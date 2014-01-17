@@ -5,7 +5,4 @@ This project implements a parser for natural language that uses a general linear
 
 Part of the system replicates the following paper:
 
-Xavier Carreras, Michael Collins, and Terry Koo. 
-TAG, Dynamic Programming and the Perceptron for Efficient, Feature-rich Parsing. 
-In Proceedings of CONLL 2008.
-http://www.cs.columbia.edu/~mcollins/papers/conll.final.pdf
+Xavier Carreras, Michael Collins, and Terry Koo. TAG, Dynamic Programming and the Perceptron for Efficient, Feature-rich Parsing. In Proceedings of CONLL 2008. http://www.cs.columbia.edu/~mcollins/papers/conll.final.pdf
