@@ -1,9 +1,8 @@
 
 import eisner
 
-test_edge_score =
-{
-    ('ROOT','economic'): 1,
+test_edge_score = {
+    ('ROOT','ecnomic'): 1,
     ('ROOT','news'): 1,
     ('ROOT','had'): 10,
     ('ROOT','little'): 1,
@@ -32,8 +31,11 @@ def test_get_score(parent,child):
     if test_edge_score.has_key((parent,child)):
         return test_edge_score[(parent,child)]
     else:
-        return 1
+        return 0
 
 def test_eisner():
-    sentence = "ROOT econimic news had little effect on financial markets".split()
-    print eisner(sentence,test_get_score)
+    sentence = "ROOT ecnomic".split()
+    eisner.eisner(sentence,test_get_score)
+
+if __name__ == "__main__":
+    test_eisner()
