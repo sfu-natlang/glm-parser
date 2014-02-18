@@ -35,7 +35,7 @@ def test_get_score(parent,child):
 
 def test_eisner():
     sentence = "ROOT ecnomic news had little effect on financial markets".split()
-    print eisner.eisner(sentence,test_get_score)
+    print eisner.EisnerParser(sentence).parse(test_get_score)
 
 if __name__ == "__main__":
     test_eisner()
