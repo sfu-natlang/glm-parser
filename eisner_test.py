@@ -13,7 +13,7 @@ test_edge_score = {
     ('ROOT','news'): 1,
 
     ('had','news'): 12,
-    ('news','ecomonic'): 9,
+    ('news','ecnomic'): 9,
     ('had','effect'): 11,
     ('effect','little'): 10,
     ('effect','on'): 8,
@@ -24,7 +24,7 @@ test_edge_score = {
     ('markets','news'): 4,
     ('had','financial'): 3,
     ('effect','markets'): 1,
-    ('economic','had'): 2
+    ('ecnomic','had'): 2
 }
 
 def test_get_score(parent,child):
@@ -34,8 +34,8 @@ def test_get_score(parent,child):
         return 0
 
 def test_eisner():
-    sentence = "ROOT ecnomic".split()
-    eisner.eisner(sentence,test_get_score)
+    sentence = "ROOT ecnomic news had little effect on financial markets".split()
+    print eisner.eisner(sentence,test_get_score)
 
 if __name__ == "__main__":
     test_eisner()
