@@ -2,7 +2,7 @@ class EisnerLearner():
     """
     A class that implements the learning alrogithm of dependency graphs.
     """
-    def __init__(self,feature_scorer_list):
+    def __init__(self,feature_scorer_list,maximum_func):
         # A list of functions that computes the feature vector
         self.feature_scorer_list = feature_scorer_list
         # Initially all parameters are set to 0. The number of parameters is
@@ -10,6 +10,7 @@ class EisnerLearner():
         self.param_vector = [0 for i in range(0,len(feature_scorer_list))]
         # Cache this number to save computation
         self.param_count = len(self.param_vector)
+        self.maximum_func = maximum_func
         return
 
     #def adjust_param_vector(self,new_pv):
