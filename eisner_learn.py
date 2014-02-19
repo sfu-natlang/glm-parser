@@ -1,4 +1,3 @@
-
 class EisnerLearner():
     """
     A class that implements the learning alrogithm of dependency graphs.
@@ -13,7 +12,7 @@ class EisnerLearner():
         self.param_count = len(self.param_vector)
         return
 
-    def adjust_param_vector(self,new_pv):
+    #def adjust_param_vector(self,new_pv):
         
 
     def local_feature_vector(self,edge_tuple,word_list):
