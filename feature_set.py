@@ -101,7 +101,7 @@ class DependencyTree():
         :param pos_list: A list that holds POS tags for all words in word_list
         :type pos_list: list(str)
         """
-        self.pos_list = copy(pos_list)
+        self.pos_list = copy.copy(pos_list)
         # Do not forget to change this !!!!! Or the reference will remain the
         # old one
         self.working_array[self.POS_ARRAY] = self.pos_list
@@ -138,6 +138,26 @@ class DependencyTree():
         else:
             self.pos_list[position] = pos_str
             return True
+
+    def get_word_list(self):
+        """
+        Return the word list. The return value is a new copy so users could
+        modify that without worrying about changing the internal data structure
+
+        :return: A list of words
+        :rtype: list(str)
+        """
+        return copy.copy(word_list)
+
+    def get_pos_list(self):
+        """
+        Return the POS tag list. The return value is a new copy so users could
+        modify that without worrying about changing the internal data structure
+
+        :return: A list of POS tags
+        :rtype: list(str)
+        """
+        return copy.copy(pos_list)
 
     def check_valid(self):
         t = self.is_valid()
@@ -280,13 +300,25 @@ class DependencyTree():
                 return edge_tuple[0]
         return -1
 
+    def get_edge_list(self):
+        """
+        Return a list of all existing edges
+
+        :return: A list of tuples, the first two elements are head index and
+            dependent index, and the last element is edge type
+        :rtype: tuple(integer,integer,str)
+        """
+        return [(i[0],i[1],self.edge_list[i]) for i in self.edge_list.keys()]
+    
 if __name__ == "__main__":
     dt = DependencyTree("I love computer science")
     dt.set_pos(3,'123')
     dt.set_pos(1,'qwe')
-    print dt[3]
-    print dt.word_list
-    print dt.pos_list
+    dt.set_edge(0,2,'type1')
+    dt.set_edge(0,3,'type2')
+    dt.set_edge(2,4,'type97')
+    print dt.get_head_index(4)
+    print dt.get_edge_list()
         
 
 class FeatureSet():
