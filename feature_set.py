@@ -309,6 +309,20 @@ class DependencyTree():
         :rtype: tuple(integer,integer,str)
         """
         return [(i[0],i[1],self.edge_list[i]) for i in self.edge_list.keys()]
+
+    def get_pos_set(self):
+        """
+        Return all POS tags. This is similar to get_pos_list, but this method
+        will return a list without any repreat of POS tags
+
+        :return: A list of POS tags
+        :rtype: list(str)
+        """
+        pos_set = []
+        for i in self.pos_list:
+            if i not in pos_set:
+                pos_set.append(i)
+        return pos_set
     
 if __name__ == "__main__":
     dt = DependencyTree("I love computer science")
