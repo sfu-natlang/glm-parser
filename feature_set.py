@@ -65,6 +65,12 @@ class DependencyTree():
         return
 
     def get_working_array_index(self):
+        """
+        Return the current working array index
+
+        :return: working array index
+        :rtype: 
+        """
         return self.working_array
 
     def __getitem__(self,position):
@@ -78,7 +84,28 @@ class DependencyTree():
         return self.working_array[self.working_array_index][position]
 
     def __setitem__(self,position,value):
-        pass
+        """
+        Call the __setitem__ method of current working array. This method
+        is a shorthand, so it will not help you to automatically create
+        empty strings if the index (i.e. position) is out of bound. If
+        such feature is desired please call set_pos or other methods instead.
+        """
+        self.working_array[self.working_array_index][position] = value
+        return
+
+    def set_pos_list(self,pos_list):
+        """
+        Set the POS array in bulk. All data in pos_list will be copied, so
+        users do not need to worry about data reference problems.
+
+        :param pos_list: A list that holds POS tags for all words in word_list
+        :type pos_list: list(str)
+        """
+        self.pos_list = copy(pos_list)
+        # Do not forget to change this !!!!! Or the reference will remain the
+        # old one
+        self.working_array[self.POS_ARRAY] = self.pos_list
+        return
 
     def set_pos(self,position,pos_str):
         """
@@ -111,6 +138,24 @@ class DependencyTree():
         else:
             self.pos_list[position] = pos_str
             return True
+
+    def check_valid(self):
+        t = self.is_valid()
+        if t[0] == True and t[1] == 0:
+            return
+        elif t[1] == 1:
+            raise ValueError("The length of pos_list and word_list not same")
+        elif t[1] == 2:
+            raise ValueError("The first word is not __ROOT__")
+        elif t[1] == 3:
+            raise ValueError("The first POS is not ROOT")
+        elif t[1] == 4:
+            raise ValueError("There is empty string in pos_list")
+        elif t[1] == 5:
+            raise ValueError("The edge_list is not a Python dictionary")
+        else:
+            raise ValueError("Unknown return value. Something went wrong!")
+        return
     
     def is_valid(self):
         """
@@ -120,23 +165,120 @@ class DependencyTree():
             (2) The first element of the word list is string "__ROOT__"
             (3) The first element of the POS list is a special tag "ROOT"
             (4) There is no empty string (unintialized) pos in pos_list
-            (5) Edge list is a list (no matter empty or not)
+            (5) Edge list is a dictionary (no matter empty or not)
+            (6) Every node except the ROOT node should have at least
+                and at most one head node
 
-        :return: True if the criterion above is satisfied. False if not
-        :rtype: bool
+        :return: A tuple. The first element is a boolean to indicate whether the
+            above criterion has been satisfied. The second element is the number
+            of the rule that is not satisfied, or 0 if all are satisfied
+        :rtype: tuple(bool,integer)
         """
         if len(self.ord_list) != len(self.pos_list):
-            return False
+            return (False,1)
         if self.word_list[0] != "__ROOT__":
-            return False
+            return (False,2)
         if self.pos_list[0] != "ROOT":
-            return False
+            return (False,3)
         if "" in self.pos_list:
-            return False
+            return (False,4)
         if not isinstance(self.edge_list,dict):
+            return (False,5)
+        # Iterate through 
+        for dep_index in range(1,len(self.word_list)):
+            count = 0
+            for head_index in range(0,len(self.word_list)):
+                if (head_index != dep_index and
+                    self.is_edge(head_index,dep_index)):
+                    count += 1
+            if count != 1:
+                return (False,6)
+
+        return (True,0)
+
+    def set_edge(self,head_index,dep_index,dep_type):
+        """
+        Set the type of a dependency edge. If the edge is not already present
+        then this methof implicitly add that edge.
+
+        :param head_index: The index of the heaf node
+        :type head_index: integer
+        :param dep_index: The index of the dependent node
+        :type dep_index: integer
+        :param dep_type: The type of dependency
+        :type dep_type: str
+
+        :return: True if a new value has been added. False if we are modifying
+            existing value
+        :rtype: bool
+        """
+        edge_tuple = (head_index,dep_index)
+        if self.edge_list.has_key(edge_tuple):
+            # Do not move this before the if stratement!!
+            self.edge_list[edge_tuple] = dep_type
+            return False
+        else:
+            self.edge_list[edge_tuple] = dep_type
+            return True
+
+    def get_edge(self,head_index,dep_index):
+        """
+        Return the edge type if edge (head_index,dep_index) exitsis, or None
+        if no such edge exist.
+
+        :param head_index: The index of the heaf node
+        :type head_index: integer
+        :param dep_index: The index of the dependent node
+        :type dep_index: integer
+
+        :return: Edge type string if edge exists, None if not.
+        :rtype: str/None
+        """
+        edge_tuple = (head_index,dep_index)
+        if self.edge_list.has_key(edge_tuple):
+            return self.edge_list[edge_tuple]
+        else:
+            return None
+
+    def is_edge(self,head_index,dep_index):
+        """
+        Judge whether there is an edge between two nodes
+        """
+        edge_tuple = (head_index,dep_index)
+        if self.edge_list.has_key(edge_tuple):
+            return True
+        else:
             return False
 
-        return True
+    def get_dependent_list(self,head_index):
+        """
+        Return a list of node index, which are the children node of a head node
+
+        :param head_index: The index of the heaf node
+        :type head_index: integer
+
+        :return: A list of integers, which are the indices of the children node
+        :rtype: list(integer)
+        """
+        return [i[1] for i in self.edge_list.keys() if i[0] == head_index]
+
+    def get_head_index(self,dep_index):
+        """
+        Given a dependent node, return its head_index. If the dependent does not
+        have a head node then just return -1 (presumably it is root node,
+        however it might be any node that does not have a head node. Users
+        should maintain the integrity state)
+
+        :param dep_index: The index of the dependent node
+        :type dep_index: integer
+
+        :return: non-negative if head node exists. -1 if not.
+        :rtype: integer
+        """
+        for edge_tuple in self.edge_list.keys():
+            if edge_tuple[1] == dep_index:
+                return edge_tuple[0]
+        return -1
 
 if __name__ == "__main__":
     dt = DependencyTree("I love computer science")
