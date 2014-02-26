@@ -14,8 +14,8 @@ class FeatureSet():
         # Store the feature key vector in the instance
         self.feature_key_list = self.get_feature_key_list(dep_tree)
         # Callback functions
-        self.satisfation_func = [self.is_satisfied_unigram,
-                                 self.is_satisfied_bigram,
+        self.satisfaction_func = [self.is_satisfied_unigram,
+                                  self.is_satisfied_bigram,
                                    ]
         return
 
@@ -136,12 +136,12 @@ class FeatureSet():
         feature_key_list += self.get_bigram_feature_key_list(dep_tree)
         return feature_key_list
 
-    def is_satisfied_unigram(self,feature_key,dep_tree,edge_tuple):
+    def is_satisfied_unigram(self,feature_key,dep_tree,edge_tuple,check=False):
         """
         Calculate whether an edge satisfies the unigram features
         i.e. feature_key[0] == 0
         """
-        if feature_key[0] != 0:
+        if check == True and feature_key[0] != 0:
             raise ValueError("Not a unigram feature: %s" % (str(feature_key)))
         head_word = dep_tree.get_word_list_ref()[edge_tuple[0]]
         head_pos = dep_tree.get_pos_list_ref()[edge_tuple[0]]
@@ -158,14 +158,18 @@ class FeatureSet():
         else:
             return True
 
-    def is_satisfied_bigram(self,feature_key,dep_tree,edge_tuple):
+    def is_satisfied_bigram(self,feature_key,dep_tree,edge_tuple,check=False):
         """
         Calculate whether an edge satisfies the unigram features
         i.e. feature_key[0] == 1
         """
-        if feature_key[0] != 1:
+        if check == True and feature_key[0] != 1:
             raise ValueError("Not a bigram feature: %s" % (str(feature_key)))
-        return self.is_satisfied_unigram(feature_key,dep_tree,edge_tuple)
+        # Explicitly set check = False to inhibit type checking
+        # Or we will get a ValueError
+        ret_val = self.is_satisfied_unigram(feature_key,dep_tree,
+                                            edge_tuple,False)
+        return ret_val
 
     def is_satisfied(self,feature_key,dep_tree,edge_tuple):
         """
@@ -184,9 +188,12 @@ class FeatureSet():
         """
         # Retrieve the callback
         func_index = feature_key[0]
-        # Call the function. We need to pass self manually
-        return satisfaction_func[func_index](self,feature_key,
-                                             dep_tree,edge_tuple)
+        # Call the function
+        ret_val = self.satisfaction_func[func_index](feature_key,
+                                                     dep_tree,edge_tuple)
+        if ret_val == True:
+            print "found " + str(feature_key)
+        return ret_val
 
     def get_local_scalar(self,dep_tree,edge_tuple):
         """
@@ -198,6 +205,16 @@ class FeatureSet():
             ret_val += i
         return ret_val
 
+    def get_edge_score(self,edge_tuple):
+        """
+        Almost identical to get_local_scalar, except that it does not need
+        a DependencyTree instance. This is usually used to score an edge
+        during parsing, where the overall structure is not known yet, and
+        we only have to score edges
+        """
+        dp = DependencyTree()
+        return self.get_local_scalar(dp,edge_tuple)
+
     def get_local_vector(self,dep_tree,edge_tuple):
         """
         Return the local feature vector of a given edge and the context
@@ -206,16 +223,16 @@ class FeatureSet():
         # Find all parameter, i is a feature key, i[0] is the feature type
         for i in self.feature_key_list:
             # If the value already in the data base
-            if self.db.has_key(i):
+            if self.db.has_key(str(i)):
                 # Check whether it satisfies the feature key
                 if self.is_satisfied(i,dep_tree,edge_tuple):
-                    param_list.append(self.db[i])
+                    param_list.append(self.db[str(i)])
                 else:
                     param_list.append(0)
             else:
                 param_list.append(0)
                 # Create new key-value pair, if it does not exist
-                self.db[i] = 0
+                self.db[str(i)] = 0
                 
         return param_list
 
@@ -226,11 +243,11 @@ class FeatureSet():
         """
         # We do not need to check whether the feature exists or not, since we
         # have initialized the database earlier
-        for i in self.feature_key_list:
-            self.db[i] += delta_list
+        for i in range(0,len(self.feature_key_list)):
+            self.db[str(self.feature_key_list[i])] += delta_list[i]
         return
 
-    def close():
+    def close(self):
         """
         Routine that must be called before exit
         """
@@ -248,5 +265,9 @@ if __name__ == "__main__":
     dt.set_edge(0,3,'type2')
     dt.set_edge(2,4,'type97')
     fs = FeatureSet('test.db',dt)
-    for i in fs.get_unigram_feature_key_list(dt):
+    fs.update_weight_vector([i % 2 for i in range(0,len(fs.feature_key_list))])
+    for i in fs.get_local_vector(dt,(2,4)):
         print i
+        pass
+    print fs.get_local_scalar(dt,(2,4))
+    fs.close()
