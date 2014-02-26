@@ -17,6 +17,8 @@ class FeatureSet():
         self.satisfaction_func = [self.is_satisfied_unigram,
                                   self.is_satisfied_bigram,
                                    ]
+        # Save this for later use
+        self.dep_tree = dep_tree
         return
 
     def add_feature_key(self,feature_list,feature_key):
@@ -212,8 +214,7 @@ class FeatureSet():
         during parsing, where the overall structure is not known yet, and
         we only have to score edges
         """
-        dp = DependencyTree()
-        return self.get_local_scalar(dp,edge_tuple)
+        return self.get_local_scalar(self.dep_tree,edge_tuple)
 
     def get_local_vector(self,dep_tree,edge_tuple):
         """
