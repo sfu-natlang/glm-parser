@@ -49,7 +49,6 @@ class WeightLearner():
         for i in range(self.MAX_ITERATE):
             _, current_edge_set = \
                eisner.EisnerParser(word_list).parse(fset.get_edge_score)
-            print current_edge_set
             # guarantee to converge ???????
             # will the eisner calculate the different trees?
             if current_edge_set == gold_edge_set:
@@ -59,12 +58,14 @@ class WeightLearner():
             # assume the length of each local vector in the same sentanse is the same
             # the truth_global_vector will change because of the change in weights
             current_global_vector = self.get_global_vector(current_edge_set, dep_tree, fset)
-            glod_global_vector = self.get_global_vector(gold_edge_set, dep_tree, fset)
+	    print current_edge_set
+            gold_global_vector = self.get_global_vector(gold_edge_set, dep_tree, fset)
             delta_vector = [(truth - current)
                              for truth, current
-                             in zip(glod_global_vector, current_global_vector)]
+                             in zip(gold_global_vector, current_global_vector)]
             fset.update_weight_vector(delta_vector)
         fset.close()
+	print gold_edge_set
         return 
 
     def get_global_vector(self, edge_set, dep_tree, fset):
