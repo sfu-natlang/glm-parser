@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+import os, dependency_tree
 
 class DataSet():
     """
@@ -8,31 +8,49 @@ class DataSet():
     The class is specifically for penn-wsj-deps data
     """
     def __init__(self,  
-                 section_set=[(2,21)], 
-                 data_path=".\\penn-wsj-deps\\"):
-
-        # the relative or absolute path to the penn-wsj-deps
-        self.data_path = data_path
-
-        # the section set is the sections that will be used as test data
-        # it can be defined as either tuple or list
-        # but cannot be both at the same time
-        self.section_set = section_set
-        self.section_set.sort()
+                 section_set=None, 
+                 data_path=None):
+        """
+        Initialize the Data set
+        
+        :param section_set: the sections to be used. 
+        It can be specifiled by a list of either integer or tuple.
+        for tuple (a,b), the section would be from a to b including a and b
+        :type section_set: list(int/tuple)
+        
+        :param data_path: the relative or absolute path to the 'penn-wsj-deps' folder
+        (include "penn-wsj-deps")
+        :type data_path: str
+        
+        """  
+        if section_set == None:
+            section_set = [(2,21)]
+        if data_path == None:
+            data_path=".\\penn-wsj-deps\\"
+            
+        self._data_path = data_path
+        
+        self._section_list = [section for section in section_set if isinstance(section, int)]
+        section_sets = \
+            map(lambda section_tuple: range(section_tuple[0], section_tuple[1]+1),
+                [st for st in section_set if isinstance(st, tuple)])
+        for s_set in section_sets:
+            self._section_list = self._section_list + s_set
+        self._section_list.sort()
         
         # track current unused test data
         
         # the data set which contains the current unused data
-        # it is a list of each data entry
-        self.current_data_set = []
+        # it is a list of feature_set
+        self._current_data_set = []
 
         # the current_section is the section
         # in which the newest data in the current data set locates
-        self.current_section = None
+        self._current_section = -1
 
         # the left file list is the path of the files in the current section
         # that has not been added to the current data set
-        self.left_file_list  = [] 
+        self._left_file_list  = [] 
         
         return            
     
@@ -44,26 +62,36 @@ class DataSet():
         :rtype: True, if there is file path added, otherwise, False
         """
         next_section = self.get_next_section()
-        self.current_section = next_section
-        if next_section == None or self.data_path == None:
+        self._current_section = next_section
+        if next_section == None or self._data_path == None:
             return False
         else:
-            for file in os.listdir(self.data_path + "%02d" % next_section):
-                self.left_file_list.append("%02d\\" % next_section + file)
+            for file in os.listdir(self._data_path + "%02d" % next_section):
+                self._left_file_list.append("%02d\\" % next_section + file)
         return True
-                      
+        
+    def has_next_data(self):
+        """
+        :return:    True, if there exists unused data entry
+                    False, otherwise
+        :rtype: boolean
+        """            
+        data_set = self._current_data_set
+        if data_set == []:
+            data_set = self.add_data()
+        return data_set != []
+        
     def get_next_data(self):
         """
         Return the next unused data entry
 
         :return: An entry in the data set
-        :rtype: tuple(list, list), the first is the word list and the second is
-        the edge list
+        :rtype: DependencyTree
         """
-        data_set = self.current_data_set
-        if data_set == []:
-            data_set = self.add_data()
-        return data_set.pop(0)
+        if self.has_next_data():
+            return self._current_data_set.pop(0)
+        else:
+            return None
         
     def add_data(self):
         """
@@ -73,17 +101,18 @@ class DataSet():
         return: if no data has been added:  None 
                 otherwise:  the udated dataset
         """
-        data_set = self.current_data_set
+        data_set = self._current_data_set
         
-        if self.left_file_list == []:
+        if self._left_file_list == []:
             if self.add_file_list() == False:
-                return None
+                return data_set
             
-        file_path = self.data_path + self.left_file_list.pop(0)
+        file_path = self._data_path + self._left_file_list.pop(0)
         f = open(file_path)
         
         word_list = []
-        edge_set = []
+        pos_list = []
+        edge_set = {}
         current_index = 0
 
         for line in f:
@@ -95,12 +124,18 @@ class DataSet():
                     print "invalid data!!"
                 else:
                     word_list.append(entry[0])
-                    edge_set.append((entry[2], str(current_index)))
+                    pos_list.append(entry[1])
+                    edge_set[(int(entry[2]), current_index)] = entry[3]
             else:
                 if word_list != []:
-                    data_set.append((word_list, set(edge_set)))
+                    d_tree = dependency_tree.DependencyTree()
+                    d_tree.set_word_list(word_list)
+                    d_tree.set_pos_list(pos_list)
+                    d_tree.set_edge_list(edge_set)
+                    data_set.append(d_tree)
                 word_list = []
-                edge_set = []
+                pos_list = []
+                edge_set = {}
                 current_index = 0
         return data_set
 
@@ -112,34 +147,12 @@ class DataSet():
         :return: the next section
         :rtype: int
         """
-        if self.section_set == []:
+        if self._current_section == None:
             return None
-        
-        if self.current_section == None:
-            next_section = 0
-        else:
-            next_section = self.current_section + 1
-        if isinstance(self.section_set[0], tuple):
-            for sec_range in self.section_set:
-                if  next_section < sec_range[0]:
-                    return sec_range[0]
-                elif next_section <= sec_range[1]:
-                    return next_section
-            return None
-        else:
-            while next_section not in self.section_set \
-            and next_section <= max(self.section_set):
-                next_section = next_section + 1
-            if next_section in self.section_set:
-                return next_section
-            else:
-                return None
             
+        left_list = filter(lambda n: n>self._current_section, self._section_list)
+        if left_list == []:
+            return None
+        else:
+            return left_list[0]
        
-    def set_data_path(self, data_path):
-        """
-        the data_path is the path to the 'penn-wsj-deps' folder
-        (include "penn-wsj-deps")
-        """
-        self.data_path = data_path
-        return
