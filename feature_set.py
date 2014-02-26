@@ -159,11 +159,15 @@ class FeatureSet():
             return True
 
     def is_satisfied_bigram(self,feature_key,dep_tree,edge_tuple):
+        """
+        Calculate whether an edge satisfies the unigram features
+        i.e. feature_key[0] == 1
+        """
         if feature_key[0] != 1:
             raise ValueError("Not a bigram feature: %s" % (str(feature_key)))
         return self.is_satisfied_unigram(feature_key,dep_tree,edge_tuple)
 
-    def is_satisfied(self,feature_key,dep_tree,edge_tupe):
+    def is_satisfied(self,feature_key,dep_tree,edge_tuple):
         """
         Calculate whether an edge satisfies a key feature. There are several
         types of key features, so we need to treat them separately.
@@ -178,13 +182,21 @@ class FeatureSet():
         :return: True if the edge satisfies the feature key. False if not
         :rtype: bool
         """
-        
+        # Retrieve the callback
+        func_index = feature_key[0]
+        # Call the function. We need to pass self manually
+        return satisfaction_func[func_index](self,feature_key,
+                                             dep_tree,edge_tuple)
 
     def get_local_scalar(self,dep_tree,edge_tuple):
         """
         Return the score of an edge given its edge elements and the context
         """
-        pass
+        param_list = self.get_local_vector(dep_tree,edge_tuple)
+        ret_val = 0
+        for i in param_list:
+            ret_val += i
+        return ret_val
 
     def get_local_vector(self,dep_tree,edge_tuple):
         """
@@ -196,7 +208,7 @@ class FeatureSet():
             # If the value already in the data base
             if self.db.has_key(i):
                 # Check whether it satisfies the feature key
-                if satisfaction_func[i[0]]
+                if self.is_satisfied(i,dep_tree,edge_tuple):
                     param_list.append(self.db[i])
                 else:
                     param_list.append(0)
@@ -204,13 +216,27 @@ class FeatureSet():
                 param_list.append(0)
                 # Create new key-value pair, if it does not exist
                 self.db[i] = 0
+                
+        return param_list
 
     def update_weight_vector(self,delta_list):
         """
         Update the weight vector, given a list of deltas that will be added
         up to the current weight vector
         """
-        pass
+        # We do not need to check whether the feature exists or not, since we
+        # have initialized the database earlier
+        for i in self.feature_key_list:
+            self.db[i] += delta_list
+        return
+
+    def close():
+        """
+        Routine that must be called before exit
+        """
+        # Write back all pages into database
+        self.db.close()
+        return
 
 if __name__ == "__main__":
     dt = DependencyTree("I love computer science")
