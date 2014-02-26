@@ -224,11 +224,19 @@ class FeatureSet():
         during parsing, where the overall structure is not known yet, and
         we only have to score edges
         """
-        return self.get_local_scalar(self.dep_tree,edge_tuple)
+        local_vector = self.get_local_vector(self.dep_tree,edge_tuple)
+        param_list = self.get_param_list(self.dep_tree,edge_tuple)
+        if len(local_vector) != len(param_list):
+            raise ValueError("Local vector and parameter list do not accord")
+        edge_score = 0
+        for i in range(0,len(local_vector)):
+            if local_vector[i] == 1:
+                edge_score += param_list[i]
+        return edge_score
 
-    def get_local_vector(self,dep_tree,edge_tuple):
+    def get_param_list(self,dep_tree,edge_tuple):
         """
-        Return the local feature vector of a given edge and the context
+        Return the parameter list of current feature key list
         """
         param_list = []
         # Find all parameter, i is a feature key, i[0] is the feature type
@@ -249,6 +257,15 @@ class FeatureSet():
                 self.db[self.feature_str_list[i]] = 0
                 
         return param_list
+
+    def get_local_vector(self,dep_tree,edge_tuple):
+        local_vector = []
+        for i in range(0,len(self.feature_str_list)):
+            if self.is_satisfied(self.feature_key_list[i],dep_tree,edge_tuple):
+                local_vector.append(1)
+            else:
+                local_vector.append(1)
+        return local_vector
 
     def update_weight_vector(self,delta_list):
         """
