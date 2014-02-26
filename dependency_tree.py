@@ -111,6 +111,18 @@ class DependencyTree():
         self.working_array[self.POS_ARRAY] = self.pos_list
         return
 
+    def set_edge_list(self,edge_list):
+        """
+        Initialize the edge_list using a dictionary which contains edges.
+
+        :param edge_list: A dictionary that contains edges in a format like
+            tuple(integer,integer):str
+        :type edge_list: dict(tuple(integer,integer,str))
+        """
+        self.edge_list = copy.copy(edge_list)
+        self.working_array[self.EDGE_ARRAY] = self.edge_list
+        return
+
     def set_pos(self,position,pos_str):
         """
         Set the POS tag of a word of index position. position could by any
