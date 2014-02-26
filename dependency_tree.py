@@ -119,7 +119,7 @@ class DependencyTree():
             tuple(integer,integer):str
         :type edge_list: dict(tuple(integer,integer,str))
         """
-        self.edge_list = copy.copy(edge_list)
+        self.edge_list = (edge_list)
         self.working_array[self.EDGE_ARRAY] = self.edge_list
         return
 

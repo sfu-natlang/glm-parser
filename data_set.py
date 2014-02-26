@@ -26,7 +26,7 @@ class DataSet():
         if section_set == None:
             section_set = [(2,21)]
         if data_path == None:
-            data_path=".\\penn-wsj-deps\\"
+            data_path="./penn-wsj-deps/"
             
         self._data_path = data_path
         
@@ -67,7 +67,7 @@ class DataSet():
             return False
         else:
             for file in os.listdir(self._data_path + "%02d" % next_section):
-                self._left_file_list.append("%02d\\" % next_section + file)
+                self._left_file_list.append("%02d/" % next_section + file)
         return True
         
     def has_next_data(self):

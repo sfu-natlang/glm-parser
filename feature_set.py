@@ -12,7 +12,9 @@ class FeatureSet():
         # Open the database file
         self.db = shelve.open(database_filename,writeback=False)
         # Store the feature key vector in the instance
-        self.feature_key_list = self.get_feature_key_list(dep_tree)
+        feature_list = self.get_feature_key_list(dep_tree)
+        self.feature_key_list = feature_list[0]
+        self.feature_str_list = feature_list[1]
         # Callback functions
         self.satisfaction_func = [self.is_satisfied_unigram,
                                   self.is_satisfied_bigram,
@@ -136,7 +138,14 @@ class FeatureSet():
         # updated in the future
         feature_key_list += self.get_unigram_feature_key_list(dep_tree)
         feature_key_list += self.get_bigram_feature_key_list(dep_tree)
-        return feature_key_list
+
+        # Convert these keys to strings. The database can only use string as
+        # the index
+        feature_str_list = []
+        for i in range(0,len(feature_key_list)):
+            feature_str_list.append(str(feature_key_list[i]))
+        
+        return (feature_key_list,feature_str_list)
 
     def is_satisfied_unigram(self,feature_key,dep_tree,edge_tuple,check=False):
         """
@@ -194,7 +203,8 @@ class FeatureSet():
         ret_val = self.satisfaction_func[func_index](feature_key,
                                                      dep_tree,edge_tuple)
         if ret_val == True:
-            print "found " + str(feature_key)
+            #print "found " + str(feature_key)
+            pass
         return ret_val
 
     def get_local_scalar(self,dep_tree,edge_tuple):
@@ -222,18 +232,21 @@ class FeatureSet():
         """
         param_list = []
         # Find all parameter, i is a feature key, i[0] is the feature type
-        for i in self.feature_key_list:
+        # feature_str_list is the string key for using in the database
+        # feature_key_list is the tuple for using by the program code
+        for i in range(0,len(self.feature_str_list)):
             # If the value already in the data base
-            if self.db.has_key(str(i)):
+            if self.db.has_key(self.feature_str_list[i]):
                 # Check whether it satisfies the feature key
-                if self.is_satisfied(i,dep_tree,edge_tuple):
-                    param_list.append(self.db[str(i)])
+                if self.is_satisfied(self.feature_key_list[i],
+                                     dep_tree,edge_tuple):
+                    param_list.append(self.db[self.feature_str_list[i]])
                 else:
                     param_list.append(0)
             else:
                 param_list.append(0)
                 # Create new key-value pair, if it does not exist
-                self.db[str(i)] = 0
+                self.db[self.feature_str_list[i]] = 0
                 
         return param_list
 
@@ -245,9 +258,9 @@ class FeatureSet():
         # We do not need to check whether the feature exists or not, since we
         # have initialized the database earlier
         for i in range(0,len(self.feature_key_list)):
-            temp = self.db[str(self.feature_key_list[i])]
+            temp = self.db[self.feature_str_list[i]]
             temp += delta_list[i]
-            self.db[str(self.feature_key_list[i])] = temp
+            self.db[self.feature_str_list[i]] = temp
         return
 
     def close(self):
