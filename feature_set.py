@@ -264,7 +264,7 @@ class FeatureSet():
             if self.is_satisfied(self.feature_key_list[i],dep_tree,edge_tuple):
                 local_vector.append(1)
             else:
-                local_vector.append(1)
+                local_vector.append(0)
         return local_vector
 
     def update_weight_vector(self,delta_list):
