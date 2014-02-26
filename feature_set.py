@@ -245,7 +245,9 @@ class FeatureSet():
         # We do not need to check whether the feature exists or not, since we
         # have initialized the database earlier
         for i in range(0,len(self.feature_key_list)):
-            self.db[str(self.feature_key_list[i])] += delta_list[i]
+            temp = self.db[str(self.feature_key_list[i])]
+            temp += delta_list[i]
+            self.db[str(self.feature_key_list[i])] = temp
         return
 
     def close(self):
