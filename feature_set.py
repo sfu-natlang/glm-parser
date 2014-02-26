@@ -10,7 +10,7 @@ class FeatureSet():
     def __init__(self,database_filename,dep_tree):
         self.database_filename = database_filename
         # Open the database file
-        self.db = shelve.open(database_filename,writeback=True)
+        self.db = shelve.open(database_filename,writeback=False)
         # Store the feature key vector in the instance
         self.feature_key_list = self.get_feature_key_list(dep_tree)
         # Callback functions
