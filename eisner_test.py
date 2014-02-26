@@ -27,9 +27,9 @@ test_edge_score = {
     ('ecnomic','had'): 2
 }
 
-def test_get_score(parent,child):
-    if test_edge_score.has_key((parent,child)):
-        return test_edge_score[(parent,child)]
+def test_get_score(parent):
+    if test_edge_score.has_key((parent[0],parent[1])):
+        return test_edge_score[(parent[0],parent[1])]
     else:
         return 0
 

@@ -110,8 +110,8 @@ class DataSet():
         file_path = self._data_path + self._left_file_list.pop(0)
         f = open(file_path)
         
-        word_list = []
-        pos_list = []
+        word_list = ['__ROOT__']
+        pos_list = ['ROOT']
         edge_set = {}
         current_index = 0
 
@@ -133,8 +133,8 @@ class DataSet():
                     d_tree.set_pos_list(pos_list)
                     d_tree.set_edge_list(edge_set)
                     data_set.append(d_tree)
-                word_list = []
-                pos_list = []
+                word_list = ['__ROOT__']
+                pos_list = ['ROOT']
                 edge_set = {}
                 current_index = 0
         return data_set

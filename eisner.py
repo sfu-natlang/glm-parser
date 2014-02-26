@@ -75,7 +75,7 @@ class EisnerParser():
         else:
             raise TypeError("""parser() only supports string, list or a
                                default None argument.""")
-        
+        print sent
         # n is the length of the sentence including the artificial ROOT
         n = len(sent)
         e = self.init_eisner_matrix(n)
@@ -86,13 +86,13 @@ class EisnerParser():
                     break
             
                 e[s][t][0][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight(sent[t], sent[s]),
+                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight((t,s)),
                      e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(t,s)])))
                     for q in range(s, t)
                     ])
             
                 e[s][t][1][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight(sent[s], sent[t]),
+                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight((s,t)),
                      e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(s,t)])))
                     for q in range(s, t)
                     ])
@@ -108,6 +108,7 @@ class EisnerParser():
                      e[s][q][1][1][1].union(e[q][t][1][0][1]))
                     for q in range(s+1, t+1)
                     ])
+                #print s, t
         self.store_parsed_result(e[0][n - 1][1][0])
             
         return e[0][n - 1][1][0]
