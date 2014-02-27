@@ -1,5 +1,6 @@
-import shelve
+
 from dependency_tree import *
+from data_backend import *
 
 
 class FeatureSet():
@@ -10,7 +11,8 @@ class FeatureSet():
     def __init__(self,database_filename,dep_tree):
         self.database_filename = database_filename
         # Open the database file
-        self.db = shelve.open(database_filename,writeback=False)
+        # self.db = shelve.open(database_filename,writeback=False)
+        self.db = DataBackend("memory_dict")
         # Store the feature key vector in the instance
         feature_list = self.get_feature_key_list(dep_tree)
         self.feature_key_list = feature_list[0]
