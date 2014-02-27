@@ -12,7 +12,7 @@ class FeatureSet():
         self.database_filename = database_filename
         # Open the database file
         # self.db = shelve.open(database_filename,writeback=False)
-        self.db = DataBackend("memory_dict")
+        self.db = DataBackend("shelve_write_through")
         # Store the feature key vector in the instance
         feature_list = self.get_feature_key_list(dep_tree)
         self.feature_key_list = feature_list[0]
@@ -156,20 +156,21 @@ class FeatureSet():
         """
         if check == True and feature_key[0] != 0:
             raise ValueError("Not a unigram feature: %s" % (str(feature_key)))
-        head_word = dep_tree.get_word_list_ref()[edge_tuple[0]]
-        head_pos = dep_tree.get_pos_list_ref()[edge_tuple[0]]
-        dep_word = dep_tree.get_word_list_ref()[edge_tuple[1]]
-        dep_pos = dep_tree.get_pos_list_ref()[edge_tuple[1]]
+        word_list = dep_tree.get_word_list_ref()
+
+        head_word = word_list[edge_tuple[0]]
         if feature_key[1] != None and feature_key[1] != head_word:
             return False
-        elif feature_key[2] != None and feature_key[2] != head_pos:
+        head_pos = word_list[edge_tuple[0]]
+        if feature_key[2] != None and feature_key[2] != head_pos:
             return False
-        elif feature_key[3] != None and feature_key[3] != dep_word:
+        dep_word = word_list[edge_tuple[1]]
+        if feature_key[3] != None and feature_key[3] != dep_word:
             return False
-        elif feature_key[4] != None and feature_key[4] != dep_pos:
+        dep_pos = dep_tree.get_pos_list_ref()[edge_tuple[1]]
+        if feature_key[4] != None and feature_key[4] != dep_pos:
             return False
-        else:
-            return True
+        return True
 
     def is_satisfied_bigram(self,feature_key,dep_tree,edge_tuple,check=False):
         """
@@ -204,9 +205,6 @@ class FeatureSet():
         # Call the function
         ret_val = self.satisfaction_func[func_index](feature_key,
                                                      dep_tree,edge_tuple)
-        if ret_val == True:
-            #print "found " + str(feature_key)
-            pass
         return ret_val
 
     def get_local_scalar(self,dep_tree,edge_tuple):
@@ -240,21 +238,19 @@ class FeatureSet():
         """
         Return the parameter list of current feature key list
         """
-        param_list = []
+        feature_list_length = len(self.feature_str_list)
+        param_list = [0] * feature_list_length
         # Find all parameter, i is a feature key, i[0] is the feature type
         # feature_str_list is the string key for using in the database
         # feature_key_list is the tuple for using by the program code
-        for i in range(0,len(self.feature_str_list)):
+        for i in range(0,feature_list_length):
             # If the value already in the data base
             if self.db.has_key(self.feature_str_list[i]):
                 # Check whether it satisfies the feature key
                 if self.is_satisfied(self.feature_key_list[i],
                                      dep_tree,edge_tuple):
-                    param_list.append(self.db[self.feature_str_list[i]])
-                else:
-                    param_list.append(0)
+                    param_list[i] = self.db[self.feature_str_list[i]]
             else:
-                param_list.append(0)
                 # Create new key-value pair, if it does not exist
                 self.db[self.feature_str_list[i]] = 0
                 

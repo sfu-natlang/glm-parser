@@ -1,4 +1,5 @@
-from shelve import *
+
+import shelve
 
 class DataBackend():
     """
