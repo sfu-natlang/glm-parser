@@ -157,17 +157,18 @@ class FeatureSet():
         if check == True and feature_key[0] != 0:
             raise ValueError("Not a unigram feature: %s" % (str(feature_key)))
         word_list = dep_tree.get_word_list_ref()
+        pos_list = dep_tree.get_pos_list_ref()
 
         head_word = word_list[edge_tuple[0]]
         if feature_key[1] != None and feature_key[1] != head_word:
             return False
-        head_pos = word_list[edge_tuple[0]]
+        head_pos = pos_list[edge_tuple[0]]
         if feature_key[2] != None and feature_key[2] != head_pos:
             return False
         dep_word = word_list[edge_tuple[1]]
         if feature_key[3] != None and feature_key[3] != dep_word:
             return False
-        dep_pos = dep_tree.get_pos_list_ref()[edge_tuple[1]]
+        dep_pos = pos_list[edge_tuple[1]]
         if feature_key[4] != None and feature_key[4] != dep_pos:
             return False
         return True
