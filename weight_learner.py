@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import feature_set, data_set
+import feature_set, data_set, feature_vector
 import eisner
 
 class WeightLearner():
@@ -60,10 +60,8 @@ class WeightLearner():
             current_global_vector = self.get_global_vector(current_edge_set, dep_tree, fset)
 	    print current_edge_set
             gold_global_vector = self.get_global_vector(gold_edge_set, dep_tree, fset)
-            delta_vector = [(truth - current)
-                             for truth, current
-                             in zip(gold_global_vector, current_global_vector)]
-            fset.update_weight_vector(delta_vector)
+            gold_global_vector.eliminate(current_global_vector)
+            fset.update_weight_vector(gold_global_vector)
         fset.close()
 	print gold_edge_set
         return 
@@ -83,10 +81,8 @@ class WeightLearner():
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
-        global_vector = []
-        for edge_tuple in edge_set:
-            local_vector = fset.get_local_vector(dep_tree, edge_tuple)
-            if global_vector == []:
-                global_vector = [0 for i in range(len(local_vector))]
-            global_vector = [(g+l) for g,l in zip(global_vector, local_vector)]
+        global_vector = feature_vector.FeatureVector()
+        for head_index,dep_index in edge_set:
+            local_vector = fset.get_local_vector(head_index,dep_index)
+            global_vector.aggregate(local_vector)
         return global_vector
