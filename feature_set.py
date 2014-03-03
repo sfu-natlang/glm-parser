@@ -1,9 +1,166 @@
 
 from dependency_tree import *
 from data_backend import *
-
+from feature_vector import *
 
 class FeatureSet():
+    """
+    Stores and updates weight vector used in dependency parsing according to
+    various features
+    """
+    def __init__(self,database_filename,dep_tree):
+        """
+        Initialize the FeatureSet instance, including a file name that might
+        be used to store the database on the disk, and a dependency tree
+        that provides only word list and pos list (i.e. no edge information)
+        to the instance. The dependency tree should not be further modified
+        after refistered into the instance, in order to maintain consistency.
+        """
+        # If you want a disk database with write through, use
+        # self.db = DataBackend("shelve_write_through")
+        # If you want a disk data base with write back, use
+        # self.db = DataBackend("shelve_write_back")
+        # If you want a memory database, use
+        self.db = DataBackend("memory_dict")
+        # Hook the dependency tree into the instance, so that we need not
+        # to provide a parameter about the tree each time
+        self.dep_tree = dep_tree
+        # We cache these two into the instance to make it faster and prevent
+        # fetching them from the dep_tree each time
+        self.word_list = dep_tree = get_word_list_ref()
+        self.pos_list = dep_tree = get_pos_list_ref()
+        return
+    
+    def get_unigram_feature(self,fv,head_index,dep_index):
+        """
+        Add all unigram features into a given feature vector instance.
+        There should be no conflict about feature strings, i.e. no feature
+        should already exist in the feature vector instance. Unigram features
+        are:
+            +-----------------+
+            | xi-word, xi-pos | type = 0
+            | xi-word         | type = 1
+            | xi-pos          | type = 2
+            | xj-word, xj-pos | type = 3
+            | xj-word         | type = 4
+            | xj-pos          | type = 5
+            +-----------------+
+        Basic features are represented using a tuple. The first element is
+        integer 0, indicating that it is a unigram feature. The second element
+        is also an integer, the value to meaning mapping is listed above:
+        
+            (0,type,xi/xj_[word,pos])
+
+        :param fv: A feature vector instance
+        :type fv: FeatureVector
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :paramn dep_index: The index of the dependency node
+        :type dep_index: integer
+        """
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        # Prepare keys
+        type0_str = str((0,0,xi_word,xi_pos))
+        type1_str = str((0,1,xi_word))
+        type2_str = str((0,2,xi_pos))
+        type3_str = str((0,3,xj_word,xj_pos))
+        type4_str = str((0,4,xj_word))
+        type5_str = str((0,5,xj_pos))
+        # Set all unigram features to 1
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+        return
+    
+    def get_bigram_feature(self,fv,head_index,dep_index):
+        """
+        Add all bigram features into a given feature vector instance.
+        There should be no conflict about feature strings, i.e. no feature
+        should already exist in the feature vector instance. Unigram features
+        are:
+            +----------------------------------+
+            | xi-word, xi-pos, xj-word, xj-pos | type = 0
+            | xi-pos, xj-word, xj-pos          | type = 1
+            | xi-word, xj-word, xj-pos         | type = 2
+            | xi-word, xi-pos, xj-pos          | type = 3
+            | xi-word, xi-pos, xj-word         | type = 4
+            | xi-word, xj-word                 | type = 5
+            | xi-pos, xj-pos                   | type = 6
+            +----------------------------------+
+        Basic features are represented using a tuple. The first element is
+        integer 1, indicating that it is a bigram feature. The second element
+        is also an integer, the value to meaning mapping is listed above:
+        
+            (1,type,xi/xj_[word,pos,word,pos])
+
+        :param fv: A feature vector instance
+        :type fv: FeatureVector
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :paramn dep_index: The index of the dependency node
+        :type dep_index: integer
+        """
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        # Prepare keys
+        type0_str = str((0,0,xi_word,xi_pos,xj_word,xj_pos))
+        type1_str = str((0,1,xi_pos,xj_word,xj_pos))
+        type2_str = str((0,2,xi_word,xj_word,xj_pos))
+        type3_str = str((0,3,xi_word,xi_pos,xj_pos))
+        type4_str = str((0,4,xi_word,xi_pos,xj_word))
+        type5_str = str((0,5,xi_word,xj_word))
+        type6_str = str((0,6,xi_pos,xj_pos))
+        # Set all unigram features to 1
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+        fv[type6_str] = 1
+        return
+
+    def get_local_vector(self,head_index,dep_index):
+        local_fv = FeatureVector()
+        # Get Unigram features
+        unigram_fv = self.get_unigram_feature(local_fv,head_index,dep_index)
+        # Get bigram features
+        bigram_fv = self.get_bigram_feature(local_fv,head_index,dep_index)
+        # For future improvements please put all other features here
+        # ...
+        # Aggregate all these features into a single whole
+        local_fv.aggregate(unigram_fv)
+        local_fv.aggregate(bigram_fv)
+        
+        return local_fv
+
+    def get_edge_score(self,head_index,dep_index):
+        local_fv = self.get_local_vector()
+        # Since all features should have value 1, so we just need to return
+        # the length of the dictionary
+        return len(local_fv.keys())
+
+    def update_weight_vector(self,fv_delta):
+        for i in fv_delta.keys():
+            if self.db.has_key(i):
+                self.db[i] = self.db[i] + fv_delta[i]
+            else:
+                self.db[i] = fv_delta[i]
+        return
+
+###############################################################################
+#                             The Devil Split Line                            #
+###############################################################################
+
+class OldFeatureSet():
     """
     Stores and updates weight vector used in dependency parsing according to
     various features
