@@ -27,8 +27,8 @@ class FeatureSet():
         self.dep_tree = dep_tree
         # We cache these two into the instance to make it faster and prevent
         # fetching them from the dep_tree each time
-        self.word_list = dep_tree = get_word_list_ref()
-        self.pos_list = dep_tree = get_pos_list_ref()
+        self.word_list = dep_tree.get_word_list_ref()
+        self.pos_list = dep_tree.get_pos_list_ref()
         return
     
     def get_unigram_feature(self,fv,head_index,dep_index):
@@ -76,7 +76,7 @@ class FeatureSet():
         fv[type3_str] = 1
         fv[type4_str] = 1
         fv[type5_str] = 1
-        return
+        return fv
     
     def get_bigram_feature(self,fv,head_index,dep_index):
         """
@@ -126,7 +126,7 @@ class FeatureSet():
         fv[type4_str] = 1
         fv[type5_str] = 1
         fv[type6_str] = 1
-        return
+        return fv
 
     def get_local_vector(self,head_index,dep_index):
         local_fv = FeatureVector()
@@ -143,7 +143,7 @@ class FeatureSet():
         return local_fv
 
     def get_edge_score(self,head_index,dep_index):
-        local_fv = self.get_local_vector()
+        local_fv = self.get_local_vector(head_index,dep_index)
         # Since all features should have value 1, so we just need to return
         # the length of the dictionary
         return len(local_fv.keys())
