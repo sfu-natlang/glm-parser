@@ -86,13 +86,13 @@ class EisnerParser():
                     break
             
                 e[s][t][0][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight((t,s)),
+                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight(t,s),
                      e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(t,s)])))
                     for q in range(s, t)
                     ])
             
                 e[s][t][1][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight((s,t)),
+                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight(s,t),
                      e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(s,t)])))
                     for q in range(s, t)
                     ])
