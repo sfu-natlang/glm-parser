@@ -21,19 +21,6 @@ and	CC	21	AMOD
 gentle	JJ	17	NMOD
 .	.	9	P
 
-The	DT	2	NMOD
-question	NN	0	ROOT
-now	RB	2	NMOD
-:	:	2	P
-Can	MD	2	NMOD
-he	PRP	5	SUB
-act	VB	5	VMOD
-more	RBR	9	PMOD
-like	IN	7	VMOD
-hard-charging	JJ	12	NMOD
-Teddy	NNP	12	NMOD
-Roosevelt	NNP	9	PMOD
-?	.	2	P
 
 Mr.	NNP	2	NMOD
 Hahn	NNP	10	NMOD
