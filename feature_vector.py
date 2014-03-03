@@ -26,7 +26,7 @@ class FeatureVector():
         :param another_fv: The feature vector that you want to aggregate
         :type another_fv: FeatureVector
         """
-        for i in another_fv,keys():
+        for i in another_fv.keys():
             # If the feature also exists in this vector then add them up
             if self.has_key(i):
                 self[i] += another_fv[i]
@@ -42,7 +42,7 @@ class FeatureVector():
         :param another_fv: The feature vector that you want to eliminate
         :type another_fv: FeatureVector
         """
-        for i in another_fv,keys():
+        for i in another_fv.keys():
             # If the feature also exists in this vector then add them up
             if self.has_key(i):
                 self[i] -= another_fv[i]
