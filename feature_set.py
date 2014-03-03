@@ -144,9 +144,18 @@ class FeatureSet():
 
     def get_edge_score(self,head_index,dep_index):
         local_fv = self.get_local_vector(head_index,dep_index)
-        # Since all features should have value 1, so we just need to return
-        # the length of the dictionary
-        return len(local_fv.keys())
+        score = 0
+        # Iterate through each feature that appears with the edge
+        for i in local_fv.keys():
+            # If there is a parameter record (i.e. not 0) we just use that
+            if self.db.has_key(i):
+                score += self.db[i]
+            else:
+                # If not then we do not add (since it is 0)
+                # But we will add the entry into the database
+                self.db[i] = 0
+                
+        return score
 
     def update_weight_vector(self,fv_delta):
         for i in fv_delta.keys():
