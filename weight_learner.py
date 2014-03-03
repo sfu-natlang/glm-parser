@@ -8,7 +8,7 @@ class WeightLearner():
     """
     
     def __init__(self):
-        self.MAX_ITERATE = 10000
+        self.MAX_ITERATE = 20
         pass
     
     def learn_weight_source(self, section_set=None, source=None):
@@ -25,8 +25,7 @@ class WeightLearner():
         """
         dataset = data_set.DataSet(section_set, source)
         # should be while
-        if dataset.has_next_data():
-            dataset.get_next_data() # should not exist
+        while dataset.has_next_data():
             self.learn_weight(dataset.get_next_data())    
             
     def learn_weight(self,dep_tree):
@@ -46,6 +45,7 @@ class WeightLearner():
         word_list = dep_tree.get_word_list()
         gold_edge_set = \
             set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
+	print "gold set", gold_edge_set
         for i in range(self.MAX_ITERATE):
             _, current_edge_set = \
                eisner.EisnerParser(word_list).parse(fset.get_edge_score)
@@ -61,9 +61,9 @@ class WeightLearner():
 	    print current_edge_set
             gold_global_vector = self.get_global_vector(gold_edge_set, dep_tree, fset)
             gold_global_vector.eliminate(current_global_vector)
+	    # print gold_global_vector.feature_dict
             fset.update_weight_vector(gold_global_vector)
         fset.close()
-	print gold_edge_set
         return 
 
     def get_global_vector(self, edge_set, dep_tree, fset):

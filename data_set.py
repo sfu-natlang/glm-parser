@@ -109,7 +109,8 @@ class DataSet():
             
         file_path = self._data_path + self._left_file_list.pop(0)
         f = open(file_path)
-        
+        print file_path
+
         word_list = ['__ROOT__']
         pos_list = ['ROOT']
         edge_set = {}
