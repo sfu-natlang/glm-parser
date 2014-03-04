@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, dependency_tree
+import os, dependency_tree, re
 
 class DataSet():
     """
@@ -29,19 +29,19 @@ class DataSet():
             data_path="./penn-wsj-deps/"
             
         self._data_path = data_path
+        self.set_section_list(section_set)        
+        self.init_current_tracker()
         
-        self._section_list = [section for section in section_set if isinstance(section, int)]
-        section_sets = \
-            map(lambda section_tuple: range(section_tuple[0], section_tuple[1]+1),
-                [st for st in section_set if isinstance(st, tuple)])
-        for s_set in section_sets:
-            self._section_list = self._section_list + s_set
-        self._section_list.sort()
+        return            
+
+    def init_current_tracker(self):
+        """
+        Initialize the parameter for tracking the current unused data:
         
-        # track current unused test data
-        
+        """
+        # track current unused test data       
         # the data set which contains the current unused data
-        # it is a list of feature_set
+        # it is a list of DependencyTree
         self._current_data_set = []
 
         # the current_section is the section
@@ -51,8 +51,29 @@ class DataSet():
         # the left file list is the path of the files in the current section
         # that has not been added to the current data set
         self._left_file_list  = [] 
+        return
+    
+    def set_section_list(self, section_set):
+        """
+        Set the section list from section set
+        the section set is a list contains:
+            tuples --   representing the range of the section,
+                        i.e. (1,3) means range 1,2,3
+            int    --   single section number
         
-        return            
+        :param section_set: the sections to be used
+        :type section_set: list(tuple/int) 
+        """
+        self._section_list = [section for section in section_set if isinstance(section, int)]
+        
+        section_sets = \
+            map(lambda section_tuple: range(section_tuple[0], section_tuple[1]+1),
+                [st for st in section_set if isinstance(st, tuple)])
+        for s_set in section_sets:
+            self._section_list = self._section_list + s_set
+        
+        self._section_list.sort()        
+        return               
     
     def add_file_list(self):
         """
@@ -92,25 +113,49 @@ class DataSet():
             return self._current_data_set.pop(0)
         else:
             return None
-        
-    def add_data(self):
-        """
-        add data from the next file in the left_file_list
-        that has not been added to the data set
 
-        return: if no data has been added:  None 
-                otherwise:  the udated dataset
+    def get_data(self, file_name, index=0):
         """
-        data_set = self._current_data_set
+        Get data entity from specified file name and index
         
-        if self._left_file_list == []:
-            if self.add_file_list() == False:
-                return data_set
+        :param file_name: the name of the data file
+        :type file_name: str
+        
+        :param index: the index of the data entity in the file, 0 by default,
+                      which is the 1st entity in the file
+        :type index: int
+        
+        :return: the expected data entity
+        :rtype: DependencyTree
+        """
+        sections = re.findall( r'wsj_(\d\d)\d\d\.mrg\.3\.pa\.gs\.tab', file_name)
+        if sections == None or len(sections) != 1:
+            print "Invalid file name!!"
+            return None   
             
-        file_path = self._data_path + self._left_file_list.pop(0)
+        section = sections[0]
+        
+        file_path = self._data_path + section + '/' + file_name
+        data_list = self.get_data_list(file_path)
+        
+        if index >= len(data_list) or index < -len(data_list):
+            print "Invalid index!!"
+            return None
+        return data_list[index]
+    
+    def get_data_list(self, file_path):
+        """
+        Form the DependencyTree list from the specified file
+        
+        :param file_path: the path to the data file
+        :type: str
+        
+        :return: a list of DependencyTree in the specified file
+        :rtype: list(DependencyTree)
+        """
         f = open(file_path)
-        print file_path
-
+        
+        data_set = []
         word_list = ['__ROOT__']
         pos_list = ['ROOT']
         edge_set = {}
@@ -139,6 +184,22 @@ class DataSet():
                 edge_set = {}
                 current_index = 0
         return data_set
+    
+    def add_data(self):
+        """
+        add data from the next file in the left_file_list
+        that has not been added to the data set
+
+        return: if no data has been added:  None 
+                otherwise:  the udated dataset
+        """      
+        if self._left_file_list == []:
+            if self.add_file_list() == False:
+                return self._current_data_set
+            
+        file_path = self._data_path + self._left_file_list.pop(0)
+        self._current_data_set += self.get_data_list(file_path)
+        return self._current_data_set
 
     def get_next_section(self):
         """
