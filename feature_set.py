@@ -8,7 +8,7 @@ class FeatureSet():
     Stores and updates weight vector used in dependency parsing according to
     various features
     """
-    def __init__(self,database_filename=None,dep_tree):
+    def __init__(self,dep_tree,database_filename=None):
         """
         Initialize the FeatureSet instance, including a file name that might
         be used to store the database on the disk, and a dependency tree
@@ -120,7 +120,7 @@ class FeatureSet():
         fv[type3_str] = 1
         fv[type4_str] = 1
         fv[type5_str] = 1
-        return fv
+        return
     
     def get_bigram_feature(self,fv,head_index,dep_index):
         """
@@ -170,19 +170,113 @@ class FeatureSet():
         fv[type4_str] = 1
         fv[type5_str] = 1
         fv[type6_str] = 1
-        return fv
+        return
+
+    def get_in_between_feature(self,fv,head_index,dep_index):
+        """
+        Add in-between features in to a feature vector instance. These features
+        are:
+
+        +------------------------+
+        | xi-pos, xb-pos, xj-pos | No type information
+        +------------------------+
+        (For all xb in the middle of xi and xj)
+
+        (2,xi-pos,xb-pos,xj-pos)
+        """
+        # We assume these two will not be the same (maintained by the caller)
+        if head_index > dep_index:
+            start_index = dep_index
+            end_index = head_index
+        else:
+            start_index = head_index
+            end_index = dep_index
+            
+        # If these two words are ajdacent then we do not need to add anything
+        # since there is no in-between features
+        if start_index + 1 == end_index:
+            return fv
+
+        # Fetch the two pos tag for xi and xj
+        xi_pos = self.pos_list[head_index]
+        xj_pos = self.pos_list[dep_index]
+        
+        # Iterate through [start_index + 1,end_index - 1]
+        for between_index in range(start_index + 1,end_index):
+            xb_pos = self.pos_list[between_index]
+            # Add all words between xi and xj into the feature
+            feature_str = str((2,xi_pos,xb_pos,xj_pos))
+            # Binary function
+            fv[feature_str] = 1
+            
+        return
+
+    def get_surrounding_feature(self,fv,head_index,dep_index):
+        """
+        Add surrounding POS features into the feature vector. These features are
+
+        +------------------------------------+
+        | xi_pos, xi+1_pos, xj-1_pos, xj_pos | type = 0
+        | xi-1_pos, xi_pos, xj-1_pos, xj_pos | type = 1
+        | xi_pos, xi+1_pos, xj_pos, xj+1_pos | type = 2
+        | xi-1_pos, xi_pos, xj_pos, xj+1_pos | type = 3
+        +------------------------------------+
+        If xi or xj is at the boundary (the first word or the last word) then
+        there will be out of bound error. In this case we just put a None
+
+        (3,type,xi_pos,xi[+/-1]_pos,xi[+/-1]_pos,xj[+/-1]_pos,xj[+/-1]_pos)
+        """
+        # This is used to detect out of bound case
+        len_pos_list = len(self.pos_list)
+        xi_pos = self.pos_list[head_index]
+        xj_pos = self.pos_list[dep_index]
+        # xi+1_pos
+        if head_index + 1 == len_pos_list:
+            xiplus_pos = None
+        else:
+            xiplus_pos = self.pos_list[head_index + 1]
+            
+        # xi-1_pos
+        if head_index == 0:
+            ximinus_pos = None
+        else:
+            ximinus_pos = self.pos_list[head_index - 1]
+            
+        # xj+1_pos
+        if dep_index + 1 == len_pos_list:
+            xjplus_pos = None
+        else:
+            xjplus_pos = self.pos_list[dep_index + 1]
+            
+        # xj-1_pos
+        if dep_index == 0:
+            xjminus_pos = None
+        else:
+            xjminus_pos = self.pos_list[dep_index - 1]
+
+        type0_str = str((3,0,xi_pos,xiplus_pos,xjminus_pos,xj_pos))
+        type1_str = str((3,1,ximinus_pos,xi_pos,xjminus_pos,xj_pos))
+        type2_str = str((3,2,xi_pos,xiplus_pos,xj_pos,xjplus_pos))
+        type3_str = str((3,3,ximinus_pos,xi_pos,xj_pos,xjplus_pos))
+
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+
+        return
+        
 
     def get_local_vector(self,head_index,dep_index):
         local_fv = FeatureVector()
         # Get Unigram features
-        unigram_fv = self.get_unigram_feature(local_fv,head_index,dep_index)
+        self.get_unigram_feature(local_fv,head_index,dep_index)
         # Get bigram features
-        bigram_fv = self.get_bigram_feature(local_fv,head_index,dep_index)
+        self.get_bigram_feature(local_fv,head_index,dep_index)
+        # Get in-between features
+        self.get_in_between_feature(local_fv,head_index,dep_index)
         # For future improvements please put all other features here
         # ...
-        # Aggregate all these features into a single whole
-        local_fv.aggregate(unigram_fv)
-        local_fv.aggregate(bigram_fv)
         
         return local_fv
 
@@ -510,7 +604,7 @@ if __name__ == "__main__":
     dt.set_edge(0,2,'type1')
     dt.set_edge(0,3,'type2')
     dt.set_edge(2,4,'type97')
-    fs = FeatureSet('test.db',dt)
+    fs = FeatureSet(dt)
     fs.update_weight_vector([i % 2 for i in range(0,len(fs.feature_key_list))])
     for i in fs.get_local_vector(dt,(2,4)):
         print i
