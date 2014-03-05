@@ -32,9 +32,11 @@ class WeightLearner():
         dataset = data_set.DataSet(section_set, data_path)
         while dataset.has_next_data():
             self.update_weight(dataset.get_next_data())  
+        self.fset.dump()
+        self.fset.close()
         return
             
-    def learn_weight_sentence(self, file_name, index=0, data_path=None):
+    def learn_weight_sentence(self,file_name,index=0,data_path=None):
         """
         Given the location for one sentence in the source
         update the weight of the features in that sentence
@@ -49,8 +51,10 @@ class WeightLearner():
         :param data_path: path to the data source
         :type data_path: int
         """
-        dataset = data_set.DataSet(section_set, data_path)
+        dataset = data_set.DataSet(data_path=data_path)
         self.update_weight(dataset.get_data(file_name, index))
+        self.fset.dump()
+        self.fset.close()
         return
         
     def update_weight(self,dep_tree):
@@ -88,7 +92,6 @@ class WeightLearner():
             gold_global_vector.eliminate(current_global_vector)
 	      # print gold_global_vector.feature_dict
             self.fset.update_weight_vector(gold_global_vector)
-        self.fset.dump()
         return 
 
     def get_global_vector(self, edge_set):
