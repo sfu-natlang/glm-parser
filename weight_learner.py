@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import feature_set, data_set, feature_vector
+import feature_set, data_set, feature_vector, dependency_tree
 import eisner
 
 class WeightLearner():
@@ -12,7 +12,9 @@ class WeightLearner():
         Initialize the WeightLearner
         """
         self.MAX_ITERATE = 20
-        self.fset = feature_set.FeatureSet('weight.db',dep_tree)
+        self.fset = feature_set.FeatureSet(
+                    dependency_tree.DependencyTree(),
+                    'weight.db')
         return
     
     def learn_weight_sections(self, section_set=None, data_path=None):
@@ -63,7 +65,7 @@ class WeightLearner():
         :return: updated feature set
         :rtype: FeatureSet
         """
-
+        self.fset.switch_tree(dep_tree)
         word_list = dep_tree.get_word_list()
         gold_edge_set = \
             set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
@@ -81,12 +83,12 @@ class WeightLearner():
             # assume the length of each local vector in the same sentanse is the same
             # the truth_global_vector will change because of the change in weights
             current_global_vector = self.get_global_vector(current_edge_set)
-	      print current_edge_set
+            print current_edge_set
             gold_global_vector = self.get_global_vector(gold_edge_set)
             gold_global_vector.eliminate(current_global_vector)
 	      # print gold_global_vector.feature_dict
             self.fset.update_weight_vector(gold_global_vector)
-        self.fset.close()
+        self.fset.dump()
         return 
 
     def get_global_vector(self, edge_set):
