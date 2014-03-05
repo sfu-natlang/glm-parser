@@ -5,6 +5,7 @@ def test_weight_learner():
     section_set = [1]
     wl = weight_learner.WeightLearner()
     wl.learn_weight_sections(section_set)
+    #wl.learn_weight_sentence('wsj_0099.mrg.3.pa.gs.tab')
     
 if __name__ == "__main__":
     test_weight_learner()
