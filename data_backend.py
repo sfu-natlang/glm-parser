@@ -1,10 +1,23 @@
 
 import shelve
+import pickle
 
 class DataBackend():
     """
     A dictitionary-like object. Used to facilitate class FeatureSet to
     store the features.
+
+    Callables inside the class:
+
+    close() - Close the dictionary file. It has not effect when we are using
+              memory dict. However when using other persistent objects remember
+              to close it before quitting
+    dump()  - Dump the content of the data object into memory. When we are using
+              memory dict it will call Pickle to do that. When we are using
+
+    Please notice that there is no open() method as in other similar classes.
+    Users must provide a file name as well as an operating mode to support
+    both persistent and non-persistent (or semi-persistent) operations.
     """
     def __init__(self,store_type='memory_dict',filename=None):
         if filename == None:
@@ -13,12 +26,15 @@ class DataBackend():
         if store_type == 'memory_dict':
             self.data_dict = {}
             self.close = self.dummy
+            self.dump = self.dict_dump
         elif store_type == 'shelve_write_through':
             self.data_dict = shelve.open(filename,writeback=False)
             self.close = self.do_close
+            self.dump = self.shelve_dump
         elif store_type == 'shelve_write_back':
             self.data_dict = shelve.open(filename,writeback=True)
             self.close = self.do_close
+            self.dump = self.shelve.dump
         else:
             raise ValueError("Unknown store type: %s" % (str(store_type)))
         return
@@ -39,4 +55,20 @@ class DataBackend():
     
     def dummy(self):
         pass
+        return
+
+    def dict_dump(self,filename):
+        """
+        Called when memory dictionary is used. Dump the content of the dict
+        into a disk file using Pickle
+        """
+        pickle.dump(self.data_dict,filename)
+        return
+
+    def shelve_dump(self,filename):
+        """
+        Called when persistent daba object is used. This is equivelent of calling
+        sync() to the data object
+        """
+        self.data_dict.sync()
         return

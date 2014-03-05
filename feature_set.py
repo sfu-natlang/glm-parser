@@ -8,7 +8,7 @@ class FeatureSet():
     Stores and updates weight vector used in dependency parsing according to
     various features
     """
-    def __init__(self,database_filename,dep_tree):
+    def __init__(self,database_filename=None,dep_tree):
         """
         Initialize the FeatureSet instance, including a file name that might
         be used to store the database on the disk, and a dependency tree
@@ -27,8 +27,40 @@ class FeatureSet():
         self.dep_tree = dep_tree
         # We cache these two into the instance to make it faster and prevent
         # fetching them from the dep_tree each time
+        # Also do not forget that each time we switch to a new dependency tree
+        # we should refresh self.word_list and self.pos_list cache to make
+        # it up-to-date.
         self.word_list = dep_tree.get_word_list_ref()
         self.pos_list = dep_tree.get_pos_list_ref()
+        return
+
+    def switch_tree(self,dep_tree):
+        """
+        After finishing traning on one tree, switch to another new dependency
+        tree. This will force the instance ti refresh its word_list and pos_list
+        cache.
+
+        :param dep_tree: A dependency tree represenattion tree
+        :type dep_tree: DependencyTree 
+        """
+        # Save for later use
+        self.dep_tree = dep_tree
+        # refresh the cache
+        self.word_list = dep_tree.get_word_list_ref()
+        self.pos_list = dep_tree.get_pos_list_ref()
+        return
+
+    def dump(self,filename=None):
+        """
+        Save the content of the database to a disk file. The file name is given
+        in the parameter. For persistent data objects, it will call the sync()
+        method. But for memory dict it will call pickle procedure to implement
+        the dump operation.
+
+        :param filename: The name of the saved dump file
+        :type filename: str
+        """
+        self.db.dump(filename)
         return
     
     def get_unigram_feature(self,fv,head_index,dep_index):
