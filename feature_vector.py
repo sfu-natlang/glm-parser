@@ -63,4 +63,10 @@ class FeatureVector():
         # unless necessary
         ret_vector.aggregate(self)
         ret_vector.aggregate(another_fv)
-        return
+        return ret_vector
+
+    def __sub__(self,another_fv):
+        ret_vector = FeatureVector()
+        ret_vector.aggregate(self)
+        ret_vector.eliminate(another_fv)
+        return ret_vector
