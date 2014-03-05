@@ -16,6 +16,8 @@ class FeatureSet():
         to the instance. The dependency tree should not be further modified
         after refistered into the instance, in order to maintain consistency.
         """
+        # If this is None, then we will use the parameter provided in dump()
+        self.database_filename = database_filename
         # If you want a disk database with write through, use
         # self.db = DataBackend("shelve_write_through")
         # If you want a disk data base with write back, use
@@ -57,9 +59,19 @@ class FeatureSet():
         method. But for memory dict it will call pickle procedure to implement
         the dump operation.
 
-        :param filename: The name of the saved dump file
+        :param filename: The name of the saved dump file. This will override
+        the file name provided in the constructor
         :type filename: str
         """
+        if filename == None:
+            if self.database_filename == None:
+                raise ValueError("""You must provide a file name or use the
+                                    default file name.""")
+            # If None is passed then use the default file name provided to
+            # the constructor
+            else:
+                filename = self.database_filename
+        # This should work for both mem dict and persistent data object
         self.db.dump(filename)
         return
     
