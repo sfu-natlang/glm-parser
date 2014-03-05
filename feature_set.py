@@ -8,13 +8,22 @@ class FeatureSet():
     Stores and updates weight vector used in dependency parsing according to
     various features
     """
-    def __init__(self,dep_tree,database_filename=None):
+    def __init__(self,dep_tree,database_filename=None,
+                 operating_mode="memory_dict"):
         """
         Initialize the FeatureSet instance, including a file name that might
         be used to store the database on the disk, and a dependency tree
         that provides only word list and pos list (i.e. no edge information)
         to the instance. The dependency tree should not be further modified
         after refistered into the instance, in order to maintain consistency.
+
+        :param dep_tree: The dependency tree that you want to train on
+        :type dep_tree: DependencyTree
+        :param database_filename: The file name of the database file. If this
+        is not provided then a file name is reqiured when you call dump()
+        :type database_filename: str
+        :param operating_mode: The mode of operation on the database
+        :type operating_mode: str
         """
         # If this is None, then we will use the parameter provided in dump()
         self.database_filename = database_filename
@@ -23,17 +32,10 @@ class FeatureSet():
         # If you want a disk data base with write back, use
         # self.db = DataBackend("shelve_write_back")
         # If you want a memory database, use
-        self.db = DataBackend("memory_dict")
-        # Hook the dependency tree into the instance, so that we need not
-        # to provide a parameter about the tree each time
-        self.dep_tree = dep_tree
-        # We cache these two into the instance to make it faster and prevent
-        # fetching them from the dep_tree each time
-        # Also do not forget that each time we switch to a new dependency tree
-        # we should refresh self.word_list and self.pos_list cache to make
-        # it up-to-date.
-        self.word_list = dep_tree.get_word_list_ref()
-        self.pos_list = dep_tree.get_pos_list_ref()
+        self.db = DataBackend(operating_mode)
+        # We do this during initialization. For later stages if you need to
+        # change the tree then just call that method manually
+        switch_tree(dep_tree)
         return
 
     def switch_tree(self,dep_tree):
@@ -45,9 +47,14 @@ class FeatureSet():
         :param dep_tree: A dependency tree represenattion tree
         :type dep_tree: DependencyTree 
         """
-        # Save for later use
+        # Hook the dependency tree into the instance, so that we need not
+        # to provide a parameter about the tree each time
         self.dep_tree = dep_tree
-        # refresh the cache
+        # We cache these two into the instance to make it faster and prevent
+        # fetching them from the dep_tree each time
+        # Also do not forget that each time we switch to a new dependency tree
+        # we should refresh self.word_list and self.pos_list cache to make
+        # it up-to-date.
         self.word_list = dep_tree.get_word_list_ref()
         self.pos_list = dep_tree.get_pos_list_ref()
         return
@@ -183,6 +190,11 @@ class FeatureSet():
         (For all xb in the middle of xi and xj)
 
         (2,xi-pos,xb-pos,xj-pos)
+
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :param dep_index: The index of the dependency node
+        :type dep_node: integer
         """
         # We assume these two will not be the same (maintained by the caller)
         if head_index > dep_index:
@@ -225,6 +237,11 @@ class FeatureSet():
         there will be out of bound error. In this case we just put a None
 
         (3,type,xi_pos,xi[+/-1]_pos,xi[+/-1]_pos,xj[+/-1]_pos,xj[+/-1]_pos)
+
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :param dep_index: The index of the dependency node
+        :type dep_node: integer
         """
         # This is used to detect out of bound case
         len_pos_list = len(self.pos_list)
@@ -268,6 +285,14 @@ class FeatureSet():
         
 
     def get_local_vector(self,head_index,dep_index):
+        """
+        Given an edge, return its local vector
+
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :param dep_index: The index of the dependency node
+        :type dep_node: integer
+        """
         local_fv = FeatureVector()
         # Get Unigram features
         self.get_unigram_feature(local_fv,head_index,dep_index)
@@ -283,6 +308,15 @@ class FeatureSet():
         return local_fv
 
     def get_edge_score(self,head_index,dep_index):
+        """
+        Given an edge, return its score. The score of an edge is the aggregation
+        of its local vector components weighted by the parameters.
+
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :param dep_index: The index of the dependency node
+        :type dep_node: integer
+        """
         local_fv = self.get_local_vector(head_index,dep_index)
         score = 0
         # Iterate through each feature that appears with the edge
@@ -298,6 +332,14 @@ class FeatureSet():
         return score
 
     def update_weight_vector(self,fv_delta):
+        """
+        Update the patameter of features in the database. fv_delta is the delta
+        feature vector, which in most cases is the result of applying
+        eliminate() on the correct global vector with the global vector
+
+        :param fv_delta: Delta vector
+        :type delta: FeatureVector
+        """
         for i in fv_delta.keys():
             if self.db.has_key(i):
                 self.db[i] = self.db[i] + fv_delta[i]
@@ -306,6 +348,12 @@ class FeatureSet():
         return
 
     def close(self):
+        """
+        Close the database. This must be done before program exits, or there is
+        probablity that the changes will not be written back. However if you
+        have already called dump() to save the content then it is up to you
+        whether to close the database. Still, it is good practice to do so
+        """
         self.db.close()
         return
 
