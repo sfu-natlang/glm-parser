@@ -62,7 +62,9 @@ class DataBackend():
         Called when memory dictionary is used. Dump the content of the dict
         into a disk file using Pickle
         """
-        pickle.dump(self.data_dict,filename)
+        fp = open(filename)
+        pickle.dump(self.data_dict,fp)
+        fp.close()
         return
 
     def shelve_dump(self,filename):
