@@ -275,6 +275,8 @@ class FeatureSet():
         self.get_bigram_feature(local_fv,head_index,dep_index)
         # Get in-between features
         self.get_in_between_feature(local_fv,head_index,dep_index)
+        # Get sorrounding feature
+        self.get_surrounding_feature(local_fv,head_index,dep_index)
         # For future improvements please put all other features here
         # ...
         
