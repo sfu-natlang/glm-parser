@@ -27,27 +27,27 @@ class DataBackend():
     def __init__(self,store_type='memory_dict',filename=None):
         if filename == None:
             filename = "default_database.db"
-
-        self.filename = filename
-        self.store_type = store_type
         
         if store_type == 'memory_dict':
             self.data_dict = {}
             self.close = self.dummy
             self.dump = self.dict_dump
+            self.load = self.dict_load
         elif store_type == 'shelve_write_through':
             self.data_dict = shelve.open(filename,writeback=False)
             self.close = self.do_close
             self.dump = self.shelve_dump
+            self.load = self.dummy
         elif store_type == 'shelve_write_back':
             self.data_dict = shelve.open(filename,writeback=True)
             self.close = self.do_close
             self.dump = self.shelve.dump
+            self.load = self.dummy
         else:
             raise ValueError("Unknown store type: %s" % (str(store_type)))
         return
 
-    def load(self):
+    def dict_load(self,filename):
         """
         Load the dumped memory dictionary Pickle file into memory. Essentially
         you can do this with a shelve object, however it does not have effect,
@@ -55,10 +55,9 @@ class DataBackend():
 
         Parameter is the same as constructor (__init__).
         """
-        if self.store_type == 'memory_dict':
-            fp = open(self.filename,"r")
-            self.data_dict = pickle.load(fp)
-            fp.close()
+        fp = open(filename,"r")
+        self.data_dict = pickle.load(fp)
+        fp.close()
         return
 
     def __getitem__(self,index):

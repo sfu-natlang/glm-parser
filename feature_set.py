@@ -25,6 +25,7 @@ class FeatureSet():
         :param operating_mode: The mode of operation on the database
         :type operating_mode: str
         """
+        self.operating_mode = operating_mode
         # If this is None, then we will use the parameter provided in dump()
         self.database_filename = database_filename
         # If you want a disk database with write through, use
@@ -35,7 +36,7 @@ class FeatureSet():
         self.db = DataBackend(operating_mode)
         # We do this during initialization. For later stages if you need to
         # change the tree then just call that method manually
-        switch_tree(dep_tree)
+        self.switch_tree(dep_tree)
         return
 
     def switch_tree(self,dep_tree):
@@ -80,6 +81,22 @@ class FeatureSet():
                 filename = self.database_filename
         # This should work for both mem dict and persistent data object
         self.db.dump(filename)
+        return
+
+    def load(self,filename=None):
+        """
+        Load the content of a database from the disk file. For shelve types this
+        could be saved, since shelve always works on disk file. However if you
+        are using memory dictionary, each time you want to continue your job,
+        you need to load the previous dumped one.
+        """
+        if filename == None:
+            if self.database_filename == None:
+                raise ValueError("""You must provide a file name or use the
+                                    default file name.""")
+            else:
+                filename = self.database_filename
+        self.db.load(filename)
         return
     
     def get_unigram_feature(self,fv,head_index,dep_index):
@@ -646,18 +663,11 @@ class OldFeatureSet():
         return
 
 if __name__ == "__main__":
-    dt = DependencyTree("I love computer science")
-    dt.set_pos(4,'123')
-    dt.set_pos(3,'456')
-    dt.set_pos(2,'789')
-    dt.set_pos(1,'qwe')
-    dt.set_edge(0,2,'type1')
-    dt.set_edge(0,3,'type2')
-    dt.set_edge(2,4,'type97')
-    fs = FeatureSet(dt)
-    fs.update_weight_vector([i % 2 for i in range(0,len(fs.feature_key_list))])
-    for i in fs.get_local_vector(dt,(2,4)):
-        print i
-        pass
-    print fs.get_local_scalar(dt,(2,4))
-    fs.close()
+    fs = FeatureSet(DependencyTree(),"test_load.db")
+    fs.db['123'] = 456
+    fs.db['qwe'] = 'qwe'
+    fs.db['ttt'] = 'ppp'
+    fs.dump()
+    fs2 = FeatureSet(DependencyTree(),"test_load.db")
+    fs2.load()
+    print fs2.db.data_dict
