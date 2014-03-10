@@ -33,7 +33,14 @@ class DataSet():
         self.init_current_tracker()
         
         return            
-
+    
+    def reset(self):
+        """
+        reset the tracking parameter, to start over from the first sentence
+        """
+        self.init_current_tracker()
+        return        
+        
     def init_current_tracker(self):
         """
         Initialize the parameter for tracking the current unused data:

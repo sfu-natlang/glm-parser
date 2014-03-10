@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
-import copy
+import copy, time
 
 class EisnerParser():
     """
     An Eisner parsing algorithm implementation
     """
     
-    def __init__(self,sentence=""):
-        # Default is empty string or a list
-        if isinstance(sentence,str):
-            self.sentence_list = sentence.split()
-        else:
-            self.sentence_list = sentence
+    def __init__(self):
         return
-
-    def __add__(self,op2):
-        return EsinerParser(self.sentence_list + op2.sentence_list)
         
     def init_eisner_matrix(self,n):
         """
@@ -53,46 +45,39 @@ class EisnerParser():
         return
     
 
-    def parse(self,arc_weight,sentence=None):
+    def parse(self,n,arc_weight,sentence=None):
         """
         Implementation of Eisner Algorithm using dynamic programming table
         
-        :param sent: The list of input words that constitute a sentence.
-        :type sent: list
+        :param n: The number of input words that constitute a sentence.
+        :type n: int
         :param arc_weight: A scoring function that gives scores to edges
         :type arc_weight: function(head_node,child_node)
 
         :return: The maximum score of the dependency structure as well as all edges
         :rtype: tuple(integer,list(tuple(integer,integer)))
         """
-
-        if sentence == None:
-            sent = self.sentence_list
-        elif isinstance(sentence,list):
-            sent = sentence
-        elif isinstance(sentence,str):
-            sent = sentence.split()
-        else:
-            raise TypeError("""parser() only supports string, list or a
-                               default None argument.""")
-        print sent
-        # n is the length of the sentence including the artificial ROOT
-        n = len(sent)
+        #tt = 0;
         e = self.init_eisner_matrix(n)
         for m in range(1, n):
             for s in range(0, n):
                 t = s + m
                 if t >= n:
                     break
-            
+                #t1 = time.clock()
+                weight = arc_weight(t,s)
+                #tt += (time.clock() - t1)
                 e[s][t][0][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight(t,s),
+                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight,
                      e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(t,s)])))
                     for q in range(s, t)
                     ])
             
+                #t1 = time.clock()
+                weight = arc_weight(s,t)
+                #tt += (time.clock() - t1)
                 e[s][t][1][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + arc_weight(s,t),
+                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight,
                      e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(s,t)])))
                     for q in range(s, t)
                     ])
@@ -110,6 +95,6 @@ class EisnerParser():
                     ])
                 #print s, t
         self.store_parsed_result(e[0][n - 1][1][0])
-            
+        #print "edge query time", tt    
         return e[0][n - 1][1][0]
     

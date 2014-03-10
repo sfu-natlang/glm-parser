@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import feature_set, data_set, feature_vector, dependency_tree
 import eisner
+import time
 
 class WeightLearner():
     """
@@ -11,11 +12,11 @@ class WeightLearner():
         """
         Initialize the WeightLearner
         """
-        self.MAX_ITERATE = 20
+        self.MAX_ITERATE = 2
         self.fset = feature_set.FeatureSet(
                     dependency_tree.DependencyTree(),
                     'weight.db')
-        return
+        return    
     
     def learn_weight_sections(self, section_set=None, data_path=None):
         """
@@ -30,13 +31,15 @@ class WeightLearner():
         :type data_path: str
         """
         dataset = data_set.DataSet(section_set, data_path)
-        while dataset.has_next_data():
-            self.update_weight(dataset.get_next_data())  
-        self.fset.dump()
-        self.fset.close()
-        return
+        for i in range(self.MAX_ITERATE):
+            while dataset.has_next_data():
+                self.update_weight(dataset.get_next_data())  
+            self.fset.dump('weight_iter_'+str(i)+'.db')
+            self.fset.close()
+            dataset.reset()
+        return self.fset
             
-    def learn_weight_sentence(self,file_name,index=0,data_path=None):
+    def learn_weight_sentences(self,file_name,index=0,data_path=None):
         """
         Given the location for one sentence in the source
         update the weight of the features in that sentence
@@ -73,25 +76,26 @@ class WeightLearner():
         word_list = dep_tree.get_word_list()
         gold_edge_set = \
             set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
-        print "gold set:", gold_edge_set
+        #print "gold set:", gold_edge_set
+        t = time.clock()
         
-        for i in range(self.MAX_ITERATE):
-            _, current_edge_set = \
-               eisner.EisnerParser(word_list).parse(self.fset.get_edge_score)
-            # guarantee to converge ???????
-            # will the eisner calculate the different trees?
-            if current_edge_set == gold_edge_set:
-                break
-            
-            # calculate the global score
-            # assume the length of each local vector in the same sentanse is the same
-            # the truth_global_vector will change because of the change in weights
-            current_global_vector = self.get_global_vector(current_edge_set)
-            print current_edge_set
-            gold_global_vector = self.get_global_vector(gold_edge_set)
-            gold_global_vector.eliminate(current_global_vector)
-	      # print gold_global_vector.feature_dict
-            self.fset.update_weight_vector(gold_global_vector)
+        _, current_edge_set = \
+               eisner.EisnerParser().parse(len(word_list), self.fset.get_edge_score)
+        t = (time.clock() - t)
+        print "eisner time:", t, "sec     sent_length:", str(len(word_list))
+        
+        if current_edge_set == gold_edge_set:
+            return
+        
+        # calculate the global score
+        # assume the length of each local vector in the same sentanse is the same
+        # the truth_global_vector will change because of the change in weights
+        current_global_vector = self.get_global_vector(current_edge_set)
+        #print current_edge_set
+        gold_global_vector = self.get_global_vector(gold_edge_set)
+        gold_global_vector.eliminate(current_global_vector)
+        # print gold_global_vector.feature_dict
+        self.fset.update_weight_vector(gold_global_vector)
         return 
 
     def get_global_vector(self, edge_set):

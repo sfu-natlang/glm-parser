@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import data_set, weight_learner
+import data_set, weight_learner, glm_parser
 
 def test_weight_learner():
     section_set = [1]
@@ -8,7 +8,11 @@ def test_weight_learner():
     #wl.learn_weight_sentence('wsj_0099.mrg.3.pa.gs.tab')
     
 if __name__ == "__main__":
-    test_weight_learner()
+    
+    p = glm_parser.GlmParser()
+    p.train([1])
+    #test_weight_learner()
+    
 """
     ds = data_set.DataSet(section_set=[2])
     i = 0
