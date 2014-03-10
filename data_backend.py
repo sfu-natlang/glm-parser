@@ -15,6 +15,11 @@ class DataBackend():
     dump()  - Dump the content of the data object into memory. When we are using
               memory dict it will call Pickle to do that. When we are using
 
+    load()  - Load the content of a disk file into the memory. When we are using
+              memory dict it will call Pickle to do the load. And when we are
+              using shelves it has no effect, since shelves itself is persistent
+              object.
+
     Please notice that there is no open() method as in other similar classes.
     Users must provide a file name as well as an operating mode to support
     both persistent and non-persistent (or semi-persistent) operations.
@@ -22,6 +27,9 @@ class DataBackend():
     def __init__(self,store_type='memory_dict',filename=None):
         if filename == None:
             filename = "default_database.db"
+
+        self.filename = filename
+        self.store_type = store_type
         
         if store_type == 'memory_dict':
             self.data_dict = {}
@@ -37,6 +45,20 @@ class DataBackend():
             self.dump = self.shelve.dump
         else:
             raise ValueError("Unknown store type: %s" % (str(store_type)))
+        return
+
+    def load(self):
+        """
+        Load the dumped memory dictionary Pickle file into memory. Essentially
+        you can do this with a shelve object, however it does not have effect,
+        since shelve file has been opened once you created the instance.
+
+        Parameter is the same as constructor (__init__).
+        """
+        if self.store_type == 'memory_dict':
+            fp = open(self.filename,"r")
+            self.data_dict = pickle.load(fp)
+            fp.close()
         return
 
     def __getitem__(self,index):
