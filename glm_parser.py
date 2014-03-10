@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 import data_set, feature_set, dependency_tree, eisner
 import weight_learner, evaluator
-import pickle
 
 class GlmParser():
     def __init__(self, filename=None):
-        
-        if filename != None:
-            fp = open(filename, "r")
-            pickle.load(fp)
-            
         self.fset = feature_set.FeatureSet(
                     dependency_tree.DependencyTree(),
                     'weight.db')
+        self.fset.load(filename)
         return
     
     def train(self, section_set=None, data_path=None):
@@ -20,7 +15,7 @@ class GlmParser():
         self.fset = w_learner.learn_weight_sections(section_set, data_path)
         return
     
-    def unlableled_accuracy(self, section_set=None, data_path=None):
+    def unlabeled_accuracy(self, section_set=None, data_path=None):
         dataset = data_set.DataSet(section_set, data_path)
         evlt = evaluator.Evaluator()
         evlt.reset()
@@ -34,7 +29,7 @@ class GlmParser():
             _, test_edge_set = \
                eisner.EisnerParser().parse(sent_len, self.fset.get_edge_score)
              
-            evlt.unlableled_accuracy(test_edge_set, gold_edge_set, True)
-        return evlt.get_acc_unlableled_accuracy()
+            evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+        return evlt.get_acc_unlabeled_accuracy()
                
               
