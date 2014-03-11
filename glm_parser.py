@@ -26,7 +26,7 @@ class GlmParser():
             
             self.fset.switch_tree(dep_tree)
             sent_len = len(dep_tree.get_word_list())
-            _, test_edge_set = \
+            test_edge_set = \
                eisner.EisnerParser().parse(sent_len, self.fset.get_edge_score)
              
             evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)

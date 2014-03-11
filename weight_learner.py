@@ -79,7 +79,7 @@ class WeightLearner():
         #print "gold set:", gold_edge_set
         t = time.clock()
         
-        _, current_edge_set = \
+        current_edge_set = \
                eisner.EisnerParser().parse(len(word_list), self.fset.get_edge_score)
         t = (time.clock() - t)
         print "eisner time:", t, "sec     sent_length:", str(len(word_list))

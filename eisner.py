@@ -24,7 +24,7 @@ class EisnerParser():
         # in the chart
         # The last dimenison of the table. It uses a tuple to store score
         # and edges of current stage
-        e1 = [copy.deepcopy((0,set([]))) for i in range(2)]
+        e1 = [copy.deepcopy([0,[]]) for i in range(2)]
         # The dimension that specifies the direction of the edge
         e2 = [copy.deepcopy(e1) for i in range(2)]
         # The end of the span
@@ -67,34 +67,40 @@ class EisnerParser():
                 #t1 = time.clock()
                 weight = arc_weight(t,s)
                 #tt += (time.clock() - t1)
-                e[s][t][0][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight,
-                     e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(t,s)])))
-                    for q in range(s, t)
-                    ])
-            
+                e[s][t][0][1][0], q_max = max(
+                    [(e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight, q)
+                    for q in range(s, t)], 
+                    key=lambda (a,c): a)
+                e[s][t][0][1][1] =\
+                    e[s][q_max][1][0][1] + e[q_max+1][t][0][0][1] + [(t,s)]
+                
+                
                 #t1 = time.clock()
                 weight = arc_weight(s,t)
                 #tt += (time.clock() - t1)
-                e[s][t][1][1] = max([
-                    (e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight,
-                     e[s][q][1][0][1].union(e[q+1][t][0][0][1]).union(set([(s,t)])))
-                    for q in range(s, t)
-                    ])
-            
-                e[s][t][0][0] = max([
-                    (e[s][q][0][0][0] + e[q][t][0][1][0],
-                     e[s][q][0][0][1].union(e[q][t][0][1][1]))
-                    for q in range(s, t)
-                    ])
-            
-                e[s][t][1][0] = max([
-                    (e[s][q][1][1][0] + e[q][t][1][0][0],
-                     e[s][q][1][1][1].union(e[q][t][1][0][1]))
-                    for q in range(s+1, t+1)
-                    ])
+                e[s][t][1][1][0], q_max = max(
+                    [(e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight, q)
+                    for q in range(s, t)], 
+                    key=lambda (a,c): a)
+                e[s][t][1][1][1] =\
+                    e[s][q_max][1][0][1] + e[q_max+1][t][0][0][1] + [(s,t)]
+                
+                
+                e[s][t][0][0][0], q_max = max(
+                    [(e[s][q][0][0][0] + e[q][t][0][1][0],q)
+                    for q in range(s, t)], 
+                    key=lambda (a,c): a)
+                e[s][t][0][0][1] = e[s][q_max][0][0][1] + e[q_max][t][0][1][1]
+                
+                
+                e[s][t][1][0][0], q_max = max(
+                    [(e[s][q][1][1][0] + e[q][t][1][0][0], q)
+                    for q in range(s+1, t+1)], 
+                    key=lambda (a,c): a)
+                e[s][t][1][0][1] = e[s][q_max][1][1][1] + e[q_max][t][1][0][1]
                 #print s, t
+                
         self.store_parsed_result(e[0][n - 1][1][0])
         #print "edge query time", tt    
-        return e[0][n - 1][1][0]
+        return set(e[0][n - 1][1][0][1])
     
