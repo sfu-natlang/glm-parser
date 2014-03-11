@@ -1,5 +1,6 @@
 
 import copy
+import string
 
 class IndexedStr():
     """
@@ -29,12 +30,26 @@ class IndexedStr():
         else:
             self.start_index += length
             return True
+        
+    def try_proceed(self,s2):
+        length = len(s2)
+        if self.start_index + length > len(self.s):
+            return False
+        elif self.s[self.start_index:self.start_index + length] != s2:
+            return False
+        else:
+            return True
 
     def is_end(self):
         if self.start_index >= len(self.s):
             return True
         else:
             return False
+
+    def rewind(self,length):
+        self.start_index -= length
+        if self.start_index < 0:
+            raise ValueError("The index have crossed zero bound")
 
 ###############################################################################
 ########################### The Devil Split Bar ###############################
@@ -50,6 +65,7 @@ class RegExp():
     concat_node = 1
     star_node = 2
     plus_node = 3
+    question_node = 4
     
     def __init__(self,initializer=[],node_type=0):
         """
@@ -67,7 +83,8 @@ class RegExp():
         self.node_type = node_type
 
         self.parse_method_list = [self.parse_union,self.parse_concat,
-                             self.parse_star,self.parse_plus]
+                             self.parse_star,self.parse_plus,
+                                  self.parse_question]
         
         self.bind_parse_method(node_type)
         
@@ -79,8 +96,6 @@ class RegExp():
             self.token_list = copy.copy(initializer)
         elif isinstance(initializer,RegExp):
             self.token_list = copy.copy(initializer.token_list)
-            # Do not forget to copy the node type
-            self.node_type = initializer.node_type
         else:
             raise TypeError("Do not support other kind of initializers!")
         return
@@ -146,42 +161,57 @@ class RegExp():
         node allows for multiple entries in token_list, and they will be treated
         as concatenation.
         """
-        new_node = RegExp(self,RegExp.star_node)
+        new_node = RegExp([self],RegExp.star_node)
         return new_node
 
     def star(self):
         return self.get_star()
 
     def get_plus(self):
-        new_node = RegExp(self,RegExp.plus_node)
+        new_node = RegExp([self],RegExp.plus_node)
         return new_node
 
     def plus(self):
         return self.get_plus()
 
+    def get_question(self):
+        new_node = RegExp([self],RegExp.question_node)
+        return new_node
+
+    def question(self):
+        return self.get_question()
+
     def parse_union(self,s):
         """
         Parse the union node and return the result if there is (one or more)
-        match. Return None if there is not a match (either the string reaches
-        the end, or we encounter a dismatch)
+        match. The returned string is the longest possible.
+        Return None if there is not a match.
 
         :return: A matched string token, or None if none is matched
         :rtype: str/None
         """
+        parse_result = ""
+        find_parse = False
         for i in self.token_list:
             if isinstance(i,str):
                 # Remember that proceed() will increase the index automatically
-                if s.proceed(i) == True:  
-                    return i
+                if s.try_proceed(i) == True and len(i) > len(parse_result):
+                    parse_result = i
+                    find_parse = True
             elif isinstance(i,RegExp):
                 ret = i.parse(s)
-                if ret != None:
-                    return ret
+                if ret != None and len(ret) > len(parse_result):
+                    parse_result = ret
+                    find_parse = True
             else:
                 raise TypeError("""No other types other than str and RegExp could
                                 be parsed!""")
         # If none of them matches, return None
-        return None
+        if find_parse == False:
+            return None
+        else:
+            s.proceed(parse_result)
+            return parse_result
 
     def parse_concat(self,s):
         """
@@ -245,12 +275,65 @@ class RegExp():
         self.bind_parse_method(RegExp.plus_node)
         # There must be some valid string if we reach here, so return directly
         return parse_result
+
+    def parse_question(self,s):
+        """
+        Same as parse_union except that it recognizes zero or one occurrance
+        """
+        self.bind_parse_method(RegExp.concat_node)
+        ret = self.parse(s)
+        self.bind_parse_method(RegExp.question_node)
+        if ret == None:
+            return ""
+        else:
+            return ret
         
+class RegBuilder():
+    digit = RegExp(list("0123456789"))
+    digits = digit.plus()
+    digits_or_none = digit.star()
+    hex_digit = RegExp(list("0123456789ABCDEFabcdef"))
+    
+    alpha_lower = RegExp(list("abcdefghijklmnopqrstuvwxyz"))
+    alpha_higher = RegExp(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+    alpha = alpha_lower | alpha_higher
+    alnum = alpha | digit
+    underline = RegExp("_")
+    al_underline = alpha | underline
+    alnum_underline = alnum | underline
+    
+    # C identifier
+    c_ident = al_underline + alnum_underline.star()
+    # C decimal integer
+    c_decimal = RegExp(["+","-"]).question() + digit.plus()
+    # C hex integer
+    c_hex = RegExp(["0x","0X"]) + hex_digit.plus()
+    # C oct integer
+    c_oct = RegExp('0') + c_decimal
+    # C integer (all these three)
+    c_integer = c_decimal | c_hex | c_oct
+    # C float
+    c_float = (RegExp(["+","-"]).question() + digits_or_none + RegExp('.') +
+               digits + (RegExp(['e','E']) + c_decimal).question()
+               )
+    single_quote = RegExp("'")
+    double_quote = RegExp('"')
+    # \\ \n \t \v \r \v \' \"
+    escape_char = RegExp('\\') + RegExp(list('\\nvtbr\'"'))
+    all_char_no_escape = RegExp(list("""0123456789abcdefghijklmnopqrstuvwxyz
+                    ABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&\'()*+,-./:;<=>?@[\\]^_`
+                              {|}~ \t\n\r"""))
+    all_char = RegExp(list("""0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM
+                    NOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r"""))
+    # C string
+    c_str = double_quote + all_char_no_escape.star() + double_quote
+    
+
     
 if __name__ == "__main__":
     reg = RegExp(['me','ow '],RegExp.plus_node)
     reg2 = RegExp(["My"," master"],0)
     s = IndexedStr("!!!@")
     reg3 = (reg + reg2) | RegExp(['!']).plus()
-    print reg3.parse(s)
-    print s.is_end()
+    s1 = IndexedStr('"This is a C \\n\\\\ string #include <stdio.h>"')
+    print RegBuilder.c_str.parse(s1)
