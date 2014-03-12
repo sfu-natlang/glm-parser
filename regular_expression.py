@@ -309,7 +309,7 @@ class RegBuilder():
     # C hex integer
     c_hex = RegExp(["0x","0X"]) + hex_digit.plus()
     # C oct integer
-    c_oct = RegExp('0') + c_decimal
+    c_oct = RegExp('0') + digits
     # C integer (all these three)
     c_integer = c_decimal | c_hex | c_oct
     # C float

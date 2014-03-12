@@ -80,7 +80,7 @@ class LLParser():
         return [line[0] for line in line_list]
 
     def process_cfg_rule(self,line,symbol_table):
-        for symbol in line:
+        for symbol in line[2:]:
             
 
     def parse_cfg(self,s):
