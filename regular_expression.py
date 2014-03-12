@@ -327,6 +327,9 @@ class RegBuilder():
                     NOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r"""))
     # C string
     c_str = double_quote + all_char_no_escape.star() + double_quote
+
+    space = RegExp(" \n\t\r\v\b")
+    all_space = space.star()
     
 
     
@@ -335,5 +338,5 @@ if __name__ == "__main__":
     reg2 = RegExp(["My"," master"],0)
     s = IndexedStr("!!!@")
     reg3 = (reg + reg2) | RegExp(['!']).plus()
-    s1 = IndexedStr('"This is a C \\n\\\\ string #include <stdio.h>"')
+    s1 = IndexedStr('"This is a C \\n\\\\ string #include <stdio.h>\\\'"')
     print RegBuilder.c_str.parse(s1)
