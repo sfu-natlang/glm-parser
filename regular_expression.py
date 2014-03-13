@@ -10,7 +10,47 @@ class IndexedStr():
     def __init__(self,s,start_index=0):
         self.s = s
         self.start_index = start_index
+        # Used to trace back when parsing fails
+        self.stack = []
         return
+
+    def push_index(self):
+        """
+        Save the current position
+        """
+        self.stack.append(self.start_index)
+        return
+    
+    def push(self,num):
+        """
+        Save a mark into the stack
+        """
+        self.stack.append(num)
+        return
+
+    def pop_index(self):
+        """
+        Pop out a value from the stack to start_index
+        """
+        self.start_index = self.stack.pop()
+        return
+
+    def peak_index(self):
+        """
+        Pop out a value but do not save it to start_index
+        """
+        return self.stack.pop()
+
+    def pop_until(self,num):
+        """
+        Pop the stack until we have seen some value. Then set start_index
+        as current stack top
+        """
+        # Keep popping until we have seen that value
+        while self.stack.pop() != num:
+            pass
+        # Set the current stack top as start_index
+        self.start_index = self.stack[-1]
 
     def proceed(self,s2):
         """
@@ -187,9 +227,14 @@ class RegExp():
         match. The returned string is the longest possible.
         Return None if there is not a match.
 
+        If parse fails s will remain at the same position
+
         :return: A matched string token, or None if none is matched
         :rtype: str/None
         """
+        # Save current index
+        s.push_index()
+
         parse_result = ""
         find_parse = False
         for i in self.token_list:
@@ -208,6 +253,7 @@ class RegExp():
                                 be parsed!""")
         # If none of them matches, return None
         if find_parse == False:
+            s.pop_index()
             return None
         else:
             s.proceed(parse_result)
@@ -216,17 +262,22 @@ class RegExp():
     def parse_concat(self,s):
         """
         Same as parse_union() except that it recognizes a concatenation of nodes
+
+        If parse fails s will remain at the start position beforr calling this
         """
+        s.push_index()
         parse_result = ""
         for i in self.token_list:
             if isinstance(i,str):
                 if s.proceed(i) == True:  
                     parse_result += i
                 else:   # Any mismatch will cause a None to be returned
+                    s.pop_index()
                     return None
             elif isinstance(i,RegExp):
                 ret = i.parse(s)
                 if ret == None:
+                    s.pop_index()
                     return None
                 else:
                     parse_result += ret
@@ -260,12 +311,16 @@ class RegExp():
         """
         Same as parse_union() except that it regconizes an plus of a string
         (i.e. repeat for 1 or more times)
+
+        If parse fails s will remain at the position before calling this
         """
+        s.push_index()
         self.bind_parse_method(RegExp.concat_node)
         parse_result = ""
         ret = self.parse(s)
         # The first pass must be a valid string
         if ret == None:
+            s.pop_index()
             return None
         else:
             parse_result += ret
@@ -279,11 +334,15 @@ class RegExp():
     def parse_question(self,s):
         """
         Same as parse_union except that it recognizes zero or one occurrance
+
+        If parse fails s will remain at the position before calling this
         """
+        s.push_index()
         self.bind_parse_method(RegExp.concat_node)
         ret = self.parse(s)
         self.bind_parse_method(RegExp.question_node)
         if ret == None:
+            s.pop_index()
             return ""
         else:
             return ret
@@ -328,7 +387,7 @@ class RegBuilder():
     # C string
     c_str = double_quote + all_char_no_escape.star() + double_quote
 
-    space = RegExp(" \n\t\r\v\b")
+    space = RegExp(list(" \n\t\r\v\b"))
     spaces = space.star()
     
 reg_dict = {
