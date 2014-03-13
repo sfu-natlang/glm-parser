@@ -5,12 +5,13 @@ class Nonterminal():
     """
     Nonterminal node used by LL parser
     """
-    def __init__(self):
+    def __init__(self,name=""):
         """
         Initialize a child list. The children will be trated in order, and
         we do not pick the longest one
         """
         self.child_list = []
+        self.name = name
         pass
 
     def append(self,child_node):
@@ -40,7 +41,10 @@ class Terminal():
         """
         Initialize the terminal node with a regular expression
         """
-        self.regexp = regular_exp
+        if not isinstance(regular_exp,RegExp):
+            raise TypeError("The leaf node must be a RegExp instance!")
+        else:
+            self.regexp = regular_exp
         return
 
     def parse(self,s):
@@ -79,9 +83,19 @@ class LLParser():
         """
         return [line[0] for line in line_list]
 
-    def process_cfg_rule(self,line,symbol_table):
+    def process_cfg_rule(self,line,symbol_table,nonterminal_list):
         for symbol in line[2:]:
-            
+            # Symbol is a terminal
+            if symbol not in nonterminal_list:
+                # Symbol is a reference to the RegBuilder
+                if symbol[0] == '@':
+                    if not reg_dict.has_key(symbol[1:]):
+                        raise ValueError("""There is not a predefined terminal
+                                            %s\n""" % (symbol[1:]))
+                    # Create a new non-terminal node
+                    nt = Nonterminal(line[0])
+                    
+                    
 
     def parse_cfg(self,s):
         # We process the grammar in a line basis

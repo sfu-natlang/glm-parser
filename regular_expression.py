@@ -329,9 +329,39 @@ class RegBuilder():
     c_str = double_quote + all_char_no_escape.star() + double_quote
 
     space = RegExp(" \n\t\r\v\b")
-    all_space = space.star()
+    spaces = space.star()
     
+reg_dict = {
+    'digit': RegBuilder.digit,
+    'digits': RegBuilder.digits,
+    'digits_or_none': RegBuilder.digits_or_none,
+    'hex_digit': RegBuilder.hex_digit,
 
+    'alpha_lower': RegBuilder.alpha_lower,
+    'alpha_higher': RegBuilder.alpha_higher,
+    'alpha': RegBuilder.alpha,
+    'alnum': RegBuilder.alnum,
+    'underline': RegBuilder.underline,
+    'al_underline': RegBuilder.al_underline,
+    'alnum_underline': RegBuilder.alnum_underline,
+
+    'c_ident': RegBuilder.c_ident,
+    'c_decimal': RegBuilder.c_decimal,
+    'c_hex': RegBuilder.c_hex,
+    'c_oct': RegBuilder.c_oct,
+    'c_integer': RegBuilder.c_integer,
+    'c_float': RegBuilder.c_float,
+
+    'single_quote': RegBuilder.single_quote,
+    'double_quote': RegBuilder.double_quote,
+    'escape_char': RegBuilder.escape_char,
+    'all_char_no_escape': RegBuilder.all_char_no_escape,
+    'all_char': RegBuilder.all_char,
+
+    'c_str': RegBuilder.c_str,
+    'space': RegBuilder.space,
+    'spaces': RegBuilder.spaces,
+    }
     
 if __name__ == "__main__":
     reg = RegExp(['me','ow '],RegExp.plus_node)
