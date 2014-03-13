@@ -54,6 +54,7 @@ class Nonterminal():
             #print self.name,ret
             # We only return the first match, not the longest match
             if ret != None:
+                s.peak_index()
                 return ret
             else:
                 # If parsing fail then restore state and prepare for next try
@@ -73,7 +74,7 @@ class Nonterminal():
         for i in self.child_list:
             reg_dict['spaces'].parse(s)
             ret = i.parse(s)
-            print self.name,ret
+            print self.name,ret,self.line_str
             if ret == None:
                 s.pop_index()
                 print 'concat pop: ', s.start_index
@@ -141,6 +142,7 @@ class LLParser():
         if line[0] not in symbol_table:
             node_union = Nonterminal("union",node_type=Nonterminal.union_node)
             symbol_table[line[0]] = node_union
+            node_union.nonterminal_str = line[0]
         else:
             node_union = symbol_table[line[0]]
         # Create the node for this line
@@ -188,6 +190,11 @@ class LLParser():
                 else:
                     node_concat.append(symbol_table[symbol])
                     
+        line_str = ''          
+        for token in line:
+            line_str += (token + ' ')
+        node_concat.line_str = line_str
+                    
         return
 
     def parse_cfg(self,s,reverse=True):
@@ -233,13 +240,14 @@ class LLParser():
 
 nonterminal_func_dict['func_func'] = lambda(x): x[:-2]
 nonterminal_func_dict['func_func2'] = lambda(x): x[:3] + x[4:-1]
+nonterminal_func_dict['type_list_func2'] = lambda(x): x[:3] + x[4:]
 
 if __name__ == "__main__":
     cfg_str = """
     func -> type ident ( ) <- func_func
     func -> type ident ( type_list ) <- func_func2
     type_list -> type ident
-    type_list -> type ident , type_list
+    type_list -> type ident , type_list <- type_list_func2 
     type -> void
     type -> int
     type -> char
@@ -249,9 +257,9 @@ if __name__ == "__main__":
     ll = LLParser()
     ll.parse_cfg(cfg_str)
     index_str = IndexedStr("void main(int argc,char argv)")
-    is2 = IndexedStr("int argc,char argv")
+    is2 = IndexedStr("void main(int argc,char argv)")
     #ll.print_tree(ll.symbol_table['func'].parse(index_str))
-    ll.print_tree(ll.symbol_table['type_list'].parse(is2))
+    ll.print_tree(ll.symbol_table['func'].parse(is2))
     #print ll.symbol_table['N'].child_list[0].child_list[0].token_list
     #print is2.s[is2.start_index:]
         
