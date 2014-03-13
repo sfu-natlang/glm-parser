@@ -257,6 +257,7 @@ class RegExp():
             return None
         else:
             s.proceed(parse_result)
+            s.peak_index()
             return parse_result
 
     def parse_concat(self,s):
@@ -285,6 +286,7 @@ class RegExp():
                 raise TypeError("""No other types other than str and RegExp could
                                 be parsed!""")
         # If none of them matches, return None
+        s.peak_index()
         return parse_result
 
     def parse_star(self,s):
@@ -329,6 +331,7 @@ class RegExp():
         parse_result += self.parse(s)
         self.bind_parse_method(RegExp.plus_node)
         # There must be some valid string if we reach here, so return directly
+        s.peak_index()
         return parse_result
 
     def parse_question(self,s):
@@ -345,6 +348,7 @@ class RegExp():
             s.pop_index()
             return ""
         else:
+            s.peak_index()
             return ret
         
 class RegBuilder():

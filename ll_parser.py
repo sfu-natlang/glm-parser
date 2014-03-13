@@ -40,14 +40,13 @@ class Nonterminal():
         self.child_list.append(child_node)
         return
     
-
     def parse_union(self,s):
         """
         Parse the union non-terminal. It acts as an intermediate level when
         there is multiple definition for a non-terminmal
         """
         s.push_index()
-        print 'push: ',s.stack[-1]
+        print 'union push: ',s.stack[-1]
         for i in self.child_list:
             # Save the state before parsing
             s.push_index()
@@ -60,7 +59,7 @@ class Nonterminal():
                 # If parsing fail then restore state and prepare for next try
                 s.pop_index()
         s.pop_index()
-        print 'pop: ', s.start_index
+        print 'union pop: ', s.start_index
         return None
 
     def parse_concat(self,s):
@@ -68,6 +67,7 @@ class Nonterminal():
         Parse the concatenation non-terminal.
         """
         s.push_index()
+        print 'concat push: ',s.stack[-1]
         # Record the name as the first element
         parse_result = [self.name]
         for i in self.child_list:
@@ -76,11 +76,13 @@ class Nonterminal():
             print self.name,ret
             if ret == None:
                 s.pop_index()
+                print 'concat pop: ', s.start_index
                 return None
             else:
                 parse_result.append(ret)
 
         parse_result = nonterminal_func_dict[self.func_name](parse_result)
+        s.peak_index()
         return parse_result
 
 class Terminal():
@@ -249,7 +251,7 @@ if __name__ == "__main__":
     index_str = IndexedStr("void main(int argc,char argv)")
     is2 = IndexedStr("int argc,char argv")
     #ll.print_tree(ll.symbol_table['func'].parse(index_str))
-    ll.symbol_table['type_list'].parse(is2)
+    ll.print_tree(ll.symbol_table['type_list'].parse(is2))
     #print ll.symbol_table['N'].child_list[0].child_list[0].token_list
-    print is2.s[is2.start_index:]
+    #print is2.s[is2.start_index:]
         
