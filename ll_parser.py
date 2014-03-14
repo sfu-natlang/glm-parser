@@ -47,8 +47,8 @@ class Nonterminal():
         Parse the union non-terminal. It acts as an intermediate level when
         there is multiple definition for a non-terminmal
         """
+        print "union: ",self.nonterminal_str
         for i in self.child_list:
-            print "union: ",i.nonterminal_str
             ret = i.parse(s)
             #print self.name,ret
             # We only return the first match, not the longest match
@@ -252,10 +252,27 @@ arithmetic_cfg = """
     add_exp -> multi_exp + add_exp
     multi_exp -> value
     multi_exp -> value * multi_exp
-    test -> ( value )
     value -> @c_decimal
-    
+    value -> @c_ident
 """
+
+def evaluate_exp(tree_node):
+    if tree_node[0] == 'value' and len(tree_node) <= 2:
+        return int(tree_node[1])
+    elif tree_node[0] == 'value':
+        return evaluate_exp(tree_node[2])
+    elif tree_node[0] == 'add_exp' and len(tree_node) > 2:
+        return evaluate_exp(tree_node[1]) + evaluate_exp(tree_node[3])
+    elif tree_node[0] == 'add_exp':
+        return evaluate_exp(tree_node[1])
+    elif tree_node[0] == 'multi_exp' and len(tree_node) > 2:
+        return evaluate_exp(tree_node[1]) * evaluate_exp(tree_node[3])
+    elif tree_node[0] == 'multi_exp':
+        return evaluate_exp(tree_node[1])
+    elif tree_node[0] == 'exp':
+        return evaluate_exp(tree_node[1])
+    else:
+        raise ValueError("Unknown type: %s\n" % (tree_node[0]))
 
 if __name__ == "__main__":
     cfg_str = """
@@ -272,8 +289,7 @@ if __name__ == "__main__":
     ll_debug = True
     ll = LLParser()
     ll.parse_cfg(arithmetic_cfg)
-    is2 = IndexedStr("(-23 + 24)")
-    ll.print_tree(ll.symbol_table['test'].parse(is2))
-    print ll.symbol_table['value'].child_list[1].child_list[0].token_list
-
+    is2 = IndexedStr("(-23 + 24) + (25 * 26) * 27")
+    #ll.print_tree(ll.symbol_table['exp'].parse(is2))
+    print evaluate_exp(ll.symbol_table['exp'].parse(is2))
         
