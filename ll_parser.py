@@ -138,15 +138,30 @@ class LLParser():
         """
         return [line[0] for line in line_list]
 
-    def process_cfg_rule(self,line,symbol_table,nonterminal_list):
-        # We add the union node first, because we may have to refer to this
-        # later. node_union is the union node for nonterminal line[0]
-        if line[0] not in symbol_table:
+    def create_nonterminal(self,symbol_table,symbol_name):
+        """
+        Add a new nonterminal union node into the symbol table
+
+        If that nonternimal already exists then do nothing
+
+        :return: The nonterminal node whose name is symbol_name, no matter
+        it already exists or not
+        :rtype: Nonterminal
+        """
+        if symbol_name not in symbol_table:
             node_union = Nonterminal("union",node_type=Nonterminal.union_node)
-            symbol_table[line[0]] = node_union
-            node_union.nonterminal_str = line[0]
+            symbol_table[symbol_name] = node_union
+            node_union.nonterminal_str = symbol_name
         else:
-            node_union = symbol_table[line[0]]
+            node_union = symbol_table[symbol_name]
+            
+        return node_union
+
+    def process_cfg_rule(self,line,symbol_table,nonterminal_list):
+        # This function will add the new nonterminal, if it does not exist,
+        # or just do nothing. The return value is guaranteed to be the node
+        # of name line[0]
+        node_union = self.create_nonterminal(symbol_table,line[0])
         # Create the node for this line
         node_concat = Nonterminal(line[0])
         # Add the node into the union node for this nonterminal
@@ -187,10 +202,11 @@ class LLParser():
             # The symbol is a nonterminal, we need to look up the dict
             else:
                 if symbol not in symbol_table:  # key in dict is allowed
-                    raise ValueError("""You have not defined the nonterminal
-                                        %s yet\n""" % (symbol))
-                else:
-                    node_concat.append(symbol_table[symbol])
+                    #raise ValueError("""You have not defined the nonterminal
+                    #                    %s yet\n""" % (symbol))
+                    # Create a new empty node for that node
+                    self.create_nonterminal(symbol_table,symbol)
+                node_concat.append(symbol_table[symbol])
                     
         line_str = ''          
         for token in line:
@@ -267,9 +283,6 @@ simple_cfg = """
     
     assign_stmt -> l_value = r_value
     
-    r_value -> const_value
-    r_value -> exp
-    
     exp -> add_exp
     exp -> ( add_exp )
     value -> ( add_exp )
@@ -289,6 +302,8 @@ simple_cfg = """
     r_value -> @c_ident
     r_value -> @c_ident ( )
     l_value -> @c_ident
+    r_value -> const_value
+    r_value -> exp
     ident -> @c_ident
     type -> void
     type -> int
@@ -331,7 +346,7 @@ if __name__ == "__main__":
         void main()
         {
             int a,c,d,r;
-            int b = (a * a);
+            int b = a * a;
             a = (5 * (2 + a) - b / 3);
             return;
         }
