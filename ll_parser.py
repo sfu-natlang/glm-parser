@@ -7,6 +7,8 @@ nonterminal_func_dict = {
     None: lambda(x): x,
     }
 
+ll_debug = False
+
 class Nonterminal():
     concat_node = 0
     union_node = 1
@@ -45,39 +47,38 @@ class Nonterminal():
         Parse the union non-terminal. It acts as an intermediate level when
         there is multiple definition for a non-terminmal
         """
-        s.push_index()
-        print 'union push: ',s.stack[-1]
         for i in self.child_list:
-            # Save the state before parsing
-            s.push_index()
+            print "union: ",i.nonterminal_str
             ret = i.parse(s)
             #print self.name,ret
             # We only return the first match, not the longest match
             if ret != None:
-                s.peak_index()
                 return ret
-            else:
-                # If parsing fail then restore state and prepare for next try
-                s.pop_index()
-        s.pop_index()
-        print 'union pop: ', s.start_index
+            
         return None
 
     def parse_concat(self,s):
         """
         Parse the concatenation non-terminal.
-        """
+        """ 
         s.push_index()
-        print 'concat push: ',s.stack[-1]
+        if ll_debug == True:
+            print 'concat push: ',s.stack[-1]
+            
         # Record the name as the first element
         parse_result = [self.name]
         for i in self.child_list:
             reg_dict['spaces'].parse(s)
             ret = i.parse(s)
-            print self.name,ret,self.line_str
+            if ll_debug == True:
+                print self.name,ret,self.line_str
+                
             if ret == None:
+                
                 s.pop_index()
-                print 'concat pop: ', s.start_index
+                if ll_debug == True:
+                    print 'concat pop: ', s.start_index
+                    
                 return None
             else:
                 parse_result.append(ret)
@@ -242,6 +243,20 @@ nonterminal_func_dict['func_func'] = lambda(x): x[:-2]
 nonterminal_func_dict['func_func2'] = lambda(x): x[:3] + x[4:-1]
 nonterminal_func_dict['type_list_func2'] = lambda(x): x[:3] + x[4:]
 
+arithmetic_cfg = """
+    exp -> value
+    exp -> multi_exp
+    exp -> add_exp
+    value -> ( add_exp ) 
+    add_exp -> multi_exp
+    add_exp -> multi_exp + add_exp
+    multi_exp -> value
+    multi_exp -> value * multi_exp
+    test -> ( value )
+    value -> @c_decimal
+    
+"""
+
 if __name__ == "__main__":
     cfg_str = """
     func -> type ident ( ) <- func_func
@@ -253,13 +268,12 @@ if __name__ == "__main__":
     type -> char
     ident -> @c_ident
     """
-    
+    global ll_debug
+    ll_debug = True
     ll = LLParser()
-    ll.parse_cfg(cfg_str)
-    index_str = IndexedStr("void main(int argc,char argv)")
-    is2 = IndexedStr("void main(int argc,char argv)")
-    #ll.print_tree(ll.symbol_table['func'].parse(index_str))
-    ll.print_tree(ll.symbol_table['func'].parse(is2))
-    #print ll.symbol_table['N'].child_list[0].child_list[0].token_list
-    #print is2.s[is2.start_index:]
+    ll.parse_cfg(arithmetic_cfg)
+    is2 = IndexedStr("(-23 + 24)")
+    ll.print_tree(ll.symbol_table['test'].parse(is2))
+    print ll.symbol_table['value'].child_list[1].child_list[0].token_list
+
         
