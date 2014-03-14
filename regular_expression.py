@@ -323,6 +323,9 @@ class RegExp():
         # The first pass must be a valid string
         if ret == None:
             s.pop_index()
+            # Never forget to add this line to make it restore to its original
+            # type of node before exiting!!
+            self.bind_parse_method(RegExp.plus_node)
             return None
         else:
             parse_result += ret
