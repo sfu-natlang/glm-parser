@@ -47,7 +47,8 @@ class Nonterminal():
         Parse the union non-terminal. It acts as an intermediate level when
         there is multiple definition for a non-terminmal
         """
-        print "union: ",self.nonterminal_str
+        if ll_debug == True:
+            print "union: ",self.nonterminal_str
         for i in self.child_list:
             ret = i.parse(s)
             #print self.name,ret
@@ -243,17 +244,54 @@ nonterminal_func_dict['func_func'] = lambda(x): x[:-2]
 nonterminal_func_dict['func_func2'] = lambda(x): x[:3] + x[4:-1]
 nonterminal_func_dict['type_list_func2'] = lambda(x): x[:3] + x[4:]
 
-arithmetic_cfg = """
-    exp -> value
-    exp -> multi_exp
+simple_cfg = """
+
+    func -> type ident ( ) { stmts }
+    func -> type ident ( type_list )
+    type_list -> type ident
+    type_list -> type ident , type_list
+
+    stmts -> stmt ;
+    stmts -> stmt ; stmts
+    
+    stmt -> assign_stmt
+    stmt -> return
+    stmt -> type_dec
+
+    type_dec -> type ident
+    type_dec -> type ident_list
+    type_dec -> type ident = r_value
+    
+    ident_list -> @c_ident
+    ident_list -> @c_ident , ident_list
+    
+    assign_stmt -> l_value = r_value
+    
+    r_value -> const_value
+    r_value -> exp
+    
     exp -> add_exp
-    value -> ( add_exp ) 
+    exp -> ( add_exp )
+    value -> ( add_exp )
     add_exp -> multi_exp
+    add_exp -> multi_exp - add_exp
     add_exp -> multi_exp + add_exp
     multi_exp -> value
+    multi_exp -> value / multi_exp
     multi_exp -> value * multi_exp
-    value -> @c_decimal
+    value -> const_value
+    
     value -> @c_ident
+    value -> @c_ident ( )
+    
+    const_value -> @c_decimal
+    
+    r_value -> @c_ident
+    r_value -> @c_ident ( )
+    l_value -> @c_ident
+    ident -> @c_ident
+    type -> void
+    type -> int
 """
 
 def evaluate_exp(tree_node):
@@ -262,11 +300,17 @@ def evaluate_exp(tree_node):
     elif tree_node[0] == 'value':
         return evaluate_exp(tree_node[2])
     elif tree_node[0] == 'add_exp' and len(tree_node) > 2:
-        return evaluate_exp(tree_node[1]) + evaluate_exp(tree_node[3])
+        if tree_node[2] == '+':
+            return evaluate_exp(tree_node[1]) + evaluate_exp(tree_node[3])
+        elif tree_node[2] == '-':
+            return evaluate_exp(tree_node[1]) - evaluate_exp(tree_node[3])
     elif tree_node[0] == 'add_exp':
         return evaluate_exp(tree_node[1])
     elif tree_node[0] == 'multi_exp' and len(tree_node) > 2:
-        return evaluate_exp(tree_node[1]) * evaluate_exp(tree_node[3])
+        if tree_node[2] == '*':
+            return evaluate_exp(tree_node[1]) * evaluate_exp(tree_node[3])
+        elif tree_node[2] == '/':
+            return int(evaluate_exp(tree_node[1]) / evaluate_exp(tree_node[3]))
     elif tree_node[0] == 'multi_exp':
         return evaluate_exp(tree_node[1])
     elif tree_node[0] == 'exp':
@@ -276,20 +320,22 @@ def evaluate_exp(tree_node):
 
 if __name__ == "__main__":
     cfg_str = """
-    func -> type ident ( ) <- func_func
-    func -> type ident ( type_list ) <- func_func2
-    type_list -> type ident
-    type_list -> type ident , type_list <- type_list_func2 
-    type -> void
-    type -> int
-    type -> char
-    ident -> @c_ident
+
     """
     global ll_debug
-    ll_debug = True
+    ll_debug = False
     ll = LLParser()
-    ll.parse_cfg(arithmetic_cfg)
-    is2 = IndexedStr("(-23 + 24) + (25 * 26) * 27")
-    #ll.print_tree(ll.symbol_table['exp'].parse(is2))
-    print evaluate_exp(ll.symbol_table['exp'].parse(is2))
+    ll.parse_cfg(simple_cfg)
+    is2 = IndexedStr(
+        """
+        void main()
+        {
+            int a,c,d,r;
+            int b = (a * a);
+            a = (5 * (2 + a) - b / 3);
+            return;
+        }
+        """)
+    ll.print_tree(ll.symbol_table['func'].parse(is2))
+    #print evaluate_exp(ll.symbol_table['func'].parse(is2))
         

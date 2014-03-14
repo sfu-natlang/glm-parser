@@ -63,11 +63,10 @@ class IndexedStr():
         :rtype: bool
         """
         length = len(s2)
-        if self.start_index + length > len(self.s):
-            return False
-        elif self.s[self.start_index:self.start_index + length] != s2:
+        if self.try_proceed(s2) == False:
             return False
         else:
+            #print "Proceed: ",length
             self.start_index += length
             return True
         
@@ -106,6 +105,12 @@ class RegExp():
     star_node = 2
     plus_node = 3
     question_node = 4
+    
+    def __str__(self):
+        return "RegExp Type %d instance" % (self.node_type)
+
+    def __repr__(self):
+        return self.__str__()
     
     def __init__(self,initializer=[],node_type=0):
         """
@@ -237,11 +242,13 @@ class RegExp():
 
         parse_result = ""
         find_parse = False
+        
         for i in self.token_list:
             if isinstance(i,str):
                 # Remember that proceed() will increase the index automatically
                 if s.try_proceed(i) == True and len(i) > len(parse_result):
-                    parse_result = i
+                    #print 'Union: ',i
+                    parse_result = str(i)
                     find_parse = True
             elif isinstance(i,RegExp):
                 ret = i.parse(s)
@@ -256,7 +263,11 @@ class RegExp():
             s.pop_index()
             return None
         else:
-            s.proceed(parse_result)
+            # We only do the proceed when we are dealing with strings directly
+            # or the lower-level RegExp instance will proceed on its own
+            # responsibility
+            if isinstance(i,str):
+                s.proceed(parse_result)
             s.peak_index()
             return parse_result
 
@@ -264,7 +275,7 @@ class RegExp():
         """
         Same as parse_union() except that it recognizes a concatenation of nodes
 
-        If parse fails s will remain at the start position beforr calling this
+        If parse fails s will remain at the start position before calling this
         """
         s.push_index()
         parse_result = ""
@@ -277,6 +288,7 @@ class RegExp():
                     return None
             elif isinstance(i,RegExp):
                 ret = i.parse(s)
+                #print "Concat: ",ret
                 if ret == None:
                     s.pop_index()
                     return None
@@ -299,7 +311,10 @@ class RegExp():
         # It should not loop forever, since the string must be limited length
         # and self.parse(s) will return None
         while True:
+            #print s.start_index
             ret = self.parse(s)
+            #print s.start_index
+            #print "Star: ",ret
             # We could tolerate an empty string
             if ret == None:
                 break
@@ -396,7 +411,8 @@ class RegBuilder():
 
     space = RegExp(list(" \n\t\r\v\b"))
     spaces = space.star()
-    
+
+"""
 reg_dict = {
     'digit': RegBuilder.digit,
     'digits': RegBuilder.digits,
@@ -428,11 +444,15 @@ reg_dict = {
     'space': RegBuilder.space,
     'spaces': RegBuilder.spaces,
     }
+"""
+
+reg_dict = RegBuilder.__dict__
     
 if __name__ == "__main__":
     reg = RegExp(['me','ow '],RegExp.plus_node)
     reg2 = RegExp(["My"," master"],0)
     s = IndexedStr("!!!@")
     reg3 = (reg + reg2) | RegExp(['!']).plus()
-    s1 = IndexedStr('"This is a C \\n\\\\ string #include <stdio.h>\\\'"')
-    print RegBuilder.c_str.parse(s1)
+    s1 = IndexedStr('_aaaaa')
+    print RegBuilder.c_ident.parse(s1)
+    print RegBuilder.alpha.star().token_list
