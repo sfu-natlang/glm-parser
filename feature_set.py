@@ -728,14 +728,14 @@ class OldFeatureSet():
 #############################################################################
 
 if __name__ == "__main__":
-    fs = FeatureSet(DependencyTree(),"test_load.db")
+    fs = FeatureSet(DependencyTree(),"test_load.db",operating_mode='shelve_write_back')
     fs.db['123'] = 456
     fs.db['qwe'] = 'qwe'
     fs.db['ttt'] = 'ppp'
     fs.dump()
     fs.db['456'] = 123
     fs.db['ttt'] = '124'
-    fs2 = FeatureSet(DependencyTree(),"test_load.db")
+    fs2 = FeatureSet(DependencyTree(),"test_load.db",operating_mode='shelve_write_back')
     fs2.load()
     fs2.merge(fs)
     print fs2.db.data_dict

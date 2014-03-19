@@ -13,6 +13,7 @@ class DataBackend():
     close() - Close the dictionary file. It has not effect when we are using
               memory dict. However when using other persistent objects remember
               to close it before quitting
+              
     dump()  - Dump the content of the data object into memory. When we are using
               memory dict it will call Pickle to do that. When we are using
 
@@ -20,7 +21,11 @@ class DataBackend():
               memory dict it will call Pickle to do the load. And when we are
               using shelves it has no effect, since shelves itself is persistent
               object.
+    
+    keys()  - Return a list of keys in the dictionary.
 
+    has_key() - Check whether a given key is in the dictionary.
+    
     Please notice that there is no open() method as in other similar classes.
     Users must provide a file name as well as an operating mode to support
     both persistent and non-persistent (or semi-persistent) operations.
@@ -39,13 +44,13 @@ class DataBackend():
             self.data_dict = shelve.open(filename,writeback=False)
             self.close = self.do_close
             self.dump = self.shelve_dump
-            self.load = self.dummy
+            self.load = self.dummy2
             self.keys = self.shelve_keys
         elif store_type == 'shelve_write_back':
             self.data_dict = shelve.open(filename,writeback=True)
             self.close = self.do_close
-            self.dump = self.shelve.dump
-            self.load = self.dummy
+            self.dump = self.shelve_dump
+            self.load = self.dummy2
             self.keys = self.shelve_keys
         else:
             raise ValueError("Unknown store type: %s" % (str(store_type)))
@@ -96,6 +101,10 @@ class DataBackend():
         return
     
     def dummy(self):
+        pass
+        return
+
+    def dummy2(self,empty):
         pass
         return
 
