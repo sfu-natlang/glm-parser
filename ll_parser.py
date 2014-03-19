@@ -240,6 +240,9 @@ class LLParser():
             line_list.reverse()
 
         for line in line_list:
+            # '//' is the comment mark
+            if line[0:2] == '//':
+                continue
             self.process_cfg_rule(line,symbol_table,nonterminal_list)
 
         self.symbol_table = symbol_table

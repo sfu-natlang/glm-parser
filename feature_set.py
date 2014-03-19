@@ -2,6 +2,9 @@
 from dependency_tree import *
 from data_backend import *
 from feature_vector import *
+from feature_description import simple_cfg, FeatureDescription
+from regular_expression import IndexedStr
+from ll_parser import LLParser
 
 class FeatureSet():
     """
@@ -25,6 +28,8 @@ class FeatureSet():
         :param operating_mode: The mode of operation on the database
         :type operating_mode: str
         """
+        # A list of FeatureDescription instances
+        self.extra_feature_dict = {}
         self.operating_mode = operating_mode
         # If this is None, then we will use the parameter provided in dump()
         self.database_filename = database_filename
@@ -432,7 +437,44 @@ class FeatureSet():
             else:
                 self[fk] = fs[fk]
         return
-        
+
+    def add_feature_description(self,name,program):
+        """
+        Add a new program to generate new features
+
+        :param name: A string name for the feature program
+        :type name: str
+        :param program: A program to generate the feature
+        :type program: IndexedStr
+        """
+        fd = FeatureDescription(self.dep_tree,simple_cfg,program)
+        self.extra_feature_dict[name] = fd
+        return
+
+    def get_feature_by_name(self,name,head_index,dep_index):
+        """
+        Get a feature from self defined feature descriptions
+        """
+        return self.extra_feature_dict[name].get_feature(head_index,dep_index)
+
+    def parse_description(self,s):
+        """
+        Parse a string of a feature description
+
+        :param s: A indexed string contains the feature description
+        :type s: IndexedStr
+        """
+        global local_var
+        local_var.clear()
+        local_var['word_list'] = ('string[]',self.dep_tree.word_list)
+        local_var['pos_list'] = ('string[]',self.dep_tree.pos_list)
+        local_var['length'] = ('int',len(self.dep_tree.word_list))
+        lp = LLParser()
+        lp.parse_cfg(simple_cfg)
+        t = lp.symbol_table['stmts'].parse(s)
+        lp.print_tree(t)
+        eva_stmts(t)
+        return
 
 ###############################################################################
 #                             The Devil Split Line                            #
@@ -728,14 +770,35 @@ class OldFeatureSet():
 #############################################################################
 
 if __name__ == "__main__":
-    fs = FeatureSet(DependencyTree(),"test_load.db",operating_mode='shelve_write_back')
+    dt = DependencyTree()
+    dt.word_list = ['I','am','the','King']
+    dt.pos_list = ['NNP','V','DET','NP']
+    fs = FeatureSet(dt,"test_load.db",operating_mode='shelve_write_back')
     fs.db['123'] = 456
     fs.db['qwe'] = 'qwe'
     fs.db['ttt'] = 'ppp'
     fs.dump()
     fs.db['456'] = 123
     fs.db['ttt'] = '124'
-    fs2 = FeatureSet(DependencyTree(),"test_load.db",operating_mode='shelve_write_back')
+    fs2 = FeatureSet(dt,"test_load.db",operating_mode='shelve_write_back')
     fs2.load()
     fs2.merge(fs)
-    print fs2.db.data_dict
+    #print fs2.db.data_dict
+    s = IndexedStr("""
+                    string result[5];
+                    result[0] = word_list[head_index];
+                    result[1] = pos_list[head_index];
+                    result[2] = word_list[dep_index];
+                    result[3] = pos_list[dep_index];
+                    if(dep_index == (length - 1))
+                    {
+                        result[4] = "end_node";
+                    }
+                    else
+                    {
+                        result[4] = "not_end";
+                    };
+                   """)
+    fs2.add_feature_description('my_feature',s)
+    print fs2.get_feature_by_name('my_feature',1,2)
+    

@@ -247,11 +247,13 @@ class RegExp():
             if isinstance(i,str):
                 # Remember that proceed() will increase the index automatically
                 if s.try_proceed(i) == True and len(i) > len(parse_result):
-                    #print 'Union: ',i
+                    #print i + ' overrides ' + parse_result
                     parse_result = str(i)
                     find_parse = True
             elif isinstance(i,RegExp):
+                s.push_index()
                 ret = i.parse(s)
+                s.pop_index()
                 if ret != None and len(ret) > len(parse_result):
                     parse_result = ret
                     find_parse = True
@@ -263,11 +265,8 @@ class RegExp():
             s.pop_index()
             return None
         else:
-            # We only do the proceed when we are dealing with strings directly
-            # or the lower-level RegExp instance will proceed on its own
-            # responsibility
-            if isinstance(i,str):
-                s.proceed(parse_result)
+            s.proceed(parse_result)
+            #print "Union result: ",self.token_list,parse_result
             s.peak_index()
             return parse_result
 
@@ -453,6 +452,5 @@ if __name__ == "__main__":
     reg2 = RegExp(["My"," master"],0)
     s = IndexedStr("!!!@")
     reg3 = (reg + reg2) | RegExp(['!']).plus()
-    s1 = IndexedStr('_aaaaa')
-    print RegBuilder.c_ident.parse(s1)
-    print RegBuilder.alpha.star().token_list
+    s1 = IndexedStr('12345')
+    print RegBuilder.c_decimal.parse(s1)
