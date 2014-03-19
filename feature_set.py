@@ -374,6 +374,66 @@ class FeatureSet():
         self.db.close()
         return
 
+    def __getitem__(self,key_str):
+        """
+        A wrap to the __getitem__ method of the data backend
+        """
+        return self.db[key_str]
+
+    def __setitem__(self,key_str,value):
+        """
+        A wrap to the __setitem__ method of the data backend
+        """
+        self.db[key_str] = value
+        return
+
+    def keys(self):
+        """
+        Return a list of items that is the keys of the underlying dictionary.
+
+        This is only a simple wrap of the underlying database, which may be
+        another level of wrapping of the built-in data structure method. However
+        you can ignore the difference.
+
+        :return: A list of feature keys
+        :rtype: list(str)
+        """
+        return self.db.keys()
+
+    def has_key(self,key_str):
+        """
+        Check whether the given key is in the database. A key in this case is a
+        string.
+
+        :param key_str: The key string
+        :type key_str: str
+        :return: True if the key is in the database, False if not
+        :rtype: bool
+        """
+        return self.db.has_key(key_str)
+
+    def merge(self,fs):
+        """
+        Merge this feature set instance with another instance. The sharing keys
+        will be added up together to produce a new parameter value, and the
+        unique keys are copied from the sources. This method will change the
+        instance it is calling from in-place. If you need a new instance as the
+        result of an addition, call the operator overloading __add__
+
+        :param fs: The feature set instance you want to merge from
+        :type fs: FeatureSet instance
+        """
+        # We only need to check the key
+        for fk in fs.keys():
+            # If key already exists then merge by addition
+            if self.has_key(fk):
+                self[fk] += fs[fk]
+            # If key does not exist then just add the key
+            else:
+                self[fk] = fs[fk]
+        return
+        
+
 ###############################################################################
 #                             The Devil Split Line                            #
 ###############################################################################
@@ -662,12 +722,20 @@ class OldFeatureSet():
         self.db.close()
         return
 
+#############################################################################
+# If you see this line and you are modiyfing the code exactly above, then you
+# are accessing the wrong part of the code.
+#############################################################################
+
 if __name__ == "__main__":
     fs = FeatureSet(DependencyTree(),"test_load.db")
     fs.db['123'] = 456
     fs.db['qwe'] = 'qwe'
     fs.db['ttt'] = 'ppp'
     fs.dump()
+    fs.db['456'] = 123
+    fs.db['ttt'] = '124'
     fs2 = FeatureSet(DependencyTree(),"test_load.db")
     fs2.load()
+    fs2.merge(fs)
     print fs2.db.data_dict

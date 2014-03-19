@@ -1,6 +1,7 @@
 
 import shelve
 import pickle
+import sys
 
 class DataBackend():
     """
@@ -33,16 +34,19 @@ class DataBackend():
             self.close = self.dummy
             self.dump = self.dict_dump
             self.load = self.dict_load
+            self.keys = self.dict_keys
         elif store_type == 'shelve_write_through':
             self.data_dict = shelve.open(filename,writeback=False)
             self.close = self.do_close
             self.dump = self.shelve_dump
             self.load = self.dummy
+            self.keys = self.shelve_keys
         elif store_type == 'shelve_write_back':
             self.data_dict = shelve.open(filename,writeback=True)
             self.close = self.do_close
             self.dump = self.shelve.dump
             self.load = self.dummy
+            self.keys = self.shelve_keys
         else:
             raise ValueError("Unknown store type: %s" % (str(store_type)))
         return
@@ -69,6 +73,23 @@ class DataBackend():
 
     def has_key(self,index):
         return self.data_dict.has_key(index)
+
+    def shelve_keys(self):
+        """
+        This operation is very slow because the database must lookup the disk
+        file and extract all keys from the file. So we print a warning message
+        to inform the user.
+        """
+        sys.stderr.write("""Warning: Calling keys() mehtod on a shelve object
+                            may cause severe performance degrade.\n""")
+        return self.data_dict.keys()
+    
+    def dict_keys(self):
+        """
+        Return a list of dictionary keys. This operation is not as expensive
+        as the shelve keys() method, so we separate them.
+        """
+        return self.data_dict.keys()
 
     def do_close(self):
         self.data_dict.close()
