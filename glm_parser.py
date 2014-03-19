@@ -11,9 +11,9 @@ class GlmParser():
             self.fset.load(filename)
         return
     
-    def train(self, section_set=[(2,21)], data_path=None):
+    def train(self, section_set=[(2,21)], data_path=None, output_file="weight"):
         w_learner = weight_learner.WeightLearner()
-        self.fset = w_learner.learn_weight_sections(section_set, data_path)
+        self.fset = w_learner.learn_weight_sections(section_set, data_path, output_file)
         return
     
     def unlabeled_accuracy(self, section_set=[0,1,22,24], data_path=None):
