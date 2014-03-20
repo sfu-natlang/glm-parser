@@ -12,7 +12,7 @@ class WeightLearner():
         """
         Initialize the WeightLearner
         """
-        self.MAX_ITERATE = 1
+        self.MAX_ITERATE = iter_num
         self.fset = feature_set.FeatureSet(
                     dependency_tree.DependencyTree(),
                     'weight.db')
@@ -35,6 +35,7 @@ class WeightLearner():
             while dataset.has_next_data():
                 self.update_weight(dataset.get_next_data())  
             self.fset.dump(output_file+'_iter_'+str(i)+'.db')
+            print "iteration", i, "done"
             self.fset.close()
             dataset.reset()
         return self.fset
