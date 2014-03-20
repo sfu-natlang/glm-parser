@@ -5,7 +5,7 @@ export PYTHONPATH=$PYTHONPATH:/cs/natlang-projects/glm-parser/Cython-0.20.1
 train_sec_begin="2"
 train_sec_end="6"
 acc_test_sec_list="2"
-
+test_data_path="/cs/natlang-projects/glm-parser/penn-wsj-deps/"
 
 if [ "" != "$1" ]
 then
@@ -25,5 +25,5 @@ python setup.py build_ext --inplace
 #train: python test_glm_parser.py -b 2 -e 2 -o sec_02 
 #accuracy test: python test_glm_parser.py -d weight_iter_1.db -o sec_02 -a 2
 
-python test_glm_parser.py -b $train_sec_begin -e $train_sec_end -o $output_file_name 
+python test_glm_parser.py -b $train_sec_begin -e $train_sec_end -o $output_file_name -t $test_data_path
 #-a $acc_test_sec_listl
