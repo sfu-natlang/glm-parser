@@ -1,6 +1,6 @@
 
 import shelve
-import pickle
+import cPickle as pickle
 import sys
 
 class DataBackend():

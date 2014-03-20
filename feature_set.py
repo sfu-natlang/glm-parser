@@ -773,17 +773,17 @@ if __name__ == "__main__":
     dt = DependencyTree()
     dt.word_list = ['I','am','the','King']
     dt.pos_list = ['NNP','V','DET','NP']
-    fs = FeatureSet(dt,"test_load.db",operating_mode='shelve_write_back')
+    fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
     fs.db['123'] = 456
     fs.db['qwe'] = 'qwe'
     fs.db['ttt'] = 'ppp'
     fs.dump()
     fs.db['456'] = 123
     fs.db['ttt'] = '124'
-    fs2 = FeatureSet(dt,"test_load.db",operating_mode='shelve_write_back')
+    fs2 = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
     fs2.load()
     fs2.merge(fs)
-    #print fs2.db.data_dict
+    print fs2.db.data_dict
     s = IndexedStr("""
                     string result[5];
                     result[0] = word_list[head_index];
@@ -799,6 +799,6 @@ if __name__ == "__main__":
                         result[4] = "not_end";
                     };
                    """)
-    fs2.add_feature_description('my_feature',s)
-    print fs2.get_feature_by_name('my_feature',1,2)
+    #fs2.add_feature_description('my_feature',s)
+    #print fs2.get_feature_by_name('my_feature',1,2)
     
