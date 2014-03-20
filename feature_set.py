@@ -417,6 +417,10 @@ class FeatureSet():
         """
         return self.db.has_key(key_str)
 
+    def pop(self,key):
+        self.db.pop(key)
+        return
+
     def merge(self,fs):
         """
         Merge this feature set instance with another instance. The sharing keys
@@ -424,6 +428,9 @@ class FeatureSet():
         unique keys are copied from the sources. This method will change the
         instance it is calling from in-place. If you need a new instance as the
         result of an addition, call the operator overloading __add__
+
+        Please notice that after merge, the second FeatureSet instance will
+        e cleared. This is done based on a memory issue.
 
         :param fs: The feature set instance you want to merge from
         :type fs: FeatureSet instance
@@ -436,6 +443,8 @@ class FeatureSet():
             # If key does not exist then just add the key
             else:
                 self[fk] = fs[fk]
+            # We would like to keep the two dictionaries as small as possible
+            fs.pop(fk)
         return
 
     def add_feature_description(self,name,program):

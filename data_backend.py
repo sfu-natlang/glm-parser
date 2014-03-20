@@ -79,6 +79,10 @@ class DataBackend():
     def has_key(self,index):
         return self.data_dict.has_key(index)
 
+    def pop(self,key):
+        self.data_dict.pop(key)
+        return
+
     def shelve_keys(self):
         """
         This operation is very slow because the database must lookup the disk
