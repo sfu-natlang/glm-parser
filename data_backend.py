@@ -64,7 +64,7 @@ class DataBackend():
 
         Parameter is the same as constructor (__init__).
         """
-        fp = open(filename,"r")
+        fp = open(filename,"rb")
         self.data_dict = pickle.load(fp)
         fp.close()
         return
@@ -113,8 +113,8 @@ class DataBackend():
         Called when memory dictionary is used. Dump the content of the dict
         into a disk file using Pickle
         """
-        fp = open(filename,"w")
-        pickle.dump(self.data_dict,fp)
+        fp = open(filename,"wb")
+        pickle.dump(self.data_dict,fp,-1)
         fp.close()
         return
 
