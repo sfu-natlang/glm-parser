@@ -94,6 +94,7 @@ class DataSet():
         if next_section == None or self._data_path == None:
             return False
         else:
+            print next_section
             for file in os.listdir(self._data_path + "%02d" % next_section):
                 self._left_file_list.append("%02d/" % next_section + file)
         return True
@@ -161,7 +162,7 @@ class DataSet():
         :rtype: list(DependencyTree)
         """
         f = open(file_path)
-        
+        #print file_path
         data_set = []
         word_list = ['__ROOT__']
         pos_list = ['ROOT']
