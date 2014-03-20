@@ -7,6 +7,11 @@ train_sec_end="6"
 acc_test_sec_list="2"
 test_data_path="/cs/natlang-projects/glm-parser/penn-wsj-deps/"
 
+# this bash accept 3 valuables
+# 1.  begin train section
+# 2.  end train section
+# 3.  iteration number (i -- indicate ith iteration)
+
 if [ "" != "$1" ]
 then
    train_sec_begin=$1 
@@ -19,6 +24,11 @@ fi
 
 output_file_name="sec_"$train_sec_begin"_"$train_sec_end
 
+if [ "" != "$3" ]
+then
+   output_file_name=$output_file_name"_iter_"$3
+fi
+echo $output_file_name
 cd /home/yulanh/glm-parser
 python setup.py build_ext --inplace
 
