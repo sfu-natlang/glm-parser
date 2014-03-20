@@ -5,8 +5,7 @@ import weight_learner, evaluator
 class GlmParser():
     def __init__(self, filename=None):
         self.fset = feature_set.FeatureSet(
-                    dependency_tree.DependencyTree(),
-                    'weight.db')
+                    dependency_tree.DependencyTree())
         if filename != None:
             self.fset.load(filename)
         return
@@ -30,7 +29,7 @@ class GlmParser():
             test_edge_set = \
                eisner.EisnerParser().parse(sent_len, self.fset.get_edge_score)
              
-            print "sent acc:", evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+            #print "sent acc:", evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
         return evlt.get_acc_unlabeled_accuracy()
                
               
