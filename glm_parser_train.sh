@@ -33,8 +33,8 @@ echo $output_file_name
 cd /home/yulanh/glm-parser
 python setup.py build_ext --inplace
 
-#train: python test_glm_parser.py -b 2 -e 2 -o sec_02 
-#accuracy test: python test_glm_parser.py -d weight_iter_1.db -o sec_02 -a 2
+#train: python glm_parser_train.py -b 2 -e 2 -o sec_02 
+#accuracy test: python glm_parser_train.py -d weight_iter_1.db -o sec_02 -a 2
 
-python test_glm_parser.py -b $train_sec_begin -e $train_sec_end -o $output_file_name -t $test_data_path
-#-a $acc_test_sec_listl
+python glm_parser_train.py -b $train_sec_begin -e $train_sec_end -o $output_file_name -t $test_data_path
+#-a $acc_test_sec_list
