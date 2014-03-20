@@ -26,6 +26,7 @@ options:
             default: "weight"
             the name would be prefix + iteration number
             i.e. "weight_iter_0.db"
+    -t:     test data path, default: "./penn-wsj-deps/" 
     
 """
 
@@ -39,8 +40,9 @@ if __name__ == "__main__":
     #trainsection = [(2,21)]
     #testsection = [0,1,22,24]
     output_file = "weight"
+    test_data_path = "./penn-wsj-deps/"
     try:
-        opt_spec = "hb:e:a:d:o:"
+        opt_spec = "hb:e:a:d:o:t:"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -57,6 +59,8 @@ if __name__ == "__main__":
                 db_name = value
             elif opt == "-o":
                 output_file = value
+            elif opt == "-t":
+                test_data_path = value
             else:
                 print "invalid input, see -h"
                 sys.exit(0)
@@ -68,9 +72,9 @@ if __name__ == "__main__":
         gp = glm_parser.GlmParser(db_name)
         if train:
             print output_file, trainsection
-            gp.train(trainsection, output_file=output_file)
+            gp.train(trainsection, test_data_path, output_file)
         if test:
-            print gp.unlabeled_accuracy(testsection)
+            print gp.unlabeled_accuracy(testsection, test_data_path)
     except getopt.GetoptError, e:
         print "invalid arguments!! \n" + HELP_MSG
         sys.exit(1)
