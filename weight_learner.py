@@ -14,8 +14,7 @@ class WeightLearner():
         """
         self.MAX_ITERATE = iter_num
         self.fset = feature_set.FeatureSet(
-                    dependency_tree.DependencyTree(),
-                    'weight.db')
+                    dependency_tree.DependencyTree())
         return    
     
     def learn_weight_sections(self, section_set=None, data_path=None, output_file='weight'):
@@ -34,8 +33,8 @@ class WeightLearner():
         for i in range(self.MAX_ITERATE):
             while dataset.has_next_data():
                 self.update_weight(dataset.get_next_data())  
-            self.fset.dump(output_file+'_iter_'+str(i)+'.db')
-            print "iteration", i, "done"
+            self.fset.dump(output_file+'.db')
+            print "train done"
             self.fset.close()
             dataset.reset()
         return self.fset
@@ -79,12 +78,12 @@ class WeightLearner():
         gold_edge_set = \
             set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
         #print "gold set:", gold_edge_set
-        t = timeit.default_timer()
+        #t = timeit.default_timer()
         
         current_edge_set = \
                ceisner.EisnerParser().parse(len(word_list), self.fset.get_edge_score)
-        t = (timeit.default_timer() - t)
-        print "eisner time:", t, "sec     sent_length:", str(len(word_list))
+        #t = (timeit.default_timer() - t)
+        #print "eisner time:", t, "sec     sent_length:", str(len(word_list))
         
         if current_edge_set == gold_edge_set:
             return
