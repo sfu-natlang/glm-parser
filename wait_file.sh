@@ -33,6 +33,7 @@ do
     opt=$value
 done
 
+echo $file_name
 if [ "$file_name" == "" ]
 then
     echo "please enter the file name, see --help for help"
