@@ -59,8 +59,8 @@ done
 output_file_name=$output_path"sec_"$train_sec_begin"_"$train_sec_end"_iter_"$iter
 
 
-#cd /home/yulanh/glm-parser
-#python setup.py build_ext --inplace
+cd /home/yulanh/glm-parser
+python setup.py build_ext --inplace
 
 #train: python glm_parser.py -b 2 -e 2 -o sec_02 
 #accuracy test: python glm_parser.py -d weight_iter_1.db -o sec_02 -a 2
