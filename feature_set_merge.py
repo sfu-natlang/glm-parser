@@ -10,7 +10,7 @@ if __name__ == "__main__":
     
     db_1 = sys.argv[1]
     db_2 = sys.argv[2]
-    output_file = sys.arg[3]
+    output_file = sys.argv[3]
 
     dt = DependencyTree()
     
