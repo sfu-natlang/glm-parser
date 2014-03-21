@@ -62,8 +62,8 @@ output_file_name=$output_path"sec_"$train_sec_begin"_"$train_sec_end"_iter_"$ite
 #cd /home/yulanh/glm-parser
 #python setup.py build_ext --inplace
 
-#train: python glm_parser_train.py -b 2 -e 2 -o sec_02 
-#accuracy test: python glm_parser_train.py -d weight_iter_1.db -o sec_02 -a 2
+#train: python glm_parser.py -b 2 -e 2 -o sec_02 
+#accuracy test: python glm_parser.py -d weight_iter_1.db -o sec_02 -a 2
 
 python glm_parser.py -b $train_sec_begin -e $train_sec_end -o $output_file_name -t $test_data_path
 #-a $acc_test_sec_list
