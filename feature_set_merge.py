@@ -12,7 +12,7 @@ if __name__ == "__main__":
     db_2 = sys.argv[2]
     output_file = sys.argv[3]
 
-    dt = DependencyTree()
+    dt = dependency_tree.DependencyTree()
     
     fset_1 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
     fset_2 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
