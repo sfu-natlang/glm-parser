@@ -41,7 +41,14 @@ do
 	opt=$value
 done
 
+echo <<debug
+python feature_set_merge.py -b $begin_sec -e $end_sec -i $iter -p $output_path -o $output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
+debug
 
+python feature_set_merge.py -b $begin_sec -e $end_sec -i $iter -p $output_path -o $output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
+
+
+<<SINGLE_JOB
 merge_output_pre=$output_path"merged_iter_"$iter"_sec_"
 #rm $merge_output_pre"*.done"
 
@@ -64,10 +71,11 @@ do
     merge_file_2=$merge_file_pre$i
     ./wait_file.sh -f $merge_file_2".done"
 
-    python feature_set_merge.py $merge_file_1".db" $merge_file_2".db" $merge_output_file".db"
+    python feature_set_merge.py -x $merge_file_1".db" -y $merge_file_2".db" -o $merge_output_file".db"
     echo "" > $merge_output_file".done"
     merge_file_1=$merge_output_file
 
     echo $merge_file_2" is merged!!" 
 done
 
+SINGLE_JOB
