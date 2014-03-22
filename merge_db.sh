@@ -41,9 +41,7 @@ do
 	opt=$value
 done
 
-echo <<debug
-python feature_set_merge.py -b $begin_sec -e $end_sec -i $iter -p $output_path -o $output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
-debug
+echo "python feature_set_merge.py -b "$begin_sec" -e "$end_sec" -i "$iter" -p "$output_path" -o "$output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
 
 python feature_set_merge.py -b $begin_sec -e $end_sec -i $iter -p $output_path -o $output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
 

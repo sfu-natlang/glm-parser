@@ -31,7 +31,7 @@ if __name__ == "__main__":
     iteration = '0'
     
     try:
-        opt_spec = "hb:e:i:x:y:o:"
+        opt_spec = "hb:e:i:x:y:o:p:"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -55,7 +55,8 @@ if __name__ == "__main__":
                 print "invalid input, see -h"
                 sys.exit(0)
     except getopt.GetoptError, e:
-        print "invalid arguments!! \n" + HELP_MSG
+        print e 
+        print HELP_MSG
         sys.exit(1)
 
     dt = dependency_tree.DependencyTree()
