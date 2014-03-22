@@ -1,5 +1,7 @@
 
 from data_backend import DataBackend
+import copy
+import sys
 
 class FreqDict():
 
@@ -31,6 +33,20 @@ class FreqDict():
         self.threshold = threshold
         # Create a new dict for storing words (we use DataBackend)
         self.db = DataBackend('memory_dict',filename)
+        # What filter() will return if a word has small frequency
+        self.default_return = None
+        # When created the instance is raw dict
+        self.db['__USE__'] = 'dict_raw'
+        # Bind the method
+        self.bind_method()
+        return
+
+    def register_default_return(self,default):
+        """
+        Set a default return value is a word is filtered out, i.e. the word
+        is not in the dict or list when calling filter()
+        """
+        self.default_return = default
         return
 
     def add_word(self,word):
@@ -40,7 +56,10 @@ class FreqDict():
         :param word: The word you want to add
         :type word: str
         """
-        self.db[word] += 1
+        if self.db.has_key(word):
+            self.db[word] += 1
+        else:
+            self.db[word] = 1
         return
 
     def add_tree(self,dep_tree):
@@ -72,9 +91,13 @@ class FreqDict():
         if threshold == None:
             raise ValueError("Must provide a threshold value")
 
-        for word in db.keys():
-            if db[word] > threshold:
-                db.pop(word)
+        for word in self.db.keys():
+            if self.db[word] > threshold:
+                self.db.pop(word)
+                
+        # We are eliminating those too large, so this is a dict_small
+        self.db['__USE__'] = 'dict_small'
+
         return
 
     def remove_small_freq(self,threshold=None):
@@ -89,12 +112,73 @@ class FreqDict():
         if threshold == None:
             raise ValueError("Must provide a threshold value")
 
-        for word in db.keys():
-            if db[word] <= threshold:
-                db.pop(word)
+        for word in self.db.keys():
+            if self.db[word] <= threshold:
+                self.db.pop(word)
+
+        self.db['__USE__'] = 'dict_large'
         return
 
-    def dump(self,filename=None,threshold=None,mode=FreqDict.REMOVE_LARGE):
+    def filter(self,word):
+        """
+        This is only a stub, and will be replaced by other call backs.
+
+        In general, this function returns the word if its frequency is large
+        and return a default return if the frequency is small
+        """
+        raise TypeError("You have not bound the proper method yet")
+        return
+
+    def filter_dict_large(self,word):
+        if self.db.has_key(word):
+            return word
+        else:
+            return self.default_return
+
+    def filter_dict_small(self,word):
+        if self.db.has_key(word):
+            return self.default_return
+        else:
+            return word
+
+    def filter_dict_raw(self,word):
+        sys.stderr.write("WARNING: Raw type used for filter()\n")
+        return word
+        
+    def bind_method(self):
+        """
+        Bind the correct functions to the method name.
+        """
+        use = self.db['__USE__']
+        if use == 'dict_small':
+            self.filter = self.filter_dict_small
+        elif use == 'dict_large':
+            self.filter = self.filter_dict_large
+        elif use == 'dict_raw':
+            self.filter = self.filter_dict_raw
+        else:
+            raise TypeError("Unknown type when binding: %s" % (use))
+        return
+
+    def load(self,filename=None):
+        """
+        Load a dumped file from the disk. It will construct a new dictionary in
+        the memory. If you would like to remove the frequency and only keeps
+        the words, please use convert()
+        """
+        if filename == None:
+            filename = self.filename
+        if filename == None:
+            raise ValueError("You must provide a file name")
+        
+        self.db.load(filename)
+        # Bind correct method according to the type we have just loaded
+        # i.e. self.db['__USE__']
+        self.bind_method()
+        
+        return
+
+    def dump(self,filename=None,threshold=None,mode=REMOVE_LARGE):
         """
         Dump the freq dict into the disk
 
@@ -117,9 +201,30 @@ class FreqDict():
             self.remove_large_freq(threshold)
         elif mode == FreqDict.REMOVE_SMALL:
             self.remove_small_freq(threshold)
-        elif mode == FreqDist.RAW:
+        elif mode == FreqDict.RAW:
             pass
         else:
             raise ValueError("Unknown mode: %d" % (mode))
         
         self.db.dump(filename)
+
+    def __getitem__(self,word):
+        """
+        Operator overloading for adding a word. Please notice that this is
+        __getitem__, and will change the frequency of the word. Logically
+        speaking this is not a good design, however I did this because it
+        looks more concise.
+        """
+        self.add_word(word)
+        return
+
+if __name__ == "__main__":
+    fd = FreqDict()
+    fd['wzq'];fd['wzq'];fd['wzq'];fd['wzq'];fd['wzq'];fd['wzq']
+    fd['www'];fd['www'];fd['www'];fd['www']
+    fd['123'];fd['123'];fd['123'];fd['123'];fd['123']
+    fd['456'];
+    fd.dump(filename="freqdict_test.db",threshold=5,mode=FreqDict.REMOVE_SMALL)
+    fd.load(filename="freqdict_test.db")
+    for i in fd.db.keys():
+        print i,fd.db[i]
