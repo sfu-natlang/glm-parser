@@ -31,6 +31,15 @@ class DataBackend():
     both persistent and non-persistent (or semi-persistent) operations.
     """
     def __init__(self,store_type='memory_dict',filename=None):
+        """
+        :param store_type: Specify the type of database you want to use
+        :type store_type: int
+        :param filename: The file name of the database file. If you are using
+        memory_dict then this could be given here or in dump(). However if
+        you are using shelve or other possible extensions, you must provide
+        a file name here in order to establish the connection to the database.
+        :type filename: str
+        """
         if filename == None:
             filename = "default_database.db"
         
@@ -112,20 +121,27 @@ class DataBackend():
         pass
         return
 
-    def dict_dump(self,filename):
+    def dict_dump(self,filename=None):
         """
         Called when memory dictionary is used. Dump the content of the dict
         into a disk file using Pickle
         """
+        if filename == None:
+            filename = self.filename
+        if filename == None:
+            raise ValueError("You must provide a file name")
         fp = open(filename,"wb")
         pickle.dump(self.data_dict,fp,-1)
         fp.close()
         return
 
-    def shelve_dump(self,filename):
+    def shelve_dump(self,filename=None):
         """
         Called when persistent daba object is used. This is equivelent of calling
         sync() to the data object
+
+        :param filename: Not used. This is already given in __init__()
+        :type filename: None
         """
         self.data_dict.sync()
         return
