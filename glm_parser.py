@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import data_set, feature_set, dependency_tree, eisner
+import data_set, feature_set, dependency_tree, ceisner
 import weight_learner, evaluator
 
 class GlmParser():
@@ -8,6 +8,10 @@ class GlmParser():
                     dependency_tree.DependencyTree())
         if filename != None:
             self.fset.load(filename)
+        return
+    
+    def set_feature_set(self, fset):
+        self.fset = fset
         return
     
     def train(self, section_set=[(2,21)], data_path=None, output_file="weight"):
@@ -27,9 +31,10 @@ class GlmParser():
             self.fset.switch_tree(dep_tree)
             sent_len = len(dep_tree.get_word_list())
             test_edge_set = \
-               eisner.EisnerParser().parse(sent_len, self.fset.get_edge_score)
+               ceisner.EisnerParser().parse(sent_len, self.fset.get_edge_score)
              
-            #print "sent acc:", evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+            print "sent acc:", evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+            print "acc acc:", evlt.get_acc_unlabeled_accuracy()
         return evlt.get_acc_unlabeled_accuracy()
                
               

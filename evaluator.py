@@ -48,11 +48,11 @@ class Evaluator():
             
         if accumulate == True:          
             self.unlabeled_correct_num += correct_num
-            correct_num = self.unlabeled_correct_num
+            #correct_num = self.unlabeled_correct_num
             
             self.unlabeled_gold_set_size += gold_set_size
-            gold_set_size = self.unlabeled_gold_set_size
-        
+            #gold_set_size = self.unlabeled_gold_set_size
+            print correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size 
         return correct_num / gold_set_size
         
     def get_acc_unlabeled_accuracy(self):

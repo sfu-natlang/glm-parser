@@ -2,7 +2,7 @@
 
 test_secs=0,1,22,24
 iter=0
-db_name=""
+db_name="weight"
 output_file="accuracy.out"
 
 HELP_MSG="
@@ -45,6 +45,15 @@ do
 done
 
 echo $test_secs $db_name $iter
+
+read name ftype <<< $(IFS="."; echo $db_name)
+echo "check "$name".done"
+
+if ! [ -e $name".done" ]
+then
+	echo $name".done not exists!!"
+	exit 0
+fi
 
 echo $db_name" accuracy on sections: "$test_secs >> $output_file
 python glm_parser.py -a $test_secs -d $db_name >> $output_file 
