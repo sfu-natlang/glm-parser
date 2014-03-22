@@ -78,7 +78,7 @@ if __name__ == "__main__":
     for i in range(begin_sec, end_sec):
         fset_2 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
         fset_2.load(db_path + db_name%(iteration, i))
-        print "fs2 " db_name % (iteration, i) + " load successfully"
+        print "fs2 " + db_name % (iteration, i) + " load successfully"
 
         fset_1.merge(fset_2)
         print "merge done"
