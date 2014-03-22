@@ -40,11 +40,11 @@ do
 
 	opt=$value
 done
+output_file_name="$output_path"merged_iter_"$iter"_sec_"$begin_sec"_"$end_sec
+echo "python feature_set_merge.py -b "$begin_sec" -e "$end_sec" -i "$iter" -p "$output_path" -o "$output_file_name"".db"
 
-echo "python feature_set_merge.py -b "$begin_sec" -e "$end_sec" -i "$iter" -p "$output_path" -o "$output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
-
-python feature_set_merge.py -b $begin_sec -e $end_sec -i $iter -p $output_path -o $output_path"merged_iter"$iter"_sec_"$begin_sec"_"$end_sec".db"
-
+python feature_set_merge.py -b $begin_sec -e $end_sec -i $iter -p $output_path -o $output_file_name".db"
+echo "" > $output_file_name".done"
 
 <<SINGLE_JOB
 merge_output_pre=$output_path"merged_iter_"$iter"_sec_"
