@@ -54,6 +54,13 @@ let "begin_sec_1=$begin_sec+1"
 for i in `seq $begin_sec_1 $end_sec`
 do
     merge_output_file=$merge_output_pre$i
+    
+    if [ -e "$merge_output_file.done" ]
+    then
+        echo $merge_output_file".done exist, pass merge"
+        continue
+    fi
+
     merge_file_2=$merge_file_pre$i
     ./wait_file.sh -f $merge_file_2".done"
 
