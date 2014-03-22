@@ -29,7 +29,7 @@ if __name__ == "__main__":
     begin_sec = 2
     end_sec = 2
     iteration = '0'
-
+    
     try:
         opt_spec = "hb:e:i:x:y:o:"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
@@ -54,23 +54,26 @@ if __name__ == "__main__":
             else:
                 print "invalid input, see -h"
                 sys.exit(0)
+    except getopt.GetoptError, e:
+        print "invalid arguments!! \n" + HELP_MSG
+        sys.exit(1)
 
     dt = dependency_tree.DependencyTree()
-    fset_1 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
-
     if db_1 != None and db_2 != None:
-        fset_2 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
-        fset_1.load(db_1)
+        fset_x = feature_set.FeatureSet(dt,operating_mode='memory_dict')
+        fset_y = feature_set.FeatureSet(dt,operating_mode='memory_dict')
+        fset_x.load(db_1)
         print "fs1 load successfully"
-        fset_2.load(db_2)
+        fset_y.load(db_2)
         print "fs2 load successfully"
-        fset_1.merge(fset_2)
+        fset_x.merge(fset_y)
         print "merge done"
-        fset_1.dump(output_file)
+        fset_x.dump(output_file)
         print "dump done"
 
         return
-
+    
+    fset_1 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
     fset_1.load(db_path + db_name%(iteration, end_sec))
     for i in range(begin_sec, end_sec):
         fset_2 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
