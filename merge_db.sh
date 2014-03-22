@@ -37,6 +37,8 @@ do
 	then
 	   iter=$value
 	fi
+
+	opt=$value
 done
 
 
