@@ -63,10 +63,17 @@ done
 
 if [ "" == "$output_file_name" ]
 then
-	output_file_name="sec_"$train_sec_begin"_"$train_sec_end"_iter_"$iter
+	output_file_name="iter_"$iter"_sec_"$train_sec_begin"_"$train_sec_end
 fi
 
 output_file_name=$output_path$output_file_name
+
+if [ -e "$output_file_name.done" ]
+then
+	echo "$output_file_name.done exists, pass training this section"
+	exit 0
+fi
+
 echo $output_file_name
 #cd /home/yulanh/glm-parser
 python setup.py build_ext --inplace
