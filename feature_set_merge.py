@@ -59,6 +59,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     dt = dependency_tree.DependencyTree()
+    
     if db_1 != None and db_2 != None:
         fset_x = feature_set.FeatureSet(dt,operating_mode='memory_dict')
         fset_y = feature_set.FeatureSet(dt,operating_mode='memory_dict')
@@ -71,22 +72,21 @@ if __name__ == "__main__":
         fset_x.dump(output_file)
         print "dump done"
 
-        return
-    
-    fset_1 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
-    fset_1.load(db_path + db_name%(iteration, end_sec))
-    for i in range(begin_sec, end_sec):
-        fset_2 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
-        fset_2.load(db_path + db_name%(iteration, i))
-        print "fs2 " + db_name % (iteration, i) + " load successfully"
+    else:
+        fset_1 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
+        fset_1.load(db_path + db_name%(iteration, end_sec))
+        for i in range(begin_sec, end_sec):
+            fset_2 = feature_set.FeatureSet(dt,operating_mode='memory_dict')
+            fset_2.load(db_path + db_name%(iteration, i))
+            print "fs2 " + db_name % (iteration, i) + " load successfully"
 
-        fset_1.merge(fset_2)
-        print "merge done"
+            fset_1.merge(fset_2)
+            print "merge done"
 
-        del fset_2
+            del fset_2
 
-    fset_1.dump(output_file)
-    print "dump done"
+        fset_1.dump(output_file)
+        print "dump done"
         
         
         
