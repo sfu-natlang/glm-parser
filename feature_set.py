@@ -447,6 +447,13 @@ class FeatureSet():
             fs.pop(fk)
         return
 
+    def get_feature_count(self):
+        """
+        Return the number of features. This is actually the number of keys in
+        the dictionary.
+        """
+        return len(self.keys())
+
     def add_feature_description(self,name,program):
         """
         Add a new program to generate new features
@@ -484,6 +491,7 @@ class FeatureSet():
         lp.print_tree(t)
         eva_stmts(t)
         return
+    
 
 ###############################################################################
 #                             The Devil Split Line                            #
@@ -782,14 +790,14 @@ if __name__ == "__main__":
     dt = DependencyTree()
     dt.word_list = ['I','am','the','King']
     dt.pos_list = ['NNP','V','DET','NP']
-    fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
-    fs.load('sec_14_14_iter_0.db')
-    print "fs load successfully"
-    fs2 = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
-    fs2.load('sec_15_15_iter_0.db')
-    print "fs2 load successfully"
-    fs2.merge(fs)
-    fs2.dump('test_merge.db')
+    #fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
+    #fs.load('sec_14_14_iter_0.db')
+    #print "fs load successfully"
+    #fs2 = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
+    #fs2.load('sec_15_15_iter_0.db')
+    #print "fs2 load successfully"
+    #fs2.merge(fs)
+    #fs2.dump('test_merge.db')
     s = IndexedStr("""
                     string result[5];
                     result[0] = word_list[head_index];
@@ -805,6 +813,9 @@ if __name__ == "__main__":
                         result[4] = "not_end";
                     };
                    """)
+    fs = FeatureSet(dt)
+    fs['123'] = 456
+    print fs.get_feature_count()
     #fs2.add_feature_description('my_feature',s)
     #print fs2.get_feature_by_name('my_feature',1,2)
     
