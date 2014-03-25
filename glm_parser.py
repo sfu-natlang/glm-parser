@@ -4,25 +4,29 @@ import weight_learner, evaluator
 
 class GlmParser():
     def __init__(self, filename=None):
+        self.evlt = evaluator.Evaluator()
         self.fset = feature_set.FeatureSet(
                     dependency_tree.DependencyTree())
         if filename != None:
             self.fset.load(filename)
         return
     
+    def get_evaluator(self):
+        return self.evlt
+
     def set_feature_set(self, fset):
         self.fset = fset
         return
     
-    def train(self, section_set=[(2,21)], data_path=None, output_file="weight"):
-        w_learner = weight_learner.WeightLearner()
-        self.fset = w_learner.learn_weight_sections(section_set, data_path, output_file)
+    def train(self, section_set=[(2,21)], data_path=None, output_file="weight", dump=True):
+        w_learner = weight_learner.WeightLearner(self.fset)
+        self.fset = w_learner.learn_weight_sections(section_set, data_path, output_file, dump)
         return
     
     def unlabeled_accuracy(self, section_set=[0,1,22,24], data_path=None):
         dataset = data_set.DataSet(section_set, data_path)
-        evlt = evaluator.Evaluator()
-        evlt.reset()
+        #evlt = evaluator.Evaluator()
+        self.evlt.reset()
         while dataset.has_next_data():
             dep_tree = dataset.get_next_data()
             gold_edge_set = \
@@ -33,9 +37,10 @@ class GlmParser():
             test_edge_set = \
                ceisner.EisnerParser().parse(sent_len, self.fset.get_edge_score)
              
-            print "sent acc:", evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
-            print "acc acc:", evlt.get_acc_unlabeled_accuracy()
-        return evlt.get_acc_unlabeled_accuracy()
+            #print "sent acc:", 
+            self.evlt.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+            #print "acc acc:", self.evlt.get_acc_unlabeled_accuracy()
+        return self.evlt.get_acc_unlabeled_accuracy()
                
               
 ################################################################################

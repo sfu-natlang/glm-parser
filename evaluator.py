@@ -10,7 +10,10 @@ class Evaluator():
         self.unlabeled_correct_num = 0
         self.unlabeled_gold_set_size = 0
         return
-    
+
+    def get_statistics(self):
+        return self.unlabeled_correct_num, self.unlabeled_gold_set_size
+
     def _sent_unlabeled_accuracy(self, result_edge_set, gold_edge_set):      
         if isinstance(result_edge_set, list):
             result_edge_set = set(result_edge_set)

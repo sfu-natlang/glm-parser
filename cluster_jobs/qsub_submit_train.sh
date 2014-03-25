@@ -61,18 +61,21 @@ done
 cd $cluster_output_path
 for i in `seq $begin_sec $end_sec`
 do
+    echo "./quick_train.sh $i $iter"
     output_file_name="train_iter_"$iter"_sec_"$i
     cat <<EOS | qsub -
 #PBS -W group_list=cs-natlang
 #PBS -l pmem=8gb
-#PBS -l walltime=01:00:00
-#PBS -N glm_parser_train_sec_$i
+#PBS -l walltime=72:00:00
+#PBS -N train_sec_$i
 #PBS -S /bin/csh
 
 cd $code_path
 #./glm_parser_train.sh -tb $i -te $i -tp $test_data_path -op $output_path -of $output_file_name 
 #echo "" > $output_path"train_iter_"$iter"_sec_"$i".done"
-./quick_train.sh $i
+#./quick_train.sh $i $iter
+./qsub_train_1.sh
+
 EOS
 done
 

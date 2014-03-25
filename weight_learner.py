@@ -8,16 +8,19 @@ class WeightLearner():
     Learns the weight of the features using maximum perceptron algorithm
     """
     
-    def __init__(self, iter_num=1):
+    def __init__(self, fset=None, iter_num=1):
         """
         Initialize the WeightLearner
         """
         self.MAX_ITERATE = iter_num
-        self.fset = feature_set.FeatureSet(
-                    dependency_tree.DependencyTree())
+        if fset == None:
+            self.fset = feature_set.FeatureSet(
+                        dependency_tree.DependencyTree())
+        else:
+            self.fset = fset
         return    
     
-    def learn_weight_sections(self, section_set=None, data_path=None, output_file='weight'):
+    def learn_weight_sections(self, section_set=None, data_path=None, output_file='weight', dump=True):
         """
         Given the path and specified sections, 
         for each dep_tree in the source
@@ -33,7 +36,9 @@ class WeightLearner():
         for i in range(self.MAX_ITERATE):
             while dataset.has_next_data():
                 self.update_weight(dataset.get_next_data())  
-            self.fset.dump(output_file+'.db')
+            if dump == True:
+                print "start dump"
+                self.fset.dump(output_file+'.db')
             print "train done"
             self.fset.close()
             dataset.reset()
