@@ -56,7 +56,6 @@ if __name__ == "__main__":
             acc = gp.unlabeled_accuracy(section_set=[s],data_path=test_data_path)
             stats = gp.get_evaluator().get_statistics()
             write_file("    Section %d -- Accuracy: %lf"%(s,acc) + "  ( %d / %d ) \n"%stats )
-    
 
     #print output_file + " done "
 
