@@ -372,6 +372,8 @@ class FeatureSet():
             if self.db.has_key(i):
                 self.db[i] = self.db[i] + fv_delta[i]
             else:
+                # If it does not exist, then it is considered to be 0
+                # So 0 + fv_delta[i] is merely fv_delta[i]
                 self.db[i] = fv_delta[i]
         return
 
@@ -436,7 +438,7 @@ class FeatureSet():
         result of an addition, call the operator overloading __add__
 
         Please notice that after merge, the second FeatureSet instance will
-        e cleared. This is done based on a memory issue.
+        be cleared. This is done to prevent memory error.
 
         :param fs: The feature set instance you want to merge from
         :type fs: FeatureSet instance
