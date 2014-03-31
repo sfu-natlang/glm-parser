@@ -347,9 +347,15 @@ class FeatureSet():
             if self.db.has_key(i):
                 score += self.db[i]
             else:
+                pass
                 # If not then we do not add (since it is 0)
                 # But we will add the entry into the database
-                self.db[i] = 0
+                #self.db[i] = 0
+                #####################
+                # This will cause us lots of trouble, including making
+                # the size of the database bloat to an unacceptable size
+                # and introduce a large error in the estimation of the
+                # feature number.
                 
         return score
 
@@ -449,10 +455,19 @@ class FeatureSet():
 
     def get_feature_count(self):
         """
-        Return the number of features. This is actually the number of keys in
-        the dictionary.
+        Return the number of features. Please notice that this is not the number
+        of keys in the dictionary, since we may create many unused 0 count
+        features in the feature set, so we need to count the feature with
+        non-zero count.
+
+        :return: The number of features whose count is not 0
+        :rtype: int
         """
-        return len(self.keys())
+        count = 0
+        for i in self.keys():
+            if self.db[i] != 0:
+                count += 1
+        return count
 
     def add_feature_description(self,name,program):
         """
