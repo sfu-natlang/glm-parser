@@ -63,6 +63,17 @@ class FeatureSet():
         # it up-to-date.
         self.word_list = dep_tree.get_word_list_ref()
         self.pos_list = dep_tree.get_pos_list_ref()
+        self.five_gram_word_list = []
+        # Compute a five_gram for all words. Pleace notice that for
+        # those words less than 5 characters, we just push a None into
+        # the list, therefore we could judge the length of the word against
+        # 5 by reading the corresponding position in five_gram_word_list
+        # instead of calculating it each time.
+        for word in self.word_list:
+            if len(word) > 5:
+                self.five_gram_word_list.append(word[0:5])
+            else:
+                self.five_gram_word_list.append(None)
         return
 
     def dump(self,filename=None):
@@ -251,9 +262,17 @@ class FeatureSet():
 
         +------------------------------------+
         | xi_pos, xi+1_pos, xj-1_pos, xj_pos | type = 0
+        | xi_pos, xi+1_pos,         , xj_pos | type = 10
+        | xi_pos,           xj-1_pos, xj_pos | type = 20
         | xi-1_pos, xi_pos, xj-1_pos, xj_pos | type = 1
+        |           xi_pos, xj-1_pos, xj_pos | type = 11
+        | xi-1_pos, xi_pos,           xj_pos | type = 21
         | xi_pos, xi+1_pos, xj_pos, xj+1_pos | type = 2
+        | xi_pos,           xj_pos, xj+1_pos | type = 12
+        | xi_pos, xi+1_pos, xj_pos           | type = 22
         | xi-1_pos, xi_pos, xj_pos, xj+1_pos | type = 3
+        |           xi_pos, xj_pos, xj+1_pos | type = 13
+        | xi-1_pos, xi_pos, xj_pos           | type = 23
         +------------------------------------+
         If xi or xj is at the boundary (the first word or the last word) then
         there will be out of bound error. In this case we just put a None
@@ -294,17 +313,81 @@ class FeatureSet():
             xjminus_pos = self.pos_list[dep_index - 1]
 
         type0_str = str((3,0,xi_pos,xiplus_pos,xjminus_pos,xj_pos))
+        type10_str = str((3,10,xi_pos,xjminus_pos,xj_pos))
+        type20_str = str((3,20,xi_pos,xiplus_pos,xj_pos))
+        
         type1_str = str((3,1,ximinus_pos,xi_pos,xjminus_pos,xj_pos))
+        type11_str = str((3,11,xi_pos,xjminus_pos,xj_pos))
+        type21_str = str((3,21,ximinus_pos,xi_pos,xj_pos))
+        
         type2_str = str((3,2,xi_pos,xiplus_pos,xj_pos,xjplus_pos))
+        type12_str = str((3,12,xi_pos,xj_pos,xjplus_pos))
+        type22_str = str((3,22,xi_pos,xiplus_pos,xj_pos))
+        
         type3_str = str((3,3,ximinus_pos,xi_pos,xj_pos,xjplus_pos))
+        type13_str = str((3,13,xi_pos,xj_pos,xjplus_pos))
+        type23_str = str((3,23,ximinus_pos,xi_pos,xj_pos))
 
         fv[type0_str] = 1
+        fv[type10_str] = 1
+        fv[type20_str] = 1
+        
         fv[type1_str] = 1
+        fv[type11_str] = 1
+        fv[type21_str] = 1
+        
         fv[type2_str] = 1
+        fv[type12_str] = 1
+        fv[type22_str] = 1
+        
         fv[type3_str] = 1
+        fv[type13_str] = 1
+        fv[type23_str] = 1
 
         return
+
+    def add_dir_and_dist(self,fv,head_index,dep_index):
+        """
+        Add additional distance and direction information in a given feature
+        vector. All existing features will be iterated through, and new
+        features will be constructed based on these existing features as well
+        as the edge information. All distance are calculated into the bucket
+        of 1 2 3 4 5 and 10, i.e. if some dist is more than 5 but less than 10
+        then it will be counted as 5. If some dist is more than 10 then it is
+        counted as 10.
+
+        The costructed features are also tuples, the first element being the
+        original tuple, the second and the third being the dir and dist:
+
+            ([original_feature],dir,dist)
+
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :param dep_index: The index of the dependency node
+        :type dep_node: integer
+        """
+        if head_index < dep_index:
+            #start_index = head_index
+            #end_index = dep_index
+            dist = dep_index - head_index + 1
+            direction = 'R'
+        else:
+            #start_index = dep_index
+            #end_index = head_index
+            dist = head_index - dep_index + 1
+            direction = 'L'
+
+        if dist > 5:
+            if dist < 10:
+                dist = 5
+            else:
+                dist = 10
         
+        for feature in fv.keys():
+            new_feature_str = str((feature,direction,dist))
+            fv[new_feature_str] = 1
+            
+        return
 
     def get_local_vector(self,head_index,dep_index):
         """
@@ -326,6 +409,10 @@ class FeatureSet():
         self.get_surrounding_feature(local_fv,head_index,dep_index)
         # For future improvements please put all other features here
         # ...
+
+        # Add dir and dist information for all features. This can be done
+        # uniformly since the edge is the same.
+        self.add_dir_and_dist(local_fv,head_index,dep_index)
         
         return local_fv
 
@@ -354,7 +441,7 @@ class FeatureSet():
                 #####################
                 # This will cause us lots of trouble, including making
                 # the size of the database bloat to an unacceptable size
-                # and introduce a large error in the estimation of the
+                # and introducing a large error in the estimation of the
                 # feature number.
                 
         return score
