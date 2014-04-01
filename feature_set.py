@@ -542,7 +542,7 @@ class FeatureSet():
             fs.pop(fk)
         return
 
-    def get_feature_count(self):
+    def get_feature_count(self,count_zero=False):
         """
         Return the number of features. Please notice that this is not the number
         of keys in the dictionary, since we may create many unused 0 count
@@ -552,7 +552,11 @@ class FeatureSet():
         :return: The number of features whose count is not 0
         :rtype: int
         """
+        if count_zero = True:
+            return len(self.keys())
+
         count = 0
+        
         for i in self.keys():
             if self.db[i] != 0:
                 count += 1
