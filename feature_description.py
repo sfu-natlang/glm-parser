@@ -404,7 +404,6 @@ simple_cfg = """
     type -> string
 """
 
-
 s = IndexedStr("""
 void main(int argc,int argv)
 {
@@ -472,10 +471,41 @@ class FeatureDescription():
         return local_var['result'][1]
 
 
+logic_cfg = """
+    exp -> darrow_exp
+    exp -> ( darrow_exp )
+
+    value -> ( darrow_exp )
+    
+    darrow_exp -> arrow_exp
+    darrow_exp -> arrow_exp <=> darrow_exp
+    
+    arrow_exp -> or_exp
+    arrow_exp -> or_exp => arrow_exp
+    
+    or_exp -> and_exp
+    or_exp -> and_exp | or_exp
+    
+    and_exp -> not_exp
+    and_exp -> not_exp ^ and_exp
+    
+    not_exp -> value
+    not_exp -> ~ value
+    
+    value -> @c_ident
+    
+"""
+
+
+test2 = IndexedStr("""
+    a | (b => c) ^ d
+    
+""")
+
 if __name__ == '__main__':
     lp = LLParser()
-    lp.parse_cfg(simple_cfg)
-    t = lp.symbol_table['stmts'].parse(test)
+    lp.parse_cfg(logic_cfg)
+    t = lp.symbol_table['exp'].parse(test2)
     lp.print_tree(t)
-    eva_stmts(t)
+    print lp.symbol_table.keys()
     

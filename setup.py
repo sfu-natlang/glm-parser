@@ -12,3 +12,5 @@ setup(
     name = 'ceisner',
     ext_modules = cythonize("*.pyx"),
 )
+
+#setup(name='feature_set',ext_moduls=cythonize("*.pyx"))

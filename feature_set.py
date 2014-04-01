@@ -195,13 +195,13 @@ class FeatureSet():
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
         # Prepare keys
-        type0_str = str((0,0,xi_word,xi_pos,xj_word,xj_pos))
-        type1_str = str((0,1,xi_pos,xj_word,xj_pos))
-        type2_str = str((0,2,xi_word,xj_word,xj_pos))
-        type3_str = str((0,3,xi_word,xi_pos,xj_pos))
-        type4_str = str((0,4,xi_word,xi_pos,xj_word))
-        type5_str = str((0,5,xi_word,xj_word))
-        type6_str = str((0,6,xi_pos,xj_pos))
+        type0_str = str((1,0,xi_word,xi_pos,xj_word,xj_pos))
+        type1_str = str((1,1,xi_pos,xj_word,xj_pos))
+        type2_str = str((1,2,xi_word,xj_word,xj_pos))
+        type3_str = str((1,3,xi_word,xi_pos,xj_pos))
+        type4_str = str((1,4,xi_word,xi_pos,xj_word))
+        type5_str = str((1,5,xi_word,xj_word))
+        type6_str = str((1,6,xi_pos,xj_pos))
         # Set all unigram features to 1
         fv[type0_str] = 1
         fv[type1_str] = 1
