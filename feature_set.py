@@ -552,7 +552,7 @@ class FeatureSet():
         :return: The number of features whose count is not 0
         :rtype: int
         """
-        if count_zero = True:
+	if count_zero == True:
             return len(self.keys())
 
         count = 0
