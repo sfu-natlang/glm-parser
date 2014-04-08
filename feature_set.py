@@ -44,6 +44,31 @@ class FeatureSet():
         self.switch_tree(dep_tree)
         return
 
+    def compute_five_gram(self):
+        """
+        Computes a five gram feature based on the current word_list. The five
+        gram is a list having the same length as the word_list, and it will be
+        used to construct five gram features.
+
+        Each list entry at position i correponds to the word at the same position
+        in word_list, or None if the length of that word is already less than 5.
+        This makes it easier to judge whether the length of a word is more than
+        five, making it unnecessary to compute the length each time.
+        """
+        # Flush the old one
+        self.five_gram_word_list = []
+        # Compute a five_gram for all words. Pleace notice that for
+        # those words less than 5 characters, we just push a None into
+        # the list, therefore we could judge the length of the word against
+        # 5 by reading the corresponding position in five_gram_word_list
+        # instead of calculating it each time.
+        for word in self.word_list:
+            if len(word) > 5:
+                self.five_gram_word_list.append(word[0:5])
+            else:
+                self.five_gram_word_list.append(None)
+        
+
     def switch_tree(self,dep_tree):
         """
         After finishing traning on one tree, switch to another new dependency
@@ -63,17 +88,9 @@ class FeatureSet():
         # it up-to-date.
         self.word_list = dep_tree.get_word_list_ref()
         self.pos_list = dep_tree.get_pos_list_ref()
-        self.five_gram_word_list = []
-        # Compute a five_gram for all words. Pleace notice that for
-        # those words less than 5 characters, we just push a None into
-        # the list, therefore we could judge the length of the word against
-        # 5 by reading the corresponding position in five_gram_word_list
-        # instead of calculating it each time.
-        for word in self.word_list:
-            if len(word) > 5:
-                self.five_gram_word_list.append(word[0:5])
-            else:
-                self.five_gram_word_list.append(None)
+        # Add five gram word list
+        self.compute_five_gram()
+        
         return
 
     def dump(self,filename=None):
@@ -115,7 +132,7 @@ class FeatureSet():
         self.db.load(filename)
         return
     
-    def get_unigram_feature(self,fv,head_index,dep_index):
+    def get_unigram_feature(self,fv,head_index,dep_index,five_gram=True):
         """
         Add all unigram features into a given feature vector instance.
         There should be no conflict about feature strings, i.e. no feature
@@ -146,6 +163,7 @@ class FeatureSet():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
+        
         # Prepare keys
         type0_str = str((0,0,xi_word,xi_pos))
         type1_str = str((0,1,xi_word))
@@ -160,9 +178,27 @@ class FeatureSet():
         fv[type3_str] = 1
         fv[type4_str] = 1
         fv[type5_str] = 1
+
+        # Add five gram features. Detect xi and xj separately
+        if five_gram == True:
+            xi_word_5 = self.five_gram_word_list[head_index]
+            xj_word_5 = self.five_gram_word_list[dep_index]
+            
+            if xi_word_5 != None:
+                type0_str_5 = str((0,0,xi_word_5,xi_pos))
+                type1_str_5 = str((0,1,xi_word_5))
+                fv[type0_str_5] = 1
+                fv[type1_str_5] = 1
+
+            if xj_word_5 != None:
+                type3_str_5 = str((0,3,xj_word,xj_pos))
+                type4_str_5 = str((0,4,xj_word))
+                fv[type3_str_5] = 1
+                fv[type4_str_5] = 1
+        
         return
     
-    def get_bigram_feature(self,fv,head_index,dep_index):
+    def get_bigram_feature(self,fv,head_index,dep_index,five_gram=True):
         """
         Add all bigram features into a given feature vector instance.
         There should be no conflict about feature strings, i.e. no feature
@@ -210,6 +246,54 @@ class FeatureSet():
         fv[type4_str] = 1
         fv[type5_str] = 1
         fv[type6_str] = 1
+
+        if five_gram == True:
+            xi_word_5 = self.five_gram_word_list[head_index]
+            xj_word_5 = self.five_gram_word_list[dep_index]
+
+            # We guarantee that there are no five gram features will already
+            # exist in the fv, so we only pick up those truly changes
+            # (i.e. the five gram exists, and the feature itself contains
+            # that word)
+            
+            if xi_word_5 != None and xj_word_5 != None:
+                type0_str_5 = str((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
+                type1_str_5 = str((1,1,xi_pos,xj_word_5,xj_pos))
+                type2_str_5 = str((1,2,xi_word_5,xj_word_5,xj_pos))
+                type3_str_5 = str((1,3,xi_word_5,xi_pos,xj_pos))
+                type4_str_5 = str((1,4,xi_word_5,xi_pos,xj_word_5))
+                type5_str_5 = str((1,5,xi_word_5,xj_word_5))
+                fv[type0_str_5] = 1
+                fv[type1_str_5] = 1
+                fv[type2_str_5] = 1
+                fv[type3_str_5] = 1
+                fv[type4_str_5] = 1
+                fv[type5_str_5] = 1
+
+            if xi_word_5 != None:
+                type0_str_5 = str((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
+                type2_str_5 = str((1,2,xi_word_5,xj_word_5,xj_pos))
+                type3_str_5 = str((1,3,xi_word_5,xi_pos,xj_pos))
+                type4_str_5 = str((1,4,xi_word_5,xi_pos,xj_word_5))
+                type5_str_5 = str((1,5,xi_word_5,xj_word_5))
+                fv[type0_str_5] = 1
+                fv[type2_str_5] = 1
+                fv[type3_str_5] = 1
+                fv[type4_str_5] = 1
+                fv[type5_str_5] = 1
+
+            if xj_word_5 != None:
+                type0_str_5 = str((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
+                type1_str_5 = str((1,1,xi_pos,xj_word_5,xj_pos))
+                type2_str_5 = str((1,2,xi_word_5,xj_word_5,xj_pos))
+                type4_str_5 = str((1,4,xi_word_5,xi_pos,xj_word_5))
+                type5_str_5 = str((1,5,xi_word_5,xj_word_5))
+                fv[type0_str_5] = 1
+                fv[type1_str_5] = 1
+                fv[type2_str_5] = 1
+                fv[type4_str_5] = 1
+                fv[type5_str_5] = 1
+        
         return
 
     def get_in_between_feature(self,fv,head_index,dep_index):
@@ -561,7 +645,7 @@ class FeatureSet():
         :return: The number of features whose count is not 0
         :rtype: int
         """
-	if count_zero == True:
+        if count_zero == True:
             return len(self.keys())
 
         count = 0
@@ -905,8 +989,8 @@ class OldFeatureSet():
 
 if __name__ == "__main__":
     dt = DependencyTree()
-    dt.word_list = ['I','am','the','King']
-    dt.pos_list = ['NNP','V','DET','NP']
+    dt.word_list = "John smashed the ball with the bat".split()
+    dt.pos_list = "N V D N P D N".split()
     #fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
     #fs.load('sec_14_14_iter_0.db')
     #print "fs load successfully"
@@ -931,8 +1015,8 @@ if __name__ == "__main__":
                     };
                    """)
     fs = FeatureSet(dt)
-    fs['123'] = 456
-    print fs.get_feature_count()
+    print len(fs.get_local_vector(1,4).keys())
+    fs.print_local_vector(1,4)
     #fs2.add_feature_description('my_feature',s)
     #print fs2.get_feature_by_name('my_feature',1,2)
     
