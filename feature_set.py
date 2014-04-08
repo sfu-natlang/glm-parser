@@ -416,6 +416,15 @@ class FeatureSet():
         
         return local_fv
 
+    def print_local_vector(self,head_index,dep_index):
+        """
+        Print out all feature keys in an (actually not) elegant form
+        """
+        fv = self.get_local_vector(head_index,dep_index)
+        for i in fv.keys():
+            print i
+        return
+
     def get_edge_score(self,head_index,dep_index):
         """
         Given an edge, return its score. The score of an edge is the aggregation
