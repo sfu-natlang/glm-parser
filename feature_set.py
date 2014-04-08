@@ -416,6 +416,15 @@ class FeatureSet():
         
         return local_fv
 
+    def print_local_vector(self,head_index,dep_index):
+        """
+        Print out all feature keys in an (actually not) elegant form
+        """
+        fv = self.get_local_vector(head_index,dep_index)
+        for i in fv.keys():
+            print i
+        return
+
     def get_edge_score(self,head_index,dep_index):
         """
         Given an edge, return its score. The score of an edge is the aggregation
@@ -552,7 +561,7 @@ class FeatureSet():
         :return: The number of features whose count is not 0
         :rtype: int
         """
-        if count_zero = True:
+        if count_zero == True:
             return len(self.keys())
 
         count = 0
@@ -895,10 +904,15 @@ class OldFeatureSet():
 #############################################################################
 
 if __name__ == "__main__":
+    
     dt = DependencyTree()
-    dt.word_list = ['I','am','the','King']
-    dt.pos_list = ['NNP','V','DET','NP']
-    #fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
+    dt.word_list = ['__ROOT__','John','hit','the','ball','with','the','bat']
+    dt.pos_list = ['ROOT','N','V','D','N','P','D','N']
+
+    
+    
+    fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
+    fs.print_local_vector(2,5)
     #fs.load('sec_14_14_iter_0.db')
     #print "fs load successfully"
     #fs2 = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
@@ -906,24 +920,24 @@ if __name__ == "__main__":
     #print "fs2 load successfully"
     #fs2.merge(fs)
     #fs2.dump('test_merge.db')
-    s = IndexedStr("""
-                    string result[5];
-                    result[0] = word_list[head_index];
-                    result[1] = pos_list[head_index];
-                    result[2] = word_list[dep_index];
-                    result[3] = pos_list[dep_index];
-                    if(dep_index == (length - 1))
-                    {
-                        result[4] = "end_node";
-                    }
-                    else
-                    {
-                        result[4] = "not_end";
-                    };
-                   """)
-    fs = FeatureSet(dt)
-    fs['123'] = 456
-    print fs.get_feature_count()
+    #s = IndexedStr("""
+    #                string result[5];
+    #                result[0] = word_list[head_index];
+    #                result[1] = pos_list[head_index];
+    #                result[2] = word_list[dep_index];
+    #                result[3] = pos_list[dep_index];
+    #                if(dep_index == (length - 1))
+    #                {
+    #                    result[4] = "end_node";
+    #                }
+    #                else
+    #                {
+    #                    result[4] = "not_end";
+    #                };
+    #               """)
+    #fs = FeatureSet(dt)
+    #fs['123'] = 456
+    #print fs.get_feature_count()
     #fs2.add_feature_description('my_feature',s)
     #print fs2.get_feature_by_name('my_feature',1,2)
     
