@@ -1,8 +1,11 @@
 import sys
 sys.path.append("../src/")
 
-import data_set, feature_set, dependency_tree
-import weight_learner, evaluator, glm_parser
+from backend import data_set, dependency_tree
+from feature import feature_set
+from learn import weight_learner
+from evaluate import evaluator
+import glm_parser
 
 def write_file(msg):
     f = open(output_file, "a+")
@@ -25,8 +28,8 @@ if __name__ == "__main__":
     max_iteration = 200
     #pre_iteration = iteration-1
 
-    test_data_path = "/cs/natlang-projects/glm-parser/penn-wsj-deps/"
-    #"../penn-wsj-deps/"
+    test_data_path = "../penn-wsj-deps/"
+    #"/cs/natlang-projects/glm-parser/penn-wsj-deps/"
     #db_path = "/cs/natlang-projects/glm-parser/results/"
     #db_name = "train_iter_%d_sec_%d"
 
