@@ -1,0 +1,14 @@
+Loading default RCG module...
+No other modules to load.
+
+Machine Details:
+
+Hostname          : r1s26c12
+DNS Zone          : fas.sfu.ca
+Operating System  : Linux
+OS Version        : CentOS release 6.5 (Final)
+Hardware Platform : x86_64
+Processor Count   : 12
+Processor Info    : Intel(R) Xeon(R) CPU           E7450  @ 2.40GHz
+System Memory     : 
+=>> PBS: job killed: walltime 518417 exceeded limit 518400
