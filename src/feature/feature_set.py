@@ -1,4 +1,4 @@
-from backend.dependency_tree import *
+from data.dependency_tree import *
 from backend.data_backend import *
 from feature.feature_vector import *
 from feature.feature_description import simple_cfg, FeatureDescription
