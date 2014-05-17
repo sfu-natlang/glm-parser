@@ -26,7 +26,24 @@ class Evaluator():
         gold_set_size = len(gold_edge_set)
         
         return correct_num, gold_set_size
-    
+
+    def evaluate(self, data_pool, parser, fset):        
+        while data_pool.has_next_data():  
+            dep_tree = data_pool.get_next_data()
+            
+            gold_edge_set = \
+                set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
+            
+            fset.switch_tree(dep_tree)
+            sent_len = len(dep_tree.get_word_list())
+            test_edge_set = \
+               parser.parse(sent_len, fset.get_edge_score)
+             
+            #print "sent acc:", 
+            self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+            #print "acc acc:", self.evlt.get_acc_unlabeled_accuracy()
+        print "Unlabeled accuracy:", self.get_acc_unlabeled_accuracy()
+
     
     def unlabeled_accuracy(self, result_edge_set, gold_edge_set, accumulate=False):
         """
