@@ -93,14 +93,14 @@ The feature used in the project is as follows: \\
 
 Unigram Features: \\
 
-\begin{tabular}{|l|}
+\begin{tabular}{|l l|}
 	\hline
-		$xi-word, xi-pos$ \\
-		$xi-word$ \\
-		$xi-pos$ \\
-		$xj-word, xj-pos$ \\
-		$xj-word$ \\
-		$xj-pos$ \\
+		xi-word& xi-pos \\
+		xi-word& \\
+		xi-pos & \\
+		xj-word& xj-pos \\
+		xj-word& \\
+		xj-pos& \\
 	\hline
 \end{tabular} \\
 
@@ -109,15 +109,15 @@ Unigram Features: \\
 
 Bigram Features: \\
 
-\begin{tabular}{|l| }
+\begin{tabular}{|l l l l| }
 	\hline
-		$xi-word, xi-pos, xj-word, xj-pos$ \\
-		$xi-pos, xj-word, xj-pos$ \\
-		$xi-word, xj-word, xj-pos$ \\
-		$xi-word, xi-pos, xj-pos$ \\
-		$xi-word, xi-pos, xj-word$ \\
-		$xi-word, xj-word$ \\
-		$xi-pos, xj-pos$ \\
+		xi-word& xi-pos& xj-word& xj-pos \\
+		xi-pos& xj-word& xj-pos & \\
+		xi-word& xj-word& xj-pos & \\
+		xi-word& xi-pos& xj-pos &\\
+		xi-word& xi-pos& xj-word& \\
+		xi-word& xj-word & &\\
+		xi-pos& xj-pos  & &\\
 	\hline
 \end{tabular} \\
 
@@ -125,9 +125,9 @@ Bigram Features: \\
 
 In-between Features: \\
 
-\begin{tabular}{|l|}
+\begin{tabular}{|l l l|}
 	\hline
-		$xi-pos, xb-pos, xj-pos$ \\
+		xi-pos& xb-pos& xj-pos \\
 	\hline
 \end{tabular} \\
 
@@ -135,19 +135,19 @@ In-between Features: \\
 
 Surrounding Features: \\
 
-\begin{tabular}{|l| p{10cm} |}
+\begin{tabular}{|l l l l |}
 	\hline
-		$xi\_pos, xi+1\_pos, xj-1\_pos, xj\_pos$ \\
-		$xi\_pos, xi+1\_pos,          xj\_pos$ \\
-		$xi\_pos,          xj-1\_pos, xj\_pos$ \\
-		$xi-1\_pos, xi\_pos, xj-1\_pos, xj\_pos$ \\
-		$         xi\_pos, xj-1\_pos, xj\_pos$ \\
-		$xi-1\_pos, xi\_pos,          xj\_pos$ \\
-		$xi\_pos,          xj\_pos, xj+1\_pos$ \\
-		$xi\_pos, xi+1\_pos, xj\_pos         $ \\
-		$xi-1\_pos, xi\_pos, xj\_pos, xj+1\_pos$ \\
-		$         xi\_pos, xj\_pos, xj+1\_pos$ \\
-		$xi-1\_pos, xi\_pos, xj\_pos         $ \\
+		xi\_pos& xi+1\_pos & xj-1\_pos & xj\_pos \\
+		xi\_pos& xi+1\_pos &           & xj\_pos \\
+		xi\_pos&           & xj-1\_pos & xj\_pos \\
+		xi-1\_pos& xi\_pos & xj-1\_pos & xj\_pos \\
+		         & xi\_pos & xj-1\_pos & xj\_pos \\
+		xi-1\_pos& xi\_pos &           & xj\_pos \\
+		xi\_pos&           & xj\_pos & xj+1\_pos \\
+		xi\_pos& xi+1\_pos & xj\_pos &           \\
+		xi-1\_pos& xi\_pos & xj\_pos & xj+1\_pos \\
+		         & xi\_pos & xj\_pos & xj+1\_pos \\
+		xi-1\_pos& xi\_pos & xj\_pos &           \\
 	\hline
 \end{tabular} \\
             
@@ -164,5 +164,24 @@ Perceptron, ...
 \subparagraph{evaluate}
 Dependency Accuracy, ...
 
+
+\section{How to run the code}
+The main entry point:
+   glm\_parser.py
+
+You can run the project using the command in src folder:
+      $$python glm\_parser.py \\
+      	-b [train\_begin_section] 
+      	-e [train\_end\_section] 
+      	-t [test\_sections] 
+      	-p [data\_path]$$
+
+The GlmParser contains:\\
+      - two data\_pool (train and test) \\
+      - a parser (eisner) \\
+      - a learner (perceptron) \\
+      - a evaluator \\
+      
+You can change the parser and leaner to use different parsing and learning algorithm
 
 \end{document}
