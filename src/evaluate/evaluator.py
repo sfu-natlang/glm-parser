@@ -27,7 +27,8 @@ class Evaluator():
         
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, fset):        
+    def evaluate(self, data_pool, parser, fset):
+        print "Start evaluating ..."
         while data_pool.has_next_data():  
             dep_tree = data_pool.get_next_data()
             

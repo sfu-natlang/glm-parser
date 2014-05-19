@@ -499,6 +499,23 @@ class FeatureSet():
         
         return local_fv
 
+    def get_global_vector(self, edge_set):
+        """
+        Calculate the global vector with the current weight, the order of the feature
+        score is the same order as the feature set
+
+        :param edge_set: the set of edges represented as tuples
+        :type: list(tuple(integer, integer))
+        
+        :return: The global vector of the sentence with the current weight
+        :rtype: list
+        """
+        global_vector = FeatureVector()
+        for head_index,dep_index in edge_set:
+            local_vector = self.get_local_vector(head_index,dep_index)
+            global_vector.aggregate(local_vector)
+        return global_vector
+    
     def print_local_vector(self,head_index,dep_index):
         """
         Print out all feature keys in an (actually not) elegant form

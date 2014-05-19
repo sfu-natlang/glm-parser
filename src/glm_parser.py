@@ -4,10 +4,17 @@ from parse import ceisner
 from learn import perceptron
 from evaluate import evaluator
 
+from data import dependency_tree
+from feature import feature_set, feature_vector
+
 class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/", max_iter=1):
 
         self.max_iter = max_iter
+
+        # fset -- feature_set, data structure to store the weight information
+        self.fset = feature_set.FeatureSet(
+                        dependency_tree.DependencyTree())
         
         self.train_data_pool = data_pool.DataPool(train_section, data_path)
         self.test_data_pool = data_pool.DataPool(test_section, data_path)
@@ -17,7 +24,6 @@ class GlmParser():
         
 
     def sequential_train(self, max_iter=-1):
-
         print "Starting sequantial train..."
         
         if max_iter < 0:
@@ -25,17 +31,33 @@ class GlmParser():
 
         for i in range(max_iter):
             while self.train_data_pool.has_next_data():
-                self.learner.learn(
-                    self.train_data_pool.get_next_data(),
-                    self.parser)
+                self.train(self.train_data_pool.get_next_data())
 
+    def train(self, dep_tree):
+        self.fset.switch_tree(dep_tree)
+        word_list = dep_tree.get_word_list()
+        
+        gold_edge_set = \
+            set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
+        current_edge_set = \
+               self.parser.parse(len(word_list), self.fset.get_edge_score)
+
+        if current_edge_set == gold_edge_set:
+            return
+
+        # calculate the global score
+        gold_global_vector = self.fset.get_global_vector(gold_edge_set)
+        current_global_vector = self.fset.get_global_vector(current_edge_set)
+        
+        self.learner.learn(self.fset, current_global_vector, gold_global_vector)
+        
     def evaluate(self, test_section=[]):
         if not test_section == []:
             test_data_pool = data_pool.DataPool(test_section, data_path)
         else:
             test_data_pool = self.test_data_pool
 
-        self.evaluator.evaluate(test_data_pool, self.parser, self.learner.fset)
+        self.evaluator.evaluate(test_data_pool, self.parser, self.fset)
         
 
 

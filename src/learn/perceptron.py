@@ -1,59 +1,26 @@
 # -*- coding: utf-8 -*-
-from data import dependency_tree
-from feature import feature_set, feature_vector
+import copy
 
 class PerceptronLearner():
 
-    def __init__(self, fset=None):
-        """
-            fset -- feature_set, data structure to store the weight information
-        """
-        if fset == None:
-            self.fset = feature_set.FeatureSet(
-                        dependency_tree.DependencyTree())
+    def __init__(self):
+        return
             
-    def learn(self, dep_tree, parser):
-        self.fset.switch_tree(dep_tree)
-        word_list = dep_tree.get_word_list()
-
-        gold_edge_set = \
-            set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
-        current_edge_set = \
-               parser.parse(len(word_list), self.fset.get_edge_score)
-
-        if current_edge_set == gold_edge_set:
-            return
-
-        # calculate the global score
-        # assume the length of each local vector in the same sentanse is the same
-        # the truth_global_vector will change because of the change in weights
-        current_global_vector = self.get_global_vector(current_edge_set)
-        gold_global_vector = self.get_global_vector(gold_edge_set)
-        gold_global_vector.eliminate(current_global_vector)
-        self.fset.update_weight_vector(gold_global_vector)
+    def learn(self, fset, current_global_vector, gold_global_vector):
+        # otherwise, the gold_global_vector will change because of the change in weights
+        truth_global_vector = copy.deepcopy(gold_global_vector)
+        
+        truth_global_vector.eliminate(current_global_vector)
+        fset.update_weight_vector(truth_global_vector)
         return
 
-    
-    def get_global_vector(self, edge_set):
-        """
-        Calculate the global vector with the current weight, the order of the feature
-        score is the same order as the feature set
-
-        :param edge_set: the set of edges represented as tuples
-        :type: list(tuple(integer, integer))
         
-        :return: The global vector of the sentence with the current weight
-        :rtype: list
-        """
-        global_vector = feature_vector.FeatureVector()
-        for head_index,dep_index in edge_set:
-            local_vector = self.fset.get_local_vector(head_index,dep_index)
-            global_vector.aggregate(local_vector)
-        return global_vector 
 
 
 ################################################################################
-# Old Weight learner
+# ---------------------- Old Weight learner ----------------------
+# ---------------------- Just for backup and reference ---------------------- 
+# ---------------------- Not used any more ---------------------- 
 ################################################################################
 import timeit
 
