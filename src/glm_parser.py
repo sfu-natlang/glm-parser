@@ -5,7 +5,7 @@ from learn import perceptron
 from evaluate import evaluator
 
 from data import dependency_tree
-from feature import feature_set, feature_vector
+from feature import feature_set
 
 class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/", max_iter=1):
