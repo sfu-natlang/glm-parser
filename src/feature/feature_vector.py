@@ -1,10 +1,14 @@
+from hvector._mycollections import mydefaultdict
+from hvector.mydouble import mydouble
 
 class FeatureVector():
     """
     Emulates a feature vector using dictionary indtead of list
     """
     def __init__(self):
-        self.feature_dict = {}
+        #self.feature_dict = {}
+        # changed to hvector
+        self.feature_dict = mydefaultdict(mydouble)
         return
 
     def __getitem__(self,feature_str):
@@ -26,13 +30,15 @@ class FeatureVector():
         :param another_fv: The feature vector that you want to aggregate
         :type another_fv: FeatureVector
         """
-        for i in another_fv.keys():
-            # If the feature also exists in this vector then add them up
-            if self.has_key(i):
-                self[i] += another_fv[i]
-            # If it does not exist just copy the value
-            else:
-                self[i] = another_fv[i]
+        # change to hvector
+        #for i in another_fv.keys():
+        #    # If the feature also exists in this vector then add them up
+        #    if self.has_key(i):
+        #        self[i] += another_fv[i]
+        #    # If it does not exist just copy the value
+        #    else:
+        #        self[i] = another_fv[i]
+        self.feature_dict.iadd(another_fv)
         return
 
     def eliminate(self,another_fv):
@@ -42,13 +48,15 @@ class FeatureVector():
         :param another_fv: The feature vector that you want to eliminate
         :type another_fv: FeatureVector
         """
-        for i in another_fv.keys():
-            # If the feature also exists in this vector then add them up
-            if self.has_key(i):
-                self[i] -= another_fv[i]
-            # If it does not exist just copy the value
-            else:
-                self[i] = -another_fv[i]
+        # change to hvector
+        # for i in another_fv.keys():
+        #    # If the feature also exists in this vector then add them up
+        #    if self.has_key(i):
+        #        self[i] -= another_fv[i]
+        #    # If it does not exist just copy the value
+        #    else:
+        #        self[i] = -another_fv[i]
+        self.feature_dict.iaddc(another_fv, -1)
         return
 
     def __add__(self,another_fv):

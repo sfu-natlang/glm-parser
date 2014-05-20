@@ -7,6 +7,8 @@ from evaluate import evaluator
 from data import dependency_tree
 from feature import feature_set
 
+import timeit
+
 class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/", max_iter=1):
 
@@ -48,9 +50,12 @@ class GlmParser():
         # calculate the global score
         gold_global_vector = self.fset.get_global_vector(gold_edge_set)
         current_global_vector = self.fset.get_global_vector(current_edge_set)
-        
+
+        #start = timeit.default_timer()
         self.learner.learn(self.fset, current_global_vector, gold_global_vector)
-        
+        #end = timeit.default_timer()
+
+        #print end - start
     def evaluate(self, test_section=[]):
         if not test_section == []:
             test_data_pool = data_pool.DataPool(test_section, data_path)
