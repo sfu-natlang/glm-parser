@@ -536,14 +536,18 @@ class FeatureSet():
         :type dep_node: integer
         """
         local_fv = self.get_local_vector(head_index,dep_index)
-        score = 0
+        #score = 0
+        # change to hvector
+        score = self.db.get_vector_score(local_fv)
+
+        # move to data_backend
         # Iterate through each feature that appears with the edge
-        for i in local_fv.keys():
+        #for i in local_fv.keys():
             # If there is a parameter record (i.e. not 0) we just use that
-            if self.db.has_key(i):
-                score += self.db[i]
-            else:
-                pass
+        #    if self.db.has_key(i):
+        #        score += self.db[i]
+        #    else:
+        #        pass
                 # If not then we do not add (since it is 0)
                 # But we will add the entry into the database
                 #self.db[i] = 0

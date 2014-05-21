@@ -38,7 +38,7 @@ class FeatureVector():
         #    # If it does not exist just copy the value
         #    else:
         #        self[i] = another_fv[i]
-        self.feature_dict.iadd(another_fv)
+        self.feature_dict.iadd(another_fv.feature_dict)
         return
 
     def eliminate(self,another_fv):
@@ -56,7 +56,7 @@ class FeatureVector():
         #    # If it does not exist just copy the value
         #    else:
         #        self[i] = -another_fv[i]
-        self.feature_dict.iaddc(another_fv, -1)
+        self.feature_dict.iaddc(another_fv.feature_dict, -1)
         return
 
     def __add__(self,another_fv):

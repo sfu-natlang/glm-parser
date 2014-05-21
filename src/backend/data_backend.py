@@ -3,6 +3,9 @@ import shelve
 import cPickle as pickle
 import sys
 
+from hvector._mycollections import mydefaultdict
+from hvector.mydouble import mydouble
+
 class DataBackend():
     """
     A dictitionary-like object. Used to facilitate class FeatureSet to
@@ -42,9 +45,13 @@ class DataBackend():
         """
         if filename == None:
             filename = "default_database.db"
+            
+        self.store_type = store_type
         
         if store_type == 'memory_dict':
-            self.data_dict = {}
+            # change to hvector
+            #self.data_dict = {}
+            self.data_dict = mydefaultdict(mydouble)
             self.close = self.dummy
             self.dump = self.dict_dump
             self.load = self.dict_load
@@ -65,6 +72,29 @@ class DataBackend():
             raise ValueError("Unknown store type: %s" % (str(store_type)))
         return
 
+    
+    def get_vector_score(self, fv):
+        if self.store_type == 'memory_dict':
+            score = self.data_dict.evaluate(fv.keys())
+        else:
+            score = 0
+            # Iterate through each feature that appears with the edge
+            for i in fv.keys():
+                # If there is a parameter record (i.e. not 0) we just use that
+                if self.data_dict.has_key(i):
+                    score += self.data_dict[i]
+                else:
+                    pass
+                    # If not then we do not add (since it is 0)
+                    # But we will add the entry into the database
+                    #self.db[i] = 0
+                    #####################
+                    # This will cause us lots of trouble, including making
+                    # the size of the database bloat to an unacceptable size
+                    # and introducing a large error in the estimation of the
+                    # feature number.
+        return score
+    
     def dict_load(self,filename):
         """
         Load the dumped memory dictionary Pickle file into memory. Essentially
@@ -87,7 +117,7 @@ class DataBackend():
 
     def has_key(self,index):
         return self.data_dict.has_key(index)
-
+    
     def pop(self,key):
         self.data_dict.pop(key)
         return
