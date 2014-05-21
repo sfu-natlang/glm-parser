@@ -1,0 +1,51 @@
+TO INSTALL
+
+run:
+	python setup.py install --install-lib .
+
+It requires gcc and Python header files (if missing, try: sudo apt-get install python-dev
+or get those Python source code from python.org).
+
+you'll see _mycollections.so and mydouble.so in the current dir if installation succeeds.
+
+
+TO USE
+
+>>> from _mycollections import mydefaultdict
+>>> from mydouble import mydouble
+>>> d = mydefaultdict(mydouble)  # always like that
+
+>>> d["a"] = 1                   # no need to say mydouble(1); transparent to the user
+>>> d["a"] + 1
+2.0
+>>> d["a"] += 1
+>>> d["a"]
+2.0
+
+>>> type(d.get("a"))
+<type 'mydouble'>
+>>> type(d["a"])                # returns python float -- transparent to the user
+<type 'float'>
+
+>>> d["b"]                      # does not add missing key
+0.0
+>>> len(d)
+1
+
+>>> d.iaddl(["a", "c"])
+>>> d
+mydefaultdict(<type 'mydouble'>, {'a': 3.0, 'c': 0.0})
+
+>>> d.iadd(d)                   # d += d
+>>> d
+mydefaultdict(<type 'mydouble'>, {'a': 6.0, 'c': 0.0})
+>>> d.iaddc(d, 0.5)             # d += 0.5 * d
+>>> d
+mydefaultdict(<type 'mydouble'>, {'a': 9.0, 'c': 0.0})
+
+>>> d.evaluate(["a", "a", "b"])   # dot-product
+18.0
+
+>>> d.addc(d, 0.1)                 # returns a new svector, d + 0.1 * d
+mydefaultdict(<type 'mydouble'>, {'a': 9.9, 'c': 0.0})
+
