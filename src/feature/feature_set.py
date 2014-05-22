@@ -1,16 +1,14 @@
-from data.dependency_tree import *
+from data.data_entity import *
 from backend.data_backend import *
 from feature.feature_vector import *
 from feature.feature_description import simple_cfg, FeatureDescription
-from feature.regular_expression import IndexedStr
-from feature.ll_parser import LLParser
 
 class FeatureSet():
     """
     Stores and updates weight vector used in dependency parsing according to
     various features
     """
-    def __init__(self,dep_tree,database_filename=None,
+    def __init__(self,data_entity=None,database_filename=None,
                  operating_mode="memory_dict"):
         """
         Initialize the FeatureSet instance, including a file name that might
@@ -40,7 +38,8 @@ class FeatureSet():
         self.db = DataBackend(operating_mode)
         # We do this during initialization. For later stages if you need to
         # change the tree then just call that method manually
-        self.switch_tree(dep_tree)
+        if not data_entity == None:
+            self.switch_tree(data_entity)
         return
 
     def compute_five_gram(self):
@@ -85,8 +84,8 @@ class FeatureSet():
         # Also do not forget that each time we switch to a new dependency tree
         # we should refresh self.word_list and self.pos_list cache to make
         # it up-to-date.
-        self.word_list = dep_tree.get_word_list_ref()
-        self.pos_list = dep_tree.get_pos_list_ref()
+        self.word_list = dep_tree.get_word_list()
+        self.pos_list = dep_tree.get_pos_list()
         # Add five gram word list
         self.compute_five_gram()
         
@@ -524,7 +523,8 @@ class FeatureSet():
         for i in fv.keys():
             print i
         return
-
+    
+#TODO move to WeightVector
     def get_edge_score(self,head_index,dep_index):
         """
         Given an edge, return its score. The score of an edge is the aggregation
@@ -539,26 +539,9 @@ class FeatureSet():
         #score = 0
         # change to hvector
         score = self.db.get_vector_score(local_fv)
-
-        # move to data_backend
-        # Iterate through each feature that appears with the edge
-        #for i in local_fv.keys():
-            # If there is a parameter record (i.e. not 0) we just use that
-        #    if self.db.has_key(i):
-        #        score += self.db[i]
-        #    else:
-        #        pass
-                # If not then we do not add (since it is 0)
-                # But we will add the entry into the database
-                #self.db[i] = 0
-                #####################
-                # This will cause us lots of trouble, including making
-                # the size of the database bloat to an unacceptable size
-                # and introducing a large error in the estimation of the
-                # feature number.
-                
         return score
 
+#TODO move to WeightVector
     def update_weight_vector(self,fv_delta):
         """
         Update the patameter of features in the database. fv_delta is the delta
@@ -629,6 +612,7 @@ class FeatureSet():
         self.db.pop(key)
         return
 
+#TODO move to WeightVector ??
     def merge(self,fs):
         """
         Merge this feature set instance with another instance. The sharing keys
@@ -655,6 +639,7 @@ class FeatureSet():
             fs.pop(fk)
         return
 
+#TODO move to WeightVector ??
     def get_feature_count(self,count_zero=False):
         """
         Return the number of features. Please notice that this is not the number
@@ -675,368 +660,8 @@ class FeatureSet():
                 count += 1
         return count
 
-    def add_feature_description(self,name,program):
-        """
-        Add a new program to generate new features
-
-        :param name: A string name for the feature program
-        :type name: str
-        :param program: A program to generate the feature
-        :type program: IndexedStr
-        """
-        fd = FeatureDescription(self.dep_tree,simple_cfg,program)
-        self.extra_feature_dict[name] = fd
-        return
-
     def get_feature_by_name(self,name,head_index,dep_index):
         """
         Get a feature from self defined feature descriptions
         """
         return self.extra_feature_dict[name].get_feature(head_index,dep_index)
-
-    def parse_description(self,s):
-        """
-        Parse a string of a feature description
-
-        :param s: A indexed string contains the feature description
-        :type s: IndexedStr
-        """
-        global local_var
-        local_var.clear()
-        local_var['word_list'] = ('string[]',self.dep_tree.word_list)
-        local_var['pos_list'] = ('string[]',self.dep_tree.pos_list)
-        local_var['length'] = ('int',len(self.dep_tree.word_list))
-        lp = LLParser()
-        lp.parse_cfg(simple_cfg)
-        t = lp.symbol_table['stmts'].parse(s)
-        lp.print_tree(t)
-        eva_stmts(t)
-        return
-    
-
-###############################################################################
-#                             The Devil Split Line                            #
-###############################################################################
-
-class OldFeatureSet():
-    """
-    Stores and updates weight vector used in dependency parsing according to
-    various features
-    """
-    def __init__(self,database_filename,dep_tree):
-        self.database_filename = database_filename
-        # Open the database file
-        # self.db = shelve.open(database_filename,writeback=False)
-        self.db = DataBackend("shelve_write_through")
-        # Store the feature key vector in the instance
-        feature_list = self.get_feature_key_list(dep_tree)
-        self.feature_key_list = feature_list[0]
-        self.feature_str_list = feature_list[1]
-        # Callback functions
-        self.satisfaction_func = [self.is_satisfied_unigram,
-                                  self.is_satisfied_bigram,
-                                   ]
-        # Save this for later use
-        self.dep_tree = dep_tree
-        return
-
-    def add_feature_key(self,feature_list,feature_key):
-        """
-        Add the feature key into feature list. If a key already exists then
-        do nothing and return. This is just a shorthand of
-            if not feature_key in feature_list:
-                feature_list.append(feature_key)
-        :param feature_list: A list that holds the feature keys
-        :type feature_list: list
-        
-        :return: True if there are something added to the list, False if not
-        :rtype: bool
-        """
-        if not feature_key in feature_list:
-            feature_list.append(feature_key)
-            return True
-        else:
-            return False
-
-    def get_unigram_feature_key_list(self,dep_tree):
-        """
-        Return a list of features keys, which are basic uni-gram features.
-            xi-word, xi-pos
-            xi-word
-            xi-pos
-            xj-word, xj-pos
-            xj-word
-            xj-pos
-        Basic features are represented using a five-tuple:
-            (0,xi-word,xi-pos,xj-word,xj-pos)
-            
-        The starting 0 is used as a type identifier for basic features
-        (including both uni-gram and bi-gram).
-
-        If any entry is not used in the feature tuple it is set to empty string
-
-        :param dep_tree: A DependencyTree instance
-        :type dep_tree: DependencyTree
-        """
-        word_list = dep_tree.get_word_list_ref()
-        pos_list = dep_tree.get_pos_list_ref()
-        # Check whether the dependency tree satisfies the most fundamental
-        # requirements of a dependency tree. Especially we are concerning
-        # whether the length of pos_list and word_list are the same
-        dep_tree.check_valid()
-        
-        feature_list = []
-        # All possible combinations to the possible tags listed above
-        for i in range(len(word_list)):
-            self.add_feature_key(feature_list,(0,word_list[i],pos_list[i],
-                                               None,None))
-            self.add_feature_key(feature_list,(0,word_list[i],None,
-                                               None,None))
-            self.add_feature_key(feature_list,(0,None,pos_list[i],
-                                               None,None))
-
-            self.add_feature_key(feature_list,(0,None,None,
-                                               word_list[i],pos_list[i]))
-            self.add_feature_key(feature_list,(0,None,None,
-                                               word_list[i],None))
-            self.add_feature_key(feature_list,(0,None,None,
-                                               None,pos_list[i]))
-
-        return feature_list
-
-    def get_bigram_feature_key_list(self,dep_tree):
-        """
-        Return a list of bi-gram basic features, including
-            xi-word, xi-pos, xj-word, xj-pos
-            xj-pos, xj-word, xj-pos
-            xi-word, xj-word, xj-pos
-            xi-word, xi-pos, xj-pos
-            xi-word, xi-pos, xj-word
-            xi-word, xj-word
-            xi-pos, xj-pos
-            
-        :param dep_tree: A DependencyTree instance
-        :type dep_tree: DependencyTree        
-        """
-        word_list = dep_tree.get_word_list_ref()
-        pos_list = dep_tree.get_pos_list_ref()
-
-        dep_tree.check_valid()
-        feature_list = []
-
-        # Iterate through the head word i and the dependent word j
-        for i in range(0,len(word_list)):
-            # j starts at 1 since ROOT node cannot be a dependent node
-            for j in range(1,len(pos_list)):
-                # Cannot depend on itself
-                if i == j:
-                    continue
-                # Now we assume an edge (i,j). It is guaranteed that all pairs
-                # will be enumerated in the nested loop
-                self.add_feature_key(feature_list,(1,word_list[i],pos_list[i],
-                                                   word_list[j],pos_list[j]))
-                self.add_feature_key(feature_list,(1,None,pos_list[i],
-                                                   word_list[j],pos_list[j]))
-                self.add_feature_key(feature_list,(1,word_list[i],None,
-                                                   word_list[j],pos_list[j]))
-                self.add_feature_key(feature_list,(1,word_list[i],pos_list[i],
-                                                   None,pos_list[j]))
-                self.add_feature_key(feature_list,(1,word_list[i],pos_list[i],
-                                                   word_list[j],None))
-                self.add_feature_key(feature_list,(1,word_list[i],None,
-                                                   word_list[j],None))
-                self.add_feature_key(feature_list,(1,None,pos_list[i],
-                                                   None,pos_list[j]))
-        return feature_list
-
-    def get_feature_key_list(self,dep_tree):
-        feature_key_list = []
-        # We are using unigram and bigram features. This is going to be
-        # updated in the future
-        feature_key_list += self.get_unigram_feature_key_list(dep_tree)
-        feature_key_list += self.get_bigram_feature_key_list(dep_tree)
-
-        # Convert these keys to strings. The database can only use string as
-        # the index
-        feature_str_list = []
-        for i in range(0,len(feature_key_list)):
-            feature_str_list.append(str(feature_key_list[i]))
-        
-        return (feature_key_list,feature_str_list)
-
-    def is_satisfied_unigram(self,feature_key,dep_tree,edge_tuple,check=False):
-        """
-        Calculate whether an edge satisfies the unigram features
-        i.e. feature_key[0] == 0
-        """
-        if check == True and feature_key[0] != 0:
-            raise ValueError("Not a unigram feature: %s" % (str(feature_key)))
-        word_list = dep_tree.get_word_list_ref()
-        pos_list = dep_tree.get_pos_list_ref()
-
-        head_word = word_list[edge_tuple[0]]
-        if feature_key[1] != None and feature_key[1] != head_word:
-            return False
-        head_pos = pos_list[edge_tuple[0]]
-        if feature_key[2] != None and feature_key[2] != head_pos:
-            return False
-        dep_word = word_list[edge_tuple[1]]
-        if feature_key[3] != None and feature_key[3] != dep_word:
-            return False
-        dep_pos = pos_list[edge_tuple[1]]
-        if feature_key[4] != None and feature_key[4] != dep_pos:
-            return False
-        return True
-
-    def is_satisfied_bigram(self,feature_key,dep_tree,edge_tuple,check=False):
-        """
-        Calculate whether an edge satisfies the unigram features
-        i.e. feature_key[0] == 1
-        """
-        if check == True and feature_key[0] != 1:
-            raise ValueError("Not a bigram feature: %s" % (str(feature_key)))
-        # Explicitly set check = False to inhibit type checking
-        # Or we will get a ValueError
-        ret_val = self.is_satisfied_unigram(feature_key,dep_tree,
-                                            edge_tuple,False)
-        return ret_val
-
-    def is_satisfied(self,feature_key,dep_tree,edge_tuple):
-        """
-        Calculate whether an edge satisfies a key feature. There are several
-        types of key features, so we need to treat them separately.
-
-        :param feature_key: A feature key in feature_key_list
-        :type feature_key: tuple
-        :param dep_tree: A DependencyTree instance
-        :type dep_tree: DependencyTree
-        :param edge_tuple: A pair of integers to indicate an edge
-        :type edge_tuple: tuple(integer,integer)
-
-        :return: True if the edge satisfies the feature key. False if not
-        :rtype: bool
-        """
-        # Retrieve the callback
-        func_index = feature_key[0]
-        # Call the function
-        ret_val = self.satisfaction_func[func_index](feature_key,
-                                                     dep_tree,edge_tuple)
-        return ret_val
-
-    def get_local_scalar(self,dep_tree,edge_tuple):
-        """
-        Return the score of an edge given its edge elements and the context
-        """
-        param_list = self.get_local_vector(dep_tree,edge_tuple)
-        ret_val = 0
-        for i in param_list:
-            ret_val += i
-        return ret_val
-
-    def get_edge_score(self,edge_tuple):
-        """
-        Almost identical to get_local_scalar, except that it does not need
-        a DependencyTree instance. This is usually used to score an edge
-        during parsing, where the overall structure is not known yet, and
-        we only have to score edges
-        """
-        local_vector = self.get_local_vector(self.dep_tree,edge_tuple)
-        param_list = self.get_param_list(self.dep_tree,edge_tuple)
-        if len(local_vector) != len(param_list):
-            raise ValueError("Local vector and parameter list do not accord")
-        edge_score = 0
-        for i in range(0,len(local_vector)):
-            if local_vector[i] == 1:
-                edge_score += param_list[i]
-        return edge_score
-
-    def get_param_list(self,dep_tree,edge_tuple):
-        """
-        Return the parameter list of current feature key list
-        """
-        feature_list_length = len(self.feature_str_list)
-        param_list = [0] * feature_list_length
-        # Find all parameter, i is a feature key, i[0] is the feature type
-        # feature_str_list is the string key for using in the database
-        # feature_key_list is the tuple for using by the program code
-        for i in range(0,feature_list_length):
-            # If the value already in the data base
-            if self.db.has_key(self.feature_str_list[i]):
-                # Check whether it satisfies the feature key
-                if self.is_satisfied(self.feature_key_list[i],
-                                     dep_tree,edge_tuple):
-                    param_list[i] = self.db[self.feature_str_list[i]]
-            else:
-                # Create new key-value pair, if it does not exist
-                self.db[self.feature_str_list[i]] = 0
-                
-        return param_list
-
-    def get_local_vector(self,dep_tree,edge_tuple):
-        local_vector = []
-        for i in range(0,len(self.feature_str_list)):
-            if self.is_satisfied(self.feature_key_list[i],dep_tree,edge_tuple):
-                local_vector.append(1)
-            else:
-                local_vector.append(0)
-        return local_vector
-
-    def update_weight_vector(self,delta_list):
-        """
-        Update the weight vector, given a list of deltas that will be added
-        up to the current weight vector
-        """
-        # We do not need to check whether the feature exists or not, since we
-        # have initialized the database earlier
-        for i in range(0,len(self.feature_key_list)):
-            temp = self.db[self.feature_str_list[i]]
-            temp += delta_list[i]
-            self.db[self.feature_str_list[i]] = temp
-        return
-
-    def close(self):
-        """
-        Routine that must be called before exit
-        """
-        # Write back all pages into database
-        self.db.close()
-        return
-
-#############################################################################
-# If you see this line and you are modiyfing the code exactly above, then you
-# are accessing the wrong part of the code.
-#############################################################################
-
-if __name__ == "__main__":
-    dt = DependencyTree()
-    dt.word_list = "John smashed the ball with the bat".split()
-    dt.pos_list = "N V D N P D N".split()
-    #fs = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
-    #fs.load('sec_14_14_iter_0.db')
-    #print "fs load successfully"
-    #fs2 = FeatureSet(dt,"test_load.db",operating_mode='memory_dict')
-    #fs2.load('sec_15_15_iter_0.db')
-    #print "fs2 load successfully"
-    #fs2.merge(fs)
-    #fs2.dump('test_merge.db')
-    s = IndexedStr("""
-                    string result[5];
-                    result[0] = word_list[head_index];
-                    result[1] = pos_list[head_index];
-                    result[2] = word_list[dep_index];
-                    result[3] = pos_list[dep_index];
-                    if(dep_index == (length - 1))
-                    {
-                        result[4] = "end_node";
-                    }
-                    else
-                    {
-                        result[4] = "not_end";
-                    };
-                   """)
-    fs = FeatureSet(dt)
-    print len(fs.get_local_vector(1,4).keys())
-    fs.print_local_vector(1,4)
-    #fs2.add_feature_description('my_feature',s)
-    #print fs2.get_feature_by_name('my_feature',1,2)
-    

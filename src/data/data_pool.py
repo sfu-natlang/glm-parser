@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os, re
-import dependency_tree
+import data_entity
 
 class DataPool():
     
@@ -28,6 +28,7 @@ class DataPool():
     def reset_whole(self):
         """
         Reset the index variables and the data list
+        data list is the list of data in the feature form
         """
         self.reset()
         self.data_list = []
@@ -74,8 +75,8 @@ class DataPool():
         """
         f = open(file_path)
         data_list = []
-        word_list = ['__ROOT__']
-        pos_list = ['ROOT']
+        word_list = []
+        pos_list = []
         edge_set = {}
         current_index = 0
 
@@ -92,14 +93,11 @@ class DataPool():
                     edge_set[(int(entry[2]), current_index)] = entry[3]
             else:
                 if word_list != []:
-                    d_tree = dependency_tree.DependencyTree()
-                    d_tree.set_word_list(word_list)
-                    d_tree.set_pos_list(pos_list)
-                    d_tree.set_edge_list(edge_set)
-                    data_list.append(d_tree)
+                    d_entity = data_entity.DataEntity(word_list,pos_list,edge_set)
+                    data_list.append(d_entity)
                     #print d_tree.get_word_list()
-                word_list = ['__ROOT__']
-                pos_list = ['ROOT']
+                word_list = []
+                pos_list = []
                 edge_set = {}
                 current_index = 0
         return data_list
@@ -138,7 +136,7 @@ if __name__ == "__main__":
 
 
 ##############################################################################################################
-#    Old DataSet Class
+#    Old DataSet Class --- Not used any more
 ##############################################################################################################
 class DataSet():
     """

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from data import data_pool
+from data import data_pool, data_entity
 from parse import ceisner
 from learn import perceptron
 from evaluate import evaluator
 
-from data import dependency_tree
 from feature import feature_set
 
 import timeit
@@ -15,11 +14,11 @@ class GlmParser():
         self.max_iter = max_iter
 
         # fset -- feature_set, data structure to store the weight information
-        self.fset = feature_set.FeatureSet(
-                        dependency_tree.DependencyTree())
+        self.fset = feature_set.FeatureSet()
         
         self.train_data_pool = data_pool.DataPool(train_section, data_path)
         self.test_data_pool = data_pool.DataPool(test_section, data_path)
+        
         self.parser = ceisner.EisnerParser()
         self.learner = perceptron.PerceptronLearner()
         self.evaluator = evaluator.Evaluator()
@@ -35,12 +34,12 @@ class GlmParser():
             while self.train_data_pool.has_next_data():
                 self.train(self.train_data_pool.get_next_data())
 
-    def train(self, dep_tree):
-        self.fset.switch_tree(dep_tree)
-        word_list = dep_tree.get_word_list()
+    def train(self, d_entity):
+        self.fset.switch_tree(d_entity)
+        word_list = d_entity.get_word_list()
         
         gold_edge_set = \
-            set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
+            set([(head_index,dep_index) for head_index,dep_index,_ in d_entity.get_edge_list()])
         current_edge_set = \
                self.parser.parse(len(word_list), self.fset.get_edge_score)
 
