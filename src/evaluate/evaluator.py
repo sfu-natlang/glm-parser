@@ -27,18 +27,17 @@ class Evaluator():
         
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, fset):
+    def evaluate(self, data_pool, parser, w_vector):
         print "Start evaluating ..."
         while data_pool.has_next_data():  
-            dep_tree = data_pool.get_next_data()
+            sent = data_pool.get_next_data()
             
             gold_edge_set = \
-                set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
+                set([(head_index,dep_index) for head_index,dep_index,_ in sent.get_edge_list()])
             
-            fset.switch_tree(dep_tree)
-            sent_len = len(dep_tree.get_word_list())
+            sent_len = len(sent.get_word_list())
             test_edge_set = \
-               parser.parse(sent_len, fset.get_edge_score)
+               parser.parse(sent, w_vector.get_vector_score)
              
             #print "sent acc:", 
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
