@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os, re
-import data_entity
+from sentence import *
 
 class DataPool():
     
@@ -84,17 +84,17 @@ class DataPool():
             line = line[:-1]
             if line != '':
                 current_index = current_index + 1
-                entry = line.split()
-                if len(entry) != 4:
+                entity = line.split()
+                if len(entity) != 4:
                     print "invalid data!!"
                 else:
-                    word_list.append(entry[0])
-                    pos_list.append(entry[1])
-                    edge_set[(int(entry[2]), current_index)] = entry[3]
+                    word_list.append(entity[0])
+                    pos_list.append(entity[1])
+                    edge_set[(int(entity[2]), current_index)] = entity[3]
             else:
                 if word_list != []:
-                    d_entity = data_entity.DataEntity(word_list,pos_list,edge_set)
-                    data_list.append(d_entity)
+                    sent = Sentence(word_list,pos_list,edge_set)
+                    data_list.append(sent)
                     #print d_tree.get_word_list()
                 word_list = []
                 pos_list = []
