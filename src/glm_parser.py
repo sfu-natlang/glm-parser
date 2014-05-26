@@ -4,7 +4,6 @@ from parse.ceisner import *
 from learn.perceptron import *
 from evaluate.evaluator import *
 
-from feature.feature_descriptor import *
 from weight.weight_vector import *
 import timeit
 
