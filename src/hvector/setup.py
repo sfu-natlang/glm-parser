@@ -11,7 +11,7 @@ setup(name = "mydouble",
       ext_modules = [Extension("mydouble", ["mydouble.c"])]
       )
 
-setup(name = "mydouble_nofree",
-      version = "1.0",
-      ext_modules = [Extension("mydouble_nofree", ["mydouble_nofree.c"])]
-      )
+#setup(name = "mydouble_nofree",
+#      version = "1.0",
+#      ext_modules = [Extension("mydouble_nofree", ["mydouble_nofree.c"])]
+#      )
