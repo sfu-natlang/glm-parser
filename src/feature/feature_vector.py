@@ -22,43 +22,42 @@ class FeatureVector():
 
     def keys(self):
         return self.feature_dict.keys()
-
-    def aggregate(self,another_fv):
-        """
-        Aggregate another feature vector into this one, no return value
-
-        :param another_fv: The feature vector that you want to aggregate
-        :type another_fv: FeatureVector
-        """
-        # change to hvector
-        #for i in another_fv.keys():
-        #    # If the feature also exists in this vector then add them up
-        #    if self.has_key(i):
-        #        self[i] += another_fv[i]
-        #    # If it does not exist just copy the value
-        #    else:
-        #        self[i] = another_fv[i]
-        self.feature_dict.iadd(another_fv.feature_dict)
+    def aggregate(self,another_fv):
+        """
+        Aggregate another feature vector into this one, no return value
+
+        :param another_fv: The feature vector that you want to aggregate
+        :type another_fv: FeatureVector
+        """
+        # change to hvector
+        #for i in another_fv.keys():
+        #    # If the feature also exists in this vector then add them up
+        #    if self.has_key(i):
+        #        self[i] += another_fv[i]
+        #    # If it does not exist just copy the value
+        #    else:
+        #        self[i] = another_fv[i]
+        self.feature_dict.iadd(another_fv.feature_dict)
+        return
+
+    def eliminate(self,another_fv):
+        """
+        Eliminate another feature vector from this one, no return value
+
+        :param another_fv: The feature vector that you want to eliminate
+        :type another_fv: FeatureVector
+        """
+        # change to hvector
+        # for i in another_fv.keys():
+        #    # If the feature also exists in this vector then add them up
+        #    if self.has_key(i):
+        #        self[i] -= another_fv[i]
+        #    # If it does not exist just copy the value
+        #    else:
+        #        self[i] = -another_fv[i]
+        self.feature_dict.iaddc(another_fv.feature_dict, -1)
         return
-
-    def eliminate(self,another_fv):
-        """
-        Eliminate another feature vector from this one, no return value
-
-        :param another_fv: The feature vector that you want to eliminate
-        :type another_fv: FeatureVector
-        """
-        # change to hvector
-        # for i in another_fv.keys():
-        #    # If the feature also exists in this vector then add them up
-        #    if self.has_key(i):
-        #        self[i] -= another_fv[i]
-        #    # If it does not exist just copy the value
-        #    else:
-        #        self[i] = -another_fv[i]
-        self.feature_dict.iaddc(another_fv.feature_dict, -1)
-        return
-
+    
     def __add__(self,another_fv):
         """
         Arrgegate two feature vectors into one, and return a new feature vector
