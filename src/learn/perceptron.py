@@ -3,149 +3,50 @@ import copy
 
 class PerceptronLearner():
 
-    def __init__(self):
+    def __init__(self, parser,w_vector, max_iter=1):
+        self.parser = parser
+        self.w_vector = w_vector
+        self.max_iter = max_iter
         return
+
+    def sequential_learn(self, data_pool=None, max_iter=-1, d_filename=None):
+        if max_iter <= 0:
+            max_iter = self.max_iter
             
-    def learn(self, fset, current_global_vector, gold_global_vector):
-        # otherwise, the gold_global_vector will change because of the change in weights
-        truth_global_vector = copy.deepcopy(gold_global_vector)
-        
-        truth_global_vector.eliminate(current_global_vector)
-        fset.update_weight_vector(truth_global_vector)
-        return
-
-        
-
-
-################################################################################
-# ---------------------- Old Weight learner ----------------------
-# ---------------------- Just for backup and reference ---------------------- 
-# ---------------------- Not used any more ---------------------- 
-################################################################################
-import timeit
-
-class WeightLearner():
-    """
-    Learns the weight of the features using maximum perceptron algorithm
-    """
-    
-    def __init__(self, fset=None, iter_num=1):
-        """
-        Initialize the WeightLearner
-        """
-        self.MAX_ITERATE = iter_num
-        if fset == None:
-            self.fset = feature_set.FeatureSet(
-                        dependency_tree.DependencyTree())
-        else:
-            self.fset = fset
-        return    
-    
-    def learn_weight_sections(self, section_set=None, data_path=None, output_file='weight', dump=True):
-        """
-        Given the path and specified sections, 
-        for each dep_tree in the source
-        learn the weight for each feature in that feature set
-        
-        :param section_set: see section_set in DataSet
-        :type section_set: list(int/tuple)
-        
-        :param data_path: see data_path in DataSet
-        :type data_path: str
-        """
-        dataset = data_set.DataSet(section_set, data_path)
-        for i in range(self.MAX_ITERATE):
-            while dataset.has_next_data():
-                self.perceptron(dataset.get_next_data())  
-            if dump == True:
-                print "start dump"
-                self.fset.dump(output_file+'.db')
-            print "train done"
-            self.fset.close()
-            dataset.reset()
-        return self.fset
+        print "Starting sequantial train..."
+        for i in range(max_iter):
+            print "Iteration:", i
             
-    def learn_weight_sentences(self,file_name,index=0,data_path=None):
-        """
-        Given the location for one sentence in the source
-        update the weight of the features in that sentence
-        
-        :param file_name: name of the file that contains the sentence
-        :type file_name: str
-        
-        :param index: location of the sentence in that file, 
-                      default 0 (1st sentence)
-        :type index: int
-        
-        :param data_path: path to the data source
-        :type data_path: int
-        """
-        dataset = data_set.DataSet(data_path=data_path)
-        self.perceptron(dataset.get_data(file_name, index))
-        #TODO add dump file name
-        self.fset.dump()
-        self.fset.close()
-        return
-        
-    def perceptron(self,dep_tree):
-        """
-        Given one dependency tree, the function update the weight 
-        for each feature in this sentence based on the perceptron algo
-        
-        :param dep_tree: a class contains the information about the
-        word_list, pos_list, edge and the information of edge type
-        :type dep_tree: DependencyTree
-        
-        :return: updated feature set
-        :rtype: FeatureSet
-        """
-        self.fset.switch_tree(dep_tree)
-        word_list = dep_tree.get_word_list()
+            while data_pool.has_next_data():
+                self.learn(data_pool.get_next_data())
+
+            data_pool.reset()
+            if not d_filename == None:
+                self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
+            
+
+    def learn(self, sent):
         gold_edge_set = \
-            set([(head_index,dep_index) for head_index,dep_index,_ in dep_tree.get_edge_list()])
-        #print "gold set:", gold_edge_set
-        #t = timeit.default_timer()
-        
+            set([(head_index,dep_index) for head_index,dep_index,_ in sent.get_edge_list()])
         current_edge_set = \
-               ceisner.EisnerParser().parse(len(word_list), self.fset.get_edge_score)
-        #t = (timeit.default_timer() - t)
-        #print "eisner time:", t, "sec     sent_length:", str(len(word_list))
-        
+               self.parser.parse(sent, self.w_vector.get_vector_score)
+
         if current_edge_set == gold_edge_set:
             return
-        
+
         # calculate the global score
-        # assume the length of each local vector in the same sentanse is the same
-        # the truth_global_vector will change because of the change in weights
-        current_global_vector = self.get_global_vector(current_edge_set)
-        #print current_edge_set
-        gold_global_vector = self.get_global_vector(gold_edge_set)
-        gold_global_vector.eliminate(current_global_vector)
-        # print gold_global_vector.feature_dict
-        self.fset.update_weight_vector(gold_global_vector)
-        return 
+        gold_global_vector = sent.gold_global_vector
+        current_global_vector = sent.get_global_vector(current_edge_set)
 
-    def get_global_vector(self, edge_set):
-        """
-        Calculate the global vector with the current weight, the order of the feature
-        score is the same order as the feature set
+        #start = timeit.default_timer()
+        self.update_weight(current_global_vector, gold_global_vector)
+        #end = timeit.default_timer()
 
-        :param edge_set: the set of edges represented as tuples
-        :type: list(tuple(integer, integer))
-        
-        :return: The global vector of the sentence with the current weight
-        :rtype: list
-        """
-        global_vector = feature_vector.FeatureVector()
-        for head_index,dep_index in edge_set:
-            local_vector = self.fset.get_local_vector(head_index,dep_index)
-            global_vector.aggregate(local_vector)
-        return global_vector
-        
-        
-    def get_feature_set(self):
-        """
-        :return: the updated feature set
-        :rtype: FeatureSet
-        """
-        return self.fset
+        #print end - start
+
+    def update_weight(self, current_global_vector, gold_global_vector):
+        # otherwise, the gold_global_vector will change because of the change in weights
+        self.w_vector.data_dict.iadd(gold_global_vector.feature_dict)
+        self.w_vector.data_dict.iaddc(current_global_vector.feature_dict, -1)
+        return
+       
