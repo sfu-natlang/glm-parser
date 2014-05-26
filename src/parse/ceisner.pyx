@@ -52,7 +52,7 @@ cdef class EisnerParser:
             free(self.e[i])
 
     
-    def combine_triangle(self, head, modifier, arc_weight):
+    def combine_triangle(self, head, modifier, arc_weight, sent):
         # s < t strictly
         if head == modifier:
             print "invalid head and modifier for combine triangle!!!"
@@ -65,7 +65,7 @@ cdef class EisnerParser:
             s = modifier
             t = head
             
-        cdef int edge_score = arc_weight(head, modifier)
+        cdef int edge_score = arc_weight(sent.get_local_vector(head, modifier))
         cdef int max_index = s
         cdef int max_score = \
             self.e[s][s][1][0].score + self.e[s+1][t][0][0].score + edge_score
@@ -218,24 +218,24 @@ cdef class EisnerParser:
                     node_queue.push(node_right)
         return
     
-    def parse(self, n, arc_weight):	
+    def parse(self, sent, arc_weight):	
 
-        self.n = n
+        self.n = len(sent.word_list)
         self.init_eisner_matrix()
 
         cdef int m, s, t, q
         
-        #TODO: try for m in range(1,n)
-        for m from 1 <= m < n by 1: 
-            for s from 0 <= s < n by 1:
+        #TODO: try for m in range(1,self.n)
+        for m from 1 <= m < self.n by 1: 
+            for s from 0 <= s < self.n by 1:
                 t = s + m
-                if t >= n:
+                if t >= self.n:
                     break
 
                 self.e[s][t][0][1].score, self.e[s][t][0][1].mid_index =\
-                    self.combine_triangle(t, s, arc_weight)
+                    self.combine_triangle(t, s, arc_weight, sent)
                 self.e[s][t][1][1].score, self.e[s][t][1][1].mid_index =\
-                    self.combine_triangle(s, t, arc_weight)
+                    self.combine_triangle(s, t, arc_weight, sent)
                 self.e[s][t][0][0].score, self.e[s][t][0][0].mid_index =\
                     self.combine_left(s, t)
                 self.e[s][t][1][0].score, self.e[s][t][1][0].mid_index =\
