@@ -68,7 +68,14 @@ options:
     (   accuracy test would not be processed
         if testing sections are not specified   )
     
-    -p:     test data path, default: "./penn-wsj-deps/" 
+    -p:     test data path, default: "./penn-wsj-deps/"
+
+    -l:     path to load weight vector file
+            (Including full name, i.e. Weight.db)
+            
+    -d:     path to dump weight vector file
+            (Including prefix of name
+            i.e. Weight, the file name would be Weight_Iter_1.db)
     
 """
 
