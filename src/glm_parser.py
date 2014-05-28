@@ -32,10 +32,6 @@ class GlmParser():
             max_iter = self.max_iter
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename)
-
-    def dump_weight_vector(self, filename):
-        print "Dumping weight vector ..."        
-        self.w_vector.dump(filename)
     
     def evaluate(self, test_section=[]):
         if not test_section == []:
