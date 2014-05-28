@@ -19,7 +19,7 @@ class GlmParser():
         self.test_data_pool = DataPool(test_section, data_path)
         
         self.parser = EisnerParser()
-        self.learner = PerceptronLearner(self.parser, self.w_vector, max_iter)
+        self.learner = PerceptronLearner(self.w_vector, max_iter)
         self.evaluator = Evaluator()
         
     def sequential_train(self, train_section=[], max_iter=-1, d_filename=None):
@@ -31,7 +31,7 @@ class GlmParser():
         if max_iter == -1:
             max_iter = self.max_iter
             
-        self.learner.sequential_learn(data_pool=train_data_pool, max_iter=max_iter, d_filename=d_filename)
+        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename)
 
     def dump_weight_vector(self, filename):
         print "Dumping weight vector ..."        
@@ -45,8 +45,11 @@ class GlmParser():
 
         self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector)
         
+    def compute_argmax(self, sentence):
+        current_edge_set = self.parser.parse(sentence, self.w_vector.get_vector_score)
+        current_global_vector = sentence.get_global_vector(current_edge_set)
 
-
+        return current_global_vector
 
 HELP_MSG =\
 """
