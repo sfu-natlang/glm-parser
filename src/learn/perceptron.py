@@ -17,9 +17,9 @@ class PerceptronLearner():
             print "Iteration:", i
             
             while data_pool.has_next_data():
-                dada_instance = data_pool.get_next_data()
-                gold_global_vector = dada_instance.gold_global_vector
-                current_global_vector = f_argmax(dada_instance)
+                data_instance = data_pool.get_next_data()
+                gold_global_vector = data_instance.gold_global_vector
+                current_global_vector = f_argmax(data_instance)
                 self.update_weight(current_global_vector, gold_global_vector)
 
             data_pool.reset()
