@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 import copy
+import logging
+
+logging.basicConfig(filename='glm-parser.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
 
 class PerceptronLearner():
 
@@ -12,9 +18,9 @@ class PerceptronLearner():
         if max_iter <= 0:
             max_iter = self.max_iter
             
-        print "Starting sequantial train..."
+        logging.debug("Starting sequantial train...")
         for i in range(max_iter):
-            print "Iteration:", i
+            logging.debug("Iteration: %d" % i)
             
             while data_pool.has_next_data():
                 data_instance = data_pool.get_next_data()

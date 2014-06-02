@@ -1,4 +1,11 @@
 from __future__ import division
+import logging
+
+logging.basicConfig(filename='glm-parser.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
+
 
 class Evaluator():
     def __init__(self):
@@ -28,7 +35,7 @@ class Evaluator():
         return correct_num, gold_set_size
 
     def evaluate(self, data_pool, parser, w_vector):
-        print "Start evaluating ..."
+        logging.debug("Start evaluating ...")
         while data_pool.has_next_data():  
             sent = data_pool.get_next_data()
             
@@ -42,7 +49,7 @@ class Evaluator():
             #print "sent acc:", 
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
             #print "acc acc:", self.evlt.get_acc_unlabeled_accuracy()
-        print "Unlabeled accuracy:", self.get_acc_unlabeled_accuracy()
+        logging.info("Unlabeled accuracy: %.12f" % self.get_acc_unlabeled_accuracy())
 
     
     def unlabeled_accuracy(self, result_edge_set, gold_edge_set, accumulate=False):

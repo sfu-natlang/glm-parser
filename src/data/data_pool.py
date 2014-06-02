@@ -2,6 +2,12 @@
 
 import os, re
 from sentence import *
+import logging
+
+logging.basicConfig(filename='glm-parser.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
 
 class DataPool():
     
@@ -57,8 +63,9 @@ class DataPool():
         """
         Load the trainning data
         """
-        print "Loading data..."
+        logging.debug("Loading data...")
         for section in self.section_list:
+            logging.debug("Loading section %02d " % section)
             for file_name in os.listdir(self.data_path + "%02d" % section):
                 file_path = self.data_path + "%02d/" % section + file_name
                 self.data_list = self.data_list + self.get_data_list(file_path)
@@ -86,7 +93,7 @@ class DataPool():
                 current_index = current_index + 1
                 entity = line.split()
                 if len(entity) != 4:
-                    print "invalid data!!"
+                    logging.error("invalid data!!")
                 else:
                     word_list.append(entity[0])
                     pos_list.append(entity[1])

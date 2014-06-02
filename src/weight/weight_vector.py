@@ -3,6 +3,12 @@ import sys
 
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
+import logging
+
+logging.basicConfig(filename='glm-parser.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
 
 class WeightVector():
     """
@@ -60,7 +66,7 @@ class WeightVector():
 
         Parameter is the same as constructor (__init__).
         """
-        print "Loading Weight Vector from", filename
+        logging.debug("Loading Weight Vector from %s " % filename)
         fp = open(filename,"r")
         for line in fp:
             line = line[:-1]
@@ -101,8 +107,8 @@ class WeightVector():
             print "Skipping dump ..."
             return
 
-        print "Dumping Weight Vector to", filename
-        print "Total Feature Num:", len(self.data_dict)
+        logging.debug("Dumping Weight Vector to %s " % filename)
+        logging.debug("Total Feature Num: %d " % len(self.data_dict))
         fp = open(filename,"w")
         for key in self.data_dict.keys():
             fp.write(key + "    " + str(self.data_dict[key]) + "\n")
