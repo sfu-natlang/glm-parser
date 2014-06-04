@@ -1,7 +1,7 @@
 from __future__ import division
 import logging
 
-logging.basicConfig(filename='glm-parser.log',
+logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')

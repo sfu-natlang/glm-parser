@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import copy
 import logging
 
-logging.basicConfig(filename='glm-parser.log',
+logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -10,6 +9,7 @@ logging.basicConfig(filename='glm-parser.log',
 class PerceptronLearner():
 
     def __init__(self, w_vector, max_iter=1):
+        logging.debug("Initialize PerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
         return
