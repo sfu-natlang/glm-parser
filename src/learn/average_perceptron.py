@@ -37,9 +37,7 @@ class AveragePerceptronLearner():
 
             # for i = 1 ... m
             while data_pool.has_next_data():
-            #oo=0
-            #if oo == 0:
-                #oo += 1
+
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.gold_global_vector
@@ -50,25 +48,24 @@ class AveragePerceptronLearner():
 
                     # i yi' != yi
                     if not current_global_vector == gold_global_vector:
-
+                        
                         # for each dimension s in delta_global_vector
                         delta_global_vector = gold_global_vector - current_global_vector
                         for s in delta_global_vector.keys():
                             self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
                             self.last_change_dict[s] += 1
-
+                        
                         # update weight and weight sum
-                        self.w_vector.data_dict.iadd(delta_global_vector)
-                        self.weight_sum_dict.iadd(delta_global_vector)
-
+                        self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                        self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
                         self.c += 1
                 else:
                     for s in self.last_change_dict.keys():
                         self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
 
                     if not current_global_vector == gold_global_vector:
-                        self.w_vector.data_dict.iadd(delta_global_vector)
-                        self.weight_sum_dict.iadd(delta_global_vector)
+                        self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                        self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
             data_pool.reset()
 

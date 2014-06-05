@@ -2,6 +2,7 @@
 from data.data_pool import *
 from parse.ceisner import *
 from learn.perceptron import *
+from learn.average_perceptron import *
 from evaluate.evaluator import *
 
 from weight.weight_vector import *
