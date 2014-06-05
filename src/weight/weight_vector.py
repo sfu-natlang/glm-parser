@@ -53,7 +53,13 @@ class WeightVector():
             
         return
 
-    
+    #def get_sub_vector(self, key_list):
+        # TODO figure out a more efficient way
+    #    sub_vector = mydefaultdict(mydouble)
+    #    for k in key_list:
+    #        sub_vector[k] = self.data_dict[k]
+    #    return sub_vector
+        
     def get_vector_score(self, fv):
         score = self.data_dict.evaluate(fv.keys())
         return score
