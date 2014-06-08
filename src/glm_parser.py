@@ -13,6 +13,7 @@ class GlmParser():
                  l_filename=None, max_iter=1):
 
         self.max_iter = max_iter
+        self.data_path = data_path
 
         self.w_vector = WeightVector(l_filename)
         
@@ -25,7 +26,7 @@ class GlmParser():
         
     def sequential_train(self, train_section=[], max_iter=-1, d_filename=None):
         if not train_section == []:
-            train_data_pool = data_pool.DataPool(train_section, data_path)
+            train_data_pool = DataPool(train_section, self.data_path)
         else:
             train_data_pool = self.train_data_pool
             
