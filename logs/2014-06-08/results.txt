@@ -4,5 +4,4 @@ Testing data: section 0,1,22,24
 
 Iteration 0:
 Weight vector dump (after iter0):  /cs/natlang-projects/glm-parser/results/perceptron_Iter_0.db
-Unlabeled dependency accuracy: 0.862721036312
-
+06/08/2014 02:45:44 PM INFO: Unlabeled accuracy: 0.862721036312
