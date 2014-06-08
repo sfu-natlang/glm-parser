@@ -82,9 +82,9 @@ options:
 if __name__ == "__main__":
     import getopt, sys
     
-    train_begin = 2
-    train_end = 2
-    testsection = [2]
+    train_begin = -1
+    train_end = -1
+    testsection = []
     max_iter = 1
     test_data_path = "../../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     l_filename = None
@@ -103,7 +103,6 @@ if __name__ == "__main__":
                 train_end = int(value)
             elif opt == "-t":
                 testsection = [int(sec) for sec in value.split(',')]
-                test = True
             elif opt == "-p":
                 test_data_path = value
             elif opt == "-i":
@@ -116,12 +115,14 @@ if __name__ == "__main__":
                 print "invalid input, see -h"
                 sys.exit(0)
                 
-        gp = GlmParser([(train_begin,train_end)], testsection, test_data_path, l_filename)
+        gp = GlmParser(data_path=test_data_path, l_filename=l_filename)
         #start = timeit.default_timer()
-        #gp.sequential_train(max_iter=max_iter, d_filename=d_filename)
+        if train_begin >= 0 and train_end >= train_begin:
+            gp.sequential_train([(train_begin,train_end)], max_iter, d_filename)
         #end = timeit.default_timer()
         #print end - start
-        gp.evaluate()
+        if not testsection == []:
+            gp.evaluate(testsection)
 
     except getopt.GetoptError, e:
         print "invalid arguments!! \n" + HELP_MSG
