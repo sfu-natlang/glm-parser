@@ -73,9 +73,12 @@ class Sentence():
         
     def get_local_vector(self, head_index, dep_index):
         if not (head_index, dep_index) in self.f_vector_dict:
-            self.update_feature_vector_dict(head_index, dep_index)
+            lv = self.f_gen.get_local_vector(head_index, dep_index)
+            #self.update_feature_vector_dict(head_index, dep_index)
+        else:
+            lv = self.f_vector_dict[(head_index, dep_index)]
 
-        return self.f_vector_dict[(head_index, dep_index)]
+        return lv#self.f_vector_dict[(head_index, dep_index)]
     
     def set_word_list(self,word_list):
         self.word_list = ['__ROOT__'] + word_list
