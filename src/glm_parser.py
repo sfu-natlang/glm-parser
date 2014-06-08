@@ -118,7 +118,7 @@ if __name__ == "__main__":
                 
         gp = GlmParser([(train_begin,train_end)], testsection, test_data_path, l_filename)
         #start = timeit.default_timer()
-        gp.sequential_train(max_iter=max_iter, d_filename=d_filename)
+        #gp.sequential_train(max_iter=max_iter, d_filename=d_filename)
         #end = timeit.default_timer()
         #print end - start
         gp.evaluate()

@@ -21,7 +21,8 @@ class PerceptronLearner():
         logging.debug("Starting sequantial train...")
         for i in range(max_iter):
             logging.debug("Iteration: %d" % i)
-            
+            logging.debug("Data size: %d" % len(data_pool.data_list))
+ 
             while data_pool.has_next_data():
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.gold_global_vector
