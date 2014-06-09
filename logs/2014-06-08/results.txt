@@ -8,14 +8,19 @@ Testing data: section 0,1,22,24
 
 Iteration 0:
 06/08/2014 12:46:56 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_Iter_0.db
-06/08/2014 02:45:44 PM INFO: Unlabeled accuracy: 0.862721036312 (144121 / 167054)
+06/08/2014 02:45:44 PM INFO: Unlabeled accuracy: 0.862721036312 (144121, 167054)
 
 Iteration 1:
 06/08/2014 02:23:11 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/results/perceptron_Iter_0.db
 06/08/2014 04:43:19 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_0_Iter_0.db
-06/08/2014 05:33:35 PM INFO: Unlabeled accuracy: 0.873286482215 (145886 / 167054)
+06/08/2014 05:33:35 PM INFO: Unlabeled accuracy: 0.873286482215 (145886, 167054)
 
 Iteration 2:
 06/08/2014 06:39:59 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_1_Iter_0.db
 06/08/2014 06:39:59 PM DEBUG: Total Feature Num: 9688890
+06/08/2014 07:12:02 PM INFO: Unlabeled accuracy: 0.878709878243 (146792, 167054)
+
+Iteration 3:
+06/08/2014 08:22:06 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_1_Iter_1.db
+06/08/2014 08:22:06 PM DEBUG: Total Feature Num: 9848843
 
