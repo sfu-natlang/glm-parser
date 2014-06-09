@@ -33,7 +33,7 @@ class AveragePerceptronLearner():
         
         # for t = 1 ... T
         for t in range(max_iter): 
-            logging.debug("Iteration: %d" % t)
+            logging.debug("Iteration: %d ..." % t)
 
             # for i = 1 ... m
             while data_pool.has_next_data():

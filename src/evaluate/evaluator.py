@@ -36,6 +36,7 @@ class Evaluator():
 
     def evaluate(self, data_pool, parser, w_vector):
         logging.debug("Start evaluating ...")
+        logging.info("Feature count: %d" % len(w_vector.data_dict))
         while data_pool.has_next_data():  
             sent = data_pool.get_next_data()
             

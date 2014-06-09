@@ -21,6 +21,7 @@ class GlmParser():
         self.test_data_pool = DataPool(test_section, data_path)
         
         self.parser = EisnerParser()
+        #self.learner = AveragePerceptronLearner(self.w_vector, max_iter)
         self.learner = PerceptronLearner(self.w_vector, max_iter)
         self.evaluator = Evaluator()
         
