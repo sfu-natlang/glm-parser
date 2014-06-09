@@ -37,7 +37,7 @@ class GlmParser():
     
     def evaluate(self, test_section=[]):
         if not test_section == []:
-            test_data_pool = DataPool(test_section, data_path)
+            test_data_pool = DataPool(test_section, self.data_path)
         else:
             test_data_pool = self.test_data_pool
 
