@@ -14,3 +14,7 @@ Iteration 1:
 06/08/2014 02:23:11 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/results/perceptron_Iter_0.db
 06/08/2014 04:43:19 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_0_Iter_0.db
 06/08/2014 05:33:35 PM INFO: Unlabeled accuracy: 0.873286482215 (145886 / 167054)
+
+Iteration 2:
+06/08/2014 06:39:59 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_1_Iter_0.db
+
