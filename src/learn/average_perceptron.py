@@ -69,6 +69,9 @@ class AveragePerceptronLearner():
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
             data_pool.reset()
+
+            if not d_filename == None:
+                self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
         
         self.w_vector.data_dict.clear()
         self.w_vector.data_dict.iaddc(self.weight_sum_dict, 1/self.c)
