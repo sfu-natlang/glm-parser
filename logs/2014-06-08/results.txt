@@ -17,4 +17,5 @@ Iteration 1:
 
 Iteration 2:
 06/08/2014 06:39:59 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/perceptron_1_Iter_0.db
+06/08/2014 06:39:59 PM DEBUG: Total Feature Num: 9688890
 
