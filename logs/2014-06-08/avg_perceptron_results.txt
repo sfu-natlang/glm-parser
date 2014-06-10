@@ -1,0 +1,25 @@
+Training method: average perceptron
+
+Training data: section 02-21
+Data size: 39832
+
+
+Testing data: section 0,1,22,24
+
+Iteration 1:
+06/09/2014 04:40:13 AM DEBUG: Dumping Weight Vector to /global/scratch/yulanh/results/avg_perceptron_Iter_0.db
+06/09/2014 04:40:13 AM DEBUG: Total Feature Num: 8922842
+
+Iteration 2:
+06/09/2014 06:19:00 AM DEBUG: Dumping Weight Vector to /global/scratch/yulanh/results/avg_perceptron_Iter_1.db
+06/09/2014 06:19:00 AM DEBUG: Total Feature Num: 9423694
+
+Iteration 3:
+06/09/2014 07:59:13 AM DEBUG: Dumping Weight Vector to /global/scratch/yulanh/results/avg_perceptron_Iter_2.db
+06/09/2014 07:59:13 AM DEBUG: Total Feature Num: 9688890
+
+Iteration 4:
+06/09/2014 09:42:40 AM DEBUG: Dumping Weight Vector to /global/scratch/yulanh/results/avg_perceptron_Iter_3.db
+06/09/2014 09:42:40 AM DEBUG: Total Feature Num: 9848843
+
+Iteration 5:
