@@ -6,7 +6,7 @@ from libcpp cimport bool
 from libc.stdlib cimport malloc, calloc, free
 
 cdef struct EisnerNode:
-    int score
+    float score
     int mid_index
     
 #TODO try size_t
@@ -65,12 +65,12 @@ cdef class EisnerParser:
             s = modifier
             t = head
             
-        cdef int edge_score = arc_weight(sent.get_local_vector(head, modifier))
+        cdef float edge_score = arc_weight(sent.get_local_vector(head, modifier))
         cdef int max_index = s
-        cdef int max_score = \
+        cdef float max_score = \
             self.e[s][s][1][0].score + self.e[s+1][t][0][0].score + edge_score
 
-        cdef int cur_score
+        cdef float cur_score
         for q from s < q < t by 1:
             cur_score = self.e[s][q][1][0].score + self.e[q+1][t][0][0].score + edge_score
             if max_score < cur_score:
@@ -84,9 +84,9 @@ cdef class EisnerParser:
             print "invalid head and modifier for combine left!!!"
         
         cdef int max_index = s
-        cdef int max_score = self.e[s][s][0][0].score + self.e[s][t][0][1].score
+        cdef float max_score = self.e[s][s][0][0].score + self.e[s][t][0][1].score
 
-        cdef int cur_score
+        cdef float cur_score
         cdef int q
         for q from s < q < t by 1:
             cur_score = self.e[s][q][0][0].score + self.e[q][t][0][1].score
@@ -102,9 +102,9 @@ cdef class EisnerParser:
             print "invalid head and modifier for combine right!!!"
         
         cdef int max_index = s+1
-        cdef int max_score = self.e[s][s+1][1][1].score + self.e[s+1][t][1][0].score
+        cdef float max_score = self.e[s][s+1][1][1].score + self.e[s+1][t][1][0].score
 
-        cdef int cur_score
+        cdef float cur_score
         cdef int q
         for q from s+1 < q <= t by 1:
             cur_score = self.e[s][q][1][1].score + self.e[q][t][1][0].score
