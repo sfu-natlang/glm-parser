@@ -89,7 +89,7 @@ class AveragePerceptronLearner():
 
     def avg_weight(self, w_vector, count):
         if count > 0:
-            w_vector.data_dict.iaddc(self.weight_sum_dict, count)
+            w_vector.data_dict.iaddc(self.weight_sum_dict, 1/count)
         
     def dump_vector(self, d_filename, i):
         d_vector = WeightVector()
