@@ -54,7 +54,7 @@ class AveragePerceptronLearner():
                         # for each dimension s in delta_global_vector 
                         for s in delta_global_vector.keys():
                             self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
-                            self.last_change_dict[s] += 1
+                            self.last_change_dict[s] = self.c
                         
                         # update weight and weight sum
                         self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
