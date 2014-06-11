@@ -1,7 +1,9 @@
 from __future__ import division
 import logging
+import multiprocessing
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
+from weight.weight_vector import *
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
@@ -38,7 +40,6 @@ class AveragePerceptronLearner():
 
             # for i = 1 ... m
             while data_pool.has_next_data():
-            #for k in range(2):
                 
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
@@ -46,9 +47,8 @@ class AveragePerceptronLearner():
                 current_global_vector = f_argmax(data_instance)
                 delta_global_vector = gold_global_vector - current_global_vector
                 
-                # if t != T or i != m
-                if not t == max_iter-1 or data_pool.has_next_data():
-
+                # update every iteration (more convenient for dump)
+                if data_pool.has_next_data():
                     # i yi' != yi
                     if not current_global_vector == gold_global_vector:
                         # for each dimension s in delta_global_vector 
@@ -59,22 +59,40 @@ class AveragePerceptronLearner():
                         # update weight and weight sum
                         self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
-                        self.c += 1
+
                 else:
                     for s in self.last_change_dict.keys():
                         self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
-
+                        self.last_change_dict[s] = self.c
+                        
                     if not current_global_vector == gold_global_vector:
                         self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
+                self.c += 1
+                
             data_pool.reset()
+
+            if not d_filename == None:
+                p_fork = multiprocessing.Process(
+                    target=self.dump_vector,
+                    args=(d_filename, t))
+                
+                p_fork.start()
+                #self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
         
         self.w_vector.data_dict.clear()
-        self.w_vector.data_dict.iaddc(self.weight_sum_dict, 1/self.c)
-        
-        if not d_filename == None:
-            self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
-        
+
+        self.avg_weight(self.w_vector, self.c-1)
+
         return
-                     
+
+    def avg_weight(self, w_vector, count):
+        if count > 0:
+            w_vector.data_dict.iaddc(self.weight_sum_dict, count)
+        
+    def dump_vector(self, d_filename, i):
+        d_vector = WeightVector()
+        self.avg_weight(d_vector, self.c-1)
+        d_vector.dump(d_filename + "_Iter_%d.db"%i)
+        d_vector.data_dict.clear()
