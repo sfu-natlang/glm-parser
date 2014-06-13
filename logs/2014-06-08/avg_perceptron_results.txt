@@ -34,11 +34,12 @@ Iteration 5:
 Iteration 6:
 06/12/2014 03:21:36 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_5.db
 06/12/2014 03:21:36 PM DEBUG: Total Feature Num: 10034841
-06/13/2014 01:14:07 AM INFO: Unlabeled accuracy: 0.908843846900 (151826, 167054)
+06/13/2014 01:14:07 AM INFO: Unlabeled accuracy: 0.908843846900 (151826, 167054)  <-- highest for now
 
 Iteration 7:
 06/12/2014 06:25:36 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_6.db
 06/12/2014 06:25:36 PM DEBUG: Total Feature Num: 10092868
+06/13/2014 01:37:29 AM INFO: Unlabeled accuracy: 0.908233265890 (151724, 167054)
 
 Iteration 8:
 06/12/2014 09:30:19 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_7.db
