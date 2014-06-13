@@ -20,5 +20,24 @@ Iteration 3:
 06/12/2014 06:12:41 AM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_2.db
 06/12/2014 06:12:41 AM DEBUG: Total Feature Num: 9688890
 
+Iteration 4:
+06/12/2014 09:14:40 AM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_3.db
+06/12/2014 09:14:40 AM DEBUG: Total Feature Num: 9848843
+
+Iteration 5:
+06/12/2014 12:17:43 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_4.db
+06/12/2014 12:17:43 PM DEBUG: Total Feature Num: 9958684
+
+Iteration 6:
+06/12/2014 03:21:36 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_5.db
+06/12/2014 03:21:36 PM DEBUG: Total Feature Num: 10034841
+
+Iteration 7:
+06/12/2014 06:25:36 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_6.db
+06/12/2014 06:25:36 PM DEBUG: Total Feature Num: 10092868
+
+Iteration 8:
+06/12/2014 09:30:19 PM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_7.db
+06/12/2014 09:30:19 PM DEBUG: Total Feature Num: 10138664
 
 
