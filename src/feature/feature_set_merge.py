@@ -31,7 +31,7 @@ if __name__ == "__main__":
     iteration = '0'
     
     try:
-        opt_spec = "hb:e:i:x:y:o:p:"
+        opt_spec = "h:b:e:i:x:y:o:p:"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
         for opt, value in opts:
             if opt == "-h":
