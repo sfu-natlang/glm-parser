@@ -54,3 +54,5 @@ Iteration 9:
 Iteration 10:
 06/13/2014 03:25:16 AM DEBUG: Dumping Weight Vector to /cs/natlang-projects/glm-parser/results/avg_perceptron_Iter_9.db
 06/13/2014 03:25:16 AM DEBUG: Total Feature Num: 10204381
+06/13/2014 10:30:27 AM INFO: Unlabeled accuracy: 0.908376932010 (151748, 167054)
+
