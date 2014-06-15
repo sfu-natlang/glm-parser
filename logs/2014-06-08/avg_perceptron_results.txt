@@ -2,6 +2,8 @@ Training method: average perceptron
 
 Training data: section 02-21
 Data size: 39832
+Highest dependency accuracy: 0.908843846900 (151826, 167054)
+Unlabeled Attachment Accuracy: 0.91248979967 (158786, 174014)
 
 
 Testing data: section 0,1,22,24
