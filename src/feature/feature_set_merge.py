@@ -8,6 +8,7 @@ script for merge feature sets
 Options:
     -b:     set begin section
     -e:     set end section
+    -h:     display help message
     -i:     set iteration
     -p:     set the path db file exists (not used for x,y)
     (the three parameters are used to generate the db file names)
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     iteration = '0'
     
     try:
-        opt_spec = "h:b:e:i:x:y:o:p:"
+        opt_spec = "hb:e:i:x:y:o:p:"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
         for opt, value in opts:
             if opt == "-h":
