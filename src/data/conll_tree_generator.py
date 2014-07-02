@@ -14,7 +14,7 @@ class ConllTreeGenerator():
     def generate_conll_trees(self, dump=False):
         for section in self.section_list:
             for tree_filename in os.listdir(self.tree_path + "%02d" % section):
-                
+                print tree_filename
                 conll_file = self.conll_path + "%02d/" % section + tree_filename + ".3.pa.gs.tab"
                 tree_file = self.tree_path + "%02d/" % section + tree_filename
                 self.load_trees(tree_file)
@@ -34,16 +34,36 @@ class ConllTreeGenerator():
             print "Incompatible parsing tree and conll data !!!"
             return
 
+        # TODO organize the code and make it more clear
+        trans_dict = TreeConllTranslateDict() 
         sent_conll_tree_list = []
         for i in range(len(self.conll_list)):
+            print i
             sent_conll = self.conll_list[i]
             sent_tree = self.tree_list[i]
             sent_conll_tree = []
-            for w in range(len(sent_conll)):
-                # index not includes root
-                head = sent_conll[w][2]-1
-                modifier = w
 
+            tree_words = sent_tree.leaves()
+            conll_words = [r[0] for r in sent_conll]
+            #print tree_words
+            #print conll_words
+            modifier = -1
+            for w in range(len(sent_conll)):
+                # index not includes root, assume no punctuation as header
+                modifier += 1
+
+                while not tree_words[modifier] == conll_words[w]:
+                    if trans_dict.has_key(tree_words[modifier]) and trans_dict[tree_words[modifier]] == conll_words[w]:
+                        break
+                    modifier += 1
+
+                head = sent_conll[w][2]-1
+                while not tree_words[head] == conll_words[sent_conll[w][2]-1] or head == modifier:
+                    if trans_dict.has_key(tree_words[head]) and trans_dict[tree_words[head]] == conll_words[sent_conll[w][2]-1]:
+                        break
+                    head += 1
+
+                #print head, tree_words[head], modifier, tree_words[modifier]
                 if head < 0:
                     head_treeposition = ()
                 else:
@@ -64,6 +84,7 @@ class ConllTreeGenerator():
                 sent_conll_tree.append(sent_conll[w]+[spine, n])
 
             for word in sent_conll_tree:
+                #print word
                 head = word[2] - 1 # not include the ROOT
                 if head < 0:
                     word.append('_')
@@ -75,6 +96,7 @@ class ConllTreeGenerator():
 
         if not dump_filename == "":
             self.write_file(dump_filename, sent_conll_tree_list)
+
 
             
     def write_file(self, filename, sent_conll_tree_list):
@@ -149,6 +171,20 @@ class ConllTreeGenerator():
         self.conll_list = sent_list
 
 
+class TreeConllTranslateDict():
+    """translation dict from tree word to conll word"""
+    def __init__(self):
+        self.trans_dict = {}
+        self.trans_dict["-LCB-"] = "{"
+        self.trans_dict["-RCB-"] = "}"
+        self.trans_dict["-LRB-"] = "("
+        self.trans_dict["-RRB-"] = ")"
+
+    def __getitem__(self,index):
+        return self.trans_dict[index]
+
+    def has_key(self,index):
+        return self.trans_dict.has_key(index)
 
 if __name__ == "__main__":
     ctg = ConllTreeGenerator("../../../penn-wsj-deps/", "../../../wsj/", "../../../wsj_conll_tree/", [0])
@@ -165,6 +201,7 @@ if __name__ == "__main__":
     #    print m
     #self.load_trees("../../../wsj/00/wsj_0001.mrg")
     #self.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
-    #ctg.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
-    #ctg.load_trees("../../../wsj/00/wsj_0001.mrg")
+    #ctg.load_conll("../../../penn-wsj-deps/00/wsj_0071.mrg.3.pa.gs.tab")
+    #ctg.load_trees("../../../wsj/00/wsj_0071.mrg")
+    #ctg.tree_list[29].draw()
     ctg.generate_conll_trees(True)
