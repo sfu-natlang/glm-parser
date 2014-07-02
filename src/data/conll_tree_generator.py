@@ -58,57 +58,6 @@ class ConllTreeGenerator():
 			return Tree(tree.node, [subpath])
 
 
-	def generate_conll_tree1(self):
-		"""
-			Assuming the order of sentences in ptree_list and conll_list are the same
-		"""
-		if not len(self.tree_list) == len(self.conll_list):
-			print "Incompatible parsing tree and conll data !!!"
-			return
-
-		for i in range(len(self.conll_list)):
-			sent_conll = self.conll_list[i]
-			sent_paths = self.get_root_path(self.tree_list[i])
-			sent_spines = []
-
-			for w in range(len(sent_conll)):
-				# index not includes root
-				spine = self.get_spine(sent_conll[w][2]-1, w, sent_paths)
-				print spine
-				sent_spines.append(spine)
-
-			#for a in sent_paths:
-			#	print(a)
-			print 
-			self.tree_list[i].draw()
-
-	def get_spine1(self, head, modifier, sent_paths):
-		if head == -1:
-			return sent_paths[modifier]
-		
-		print head, modifier
-		head_spine = sent_paths[head]
-		modifier_spine = sent_paths[modifier]
-		
-		print head_spine
-		print modifier_spine
-		if head_spine.height() <= 2:
-
-			print "Error in get spine!!! Head_spine Height less than 3!!"
-			#print head, modifier
-			#print head_spine
-			return
-
-		while head_spine.node == modifier_spine.node:
-			if modifier_spine.height() < 3:
-				# the smallest spine is the word plus its POS tag
-				return modifier_spine
-
-			head_spine = head_spine[0]
-			modifier_spine = modifier_spine[0]
-
-		return modifier_spine
-
 	def load_trees(self, filename):
 		tree_list = []
 
@@ -151,24 +100,6 @@ class ConllTreeGenerator():
 					sent = []
 
 		self.conll_list += sent_list
-
-	def get_root_path(self, subtree):
-		spine_list = []
-
-		if subtree.height() == 2:
-			return [subtree]
-		else:
-			for child in subtree:
-				spine_list += self.get_root_path(child)
-			
-			spine_list = [Tree(subtree.node, [child])  
-				#if type(child) == str or not subtree.node == child.node else child
-				for child in spine_list ]
-
-		return spine_list
-
-
-
 
 
 
