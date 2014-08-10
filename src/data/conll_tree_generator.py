@@ -69,17 +69,28 @@ class ConllTreeGenerator():
 
             leaf_node = self.find_leaf_node(modifier, sent_tree)
 
-            self.generate_spine(leaf_node, len(modifier_treeposition), -1, '_', sent_conll, sent_conll_tree)
+            self.generate_spine(leaf_node, len(modifier_treeposition), '_', '_', sent_conll, sent_conll_tree)
+            sent_conll_tree.sort(key=lambda tup: tup[0]) 
+            sent_conll_tree_list.append(sent_conll_tree)
 
-    def generate_spine(self, sub_spine, spine_len, r_count, join_position, sent_conll, sent_conll_tree):
+        #print sent_conll_tree_list
+        if not dump_filename == "":
+            self.write_file(dump_filename, sent_conll_tree_list)
+
+    def generate_spine(self, sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree):
         while not sub_spine.height() == spine_len:
-            sub_spine, r_count, join_position, spine_len = self.recursive_generate_spine(sub_spine, spine_len, r_count, join_position, sent_conll, sent_conll_tree)
+            sub_spine, adjoin_type, join_position, spine_len = self.recursive_generate_spine(sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree)
         #sub_spine.draw()
-        sent_conll_tree.append((sub_spine, r_count, join_position))
+        sent_index = sub_spine.leaves()[0][0]     # start from 1 considering ROOT
+        sent_conll_row = sent_conll[sent_index-1] # sent_index start from 0 in the sent_conll
 
-    def recursive_generate_spine(self, sub_spine, spine_len, r_count, join_position, sent_conll, sent_conll_tree):
+        word, tag, sub_spine = self.remove_tag_word(sub_spine)
+        sent_conll_tree.append((sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type))
+
+    def recursive_generate_spine(self, sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree):
         """
-            r_count --- the order of the r-adjoin (-1 if it is s-adjoin)
+            adjoin_type --- flag indicates if the node has r-adjoin before it in the same level,
+                        -1 if it is s-adjoin, 0 if it is the 1st r-adjoin, 1 if it is r-adjoin but not the 1st one)
             join_position --- the height in the head spine that the modifier adjoins (before any r-adjoin)
             sent_conll_tree --- store the results
         """
@@ -93,6 +104,7 @@ class ConllTreeGenerator():
 
         if not self.is_r_adjoin(spine, sub_spine):   
 
+            # s-adjoin
             j = len(spine) - 1  
 
             while j >= 0 :
@@ -108,12 +120,14 @@ class ConllTreeGenerator():
                 
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
                 child_join_position = sub_spine.height() + 1  
-                child_r_count = -1  
+                child_adjoin_type = "s"
 
-                self.generate_spine(child_sub_spine, child_spine_len, child_r_count, child_join_position, sent_conll, sent_conll_tree)
+                self.generate_spine(child_sub_spine, child_spine_len, child_adjoin_type, child_join_position, sent_conll, sent_conll_tree)
                 j = j - 1
         
         else:
+
+            # r-adjoin
             j = len(spine) - 1
 
             while j >= 0:
@@ -122,13 +136,16 @@ class ConllTreeGenerator():
                     j = j - 1
                     continue
 
+                if spine[j] == sub_spine.left_sibling() or spine[j] == sub_spine.right_sibling():
+                    child_adjoin_type = "r-0"
+                else:
+                    child_adjoin_type = "r-1"
                 spine.remove(spine[j])
-                    
+                #print child_adjoin_type
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
                 child_join_position = sub_spine.height()
-                child_r_count = r_count + 1
 
-                self.generate_spine(child_sub_spine, child_spine_len, child_r_count, child_join_position, sent_conll, sent_conll_tree)
+                self.generate_spine(child_sub_spine, child_spine_len, child_adjoin_type, child_join_position, sent_conll, sent_conll_tree)
                 j = j - 1
                 
             # remove the node added by r adjoinction
@@ -136,7 +153,7 @@ class ConllTreeGenerator():
             spine_len = spine_len - 1
 
 
-        return spine, r_count, join_position, spine_len
+        return spine, adjoin_type, join_position, spine_len
 
     def is_r_adjoin(self, spine, sub_spine):
         # no adj node:
@@ -208,16 +225,34 @@ class ConllTreeGenerator():
 
         fp = open(filename,"w")
         for sent_conll_tree in sent_conll_tree_list:
-            i = 1
+
             for row in sent_conll_tree:
-                fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    %s    %s\n"
-                    % (i,row[0],row[1],row[1],row[2],row[3],row[4].pprint(),str(row[6])))
-                i += 1
+                # sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type
+                #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1
+
+                #print spine
+                fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s\n"
+                    % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7]))
+
                 #row[4] = row[4].pprint()  
                 #row = [str(k) for k in row]              
                 #fp.write("    ".join(row) + "\n")
             fp.write("\n")
         fp.close()
+
+    def remove_tag_word(self, spine):
+        # if nothing went wrong, the spine would contain both word and tag
+        treeposition = spine.leaf_treeposition(0)
+        word = spine.leaves()[0][1]
+        tag = spine[treeposition[:-1]].node
+
+        if len(treeposition) == 2:
+            spine = ParentedTree("",[])
+        else:
+            sub_spine = spine[treeposition[:-2]]
+            sub_spine.pop()
+
+        return word, tag, spine
 
     def get_spine(self, treeposition, tree):
         # assume one word per pos tag
