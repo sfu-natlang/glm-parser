@@ -2,13 +2,14 @@ from nltk.tree import *
 import os
 
 class ConllTreeGenerator():
-    def __init__(self, conll_path, tree_path, dump_path, section_list=[]):
+    def __init__(self, conll_path, tree_path, dump_path, section_list=[], is_rm_none_word=True, is_lossy=False):
         self.section_list = section_list;
         self.conll_path = conll_path
         self.tree_path = tree_path
         self.dump_path = dump_path
 
-        self.is_rm_none_word = True
+        self.is_rm_none_word = is_rm_none_word
+        self.is_lossy = is_lossy
         return
 
     def generate_conll_trees(self, dump=False):
@@ -166,13 +167,13 @@ class ConllTreeGenerator():
             return True
 
         # Tree adj node without left sub sibling but with left sibling (same as right):
-        if (spine.left_sibling() and not sub_spine.left_sibling()) or (spine.right_sibling() and not sub_spine.right_sibling()):
-            print "Tree adj node without left sub sibling but with left sibling (same as right)"
-            return False
+        if self.is_lossy == False:
+            if (spine.left_sibling() and not sub_spine.left_sibling()) or (spine.right_sibling() and not sub_spine.right_sibling()):
+                print "Tree adj node without left sub sibling but with left sibling (same as right)"
+                return False
 
-        else:
-            print "r-adjoin"
-            return True
+        print "r-adjoin"
+        return True
 
     def change_tree(self, tree_to_remove, tree_to_add):
         parent_tree = tree_to_remove.parent()
@@ -381,7 +382,10 @@ options:
     -d:     path to dump conll_tree format
             (Including prefix of name
             i.e. Weight, the file name would be Weight_Iter_1.db)
-    
+    -n:     not remove nonword leaf
+            (otherwise, the nonword leaf would be removed)
+    -l:     lossy extraction
+
 """
 
 if __name__ == "__main__":
@@ -392,14 +396,20 @@ if __name__ == "__main__":
     conll_path = "../../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     tree_path = "../../../wsj/"
     d_filename = "../../../wsj_conll_tree/"
+    is_rm_none_word = True
+    is_lossy = False
 
     try:
-        opt_spec = "hb:e:c:t:d:"
+        opt_spec = "hb:e:c:t:d:nl"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
         for opt, value in opts:
             if opt == "-h":
                 print HELP_MSG
                 sys.exit(0)
+            elif opt == "-n":
+                is_rm_none_word = False
+            elif opt == "-l":
+                is_lossy = True
             elif opt == "-b":
                 sec_begin = int(value)
             elif opt == "-e":
@@ -416,25 +426,7 @@ if __name__ == "__main__":
 
         if sec_begin >= 0 and sec_end >= 0:
             extract_sec = range(sec_begin, sec_end+1)
-            ctg = ConllTreeGenerator(conll_path, tree_path, d_filename, extract_sec)
-            #ctg.ptree_list[0]
-            #tree0 = Tree('NP',['hellp'])
-            #tree1 = Tree('PP',['with'])
-            #tree3 = Tree('ASP', [tree0, tree1])
-            #spine_list = ctg.get_root_path(ctg.tree_list[0])
-            #for i in spine_list:
-            #    print(i)
-            #ctg.tree_list[0].draw()
-            #a = ctg.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
-            #for m in a:
-            #    print m
-            #ctg.load_trees("../../../wsj/55/wsj_0110.mrg")
-            #ctg.remove_nonword()
-            #ctg.tree_list[0].draw()
-            #self.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
-            #ctg.load_conll("../../../penn-wsj-deps/00/wsj_0071.mrg.3.pa.gs.tab")
-            #ctg.load_trees("../../../wsj/00/wsj_0071.mrg")
-            #ctg.tree_list[0].draw()
+            ctg = ConllTreeGenerator(conll_path, tree_path, d_filename, extract_sec, is_rm_none_word, is_lossy)
             ctg.generate_conll_trees(True)
 
     except getopt.GetoptError, e:
