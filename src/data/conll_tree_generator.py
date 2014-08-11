@@ -27,19 +27,7 @@ class ConllTreeGenerator():
                 if self.is_rm_none_word:
                     self.remove_nonword()
 
-                #print "print tree list"
-                #print self.tree_list
-                #for tree in self.tree_list:
-                #    print tree.pprint()
-                #print "finished ... "
-
                 self.enumerate_leaves()
-
-                #print "print tree list"
-                #print self.tree_list
-                #for tree in self.tree_list:
-                #    print tree.pprint()
-                #print "after enumerate finished ... "
 
                 dump_filename = ""
                 if dump == True:
@@ -86,7 +74,6 @@ class ConllTreeGenerator():
             sent_conll_tree.sort(key=lambda tup: tup[0]) 
             sent_conll_tree_list.append(sent_conll_tree)
 
-        #print sent_conll_tree_list
         if not dump_filename == "":
             self.write_file(dump_filename, sent_conll_tree_list)
 
@@ -94,8 +81,6 @@ class ConllTreeGenerator():
         while not sub_spine.height() == spine_len:
             sub_spine, adjoin_type, join_position, spine_len = self.recursive_generate_spine(sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree)
         
-        #sub_spine.draw()
-        #print sub_spine.pprint()
         sent_index = sub_spine.leaves()[0][0]     # start from 1 considering ROOT
         sent_conll_row = sent_conll[sent_index-1] # sent_index start from 0 in the sent_conll
 
@@ -114,9 +99,8 @@ class ConllTreeGenerator():
             print "error the spine is too short"
             return
         
-        #print sub_spine.pprint()
         spine = sub_spine.parent() # height at least 3
-        #print spine.pprint()
+
         if not self.is_r_adjoin(spine, sub_spine):   
 
             # s-adjoin
@@ -130,9 +114,8 @@ class ConllTreeGenerator():
                 if spine[j] == sub_spine:
                     j = j - 1
                     continue
-                #print spine.pprint()
+
                 spine.remove(spine[j])
-                #print spine.pprint()
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
                 child_join_position = sub_spine.height() - 1 #  + 1 - 2
                 child_adjoin_type = "s"
@@ -157,8 +140,8 @@ class ConllTreeGenerator():
                     child_adjoin_type = "r-0"
                 else:
                     child_adjoin_type = "r-1"
+
                 spine.remove(spine[j])
-                #print child_adjoin_type
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
                 child_join_position = sub_spine.height() - 2 # the height that the child join to, first node as height 1
 
@@ -218,19 +201,15 @@ class ConllTreeGenerator():
             leaf_index is the index in the tree passed into the function
         """
         node = tree
-        #print tree.pprint()
         if node.height() <= 2:
             return node
 
         treeposition = tree.leaf_treeposition(leaf_index)
 
-        #print treeposition
         for i in treeposition:
             node = node[i]
-            #print node
             if node.height() <= 2:
                 break
-        #print node.pprint()
         return node
 
     def write_file(self, filename, sent_conll_tree_list):
@@ -247,13 +226,9 @@ class ConllTreeGenerator():
                 # sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type
                 #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1
 
-                #print spine
                 fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s\n"
                     % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7]))
 
-                #row[4] = row[4].pprint()  
-                #row = [str(k) for k in row]              
-                #fp.write("    ".join(row) + "\n")
             fp.write("\n")
         fp.close()
 
@@ -262,7 +237,7 @@ class ConllTreeGenerator():
         treeposition = spine.leaf_treeposition(0)
         word = spine.leaves()[0][1]
         tag = spine[treeposition[:-1]].node
-        #print treeposition
+
         if len(treeposition) == 1:
             spine = ParentedTree("",[])
         else:
@@ -276,7 +251,7 @@ class ConllTreeGenerator():
             return tree
         else:
             subpath = self.get_spine(treeposition[1:], tree[treeposition[0]])
-            #print subpath
+
             return Tree(tree.node, [subpath])
 
     def enumerate_leaves(self):
@@ -385,25 +360,83 @@ class TreeConllTranslateDict():
     def has_key(self,index):
         return self.trans_dict.has_key(index)
 
-if __name__ == "__main__":
-    ctg = ConllTreeGenerator("../../../penn-wsj-deps/", "../../../wsj/", "../../../wsj_conll_tree/", [0])
-    #ctg.ptree_list[0]
-    tree0 = Tree('NP',['hellp'])
-    tree1 = Tree('PP',['with'])
-    tree3 = Tree('ASP', [tree0, tree1])
-    #spine_list = ctg.get_root_path(ctg.tree_list[0])
-    #for i in spine_list:
-    #    print(i)
-    #ctg.tree_list[0].draw()
-    #a = ctg.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
-    #for m in a:
-    #    print m
-    #ctg.load_trees("../../../wsj/55/wsj_0110.mrg")
-    #ctg.remove_nonword()
-    #ctg.tree_list[0].draw()
-    #self.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
-    #ctg.load_conll("../../../penn-wsj-deps/00/wsj_0071.mrg.3.pa.gs.tab")
-    #ctg.load_trees("../../../wsj/00/wsj_0071.mrg")
-    #ctg.tree_list[0].draw()
-    ctg.generate_conll_trees(True)
+
+HELP_MSG =\
+"""
+
+script for extract spine from penn-wsj-dep
+
+options:
+    -h:     help message
     
+    -b:     begining section 
+    -e:     ending section 
+    (   training would not be processed
+        unless both begin and ending section is specfied    )
+    
+    -c:     path to penn-wsj-dep, default: "./penn-wsj-deps/"
+
+    -t:     path to wsj parsed tree, default: "./wsj/"
+            
+    -d:     path to dump conll_tree format
+            (Including prefix of name
+            i.e. Weight, the file name would be Weight_Iter_1.db)
+    
+"""
+
+if __name__ == "__main__":
+    import getopt, sys
+    
+    sec_begin = -1
+    sec_end = -1
+    conll_path = "../../../penn-wsj-deps/"  #"./penn-wsj-deps/"
+    tree_path = "../../../wsj/"
+    d_filename = "../../../wsj_conll_tree/"
+
+    try:
+        opt_spec = "hb:e:c:t:d:"
+        opts, args = getopt.getopt(sys.argv[1:], opt_spec)
+        for opt, value in opts:
+            if opt == "-h":
+                print HELP_MSG
+                sys.exit(0)
+            elif opt == "-b":
+                sec_begin = int(value)
+            elif opt == "-e":
+                sec_end = int(value)
+            elif opt == "-c":
+                conll_path = value
+            elif opt == "-t":
+                tree_path = value
+            elif opt == "-d":
+                d_filename = value
+            else:
+                print "invalid input, see -h"
+                sys.exit(0)
+
+        if sec_begin >= 0 and sec_end >= 0:
+            extract_sec = range(sec_begin, sec_end+1)
+            ctg = ConllTreeGenerator(conll_path, tree_path, d_filename, extract_sec)
+            #ctg.ptree_list[0]
+            #tree0 = Tree('NP',['hellp'])
+            #tree1 = Tree('PP',['with'])
+            #tree3 = Tree('ASP', [tree0, tree1])
+            #spine_list = ctg.get_root_path(ctg.tree_list[0])
+            #for i in spine_list:
+            #    print(i)
+            #ctg.tree_list[0].draw()
+            #a = ctg.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
+            #for m in a:
+            #    print m
+            #ctg.load_trees("../../../wsj/55/wsj_0110.mrg")
+            #ctg.remove_nonword()
+            #ctg.tree_list[0].draw()
+            #self.load_conll("../../../penn-wsj-deps/00/wsj_0001.mrg.3.pa.gs.tab")
+            #ctg.load_conll("../../../penn-wsj-deps/00/wsj_0071.mrg.3.pa.gs.tab")
+            #ctg.load_trees("../../../wsj/00/wsj_0071.mrg")
+            #ctg.tree_list[0].draw()
+            ctg.generate_conll_trees(True)
+
+    except getopt.GetoptError, e:
+        print "invalid arguments!! \n" + HELP_MSG
+        sys.exit(1)
