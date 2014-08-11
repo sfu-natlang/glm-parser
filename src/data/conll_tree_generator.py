@@ -27,7 +27,19 @@ class ConllTreeGenerator():
                 if self.is_rm_none_word:
                     self.remove_nonword()
 
+                #print "print tree list"
+                #print self.tree_list
+                #for tree in self.tree_list:
+                #    print tree.pprint()
+                #print "finished ... "
+
                 self.enumerate_leaves()
+
+                #print "print tree list"
+                #print self.tree_list
+                #for tree in self.tree_list:
+                #    print tree.pprint()
+                #print "after enumerate finished ... "
 
                 dump_filename = ""
                 if dump == True:
@@ -49,6 +61,7 @@ class ConllTreeGenerator():
 
             # Every sentence 
             sent_conll = self.conll_list[i]
+            #print self.tree_list[i].pprint()
             sent_tree = self.tree_list[i].copy(True)
             sent_conll_tree = []
 
@@ -80,7 +93,9 @@ class ConllTreeGenerator():
     def generate_spine(self, sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree):
         while not sub_spine.height() == spine_len:
             sub_spine, adjoin_type, join_position, spine_len = self.recursive_generate_spine(sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree)
+        
         #sub_spine.draw()
+        #print sub_spine.pprint()
         sent_index = sub_spine.leaves()[0][0]     # start from 1 considering ROOT
         sent_conll_row = sent_conll[sent_index-1] # sent_index start from 0 in the sent_conll
 
@@ -99,9 +114,9 @@ class ConllTreeGenerator():
             print "error the spine is too short"
             return
         
-
+        #print sub_spine.pprint()
         spine = sub_spine.parent() # height at least 3
-
+        #print spine.pprint()
         if not self.is_r_adjoin(spine, sub_spine):   
 
             # s-adjoin
@@ -115,11 +130,11 @@ class ConllTreeGenerator():
                 if spine[j] == sub_spine:
                     j = j - 1
                     continue
-          
+                #print spine.pprint()
                 spine.remove(spine[j])
-                
+                #print spine.pprint()
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
-                child_join_position = sub_spine.height() + 1  
+                child_join_position = sub_spine.height() - 1 #  + 1 - 2
                 child_adjoin_type = "s"
 
                 self.generate_spine(child_sub_spine, child_spine_len, child_adjoin_type, child_join_position, sent_conll, sent_conll_tree)
@@ -129,6 +144,8 @@ class ConllTreeGenerator():
 
             # r-adjoin
             j = len(spine) - 1
+            left_sibling = sub_spine.left_sibling()
+            right_sibling = sub_spine.right_sibling()
 
             while j >= 0:
                 child_tree = spine[j]
@@ -136,14 +153,14 @@ class ConllTreeGenerator():
                     j = j - 1
                     continue
 
-                if spine[j] == sub_spine.left_sibling() or spine[j] == sub_spine.right_sibling():
+                if spine[j] == left_sibling or spine[j] == right_sibling:
                     child_adjoin_type = "r-0"
                 else:
                     child_adjoin_type = "r-1"
                 spine.remove(spine[j])
                 #print child_adjoin_type
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
-                child_join_position = sub_spine.height()
+                child_join_position = sub_spine.height() - 2 # the height that the child join to, first node as height 1
 
                 self.generate_spine(child_sub_spine, child_spine_len, child_adjoin_type, child_join_position, sent_conll, sent_conll_tree)
                 j = j - 1
@@ -201,7 +218,7 @@ class ConllTreeGenerator():
             leaf_index is the index in the tree passed into the function
         """
         node = tree
-
+        #print tree.pprint()
         if node.height() <= 2:
             return node
 
@@ -213,7 +230,7 @@ class ConllTreeGenerator():
             #print node
             if node.height() <= 2:
                 break
-
+        #print node.pprint()
         return node
 
     def write_file(self, filename, sent_conll_tree_list):
@@ -245,13 +262,12 @@ class ConllTreeGenerator():
         treeposition = spine.leaf_treeposition(0)
         word = spine.leaves()[0][1]
         tag = spine[treeposition[:-1]].node
-
-        if len(treeposition) == 2:
+        #print treeposition
+        if len(treeposition) == 1:
             spine = ParentedTree("",[])
         else:
             sub_spine = spine[treeposition[:-2]]
             sub_spine.pop()
-
         return word, tag, spine
 
     def get_spine(self, treeposition, tree):
@@ -290,10 +306,13 @@ class ConllTreeGenerator():
             tree_list.append(ParentedTree.parse(ptree))
         
         self.tree_list = tree_list
+        print "load tree finished"
 
     def remove_nonword(self):
         for tree in self.tree_list:
             _, tree = self.remove_nonword_leaf(tree)
+            #print tree.pprint()
+        print "remove nonword finished.."
 
     def remove_nonword_leaf(self, tree):
 
