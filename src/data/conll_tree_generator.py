@@ -71,7 +71,7 @@ class ConllTreeGenerator():
 
             leaf_node = self.find_leaf_node(modifier, sent_tree)
 
-            self.generate_spine(leaf_node, len(modifier_treeposition), '_', '_', sent_conll, sent_conll_tree)
+            self.generate_spine(leaf_node, len(modifier_treeposition), ('_','_'), '_', sent_conll, sent_conll_tree)
             sent_conll_tree.sort(key=lambda tup: tup[0]) 
             sent_conll_tree_list.append(sent_conll_tree)
 
@@ -101,6 +101,8 @@ class ConllTreeGenerator():
             return
         
         spine = sub_spine.parent() # height at least 3
+        left_sibling = sub_spine.left_sibling()
+        right_sibling = sub_spine.right_sibling()
 
         if not self.is_r_adjoin(spine, sub_spine):   
 
@@ -116,10 +118,16 @@ class ConllTreeGenerator():
                     j = j - 1
                     continue
 
+
+                if spine[j] == left_sibling or spine[j] == right_sibling:
+                    child_adjoin_type = ('s', 0)
+                else:
+                    child_adjoin_type = ('s', 1)
+
                 spine.remove(spine[j])
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
                 child_join_position = sub_spine.height() - 1 #  + 1 - 2
-                child_adjoin_type = "s"
+                #child_adjoin_type = "s"
 
                 self.generate_spine(child_sub_spine, child_spine_len, child_adjoin_type, child_join_position, sent_conll, sent_conll_tree)
                 j = j - 1
@@ -128,9 +136,6 @@ class ConllTreeGenerator():
 
             # r-adjoin
             j = len(spine) - 1
-            left_sibling = sub_spine.left_sibling()
-            right_sibling = sub_spine.right_sibling()
-
             while j >= 0:
                 child_tree = spine[j]
                 if spine[j] == sub_spine:
@@ -138,9 +143,9 @@ class ConllTreeGenerator():
                     continue
 
                 if spine[j] == left_sibling or spine[j] == right_sibling:
-                    child_adjoin_type = "r-0"
+                    child_adjoin_type = ('r', 0)
                 else:
-                    child_adjoin_type = "r-1"
+                    child_adjoin_type = ('r', 1)
 
                 spine.remove(spine[j])
                 child_sub_spine, child_spine_len = self.get_child_info(child_tree, sub_spine.leaves()[0][0], sent_conll)
@@ -225,10 +230,10 @@ class ConllTreeGenerator():
 
             for row in sent_conll_tree:
                 # sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type
-                #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1
+                #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1    s    0
 
-                fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s\n"
-                    % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7]))
+                fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                    % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
 
             fp.write("\n")
         fp.close()
