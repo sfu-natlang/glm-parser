@@ -244,6 +244,7 @@ class ConllTreeGenerator():
         else:
             sub_spine = spine[treeposition[:-2]]
             sub_spine.pop()
+            sub_spine.append(ParentedTree("",[]))
         return word, tag, spine
 
     def get_spine(self, treeposition, tree):
@@ -391,8 +392,8 @@ options:
 if __name__ == "__main__":
     import getopt, sys
     
-    sec_begin = -1
-    sec_end = -1
+    sec_begin = 0
+    sec_end = 0
     conll_path = "../../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     tree_path = "../../../wsj/"
     d_filename = "../../../wsj_conll_tree/"
