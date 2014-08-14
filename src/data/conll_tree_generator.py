@@ -2,7 +2,7 @@ from nltk.tree import *
 import os
 
 class ConllTreeGenerator():
-    def __init__(self, conll_path, tree_path, dump_path, section_list=[], is_rm_none_word=True, is_lossy=False):
+    def __init__(self, conll_path, tree_path, dump_path, section_list=[], is_rm_none_word=True, is_lossy=False, is_short_tag=True):
         self.section_list = section_list;
         self.conll_path = conll_path
         self.tree_path = tree_path
@@ -10,6 +10,7 @@ class ConllTreeGenerator():
 
         self.is_rm_none_word = is_rm_none_word
         self.is_lossy = is_lossy
+        self.is_short_tag = is_short_tag
         return
 
     def generate_conll_trees(self, dump=False):
@@ -24,9 +25,14 @@ class ConllTreeGenerator():
                 # load the files
                 self.load_trees(tree_file)
                 self.load_conll(conll_file)
+
                 # remove structure with none word leaf
                 if self.is_rm_none_word:
                     self.remove_nonword()
+
+                # shorthen the tags in a tree to make them consistent to the penn treebank
+                if self.is_short_tag:
+                    self.shorten_tag()
 
                 self.enumerate_leaves()
 
@@ -290,6 +296,20 @@ class ConllTreeGenerator():
         self.tree_list = tree_list
         print "load tree finished"
 
+    def shorten_tag(self):
+        for tree in self.tree_list:
+            self._shorten_tag(tree)
+
+    def _shorten_tag(self, tree):
+        if type(tree) == str:
+            return
+        else:
+            tag = tree.node.split("-")
+            tree.node = tag[0]
+            for sub_tree in tree:
+                self._shorten_tag(sub_tree)
+
+
     def remove_nonword(self):
         for tree in self.tree_list:
             _, tree = self.remove_nonword_leaf(tree)
@@ -386,11 +406,10 @@ options:
     -t:     path to wsj parsed tree, default: "./wsj/"
             
     -d:     path to dump conll_tree format
-            (Including prefix of name
-            i.e. Weight, the file name would be Weight_Iter_1.db)
     -n:     not remove nonword leaf
             (otherwise, the nonword leaf would be removed)
     -l:     lossy extraction
+    -s:     not shorten the tags
 
 """
 
@@ -404,6 +423,7 @@ if __name__ == "__main__":
     d_filename = "../../../wsj_conll_tree/"
     is_rm_none_word = True
     is_lossy = False
+    is_short_tag = True
 
     try:
         opt_spec = "hb:e:c:t:d:nl"
@@ -416,6 +436,8 @@ if __name__ == "__main__":
                 is_rm_none_word = False
             elif opt == "-l":
                 is_lossy = True
+            elif opt == "-s":
+                is_short_tag = False
             elif opt == "-b":
                 sec_begin = int(value)
             elif opt == "-e":
