@@ -316,7 +316,7 @@ if __name__ == "__main__":
     tree_path = "../../../wsj/"
     d_filename = "../../../wsj_conll_tree/lossy/"
     is_rm_none_word = True
-    is_lossy = True
+    is_lossy = False
     is_short_tag = True
 
     try:
