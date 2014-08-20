@@ -100,6 +100,9 @@ class ParsedTreeLoader():
             tag = tree.node.split("-")
             tree.node = tag[0]
 
+            tag = tree.node.split("|")
+            tree.node = tag[0]
+            
             tag = tree.node.split("=")
             tree.node = tag[0]
 

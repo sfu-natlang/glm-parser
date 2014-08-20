@@ -1,14 +1,14 @@
 Report for Conll Tree Data
 
 Section 0 to 24
-Conll Tree Path: ../../../wsj_conll_tree/
+Conll Tree Path: ../../../wsj_conll_tree/lossless/
 Parsed Tree Path: ../../../wsj/
 
 Number of Sentences: 49208 
 
 
 Spine Statistics:
-Number of Distinct Elementry Trees (Spines): 316
+Number of Distinct Elementry Trees (Spines): 314
 
 Height    | Count 
    1    | 527977 
@@ -130,5 +130,5 @@ Number of r1: 58342
 Number of tags: 42
 Tags used:    #   $   ''   ,   .   :   CC   CD   DT   EX   FW   IN   JJ   JJR   JJS   LS   MD   NN   NNP   NNPS   NNS   PDT   POS   PRP   RB   RBR   RBS   RP   SYM   TO   UH   VB   VBD   VBG   VBN   VBP   VBZ   WDT   WP   WRB   ``
 
-Number of pos: 29
-POS used: , ADJP, ADVP, ADVP|PRT, CONJP, FRAG, INTJ, LST, NAC, NP, NX, PP, PRN, PRT, PRT|ADVP, QP, RRC, S, SBAR, SBARQ, SINV, SQ, UCP, VP, WHADJP, WHADVP, WHNP, WHPP, X
+Number of pos: 27
+POS used:   ADJP  ADVP  CONJP  FRAG  INTJ  LST  NAC  NP  NX  PP  PRN  PRT  QP  RRC  S  SBAR  SBARQ  SINV  SQ  UCP  VP  WHADJP  WHADVP  WHNP  WHPP  X

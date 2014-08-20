@@ -147,12 +147,12 @@ class ConllTreeAnalyst():
         
         self.set_pos_set()
         fp.write("Number of pos: %d\n" % len(self.pos_set))
-        fp.write("POS used: %s\n" % ", ".join(sorted(self.pos_set)))
+        fp.write("POS used: %s\n" % "  ".join(sorted(self.pos_set)))
         fp.close()
 
 if __name__ == "__main__":
-    cta = ConllTreeAnalyst("../../../wsj_conll_tree/", "../../../wsj/", 0, 24)
-    cta.generate_report("./lossless_spine_report.txt")
+    cta = ConllTreeAnalyst("../../../wsj_conll_tree/lossy/", "../../../wsj/", 0, 24)
+    cta.generate_report("./lossly_spine_report.txt")
     """ 
     print "number of sentences -- conll tree", len(cta.conll_tree_sent_list)
     print "number of sentences -- parsed tree", len(cta.parsed_tree_list)
