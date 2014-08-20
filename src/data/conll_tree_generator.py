@@ -1,5 +1,7 @@
 from nltk.tree import *
 import os
+from parsed_tree_loader import *
+from dep_tree_loader import *
 
 class ConllTreeGenerator():
     def __init__(self, conll_path, tree_path, dump_path, section_list=[], is_rm_none_word=True, is_lossy=False, is_short_tag=True):
@@ -11,9 +13,12 @@ class ConllTreeGenerator():
         self.is_rm_none_word = is_rm_none_word
         self.is_lossy = is_lossy
         self.is_short_tag = is_short_tag
+
         return
 
     def generate_conll_trees(self, dump=False):
+        ptl = ParsedTreeLoader()
+        dtl = DepTreeLoader()
         for section in self.section_list:
             for tree_filename in os.listdir(self.tree_path + "%02d" % section):
 
@@ -23,16 +28,16 @@ class ConllTreeGenerator():
                 tree_file = self.tree_path + "%02d/" % section + tree_filename
 
                 # load the files
-                self.load_trees(tree_file)
-                self.load_conll(conll_file)
+                self.tree_list = ptl.load_parsed_tree(tree_file)
+                self.conll_list = dtl.load_dep_tree(conll_file)
 
                 # remove structure with none word leaf
                 if self.is_rm_none_word:
-                    self.remove_nonword()
+                    ptl.remove_nonword(self.tree_list)
 
                 # shorthen the tags in a tree to make them consistent to the penn treebank
                 if self.is_short_tag:
-                    self.shorten_tag()
+                    ptl.shorten_tag(self.tree_list)
 
                 self.enumerate_leaves()
 
@@ -273,119 +278,8 @@ class ConllTreeGenerator():
             for i in range(len(leaves)):
                 tree[tree.leaf_treeposition(i)] = (i+1, leaves[i])
 
-    def load_trees(self, filename):
-        tree_list = []
+    
 
-        trees = open(filename)
-        ptree = ""
-
-        for tree in trees:
-            tree = tree[:-1]
-            if tree == '':
-                continue
-
-            if tree[0] == '(' and not ptree == "":
-                tree_list.append(ParentedTree.parse(ptree))
-                ptree = ""
-
-            ptree += tree.strip(' ')
-
-        if not ptree == "":
-            tree_list.append(ParentedTree.parse(ptree))
-        
-        self.tree_list = tree_list
-        print "load tree finished"
-
-    def shorten_tag(self):
-        for tree in self.tree_list:
-            self._shorten_tag(tree)
-
-    def _shorten_tag(self, tree):
-        if type(tree) == str:
-            return
-        else:
-            tag = tree.node.split("-")
-            tree.node = tag[0]
-            for sub_tree in tree:
-                self._shorten_tag(sub_tree)
-
-
-    def remove_nonword(self):
-        for tree in self.tree_list:
-            _, tree = self.remove_nonword_leaf(tree)
-            #print tree.pprint()
-        print "remove nonword finished.."
-
-    def remove_nonword_leaf(self, tree):
-
-        trans_dict = TreeConllTranslateDict() 
-        if tree.height() == 2:
-            # make the word of the spine the same as the penn-wsj-dep
-            if trans_dict.has_key(tree[0]):
-                tree[0] = trans_dict[tree[0]]
-
-            # detect none word
-            if tree.node == '-NONE-':
-                return False, tree
-            else:
-                return True, tree
-        else:
-            i = 0
-            k = len(tree)
-            while i < k:
-                r, tree[i] = self.remove_nonword_leaf(tree[i])
-                if not r:
-                    tree.pop(i)
-                    k = k - 1
-                    i = i - 1                
-                i = i + 1
-
-            if len(tree) == 1 and tree.node == tree[0].node:
-                print "collaspe the tree"
-                #tree.parent.remove(tree)
-                tree._delparent(tree[0], 0)  
-                tree = tree[0] 
-
-            if tree.height() == 1:
-                return False, tree
-            else:
-                return True, tree
-
-    def load_conll(self, filename):
-        
-        data = open(filename)
-
-        sent_list = []
-        sent = []
-        for line in data:
-            line = line[:-1]
-
-            if not line == "":
-                line = line.split()
-                line[2] = int(line[2])
-                sent.append(line)
-            else:
-                if not sent == []:
-                    sent_list.append(sent)
-                    sent = []
-
-        self.conll_list = sent_list
-
-
-class TreeConllTranslateDict():
-    """translation dict from tree word to conll word"""
-    def __init__(self):
-        self.trans_dict = {}
-        self.trans_dict["-LCB-"] = "{"
-        self.trans_dict["-RCB-"] = "}"
-        self.trans_dict["-LRB-"] = "("
-        self.trans_dict["-RRB-"] = ")"
-
-    def __getitem__(self,index):
-        return self.trans_dict[index]
-
-    def has_key(self,index):
-        return self.trans_dict.has_key(index)
 
 
 HELP_MSG =\
@@ -417,12 +311,12 @@ if __name__ == "__main__":
     import getopt, sys
     
     sec_begin = 0
-    sec_end = 0
+    sec_end = 24
     conll_path = "../../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     tree_path = "../../../wsj/"
-    d_filename = "../../../wsj_conll_tree/"
+    d_filename = "../../../wsj_conll_tree/lossy/"
     is_rm_none_word = True
-    is_lossy = False
+    is_lossy = True
     is_short_tag = True
 
     try:
