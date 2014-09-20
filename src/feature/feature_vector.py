@@ -3,7 +3,7 @@ from hvector.mydouble import mydouble
 
 class FeatureVector():
     """
-    Emulates a feature vector using dictionary indtead of list
+    Emulates a feature vector using dictionary instead of list
     """
     def __init__(self):
         #self.feature_dict = {}
@@ -60,7 +60,7 @@ class FeatureVector():
     
     def __add__(self,another_fv):
         """
-        Arrgegate two feature vectors into one, and return a new feature vector
+        Aggregate two feature vectors into one, and return a new feature vector
         
         :param another_fv: The feature vector that you want to aggregate
         :type another_fv: FeatureVector
