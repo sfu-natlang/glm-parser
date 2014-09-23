@@ -1,6 +1,6 @@
 #!/bin/bash
 
-project_path=/home/yulanh/glm-parser/trunk/src/
+project_path=/home/sunyans/sfu-natlang/glm-parser/src/
 
 source $MODULESHOME/init/bash
 module load LANG/PYTHON/2.7.6-SYSTEM

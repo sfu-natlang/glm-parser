@@ -12,7 +12,7 @@ cat <<EOS | qsub -
 
 cd $script_path
 
-./mytrain.sh
+./train.sh
 
 
 EOS
