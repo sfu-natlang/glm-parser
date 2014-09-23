@@ -1,6 +1,6 @@
 #!/bin/bash
 
-script_path="/home/yulanh/glm-parser/trunk/scripts"
+script_path="/home/sunyans/sfu-natlang/glm-parser/scripts"
 
 cat <<EOS | qsub -
 
