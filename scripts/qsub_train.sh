@@ -14,7 +14,11 @@ module load LANG/PYTHON/2.7.6-SYSTEM
 export PYTHONPATH=$PYTHONPATH:/cs/natlang-projects/glm-parser/Cython-0.20.1
 
 cd $project_path'/src'
+python setup.py build_ext --inplace
 
-python glm_parser.py -i 2 -b 2 -e 21 -t 0,1,22,24 -p
-/cs/natlang-projects/glm-parser/penn-wsj-deps/ -d
-$project_path'/scripts/Weight'
+cd hvector
+python setup.py install --install-lib .
+
+cd $project_path'/src'
+
+python glm_parser.py -i 2 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d $project_path'/scripts/Weight'
