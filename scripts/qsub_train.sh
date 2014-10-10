@@ -1,20 +1,24 @@
 #!/bin/bash
 
-script_path="/home/sunyans/sfu-natlang/glm-parser/scripts"
+## Run as:
 
-cat <<EOS | qsub -
+##qsub -V -l walltime=08:00:00,nodes=1:ppn=1,pmem=8gb -W
+##group_list=colony-users <this-file>.sh
 
-#PBS -W group_list=cs-natlang
-#PBS -l pmem=200gb
-#PBS -l walltime=120:00:00
-#PBS -N glm-train
-#PBS -S /bin/csh
+project_path=$PWD'/glm-parser'
 
-cd $script_path
+source $MODULESHOME/init/bash
 
-./train.sh
+module load LANG/PYTHON/2.7.6-SYSTEM
 
+export PYTHONPATH=$PYTHONPATH:/cs/natlang-projects/glm-parser/Cython-0.20.1
 
-EOS
+cd $project_path'/src'
+python setup.py build_ext --inplace
 
+cd hvector
+python setup.py install --install-lib .
 
+cd $project_path'/src'
+
+python glm_parser.py -i 2 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d $project_path'/scripts/Weight'
