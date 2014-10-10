@@ -5,7 +5,7 @@
 ##qsub -V -l walltime=08:00:00,nodes=1:ppn=1,pmem=8gb -W
 ##group_list=colony-users <this-file>.sh
 
-project_path=$PWD'/glm-parser'
+project_path=$PWD'/sfu-natlang/glm-parser'
 
 source $MODULESHOME/init/bash
 
