@@ -1,0 +1,6 @@
+*.pyc
+*.db
+*.so
+*.egg-info
+src/build/
+src/hvector/build/
