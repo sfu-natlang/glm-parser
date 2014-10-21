@@ -151,7 +151,10 @@ class ConllTreeAnalyst():
         fp.close()
 
 if __name__ == "__main__":
-    cta = ConllTreeAnalyst("../../../wsj_conll_tree/lossy/", "../../../wsj/", 0, 24)
+    conll_path = "/cs/natlang-projects/glm-parser/penn-wsj-deps/"  
+    tree_path_lossless = "/cs/natlang-projects/glm-parser/wsj_conll_tree/lossless/"    
+    tree_path_lossly = "/cs/natlang-projects/glm-parser/wsj_conll_tree/lossy/"    
+    cta = ConllTreeAnalyst(tree_path_lossly, conll_path, 0, 24)
     cta.generate_report("./lossly_spine_report.txt")
     """ 
     print "number of sentences -- conll tree", len(cta.conll_tree_sent_list)
