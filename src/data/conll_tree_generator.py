@@ -312,7 +312,7 @@ if __name__ == "__main__":
     
     sec_begin = 0
     sec_end = 24
-    conll_path = "/cs/natlang-projects/glm-parser/penn-wsj-depsi/"  
+    conll_path = "/cs/natlang-projects/glm-parser/penn-wsj-deps/"  
     tree_path = "/cs/natlang-projects/glm-parser/wsj_conll_tree/lossless/"
     d_filename = "./test"
     is_rm_none_word = True
