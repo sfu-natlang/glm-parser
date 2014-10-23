@@ -76,7 +76,7 @@ class ConllTreeWord():
 
     def set_spine(self, spine_str):
         #print spine_str
-        self.spine = ParentedTree.parse(spine_str[1:-1])
+        self.spine = ParentedTree.fromstring(spine_str[1:-1])
 
     def set_join_position(self, position):
         if position == "_":

@@ -91,8 +91,8 @@ class ConllTreeAnalyst():
                 self._set_pos_set(node.spine)
 
     def _set_pos_set(self, spine):
-        if not spine.node in self.pos_set:
-            self.pos_set.append(spine.node)
+        if not spine.label() in self.pos_set:
+            self.pos_set.append(spine.label())
         for child in spine:
             self._set_pos_set(child)
 
@@ -152,9 +152,10 @@ class ConllTreeAnalyst():
 
 if __name__ == "__main__":
     conll_path = "/cs/natlang-projects/glm-parser/penn-wsj-deps/"  
+    tree_path = "/cs/natlang-projects/glm-parser/wsj_trees/"  
     tree_path_lossless = "/cs/natlang-projects/glm-parser/wsj_conll_tree/lossless/"    
     tree_path_lossly = "/cs/natlang-projects/glm-parser/wsj_conll_tree/lossy/"    
-    cta = ConllTreeAnalyst(tree_path_lossly, conll_path, 0, 24)
+    cta = ConllTreeAnalyst("test", tree_path, 2, 2)
     cta.generate_report("./lossly_spine_report.txt")
     """ 
     print "number of sentences -- conll tree", len(cta.conll_tree_sent_list)

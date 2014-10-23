@@ -35,13 +35,13 @@ class ParsedTreeLoader():
                 continue
 
             if tree[0] == '(' and not ptree == "":
-                tree_list.append(ParentedTree.parse(ptree))
+                tree_list.append(ParentedTree.fromstring(ptree))
                 ptree = ""
 
             ptree += tree.strip(' ')
 
         if not ptree == "":
-            tree_list.append(ParentedTree.parse(ptree))
+            tree_list.append(ParentedTree.fromstring(ptree))
         
         #print "load parsed tree finished"
         return tree_list
@@ -61,7 +61,7 @@ class ParsedTreeLoader():
                 tree[0] = trans_dict[tree[0]]
 
             # detect none word
-            if tree.node == '-NONE-':
+            if tree.label() == '-NONE-':
                 return False, tree
             else:
                 return True, tree
@@ -76,7 +76,7 @@ class ParsedTreeLoader():
                     i = i - 1                
                 i = i + 1
 
-            if len(tree) == 1 and tree.node == tree[0].node:
+            if len(tree) == 1 and tree.label() == tree[0].label():
                 print "collaspe the tree"
                 #tree.parent.remove(tree)
                 tree._delparent(tree[0], 0)  
@@ -97,17 +97,17 @@ class ParsedTreeLoader():
         if type(tree) == str:
             return
         else:
-            tag = tree.node.split("-")
-            tree.node = tag[0]
+            tag = tree.label().split("-")
+            tree.set_label(tag[0])
 
-            tag = tree.node.split("|")
-            tree.node = tag[0]
+            tag = tree.label().split("|")
+            tree.set_label(tag[0])
             
-            tag = tree.node.split("=")
-            tree.node = tag[0]
+            tag = tree.label().split("=")
+            tree.set_label(tag[0])
 
-            if len(tree.node) > 1 and tree.node[-1] == '$':
-                tree.node = tree.node[:-1]
+            if len(tree.label()) > 1 and tree.label()[-1] == '$':
+                tree.set_label(tree.label()[:-1])
             for sub_tree in tree:
                 self._shorten_tag(sub_tree)
 

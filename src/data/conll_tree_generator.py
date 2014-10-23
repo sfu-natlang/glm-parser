@@ -174,11 +174,11 @@ class ConllTreeGenerator():
 
     def is_r_adjoin(self, spine, sub_spine):
         # no adj node:
-        if not spine.node == sub_spine.node:
+        if not spine.label() == sub_spine.label():
             return False
 
         # only two same adj node:
-        if spine.parent() == None or (not spine.parent().node == spine.node):
+        if spine.parent() == None or (not spine.parent().label() == spine.label()):
             print "two same adj nodes -- r adjoin"
             return True
 
@@ -253,7 +253,7 @@ class ConllTreeGenerator():
         # if nothing went wrong, the spine would contain both word and tag
         treeposition = spine.leaf_treeposition(0)
         word = spine.leaves()[0][1]
-        tag = spine[treeposition[:-1]].node
+        tag = spine[treeposition[:-1]].label()
 
         if len(treeposition) == 1:
             spine = ParentedTree("",[])
@@ -270,7 +270,7 @@ class ConllTreeGenerator():
         else:
             subpath = self.get_spine(treeposition[1:], tree[treeposition[0]])
 
-            return Tree(tree.node, [subpath])
+            return Tree(tree.label(), [subpath])
 
     def enumerate_leaves(self):
         for tree in self.tree_list:
