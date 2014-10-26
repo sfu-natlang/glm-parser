@@ -230,13 +230,13 @@ class ConllTreeGenerator():
         return node
 
     def write_file(self, filename, sent_conll_tree_list):
-        dir = os.path.dirname(filename)
+	dir = os.path.dirname(filename)
         try:
             os.stat(dir)
         except:
             os.mkdir(dir)
 
-        fp = open(filename,"w")
+        fp = open(filename.rstrip("\.mrg")+".spine","w")
         for sent_conll_tree in sent_conll_tree_list:
 
             for row in sent_conll_tree:
