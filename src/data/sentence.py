@@ -1,4 +1,6 @@
-import copy
+import copy,sys
+sys.path.append("../")
+
 from feature.feature_generator import FeatureGenerator
 from feature.feature_vector import FeatureVector
 
