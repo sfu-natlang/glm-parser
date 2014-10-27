@@ -2,7 +2,7 @@
 from __future__ import division
 import os, re
 from sentence import *
-import logging
+import logging, settings
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
@@ -72,44 +72,50 @@ class DataPool():
                 file_path = self.data_path + "%02d/" % section + file_name
                 self.data_list = self.data_list + self.get_data_list(file_path)
 
-    def get_data_list(self, file_path):
+    def get_data_list(self, file_path, flag=1):
         """
         Form the DependencyTree list from the specified file
         
         :param file_path: the path to the data file
         :type: str
+
+        :param flag: when 1 using spine, else penn dep
+        :type: int
         
         :return: a list of DependencyTree in the specified file
         :rtype: list(DependencyTree)
         """
-        f = open(file_path)
-        data_list = []
-        word_list = []
-        pos_list = []
-        edge_set = {}
-        current_index = 0
+        if flag == 1:
+            print "here"
+        else:
+            f = open(file_path)
+            data_list = []
+            word_list = []
+            pos_list = []
+            edge_set = {}
+            current_index = 0
 
-        for line in f:
-            line = line[:-1]
-            if line != '':
-                current_index = current_index + 1
-                entity = line.split()
-                if len(entity) != 4:
-                    logging.error("invalid data!!")
+            for line in f:
+                line = line[:-1]
+                if line != '':
+                    current_index = current_index + 1
+                    entity = line.split()
+                    if len(entity) != 4:
+                        logging.error("invalid data!!")
+                    else:
+                        word_list.append(entity[0])
+                        pos_list.append(entity[1])
+                        edge_set[(int(entity[2]), current_index)] = entity[3]
                 else:
-                    word_list.append(entity[0])
-                    pos_list.append(entity[1])
-                    edge_set[(int(entity[2]), current_index)] = entity[3]
-            else:
-                if word_list != []:
-                    sent = Sentence(word_list,pos_list,edge_set)
-                    data_list.append(sent)
-                    #print d_tree.get_word_list()
-                word_list = []
-                pos_list = []
-                edge_set = {}
-                current_index = 0
-        return data_list
+                    if word_list != []:
+                        sent = Sentence(word_list,pos_list,edge_set)
+                        data_list.append(sent)
+                        #print d_tree.get_word_list()
+                    word_list = []
+                    pos_list = []
+                    edge_set = {}
+                    current_index = 0
+            return data_list
     
     def set_section_list(self, section_set):
         """
@@ -137,8 +143,9 @@ class DataPool():
 # Scripts for testing data_pool
 
 if __name__ == "__main__":
-    dp = DataPool([2], "../../penn-wsj-deps/")
+    dp = DataPool([2], settings.PENN_PATH)
     i = 0
+    dp.get_data_list("settings",1) 
     while dp.has_next_data():
         dp.get_next_data()
 
@@ -296,47 +303,53 @@ class DataSet():
             return None
         return data_list[index]
     
-    def get_data_list(self, file_path):
+    def get_data_list(self, file_path, flag=1):
         """
         Form the DependencyTree list from the specified file
         
         :param file_path: the path to the data file
         :type: str
-        
+
+        :param flag: when is 1 using spine feature, else for penn dep
+        :type: int
+
         :return: a list of DependencyTree in the specified file
         :rtype: list(DependencyTree)
         """
-        f = open(file_path)
-        #print file_path
-        data_set = []
-        word_list = ['__ROOT__']
-        pos_list = ['ROOT']
-        edge_set = {}
-        current_index = 0
+        if flag == 1:
+            print "here"
+        else:
+            f = open(file_path)
+            #print file_path
+            data_set = []
+            word_list = ['__ROOT__']
+            pos_list = ['ROOT']
+            edge_set = {}
+            current_index = 0
 
-        for line in f:
-            line = line[:-1]
-            if line != '':
-                current_index = current_index + 1
-                entry = line.split()
-                if len(entry) != 4:
-                    print "invalid data!!"
+            for line in f:
+                line = line[:-1]
+                if line != '':
+                    current_index = current_index + 1
+                    entry = line.split()
+                    if len(entry) != 4:
+                        print "invalid data!!"
+                    else:
+                        word_list.append(entry[0])
+                        pos_list.append(entry[1])
+                        edge_set[(int(entry[2]), current_index)] = entry[3]
                 else:
-                    word_list.append(entry[0])
-                    pos_list.append(entry[1])
-                    edge_set[(int(entry[2]), current_index)] = entry[3]
-            else:
-                if word_list != []:
-                    d_tree = dependency_tree.DependencyTree()
-                    d_tree.set_word_list(word_list)
-                    d_tree.set_pos_list(pos_list)
-                    d_tree.set_edge_list(edge_set)
-                    data_set.append(d_tree)
-                word_list = ['__ROOT__']
-                pos_list = ['ROOT']
-                edge_set = {}
-                current_index = 0
-        return data_set
+                    if word_list != []:
+                        d_tree = dependency_tree.DependencyTree()
+                        d_tree.set_word_list(word_list)
+                        d_tree.set_pos_list(pos_list)
+                        d_tree.set_edge_list(edge_set)
+                        data_set.append(d_tree)
+                    word_list = ['__ROOT__']
+                    pos_list = ['ROOT']
+                    edge_set = {}
+                    current_index = 0
+            return data_set
     
     def add_data(self):
         """
