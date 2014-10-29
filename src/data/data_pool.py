@@ -86,7 +86,11 @@ class DataPool():
         :rtype: list(DependencyTree)
         """
         if flag == 1:
-            print "here"
+            f = open(file_path)
+            data_list = []
+            word_list = []
+            pos_list = []
+            edge_set = {}
         else:
             f = open(file_path)
             data_list = []
@@ -143,11 +147,12 @@ class DataPool():
 # Scripts for testing data_pool
 
 if __name__ == "__main__":
-    dp = DataPool([2], settings.PENN_PATH)
-    i = 0
-    dp.get_data_list("settings",1) 
-    while dp.has_next_data():
-        dp.get_next_data()
+    dp = DataPool([2], settings.WSJ_CONLL_LOSSY_PATH)
+    dp.load()
+    print dp.get_next_data()   
+   # dp.get_data_list("settings",1) 
+   # while dp.has_next_data():
+    #    dp.get_next_data()
 
 
 
