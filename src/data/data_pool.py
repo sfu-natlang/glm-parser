@@ -112,7 +112,6 @@ class DataPool():
                 spine_list.append(spine)
 
             for line in line_list:
-                line = line.rstrip('\n')
                 elem = line.split()
                 word_list.append(elem[1])
                 pos_list.append(elem[3])
