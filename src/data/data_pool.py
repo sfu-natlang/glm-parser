@@ -26,10 +26,10 @@ class DataPool():
 
         """
         self.data_path = data_path
-        #self.set_section_list(section_set)
+        self.set_section_list(section_set)
 
-        #self.reset_whole()
-        #self.load()
+        self.reset_whole()
+        self.load()
 
     def reset_whole(self):
         """
@@ -83,93 +83,53 @@ class DataPool():
         :rtype: list(DependencyTree)
         """
         if flag == 1:
-            """
-                Gives the <E, D> pair; E is a tuple <word_index, spine> comprised of a word
-                in the sentence and the spine associated with it; D is a tuple <head_index,
-                modifier_index, <position, r_or_s, spine_head, spine_modifier, is_prev>>
-
-                r_or_s is a binary flag, 1 for regular, 0 for sister adjoin, -1 for root
-            """
-
-            file_path = "./test"
             f = open(file_path)
             word_list = []
             pos_list = []
             edge_set = {}
 
-            E = []
-            D = []
-
-            line_list = []
             spine_list = []
             data_list = []
-            for line in f:
-                if line != '':
-                    spine = spine = line.split("\"")[1]
-                    line = line.rstrip('\n')
-                    line_list.append(line)
-                    spine_list.append(spine)
-
-            for line in line_list:
-                elem = line.split()
-                word_list.append(elem[1])
-                pos_list.append(elem[3])
-                # Form E
-                E.append((elem[0], spine_list[int(elem[0]) - 1]))
-
-                # Form D
-                is_prev = 0
-                if elem[-2] == 's':
-                    r_or_s = -1
-                elif elem[-2] == 'r':
-                    r_or_s = 0
-                    if elem[-1] == 1:
-                    # If there is a previous modifier
-                        is_prev = 1
-                else:
-                    # Skip the root
-                    continue
-
-                head_index = int(elem[6])
-                modifier_index = int(elem[0])
-                position = elem[-3]
-
-                spine_head = spine_list[head_index - 1]
-                spine_modifier = spine_list[modifier_index - 1]
-
-                label = (position, r_or_s, spine_head, spine_modifier, is_prev)
-            print E
-            print D
-        else:
-            f = open(file_path)
-            data_list = []
-            word_list = []
-            pos_list = []
-            edge_set = {}
-            current_index = 0
-
+            
             for line in f:
                 line = line[:-1]
-                if line != '':
-                    current_index = current_index + 1
-                    entity = line.split()
-                    if len(entity) != 4:
-                        logging.error("invalid data!!")
-                    else:
-                        word_list.append(entity[0])
-                        pos_list.append(entity[1])
-                        edge_set[(int(entity[2]), current_index)] = entity[3]
-                else:
-                    if word_list != []:
-                        sent = Sentence(word_list, pos_list, edge_set)
-                        data_list.append(sent)
-                # print d_tree.get_word_list()
-                        word_list = []
-                        pos_list = []
-                        edge_set = {}
-                        current_index = 0
-        return data_list
+                 
+                if(line != ''):
+                    # Get the spine
+                    spine = line.split("\"")[1]
+                    spine_list.append(spine)
 
+                    elem = line.split()
+                    word_list.append(elem[1])
+                    pos_list.append(elem[3])
+                    
+                    # Form D
+                    is_prev = 0
+                    if elem[-2] == 's':
+                        r_or_s = -1
+                    elif elem[-2] == 'r':
+                        r_or_s = 0
+                        if elem[-1] == 1:
+                        # If there is a previous modifier
+                            is_prev = 1
+                    else:
+                        # Skip the root
+                        continue
+                    
+                    position = elem[-3]
+                    label = (position, r_or_s, is_prev)
+                    # Form edge set
+                    print elem[6]
+                    print elem[0]
+                    print word_list
+                    edge_set[(int(elem[6]), int(elem[0]))] = [elem[7], label]
+                # If this is the end of previous sentence
+                else:
+                    word_list = []
+                    pos_list = []
+                    edge_set = {}
+                    spine_list = []
+        return data_list
 
     def set_section_list(self, section_set):
         """
@@ -195,10 +155,9 @@ class DataPool():
         # Scripts for testing data_pool
 
 if __name__ == "__main__":
-    #dp = DataPool([2], settings.WSJ_CONLL_LOSSY_PATH)
-    #dp.load()
-    dp = DataPool([2], "./test")  
-    dp.get_data_list("./test")
+    dp = DataPool([2], settings.WSJ_CONLL_LOSSY_PATH)
+    dp.load()
+    dp.get_data_list("settings.WSJ_CONLL_LOSSY_PATH")
     #print dp.get_next_data()
     # dp.get_data_list("settings",1)
     # while dp.has_next_data():
