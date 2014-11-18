@@ -52,11 +52,14 @@ class Evaluator():
             #print "acc acc:", self.evlt.get_acc_unlabeled_accuracy()
         logging.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
+        unlabeled_attachment_accuracy(data_pool.get_sent_num())
+        logging.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
+
     
     def unlabeled_accuracy(self, result_edge_set, gold_edge_set, accumulate=False):
         """
         calculate unlabeled accuracy of the glm-parser
-        unlabeled accuracy = # of corrected edge in result / # of all corrected edge
+        unlabeled accuracy = # of corrected edges in result / # of all corrected edges
         
         :param result_edge_set: the edge set that needs to be evaluated
         :type result_edge_set: list/set
@@ -85,3 +88,16 @@ class Evaluator():
         
     def get_acc_unlabeled_accuracy(self):
         return self.unlabeled_correct_num / self.unlabeled_gold_set_size
+
+    def unlabeled_attachment_accuracy(self, sent_num):
+        """
+        calculate unlabled attachment accuracy of glm-parser
+        unlabeled attachment accuracy = # of corrected tokens in result / # of all corrected tokens
+        # of corrected tokens in result = # of corrected edges in result + # of sentences in data set
+        # of all corrected tokens = # of all corrected edges + # of sentences in data set
+        """
+        
+        self.unlabeled_correct_num += sent_num
+        self.unlabeled_gold_set_size += sent_num
+        
+        return

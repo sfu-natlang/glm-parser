@@ -131,7 +131,10 @@ class DataPool():
             self.section_list = self.section_list + s_set
         
         self.section_list.sort()        
-        return  
+        return
+    
+    def get_sent_num(self):
+        return len(self.data_list)
 
 ##############################################################################################################
 # Scripts for testing data_pool
