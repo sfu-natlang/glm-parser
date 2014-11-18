@@ -52,7 +52,7 @@ class Evaluator():
             #print "acc acc:", self.evlt.get_acc_unlabeled_accuracy()
         logging.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
-        unlabeled_attachment_accuracy(data_pool.get_sent_num())
+        self.unlabeled_attachment_accuracy(data_pool.get_sent_num())
         logging.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
     
