@@ -244,10 +244,14 @@ class ConllTreeGenerator():
         if self.is_simple_conll:
             for sent_conll_tree in sent_conll_tree_list:
                 for row in sent_conll_tree:
+                    if row[1] == '(' or row[1] == ')':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], row[1], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    else:
                     #     Pierre    NNP    2    NMOD  " (NNP Pierre)"  1    s    0
-                    fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
-                        % (row[1], row[2], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
-                fp.write("\n")
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], row[2], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    fp.write("\n")
         else:
             for sent_conll_tree in sent_conll_tree_list:
                 for row in sent_conll_tree:

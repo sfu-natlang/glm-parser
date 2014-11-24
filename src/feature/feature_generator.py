@@ -96,6 +96,47 @@ class FeatureGenerator():
     #    self.w_vector.load(filename)
     #    return
     
+    def get_unigram_spinal_feature(self,fv,head_index,dep_index):
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
+        # Prepare keys
+        type0_str = str((4,0,xi_word,xi_pos,xi_spine))
+        type1_str = str((4,1,xi_word,xi_spine))
+        type2_str = str((4,2,xi_pos,xi_spine))
+        type3_str = str((4,3,xj_word,xj_pos,xj_spine))
+        type4_str = str((4,4,xj_word,xj_spine))
+        type5_str = str((4,5,xj_pos,xj_spine))
+        # Set all unigram features to 1
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+
+        # Add five gram features. Detect xi and xj separately
+        if five_gram == True:
+            xi_word_5 = self.five_gram_word_list[head_index]
+            xj_word_5 = self.five_gram_word_list[dep_index]
+            
+            if xi_word_5 != None:
+                type0_str_5 = str((0,0,xi_word_5,xi_pos))
+                type1_str_5 = str((0,1,xi_word_5))
+                fv[type0_str_5] = 1
+                fv[type1_str_5] = 1
+
+            if xj_word_5 != None:
+                type3_str_5 = str((0,3,xj_word,xj_pos))
+                type4_str_5 = str((0,4,xj_word))
+                fv[type3_str_5] = 1
+                fv[type4_str_5] = 1
+        
+        return
+
     def get_unigram_feature(self,fv,head_index,dep_index,five_gram=True):
         """
         Add all unigram features into a given feature vector instance.

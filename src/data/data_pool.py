@@ -84,6 +84,7 @@ class DataPool():
         """
         if flag == 1:
             f = open(file_path)
+            print f
             word_list = []
             pos_list = []
             edge_set = {}
@@ -91,17 +92,20 @@ class DataPool():
             spine_list = []
             data_list = []
             
+            current_index = 0
             for line in f:
                 line = line[:-1]
-                 
+                current_index = current_index + 1
                 if(line != ''):
                     # Get the spine
                     spine = line.split("\"")[1]
                     spine_list.append(spine)
-
+                    print "spine:"+spine
+                    print "index:"+str(current_index)
                     elem = line.split()
-                    word_list.append(elem[1])
-                    pos_list.append(elem[3])
+                    word_list.append(elem[0])
+                    print elem[0]
+                    pos_list.append(elem[1])
                     
                     # Form D
                     is_prev = 0
@@ -119,16 +123,14 @@ class DataPool():
                     position = elem[-3]
                     label = (position, r_or_s, is_prev)
                     # Form edge set
-                    print elem[6]
-                    print elem[0]
-                    print word_list
-                    edge_set[(int(elem[6]), int(elem[0]))] = [elem[7], label]
+                    edge_set[(int(elem[2]), current_index)] = elem[3]
                 # If this is the end of previous sentence
                 else:
                     word_list = []
                     pos_list = []
                     edge_set = {}
                     spine_list = []
+                    current_index = 0
         return data_list
 
     def set_section_list(self, section_set):
@@ -156,7 +158,7 @@ class DataPool():
 
 if __name__ == "__main__":
     dp = DataPool([2], settings.WSJ_CONLL_LOSSY_PATH)
-    dp.load()
+    #dp.load()
     dp.get_data_list("settings.WSJ_CONLL_LOSSY_PATH")
     #print dp.get_next_data()
     # dp.get_data_list("settings",1)
