@@ -77,7 +77,7 @@ class AveragePerceptronLearner():
                 p_fork = multiprocessing.Process(
                     target=self.dump_vector,
                     args=(d_filename, t))
-                
+
                 p_fork.start()
                 #self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
         
