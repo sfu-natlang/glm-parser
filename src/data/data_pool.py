@@ -150,9 +150,7 @@ if __name__ == "__main__":
         print
         print data_instance.edge_list
         print
-        print data_instance.f_vector_dict
-        print
-        print data_instance.gold_global_vector
+        print data_instance.gold_global_vector.feature_dict
         
 
 
