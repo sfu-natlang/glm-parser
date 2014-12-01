@@ -140,7 +140,7 @@ class DataPool():
 # Scripts for testing data_pool
 
 if __name__ == "__main__":
-    dp = DataPool([2], "/cs/natlang-projects/glm-parser/penn-wsj-deps")
+    dp = DataPool([2], "/cs/natlang-projects/glm-parser/penn-wsj-deps/")
     i = 0
     while dp.has_next_data():
         dp.get_next_data()
