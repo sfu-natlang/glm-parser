@@ -266,7 +266,7 @@ class ConllTreeGenerator():
                     else:
                         fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
                             % (row[1], row[2], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
-                    fp.write("\n")
+                fp.write("\n")
         else:
             for sent_conll_tree in sent_conll_tree_list:
                 for row in sent_conll_tree:
@@ -293,7 +293,7 @@ class ConllTreeGenerator():
                     else:
                         fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
                             % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
-                    fp.write("\n")
+                fp.write("\n")
         fp.close()
 
     def remove_tag_word(self, spine):

@@ -94,17 +94,13 @@ class DataPool():
             current_index = 0
             for line in f:
                 line = line[:-1]
-                print f
                 current_index = current_index + 1
                 if(line != ''):
                     # Get the spine
                     spine = line.split("\"")[1]
                     spine_list.append(spine)
-                    print "spine:"+spine
-                    print "index:"+str(current_index)
                     elem = line.split()
                     word_list.append(elem[0])
-                    print elem[0]
                     pos_list.append(elem[1])
                     
                     # Form D
@@ -127,7 +123,7 @@ class DataPool():
                 # If this is the end of previous sentence
                 else:
                     # Generate the sentence feature vectore
-                   # sent = Sentence(word_list, pos_list, edge_set, spine_list)
+                    sent = Sentence(word_list, pos_list, edge_set, spine_list)
 
                     word_list = []
                     pos_list = []
@@ -161,9 +157,8 @@ class DataPool():
 
 if __name__ == "__main__":
     dp = DataPool([2], settings.WSJ_CONLL_LOSSY_PATH)
-    #dp.load()
-    #print dp.get_next_data()
     # dp.get_data_list("settings",1)
+    # i = 0
     # while dp.has_next_data():
-    #    dp.get_next_data()
+    #   dp.get_next_data()
 
