@@ -1,0 +1,2 @@
+rm *.pyc
+rm *.log

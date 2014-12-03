@@ -27,7 +27,9 @@ class FeatureGenerator():
     
         if not sent == None:
             self.word_list = sent.get_word_list()
-	    self.pos_list = sent.get_pos_list()
+            self.pos_list = sent.get_pos_list()
+            self.spine_list = sent.get_spine_list()
+
             # Add five gram word list
             self.compute_five_gram()
 			
@@ -96,6 +98,30 @@ class FeatureGenerator():
     #    self.w_vector.load(filename)
     #    return
     
+    def get_unigram_spinal_feature(self,fv,head_index,dep_index):
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        xi_spine = self.spine_list[dep_index-1]
+        xj_spine = self.spine_list[head_index-1]
+        # Prepare keys
+        type0_str = str((4,0,xi_word,xi_pos,xi_spine))
+        type1_str = str((4,1,xi_word,xi_spine))
+        type2_str = str((4,2,xi_pos,xi_spine))
+        type3_str = str((4,3,xj_word,xj_pos,xj_spine))
+        type4_str = str((4,4,xj_word,xj_spine))
+        type5_str = str((4,5,xj_pos,xj_spine))
+        # Set all unigram features to 1
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+
+        return
+
     def get_unigram_feature(self,fv,head_index,dep_index,five_gram=True):
         """
         Add all unigram features into a given feature vector instance.
@@ -455,6 +481,9 @@ class FeatureGenerator():
         self.get_in_between_feature(local_fv,head_index,dep_index)
         # Get sorrounding feature
         self.get_surrounding_feature(local_fv,head_index,dep_index)
+        # Get Unigram-spinal features
+        self.get_unigram_spinal_feature(local_fv,head_index,dep_index)
+
         # For future improvements please put all other features here
         # ...
 

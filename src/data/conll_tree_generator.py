@@ -2,9 +2,10 @@ from nltk.tree import *
 import os
 from parsed_tree_loader import *
 from dep_tree_loader import *
+import settings
 
 class ConllTreeGenerator():
-    def __init__(self, conll_path, tree_path, dump_path, section_list=[], is_rm_none_word=True, is_lossy=False, is_short_tag=True):
+    def __init__(self, conll_path, tree_path, dump_path, section_list=[], is_rm_none_word=True, is_lossy=False, is_short_tag=True, is_simple_conll=True):
         self.section_list = section_list;
         self.conll_path = conll_path
         self.tree_path = tree_path
@@ -13,7 +14,10 @@ class ConllTreeGenerator():
         self.is_rm_none_word = is_rm_none_word
         self.is_lossy = is_lossy
         self.is_short_tag = is_short_tag
-
+        self.is_simple_conll = is_simple_conll
+        
+        if not os.path.exists(dump_path):
+            os.makedirs(dump_path)
         return
 
     def generate_conll_trees(self, dump=False):
@@ -88,7 +92,6 @@ class ConllTreeGenerator():
 
         if not dump_filename == "":
             self.write_file(dump_filename, sent_conll_tree_list)
-
     def generate_spine(self, sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree):
         while not sub_spine.height() == spine_len:
             sub_spine, adjoin_type, join_position, spine_len = self.recursive_generate_spine(sub_spine, spine_len, adjoin_type, join_position, sent_conll, sent_conll_tree)
@@ -174,11 +177,11 @@ class ConllTreeGenerator():
 
     def is_r_adjoin(self, spine, sub_spine):
         # no adj node:
-        if not spine.node == sub_spine.node:
+        if not spine.label() == sub_spine.label():
             return False
 
         # only two same adj node:
-        if spine.parent() == None or (not spine.parent().node == spine.node):
+        if spine.parent() == None or (not spine.parent().label() == spine.label()):
             print "two same adj nodes -- r adjoin"
             return True
 
@@ -230,30 +233,74 @@ class ConllTreeGenerator():
         return node
 
     def write_file(self, filename, sent_conll_tree_list):
-        dir = os.path.dirname(filename)
+	dir = os.path.dirname(filename)
         try:
             os.stat(dir)
         except:
             os.mkdir(dir)
 
-        fp = open(filename,"w")
-        for sent_conll_tree in sent_conll_tree_list:
-
-            for row in sent_conll_tree:
-                # sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type
-                #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1    s    0
-
-                fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
-                    % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
-
-            fp.write("\n")
+        fp = open(filename.rstrip("\.mrg")+".spine","w")
+        
+        if self.is_simple_conll:
+            for sent_conll_tree in sent_conll_tree_list:
+                for row in sent_conll_tree:
+                    #     Pierre    NNP    2    NMOD  " (NNP Pierre)"  1    s    0
+                    if row[1] == '(':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-LRB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == ')':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-RRB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == '{':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-LCB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == '}':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-RCB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == '[':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-LSB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == ']':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-RSB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    else:
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], row[2], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                fp.write("\n")
+        else:
+            for sent_conll_tree in sent_conll_tree_list:
+                for row in sent_conll_tree:
+                    # sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type
+                    #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1    s    0
+                    if row[1] == '(':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-LRB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == ')':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-RRB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '{':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-LCB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '}':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-RCB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '{':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-LSB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '}':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-RSB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    else:
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                fp.write("\n")
         fp.close()
 
     def remove_tag_word(self, spine):
         # if nothing went wrong, the spine would contain both word and tag
         treeposition = spine.leaf_treeposition(0)
         word = spine.leaves()[0][1]
-        tag = spine[treeposition[:-1]].node
+        tag = spine[treeposition[:-1]].label()
 
         if len(treeposition) == 1:
             spine = ParentedTree("",[])
@@ -270,7 +317,7 @@ class ConllTreeGenerator():
         else:
             subpath = self.get_spine(treeposition[1:], tree[treeposition[0]])
 
-            return Tree(tree.node, [subpath])
+            return Tree(tree.label(), [subpath])
 
     def enumerate_leaves(self):
         for tree in self.tree_list:
@@ -304,7 +351,7 @@ options:
             (otherwise, the nonword leaf would be removed)
     -l:     lossy extraction
     -s:     not shorten the tags
-
+    -x:     use the complex conll format 
 """
 
 if __name__ == "__main__":
@@ -312,15 +359,17 @@ if __name__ == "__main__":
     
     sec_begin = 0
     sec_end = 24
-    conll_path = "/cs/natlang-projects/glm-parser/penn-wsj-deps/"  
-    tree_path = "/cs/natlang-projects/glm-parser/wsj_conll_tree/lossless/"
-    d_filename = "./test"
+    conll_path = settings.PENN_PATH  
+    tree_path = settings.WSJ_PATH
+    d_filename = None
+    default_d_file = settings.WSJ_CONLL_LOSSLESS_PATH
     is_rm_none_word = True
     is_lossy = False
     is_short_tag = True
+    is_simple_conll = True
 
     try:
-        opt_spec = "hb:e:c:t:d:nl"
+        opt_spec = "hb:e:c:t:d:nlxs"
         opts, args = getopt.getopt(sys.argv[1:], opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -330,8 +379,11 @@ if __name__ == "__main__":
                 is_rm_none_word = False
             elif opt == "-l":
                 is_lossy = True
+                default_d_file = settings.WSJ_CONLL_LOSSY_PATH
             elif opt == "-s":
                 is_short_tag = False
+            elif opt == "-x":
+                is_simple_conll = False
             elif opt == "-b":
                 sec_begin = int(value)
             elif opt == "-e":
@@ -345,10 +397,11 @@ if __name__ == "__main__":
             else:
                 print "invalid input, see -h"
                 sys.exit(0)
-
         if sec_begin >= 0 and sec_end >= 0:
             extract_sec = range(sec_begin, sec_end+1)
-            ctg = ConllTreeGenerator(conll_path, tree_path, d_filename, extract_sec, is_rm_none_word, is_lossy)
+            if d_filename is None:
+                d_filename = default_d_file
+            ctg = ConllTreeGenerator(conll_path, tree_path, d_filename, extract_sec, is_rm_none_word, is_lossy, is_short_tag, is_simple_conll)
             ctg.generate_conll_trees(True)
 
     except getopt.GetoptError, e:

@@ -65,8 +65,6 @@ The structure of the code makes the parser scalable in both parsing and learning
 
 \includegraphics[scale=0.8]{project_struct}
 
-
-
 \section{Major Data Structure}
 
 This section explains the major classes in the project,
@@ -151,6 +149,108 @@ Surrounding Features: \\
 	\hline
 \end{tabular} \\
             
+            
+            
+\vspace{1cm}            
+       
+\textbf{Spinal Features} \\
+ 
+       
+Uni-spinal Features: \\
+
+\begin{tabular}{|l l l|}
+	\hline
+    	xi-spine&&\\
+		xi-word& xi-spine& \\
+		xi-pos& xi-spine& \\
+        xi-word& xi-pos& xi-spine \\
+    	xj-spine&&\\
+		xj-word& xj-spine& \\
+		xj-pos& xj-spine& \\
+        xj-word& xj-pos& xj-spine \\
+	\hline
+\end{tabular} \\
+
+
+Bigram Spinal Features:  \\
+
+\begin{tabular}{|l l l l l| }
+	\hline
+		xi-word& xi-spine& xj-word&&\\
+		xi-word& xi-spine& xj-word & xj-pos& \\
+		xi-word& xi-pos& xi-spine& xj-word &\\
+        xi-word& xi-pos& xi-spine& xj-word & xj-pos\\
+        xi-word& xi-pos& xi-spine& xj-pos &\\
+        xi-pos&xi-spine&xj-pos&&\\
+        xi-pos&xi-spine&xj-word&xj-pos&\\
+		xj-word& xj-spine& xi-word&&\\
+		xj-word& xj-spine& xi-word & xi-pos& \\
+		xj-word& xj-pos& xj-spine& xi-word &\\
+        xj-word& xj-pos& xj-spine& xi-word & xi-pos\\
+        xj-word& xj-pos& xj-spine& xi-pos &\\
+        xj-pos&xj-spine&xi-pos&&\\
+        xj-pos&xj-spine&xi-word&xi-pos&\\
+	\hline
+\end{tabular} \\
+
+GRM Features:  \\
+
+\begin{tabular}{|l l l l l| }
+	\hline
+		xi-word&xj-word&&&GRM(xi-spine, xj-spine, POS, A)\\
+		xi-word&xj-word & xj-pos&&GRM(xi-spine, xj-spine, POS, A) \\
+		xi-word&xi-pos&xj-word &&GRM(xi-spine, xj-spine, POS, A)\\
+        xi-word& xi-pos&xj-word & xj-pos& GRM(xi-spine, xj-spine, POS, A)\\
+		xi-pos&xj-pos&&&GRM(xi-spine, xj-spine, POS, A)\\
+	\hline
+\end{tabular} \\
+
+\vspace{10cm}
+Contextual Spinal Features: \\
+
+\begin{tabular}{|l l l l l l|}
+	\hline
+    	xi-word& xi-spine& xi-1-word&&&\\
+        xi-word& xi-spine& xi+1-word&&&\\
+    	xi-word& xi-spine& xi-1-word& xi+1-word&&\\
+        xi-word& xi-spine& xi-1-word& xi-2-word&&\\
+        xi-word& xi-spine& xi+1-word& xi+2-word&&\\
+        xi-word& xi-spine& xi-1-word& xi-2-word&xi+1-word&\\
+    	xi-word& xi-spine& xi-1-word& xi-2-word&xi+1-word&xi+2-word\\
+    	xj-word& xj-spine& xj-1-word&&&\\
+        xj-word& xj-spine& xj+1-word&&&\\
+    	xj-word& xj-spine& xj-1-word& xj+1-word&&\\
+        xj-word& xj-spine& xj-1-word& xj-2-word&&\\
+        xj-word& xj-spine& xj+1-word& xj+2-word&&\\
+        xj-word& xj-spine& xj-1-word& xj-2-word&xj+1-word&\\
+    	xj-word& xj-spine& xj-1-word& xj-2-word&xj+1-word&xj+2-word\\
+	\hline
+\end{tabular} \\
+
+Contextual Spinal-tag Features: \\
+
+\begin{tabular}{|l l l l l l|}
+	\hline
+    	xi-pos& xi-spine& xi-1-pos&&&\\
+        xi-pos& xi-spine& xi+1-pos&&&\\
+    	xi-pos& xi-spine& xi-1-pos& xi+1-pos&&\\
+        xi-pos& xi-spine& xi-1-pos& xi-2-pos&&\\
+        xi-pos& xi-spine& xi+1-pos& xi+2-pos&&\\
+        xi-pos& xi-spine& xi-1-pos& xi-2-pos&xi+1-pos&\\
+    	xi-pos& xi-spine& xi-1-pos& xi-2-pos&xi+1-pos&xi+2-pos\\
+    	xj-pos& xj-spine& xj-1-pos&&&\\
+        xj-pos& xj-spine& xj+1-pos&&&\\
+    	xj-pos& xj-spine& xj-1-pos& xj+1-pos&&\\
+        xj-pos& xj-spine& xj-1-pos& xj-2-pos&&\\
+        xj-pos& xj-spine& xj+1-pos& xj+2-pos&&\\
+        xj-pos& xj-spine& xj-1-pos& xj-2-pos&xj+1-pos&\\
+    	xj-pos& xj-spine& xj-1-pos& xj-2-pos&xj+1-pos&xj+2-pos\\
+	\hline
+\end{tabular} \\
+
+
+
+
 
 
 \section{Algorithms Implemented}
