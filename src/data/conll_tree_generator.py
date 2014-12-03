@@ -244,11 +244,26 @@ class ConllTreeGenerator():
         if self.is_simple_conll:
             for sent_conll_tree in sent_conll_tree_list:
                 for row in sent_conll_tree:
-                    if row[1] == '(' or row[1] == ')':
-                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
-                            % (row[1], row[1], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
-                    else:
                     #     Pierre    NNP    2    NMOD  " (NNP Pierre)"  1    s    0
+                    if row[1] == '(':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-LRB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == ')':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-RRB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == '{':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-LCB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == '}':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-RCB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == '[':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-LSB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    elif row[1] == ']':
+                        fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
+                            % (row[1], '-RSB-', row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
+                    else:
                         fp.write("%s    %s    %d    %s    \"%s\"    %s    %s    %s\n"
                             % (row[1], row[2], row[3], row[4], row[5].pprint(),str(row[6]), row[7][0], str(row[7][1])))
                     fp.write("\n")
@@ -257,10 +272,28 @@ class ConllTreeGenerator():
                 for row in sent_conll_tree:
                     # sent_index, word, tag, sent_conll_row[2], sent_conll_row[3], sub_spine, join_position, adjoin_type
                     #     Pierre    _    NNP    NNP    _    2    NMOD    _    _    (NNP Pierre)    1    s    0
-
-                    fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
-                        % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
-                fp.write("\n")
+                    if row[1] == '(':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-LRB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == ')':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-RRB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '{':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-LCB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '}':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-RCB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '{':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-LSB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    elif row[1] == '}':
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],'-RSB-','-LRB-',row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    else:
+                        fp.write("%d    %s    _    %s    %s    _    %d    %s    _    _    \"%s\"    %s    %s    %s\n"
+                            % (row[0],row[1],row[2],row[2],row[3],row[4],row[5].pprint(),str(row[6]),row[7][0],str(row[7][1])))
+                    fp.write("\n")
         fp.close()
 
     def remove_tag_word(self, spine):

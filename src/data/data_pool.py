@@ -84,7 +84,6 @@ class DataPool():
         """
         if flag == 1:
             f = open(file_path)
-            print f
             word_list = []
             pos_list = []
             edge_set = {}
@@ -95,6 +94,7 @@ class DataPool():
             current_index = 0
             for line in f:
                 line = line[:-1]
+                print f
                 current_index = current_index + 1
                 if(line != ''):
                     # Get the spine
@@ -126,6 +126,9 @@ class DataPool():
                     edge_set[(int(elem[2]), current_index)] = elem[3]
                 # If this is the end of previous sentence
                 else:
+                    # Generate the sentence feature vectore
+                   # sent = Sentence(word_list, pos_list, edge_set, spine_list)
+
                     word_list = []
                     pos_list = []
                     edge_set = {}
@@ -159,7 +162,6 @@ class DataPool():
 if __name__ == "__main__":
     dp = DataPool([2], settings.WSJ_CONLL_LOSSY_PATH)
     #dp.load()
-    dp.get_data_list("settings.WSJ_CONLL_LOSSY_PATH")
     #print dp.get_next_data()
     # dp.get_data_list("settings",1)
     # while dp.has_next_data():
