@@ -1,0 +1,66 @@
+Run script run_evaluates.sh after get all weights files from run_linearb.sh result
+commit f425218
+
+the highest result is iter6
+12/02/2014 08:14:23 PM INFO: Unlabeled accuracy: 0.908843846900 (151826, 167054)
+12/02/2014 08:14:23 PM INFO: Unlabeled attachment accuracy: 0.912489799671 (158786, 174014)
+
+Iter 1 :
+12/02/2014 06:38:01 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_0.db 
+12/02/2014 06:39:02 PM INFO: Feature count: 8922842
+12/02/2014 06:54:37 PM INFO: Unlabeled accuracy: 0.900301698852 (150399, 167054)
+12/02/2014 06:54:37 PM INFO: Unlabeled attachment accuracy: 0.904289310056 (157359, 174014)
+===============================================
+Iter 2 :
+12/02/2014 06:54:39 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_1.db 
+12/02/2014 06:55:40 PM INFO: Feature count: 9423694
+12/02/2014 07:10:28 PM INFO: Unlabeled accuracy: 0.906239898476 (151391, 167054)
+12/02/2014 07:10:28 PM INFO: Unlabeled attachment accuracy: 0.909990000805 (158351, 174014)
+===============================================
+Iter 3 :
+12/02/2014 07:10:31 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_2.db 
+12/02/2014 07:11:32 PM INFO: Feature count: 9688890
+12/02/2014 07:26:26 PM INFO: Unlabeled accuracy: 0.907473032672 (151597, 167054)
+12/02/2014 07:26:26 PM INFO: Unlabeled attachment accuracy: 0.911173813601 (158557, 174014)
+===============================================
+Iter 4 :
+12/02/2014 07:26:29 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_3.db 
+12/02/2014 07:27:31 PM INFO: Feature count: 9848843
+12/02/2014 07:42:22 PM INFO: Unlabeled accuracy: 0.908329043303 (151740, 167054)
+12/02/2014 07:42:22 PM INFO: Unlabeled attachment accuracy: 0.911995586562 (158700, 174014)
+===============================================
+Iter 5 :
+12/02/2014 07:42:25 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_4.db 
+12/02/2014 07:43:26 PM INFO: Feature count: 9958684
+12/02/2014 07:58:18 PM INFO: Unlabeled accuracy: 0.908801944281 (151819, 167054)
+12/02/2014 07:58:18 PM INFO: Unlabeled attachment accuracy: 0.912449573023 (158779, 174014)
+===============================================
+Iter 6 :
+12/02/2014 07:58:21 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_5.db 
+12/02/2014 07:59:24 PM INFO: Feature count: 10034841
+12/02/2014 08:14:23 PM INFO: Unlabeled accuracy: 0.908843846900 (151826, 167054)
+12/02/2014 08:14:23 PM INFO: Unlabeled attachment accuracy: 0.912489799671 (158786, 174014)
+===============================================
+Iter 7 :
+12/02/2014 08:14:26 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_6.db 
+12/02/2014 08:15:26 PM INFO: Feature count: 10092868
+12/02/2014 08:30:20 PM INFO: Unlabeled accuracy: 0.908233265890 (151724, 167054)
+12/02/2014 08:30:20 PM INFO: Unlabeled attachment accuracy: 0.911903639937 (158684, 174014)
+===============================================
+Iter 8 :
+12/02/2014 08:30:24 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_7.db 
+12/02/2014 08:31:23 PM INFO: Feature count: 10138664
+12/02/2014 08:45:38 PM INFO: Unlabeled accuracy: 0.908311085038 (151737, 167054)
+12/02/2014 08:45:38 PM INFO: Unlabeled attachment accuracy: 0.911978346570 (158697, 174014)
+===============================================
+Iter 9 :
+12/02/2014 08:45:42 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_8.db 
+12/02/2014 08:46:42 PM INFO: Feature count: 10174703
+12/02/2014 09:01:05 PM INFO: Unlabeled accuracy: 0.908329043303 (151740, 167054)
+12/02/2014 09:01:05 PM INFO: Unlabeled attachment accuracy: 0.911995586562 (158700, 174014)
+===============================================
+Iter 10 :
+12/02/2014 09:01:09 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Weight_Iter_9.db 
+12/02/2014 09:02:08 PM INFO: Feature count: 10204381
+12/02/2014 09:16:46 PM INFO: Unlabeled accuracy: 0.908376932010 (151748, 167054)
+12/02/2014 09:16:46 PM INFO: Unlabeled attachment accuracy: 0.912041559874 (158708, 174014)
