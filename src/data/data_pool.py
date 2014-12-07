@@ -161,7 +161,7 @@ class DataPool():
 
 
 if __name__ == "__main__":
-    dp = DataPool([2], "/cs/natlang-projects/glm-parser/penn-wsj-deps/")
+    dp = DataPool([2], "/cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/")
     i = 0
     if dp.has_next_data():
         data_instance = dp.get_next_data()
