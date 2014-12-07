@@ -24,9 +24,13 @@ class Evaluator():
     def _sent_unlabeled_accuracy(self, result_edge_set, gold_edge_set):      
         if isinstance(result_edge_set, list):
             result_edge_set = set(result_edge_set)
+        else:
+        	print "result not set"
         
         if isinstance(gold_edge_set, list):
             gold_edge_set = set(gold_edge_set)
+        else:
+        	print "gold not set"
         
         intersect_set = result_edge_set.intersection(gold_edge_set)
         correct_num = len(intersect_set)
