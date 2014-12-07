@@ -122,9 +122,10 @@ class DataPool():
                     edge_set[(int(elem[2]), current_index)] = elem[3]
                 # If this is the end of previous sentence
                 else:
-                    # Generate the sentence feature vectore
-                    sent = Sentence(word_list, pos_list, edge_set, spine_list)
-
+                    if word_list != []:
+                        # Generate the sentence feature vectore
+                        sent = Sentence(word_list, pos_list, edge_set, spine_list)
+                        data_list.append(sent) 
                     word_list = []
                     pos_list = []
                     edge_set = {}
