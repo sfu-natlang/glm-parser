@@ -5,7 +5,7 @@
 ##qsub -V -l walltime=08:00:00,nodes=1:ppn=1,pmem=8gb -W
 ##group_list=colony-users <this-file>.sh
 
-project_path=$PWD'/glm-parser'
+project_path='/home/dif/glm-parser'
 
 source $MODULESHOME/init/bash
 
@@ -21,4 +21,4 @@ python setup.py install --install-lib .
 
 cd $project_path'/src'
 
-python glm_parser.py -i 2 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d $project_path'/scripts/Weight'
+python glm_parser.py -i 2 -b 2 -e 2 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d $project_path'/scripts/Weight'
