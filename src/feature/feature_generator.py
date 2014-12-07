@@ -693,7 +693,7 @@ class FeatureGenerator():
             
         return
 
-    def get_local_vector(self,head_index,dep_index,is_uni_spinal=True,is_bi_spinal=False,is_conx_spinal=False):
+    def get_local_vector(self,head_index,dep_index,is_uni_spinal=True,is_bi_spinal=False,is_conx_spinal=False,is_spinal_adjoin=False):
         """
         Given an edge, return its local vector
 
@@ -724,9 +724,12 @@ class FeatureGenerator():
             # Get bigram-spinal features
             self.get_bigram_spinal_feature(local_fv,head_index,dep_index)
 
-        if is_conx_spinal
+        if is_conx_spinal:
             # Get contextual-spinal features
             self.get_contextual_spinal_feature(local_fv,head_index,dep_index)
+
+        if is_spinal_adjoin:
+            self.get_spinal_adjoin_feature(local_fv,head_index,dep_index,grm)
 
         # For future improvements please put all other features here
         # ...
