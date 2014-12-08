@@ -21,4 +21,4 @@ python setup.py install --install-lib .
 
 cd $project_path'/src'
 
-python glm_parser.py -i 2 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d $project_path'/scripts/Weight'
+python glm_parser.py -i 2 -b 2 -e 2 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d $project_path'/scripts/Weight'

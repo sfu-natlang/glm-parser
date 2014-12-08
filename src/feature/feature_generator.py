@@ -97,30 +97,6 @@ class FeatureGenerator():
     #            filename = self.database_filename
     #    self.w_vector.load(filename)
     #    return
-    
-    def get_unigram_spinal_feature(self,fv,head_index,dep_index):
-        xi_word = self.word_list[head_index]
-        xi_pos = self.pos_list[head_index]
-        xj_word = self.word_list[dep_index]
-        xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
-        # Prepare keys
-        type0_str = str((4,0,xi_word,xi_pos,xi_spine))
-        type1_str = str((4,1,xi_word,xi_spine))
-        type2_str = str((4,2,xi_pos,xi_spine))
-        type3_str = str((4,3,xj_word,xj_pos,xj_spine))
-        type4_str = str((4,4,xj_word,xj_spine))
-        type5_str = str((4,5,xj_pos,xj_spine))
-        # Set all unigram features to 1
-        fv[type0_str] = 1
-        fv[type1_str] = 1
-        fv[type2_str] = 1
-        fv[type3_str] = 1
-        fv[type4_str] = 1
-        fv[type5_str] = 1
-
-        return
 
     def get_unigram_feature(self,fv,head_index,dep_index,five_gram=True):
         """
@@ -420,6 +396,260 @@ class FeatureGenerator():
 
         return
 
+    def get_unigram_spinal_feature(self,fv,head_index,dep_index):
+        """
+        Add all unigram-spinal features into a given feature vector instance.
+            +----------------------------------+
+            | xi-spine                         | type = 0
+            | xj-spine                         | type = 1
+            | xi-word, xi-pos, xi-spine        | type = 2
+            | xi-word, xi-spine                | type = 3
+            | xi-pos, xi-spine                 | type = 4
+            | xj-word, xj-pos, xj-spine        | type = 5
+            | xj-word, xj-spine                | type = 6
+            | xj-pos, xj-spine                 | type = 7
+            +----------------------------------+
+        Basic features are represented using a tuple. The first element is
+        integer 4, indicating that it is a unigram-spinal feature. The second element
+        is also an integer, the value to meaning mapping is listed above:
+        
+            (4,type,xi/xj_[word,pos,spine,word,pos,spine])
+
+        :param fv: A feature vector instance
+        :type fv: FeatureVector
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :paramn dep_index: The index of the dependency node
+        :type dep_index: integer
+        """
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        xi_spine = self.spine_list[dep_index-1]
+        xj_spine = self.spine_list[head_index-1]
+
+        # Prepare keys
+        type0_str = str((4,0,xi_spine))
+        type1_str = str((4,1,xj_spine))
+        type2_str = str((4,2,xi_word,xi_pos,xi_spine))
+        type3_str = str((4,3,xi_word,xi_spine))
+        type4_str = str((4,4,xi_pos,xi_spine))
+        type5_str = str((4,5,xj_word,xj_pos,xj_spine))
+        type6_str = str((4,6,xj_word,xj_spine))
+        type7_str = str((4,7,xj_pos,xj_spine))
+
+        # Set all unigram-spinal features to 1; same feature count will
+        # be aggregated 
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+        fv[type6_str] = 1
+        fv[type7_str] = 1
+
+        return
+
+    def get_bigram_spinal_feature(self,fv,head_index,dep_index):
+        """
+        Add all bigram-spinal features into a given feature vector instance.
+        +-------------------------------------------+
+        | xi_word, xi_spine, xj_word                | type = 0
+        | xi_word, xi_spine, xj_word, xj_pos        | type = 1
+        | xi_word, xi_pos, xi_spine, xj_word        | type = 2
+        | xi_word, xi_pos, xi_spine, xj_word,xj_pos | type = 3
+        | xi_word, xi_pos, xi_spine, xj_pos         | type = 4
+        | xi_pos, xi_spine, xj_pos                  | type = 5
+        | xi_pos, xi_spine, xj_word, xj_pos         | type = 6
+        | xj_word, xj_spine, xi_word                | type = 7
+        | xj_word, xj_spine, xi_word, xi_pos        | type = 8
+        | xj_word, xj_pos, xj_spine, xi_word        | type = 9
+        | xj_word, xj_pos, xj_spine, xi_word, xi_pos| type = 10
+        | xj_word, xj_pos, xj_spine, xi_pos         | type = 11
+        | xj_pos, xj_spine, xi_pos))                | type = 12
+        | xj_pos, xj_spine, xi_word, xi_pos         | type = 13
+        +-------------------------------------------+
+        Basic features are represented using a tuple. The first element is
+        integer 5, indicating that it is a bigram-spinal feature. The second element
+        is also an integer, the value to meaning mapping is listed above:
+        
+            (5,type,xi/xj_[word,pos,spine,word,pos,spine])
+
+        :param fv: A feature vector instance
+        :type fv: FeatureVector
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :paramn dep_index: The index of the dependency node
+        :type dep_index: integer
+        """
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        xi_spine = self.spine_list[dep_index-1]
+        xj_spine = self.spine_list[head_index-1]
+        # Prepare keys
+        type0_str = str((5,0,xi_word,xi_spine,xj_word))
+        type1_str = str((5,1,xi_word,xi_spine,xj_word,xj_pos))
+        type2_str = str((5,2,xi_word,xi_pos,xi_spine,xj_word))
+        type3_str = str((5,3,xi_word,xi_pos,xi_spine,xj_word,xj_pos))
+        type4_str = str((5,4,xi_word,xi_pos,xi_spine,xj_pos))
+        type5_str = str((5,5,xi_pos,xi_spine,xj_pos))
+        type6_str = str((5,6,xi_pos,xi_spine,xj_word,xj_pos))
+        type7_str = str((5,7,xj_word,xj_spine,xi_word))
+        type8_str = str((5,8,xj_word,xj_spine,xi_word,xi_pos))
+        type9_str = str((5,9,xj_word,xj_pos,xj_spine,xi_word))
+        type10_str = str((5,10,xj_word,xj_pos,xj_spine,xi_word,xi_pos))
+        type11_str = str((5,11,xj_word,xj_pos,xj_spine,xi_pos))
+        type12_str = str((5,12,xj_pos,xj_spine,xi_pos))
+        type13_str = str((5,13,xj_pos,xj_spine,xi_word,xi_pos))
+
+        # Set all bigram-spinal features to 1
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+        fv[type6_str] = 1
+        fv[type7_str] = 1
+        fv[type8_str] = 1
+        fv[type9_str] = 1
+        fv[type10_str] = 1
+        fv[type11_str] = 1
+        fv[type12_str] = 1
+        fv[type13_str] = 1
+
+        return
+
+    def get_contextual_spinal_feature(self,fv,head_index,dep_index):
+        """
+        Add all contextual-spinal features into a given feature vector instance.
+        +-------------------------------------------+
+        | xi_word, xi_spine, xj_word                | type = 0
+        | xi_word, xi_spine, xj_word, xj_pos        | type = 1
+        | xi_word, xi_pos, xi_spine, xj_word        | type = 2
+        | xi_word, xi_pos, xi_spine, xj_word,xj_pos | type = 3
+        | xi_word, xi_pos, xi_spine, xj_pos         | type = 4
+        | xi_pos, xi_spine, xj_pos                  | type = 5
+        | xi_pos, xi_spine, xj_word, xj_pos         | type = 6
+        | xj_word, xj_spine, xi_word                | type = 7
+        | xj_word, xj_spine, xi_word, xi_pos        | type = 8
+        | xj_word, xj_pos, xj_spine, xi_word        | type = 9
+        | xj_word, xj_pos, xj_spine, xi_word, xi_pos| type = 10
+        | xj_word, xj_pos, xj_spine, xi_pos         | type = 11
+        | xj_pos, xj_spine, xi_pos))                | type = 12
+        | xj_pos, xj_spine, xi_word, xi_pos         | type = 13
+        +-------------------------------------------+
+        Basic features are represented using a tuple. The first element is
+        integer 6, indicating that it is a contextual-spinal feature. The second element
+        is also an integer, the value to meaning mapping is listed above:
+        
+            (6,type,xi/xj_[word,pos,spine,word,pos,spine])
+
+        :param fv: A feature vector instance
+        :type fv: FeatureVector
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :paramn dep_index: The index of the dependency node
+        :type dep_index: integer
+        """
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        xi_spine = self.spine_list[dep_index-1]
+        xj_spine = self.spine_list[head_index-1]
+
+        # Prepare keys
+        type0_str = str((6,0,xi_word,xi_spine,xj_word))
+        type1_str = str((6,1,xi_word,xi_spine,xj_word,xj_pos))
+        type2_str = str((6,2,xi_word,xi_pos,xi_spine,xj_word))
+        type3_str = str((6,3,xi_word,xi_pos,xi_spine,xj_word,xj_pos))
+        type4_str = str((6,4,xi_word,xi_pos,xi_spine,xj_pos))
+        type5_str = str((6,5,xi_pos,xi_spine,xj_pos))
+        type6_str = str((6,6,xi_pos,xi_spine,xj_word,xj_pos))
+        type7_str = str((6,7,xj_word,xj_spine,xi_word))
+        type8_str = str((6,8,xj_word,xj_spine,xi_word,xi_pos))
+        type9_str = str((6,9,xj_word,xj_pos,xj_spine,xi_word))
+        type10_str = str((6,10,xj_word,xj_pos,xj_spine,xi_word,xi_pos))
+        type11_str = str((6,11,xj_word,xj_pos,xj_spine,xi_pos))
+        type12_str = str((6,12,xj_pos,xj_spine,xi_pos))
+        type13_str = str((6,13,xj_pos,xj_spine,xi_word,xi_pos))
+
+        # Set all contextual-spinal features to 1
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+        fv[type6_str] = 1
+        fv[type7_str] = 1
+        fv[type8_str] = 1
+        fv[type9_str] = 1
+        fv[type10_str] = 1
+        fv[type11_str] = 1
+        fv[type12_str] = 1
+        fv[type13_str] = 1
+
+        return
+
+    def get_spinal_adjoin_feature(self,fv,head_index,dep_index,grm):
+        """
+        Add all spine-adjoin features (GRM) into a given feature vector instance.
+            +----------------------------------+
+            | xi-spine                         | type = 0
+            | xj-spine                         | type = 1
+            | xi-word, xi-pos, xi-spine        | type = 2
+            | xi-word, xi-spine                | type = 3
+            | xi-pos, xi-spine                 | type = 4
+            +----------------------------------+
+        Basic features are represented using a tuple. The first element is
+        integer 7, indicating that it is a spinal_adjoin feature. The second element
+        is also an integer, the value to meaning mapping is listed above:
+        
+            (7,type,xi/xj_[word,pos,spine,word,pos,spine])
+
+        :param fv: A feature vector instance
+        :type fv: FeatureVector
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :paramn dep_index: The index of the dependency node
+        :type dep_index: integer
+        """
+        xi_word = self.word_list[head_index]
+        xi_pos = self.pos_list[head_index]
+        xj_word = self.word_list[dep_index]
+        xj_pos = self.pos_list[dep_index]
+        xi_spine = self.spine_list[dep_index-1]
+        xj_spine = self.spine_list[head_index-1]
+
+        # Prepare keys
+        type0_str = str((4,0,xi_spine))
+        type1_str = str((4,1,xj_spine))
+        type2_str = str((4,2,xi_word,xi_pos,xi_spine))
+        type3_str = str((4,3,xi_word,xi_spine))
+        type4_str = str((4,4,xi_pos,xi_spine))
+        type5_str = str((4,5,xj_word,xj_pos,xj_spine))
+        type6_str = str((4,6,xj_word,xj_spine))
+        type7_str = str((4,7,xj_pos,xj_spine))
+
+        # Set all unigram-spinal features to 1; same feature count will
+        # be aggregated 
+        fv[type0_str] = 1
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+        fv[type6_str] = 1
+        fv[type7_str] = 1
+
+        return
+
     def add_dir_and_dist(self,fv,head_index,dep_index):
         """
         Add additional distance and direction information in a given feature
@@ -463,7 +693,7 @@ class FeatureGenerator():
             
         return
 
-    def get_local_vector(self,head_index,dep_index):
+    def get_local_vector(self,head_index,dep_index,is_uni_spinal=True,is_bi_spinal=False,is_conx_spinal=False,is_spinal_adjoin=False):
         """
         Given an edge, return its local vector
 
@@ -473,16 +703,33 @@ class FeatureGenerator():
         :type dep_node: integer
         """
         local_fv = FeatureVector()
+
         # Get Unigram features
         self.get_unigram_feature(local_fv,head_index,dep_index)
+
         # Get bigram features
         self.get_bigram_feature(local_fv,head_index,dep_index)
+
         # Get in-between features
         self.get_in_between_feature(local_fv,head_index,dep_index)
+
         # Get sorrounding feature
         self.get_surrounding_feature(local_fv,head_index,dep_index)
-        # Get Unigram-spinal features
-        self.get_unigram_spinal_feature(local_fv,head_index,dep_index)
+
+        if is_uni_spinal:
+            # Get Unigram-spinal features
+            self.get_unigram_spinal_feature(local_fv,head_index,dep_index)
+
+        if is_bi_spinal:
+            # Get bigram-spinal features
+            self.get_bigram_spinal_feature(local_fv,head_index,dep_index)
+
+        if is_conx_spinal:
+            # Get contextual-spinal features
+            self.get_contextual_spinal_feature(local_fv,head_index,dep_index)
+
+        if is_spinal_adjoin:
+            self.get_spinal_adjoin_feature(local_fv,head_index,dep_index,grm)
 
         # For future improvements please put all other features here
         # ...
