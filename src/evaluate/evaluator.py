@@ -36,6 +36,12 @@ class Evaluator():
         correct_num = len(intersect_set)
         gold_set_size = len(gold_edge_set)
         
+        print "result edge set: "
+        print result_edge_set
+        print "gold edge set: "
+        print gold_edge_set
+        print "##############"
+        
         return correct_num, gold_set_size
 
     def evaluate(self, data_pool, parser, w_vector):
@@ -87,7 +93,7 @@ class Evaluator():
             
             self.unlabeled_gold_set_size += gold_set_size
             #gold_set_size = self.unlabeled_gold_set_size
-            print correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size 
+            # print correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size 
         return correct_num / gold_set_size
         
     def get_acc_unlabeled_accuracy(self):
