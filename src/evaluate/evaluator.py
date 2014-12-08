@@ -50,6 +50,10 @@ class Evaluator():
         while data_pool.has_next_data():  
             sent = data_pool.get_next_data()
             
+            print "data instance: "
+            print sent.get_word_list();
+            print sent.get_edge_list();
+            
             gold_edge_set = \
                 set([(head_index,dep_index) for head_index,dep_index,_ in sent.get_edge_list()])
             

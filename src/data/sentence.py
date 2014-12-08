@@ -144,3 +144,4 @@ class Sentence():
 
     def get_spine_list(self):
         return self.spine_list
+
