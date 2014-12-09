@@ -103,6 +103,9 @@ class DataPool():
                     word_list.append(elem[0])
                     pos_list.append(elem[1])
                     
+                    # Form edge set
+                    edge_set[(int(elem[2]), current_index)] = elem[3]
+
                     # Form D
                     is_prev = 0
                     if elem[-2] == 's':
@@ -118,8 +121,7 @@ class DataPool():
                     
                     position = elem[-3]
                     label = (position, r_or_s, is_prev)
-                    # Form edge set
-                    edge_set[(int(elem[2]), current_index)] = elem[3]
+
                 # If this is the end of previous sentence
                 else:
                     if word_list != []:
