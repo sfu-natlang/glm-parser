@@ -4,3 +4,4 @@
 *.egg-info
 src/build/
 src/hvector/build/
+Cython-0.20.2/*
