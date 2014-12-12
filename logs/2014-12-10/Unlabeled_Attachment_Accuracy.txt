@@ -1,4 +1,8 @@
+Script: run_evaluate.sh  commit: 48aab32
 
+The highest accuracy is at iteration 5:
+12/11/2014 04:25:45 PM INFO: Unlabeled accuracy: 0.942192344990 (157397, 167054)
+12/11/2014 04:25:45 PM INFO: Unlabeled attachment accuracy: 0.944504465158 (164357, 174014)
 
 Iter 1 :
 12/11/2014 02:52:19 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_0.db 
