@@ -1,0 +1,65 @@
+
+
+Iter 1 :
+12/11/2014 02:52:19 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_0.db 
+12/11/2014 02:53:27 PM DEBUG: Start evaluating ...
+12/11/2014 02:53:27 PM INFO: Feature count: 9534142
+12/11/2014 03:10:53 PM INFO: Unlabeled accuracy: 0.936912615083 (156515, 167054)
+12/11/2014 03:10:53 PM INFO: Unlabeled attachment accuracy: 0.939435907456 (163475, 174014)
+===============================================
+Iter 2 :
+12/11/2014 03:10:57 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_1.db 
+12/11/2014 03:12:05 PM DEBUG: Start evaluating ...
+12/11/2014 03:12:05 PM INFO: Feature count: 9886118
+12/11/2014 03:29:29 PM INFO: Unlabeled accuracy: 0.940689836819 (157146, 167054)
+12/11/2014 03:29:29 PM INFO: Unlabeled attachment accuracy: 0.943062052479 (164106, 174014)
+===============================================
+Iter 3 :
+12/11/2014 03:29:33 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_2.db 
+12/11/2014 03:30:43 PM DEBUG: Start evaluating ...
+12/11/2014 03:30:43 PM INFO: Feature count: 10066840
+12/11/2014 03:48:19 PM INFO: Unlabeled accuracy: 0.942144456284 (157389, 167054)
+12/11/2014 03:48:19 PM INFO: Unlabeled attachment accuracy: 0.944458491845 (164349, 174014)
+===============================================
+Iter 4 :
+12/11/2014 03:48:24 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_3.db 
+12/11/2014 03:49:32 PM DEBUG: Start evaluating ...
+12/11/2014 03:49:32 PM INFO: Feature count: 10174094
+12/11/2014 04:07:05 PM INFO: Unlabeled accuracy: 0.942024734517 (157369, 167054)
+12/11/2014 04:07:05 PM INFO: Unlabeled attachment accuracy: 0.944343558564 (164329, 174014)
+===============================================
+Iter 5 :
+12/11/2014 04:07:09 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_4.db 
+12/11/2014 04:08:18 PM INFO: Feature count: 10248242
+12/11/2014 04:25:45 PM INFO: Unlabeled accuracy: 0.942192344990 (157397, 167054)
+12/11/2014 04:25:45 PM INFO: Unlabeled attachment accuracy: 0.944504465158 (164357, 174014)
+===============================================
+Iter 6 :
+12/11/2014 04:25:49 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_5.db 
+12/11/2014 04:27:00 PM INFO: Feature count: 10302575
+12/11/2014 04:44:52 PM INFO: Unlabeled accuracy: 0.942144456284 (157389, 167054)
+12/11/2014 04:44:52 PM INFO: Unlabeled attachment accuracy: 0.944458491845 (164349, 174014)
+===============================================
+Iter 7 :
+12/11/2014 04:44:56 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_6.db 
+12/11/2014 04:46:05 PM INFO: Feature count: 10342271
+12/11/2014 05:03:32 PM INFO: Unlabeled accuracy: 0.941845151867 (157339, 167054)
+12/11/2014 05:03:32 PM INFO: Unlabeled attachment accuracy: 0.944171158642 (164299, 174014)
+===============================================
+Iter 8 :
+12/11/2014 05:03:37 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_7.db 
+12/11/2014 05:04:45 PM INFO: Feature count: 10373455
+12/11/2014 05:22:09 PM INFO: Unlabeled accuracy: 0.941887054485 (157346, 167054)
+12/11/2014 05:22:09 PM INFO: Unlabeled attachment accuracy: 0.944211385291 (164306, 174014)
+===============================================
+Iter 9 :
+12/11/2014 05:22:13 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_8.db 
+12/11/2014 05:23:22 PM INFO: Feature count: 10398905
+12/11/2014 05:40:33 PM INFO: Unlabeled accuracy: 0.941881068397 (157345, 167054)
+12/11/2014 05:40:33 PM INFO: Unlabeled attachment accuracy: 0.944205638627 (164305, 174014)
+===============================================
+Iter 10 :
+12/11/2014 05:40:38 PM DEBUG: Loading Weight Vector from /cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_9.db 
+12/11/2014 05:41:47 PM INFO: Feature count: 10420623
+12/11/2014 05:59:18 PM INFO: Unlabeled accuracy: 0.941928957104 (157353, 167054)
+12/11/2014 05:59:18 PM INFO: Unlabeled attachment accuracy: 0.944251611939 (164313, 174014)

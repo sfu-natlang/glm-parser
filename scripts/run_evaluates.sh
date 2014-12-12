@@ -22,6 +22,6 @@ do
     j=$(($i-1))
     
     # not specify learning section, skip learning
-    python glm_parser.py -i 0 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d "/cs/natlang-projects/glm-parser/new_results/weight/OneIter$i" -l "/cs/natlang-projects/glm-parser/new_results/weight/11-18-2014/Spinal_Weight$j.db"
+    python glm_parser.py -i 0 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d "/cs/natlang-projects/glm-parser/new_results/weight/OneIter$i" -l "/cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_$j.db"
 done
  
