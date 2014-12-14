@@ -13,4 +13,15 @@ cd hvector
 python setup.py install --install-lib .
 
 cd $project_path'/src'
-python glm_parser.py -i 20 -b 2 -e 21 -t 23 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d "/cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight"
+python glm_parser.py -i 20 -b 2 -e 21 -t 24 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d "/cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight"
+
+for i in {1..10}
+do
+    echo "===============================================" >> ./glm_parser.log
+    echo "Iter $i :" >> ./glm_parser.log
+    j=$(($i-1))
+    
+    # not specify learning section, skip learning
+    python glm_parser.py -i 0 -t 24 -p /cs/natlang-projects/glm-parser/wsj_conll_tree_lossy/ -d "/cs/natlang-projects/glm-parser/new_results/weight/OneIter$i" -l "/cs/natlang-projects/glm-parser/new_results/weight/Spinal_Weight_Iter_$j.db"
+done
+ 
