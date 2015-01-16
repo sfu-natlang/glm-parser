@@ -17,7 +17,7 @@ class Sentence():
     relevant tasks.
     """
     
-    def __init__(self, word_list, pos_list=None, edge_set=None, spine_list=None):
+    def __init__(self, word_list, pos_list=None, edge_set=None, spine_list=None, label_list=None):
         """
         Initialize a dependency tree. If you provide a sentence then the
         initializer could store it as tree nodes. If no initlization parameter
@@ -30,7 +30,8 @@ class Sentence():
         self.set_word_list(word_list)
         self.set_pos_list(pos_list)
         self.set_edge_list(edge_set)
-        self.set_spine_list(spine_list);
+        self.set_spine_list(spine_list)
+        self.set_label_list(label_list)
             
         self.f_gen = FeatureGenerator(self)
         
@@ -145,3 +146,8 @@ class Sentence():
     def get_spine_list(self):
         return self.spine_list
 
+    def set_label_list(self, label_list):
+        self.label_list = label_list
+
+    def get_label_list(self):
+        return self.label_list

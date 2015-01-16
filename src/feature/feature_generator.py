@@ -597,18 +597,11 @@ class FeatureGenerator():
 
         return
 
-    def get_spinal_adjoin_feature(self,fv,head_index,dep_index,grm):
+    def get_spinal_adjoin_feature(self,fv,head_index,dep_index):  
         """
         Add all spine-adjoin features (GRM) into a given feature vector instance.
-            +----------------------------------+
-            | xi-spine                         | type = 0
-            | xj-spine                         | type = 1
-            | xi-word, xi-pos, xi-spine        | type = 2
-            | xi-word, xi-spine                | type = 3
-            | xi-pos, xi-spine                 | type = 4
-            +----------------------------------+
-        Basic features are represented using a tuple. The first element is
-        integer 7, indicating that it is a spinal_adjoin feature. The second element
+        asic features are represented using a tuple. The first element is
+        nteger 7, indicating that it is a spinal_adjoin feature. The second element
         is also an integer, the value to meaning mapping is listed above:
         
             (7,type,xi/xj_[word,pos,spine,word,pos,spine])
@@ -626,16 +619,19 @@ class FeatureGenerator():
         xj_pos = self.pos_list[dep_index]
         xi_spine = self.spine_list[dep_index-1]
         xj_spine = self.spine_list[head_index-1]
+        xj_label = self.label_list[dep_index-1]
+        
+        # Map the label to GRM
+        xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
 
         # Prepare keys
-        type0_str = str((4,0,xi_spine))
-        type1_str = str((4,1,xj_spine))
-        type2_str = str((4,2,xi_word,xi_pos,xi_spine))
-        type3_str = str((4,3,xi_word,xi_spine))
-        type4_str = str((4,4,xi_pos,xi_spine))
-        type5_str = str((4,5,xj_word,xj_pos,xj_spine))
-        type6_str = str((4,6,xj_word,xj_spine))
-        type7_str = str((4,7,xj_pos,xj_spine))
+        type0_str = str((7,0,xi_word,xj-word,(xi_xj_grm,xj_label[1])))
+        type1_str = str((7,1,xi-word,xj-word,xj-pos,(xi_xj_grm,xj_label[1])))
+        type2_str = str((7,2,xi-word,xj-word,xi-pos,(xi_xj_grm,xj_label[1])))
+        type3_str = str((7,3,xi-word,xj-word,xi-pos,xj-pos,(xi_xj_grm,xj_label[1])))
+        type4_str = str((7,4,xi_word,xi_pos,xj-pos,(xi_xj_grm,xj_label[1])))
+        type5_str = str((7,5,xi_pos,xj-word,xj_pos,(xi_xj_grm,xj_label[1])))
+        type6_str = str((7,6,xi_pos,xj-pos,(xi_xj_grm,xj_label[1])))
 
         # Set all unigram-spinal features to 1; same feature count will
         # be aggregated 
@@ -646,8 +642,6 @@ class FeatureGenerator():
         fv[type4_str] = 1
         fv[type5_str] = 1
         fv[type6_str] = 1
-        fv[type7_str] = 1
-
         return
 
     def add_dir_and_dist(self,fv,head_index,dep_index):
@@ -775,4 +769,20 @@ class FeatureGenerator():
             # We would like to keep the two dictionaries as small as possible
             fs.pop(fk)
         return
+
+    def get_grm(self, spine_m, label, spine_h, pos):
+        position = label[0]
+        r_or_s = label[1]
+        is_prev = label[2]
+        
+        m_node = spine_m.split("(")[1]
+        h_node = spine_h.split("(")[int(position)]
+
+        # If it is a regular adjoin
+        if r_or_s:
+            return (h_node, h_node, m_node)
+        # If it is a sibling adjoin
+        else:
+            return (h_node, pos, m_node)
+
 

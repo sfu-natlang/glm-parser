@@ -89,6 +89,7 @@ class DataPool():
             edge_set = {}
 
             spine_list = []
+            label_list =[]
             data_list = []
             
             current_index = 0
@@ -109,28 +110,31 @@ class DataPool():
                     # Form D
                     is_prev = 0
                     if elem[-2] == 's':
-                        r_or_s = -1
-                    elif elem[-2] == 'r':
                         r_or_s = 0
+                    elif elem[-2] == 'r':
+                        r_or_s = 1
                         if elem[-1] == 1:
                         # If there is a previous modifier
                             is_prev = 1
                     else:
                         # Skip the root
+                        label_list.append((None, None, None))
                         continue
                     
                     position = elem[-3]
                     label = (position, r_or_s, is_prev)
+                    label_list.append(label)
 
                 # If this is the end of previous sentence
                 else:
                     if word_list != []:
                         # Generate the sentence feature vectore
-                        sent = Sentence(word_list, pos_list, edge_set, spine_list)
+                        sent = Sentence(word_list, pos_list, edge_set, spine_list, label_list)
                         data_list.append(sent) 
                     word_list = []
                     pos_list = []
                     edge_set = {}
+                    label_list = []
                     spine_list = []
                     current_index = 0
         return data_list
