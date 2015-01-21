@@ -107,7 +107,7 @@ class DataPool():
                     # Form edge set
                     edge_set[(int(elem[2]), current_index)] = elem[3]
 
-                    # Form D
+                    # Form label l in D
                     is_prev = 0
                     if elem[-2] == 's':
                         r_or_s = 0
@@ -121,7 +121,7 @@ class DataPool():
                         label_list.append((None, None, None))
                         continue
                     
-                    position = elem[-3]
+                    position = int(elem[-3])
                     label = (position, r_or_s, is_prev)
                     label_list.append(label)
 
@@ -131,6 +131,7 @@ class DataPool():
                         # Generate the sentence feature vectore
                         sent = Sentence(word_list, pos_list, edge_set, spine_list, label_list)
                         data_list.append(sent) 
+                    print self.get_derivation(edge_set, spine_list, label_list)
                     word_list = []
                     pos_list = []
                     edge_set = {}
@@ -138,6 +139,21 @@ class DataPool():
                     spine_list = []
                     current_index = 0
         return data_list
+
+    def get_derivation(self, edge_set, spine_list, label_list):
+        # Form E
+        spine_list.insert(0, 'ROOT')
+        E = zip(range(0, len(spine_list)+1), spine_list)
+
+        # Form D
+        D = []
+        for edge, tag in edge_set.iteritems():
+            head = edge[0]
+            modifier = edge[1]
+            label = label_list[modifier - 1]
+            l = (label[0], label[1], spine_list[head], spine_list[modifier],label[2])
+            D.append((head, modifier, l))
+        return (E, D)
 
     def set_section_list(self, section_set):
         """
