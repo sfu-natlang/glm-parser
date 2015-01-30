@@ -10,9 +10,9 @@ cdef struct EisnerNode:
     int mid_index
     
 cdef struct EdgeRecoverNode:
-    int s
-    int t
-    int orientation
+    int h
+    int m
+    int x
     int shape
 
 ctypedef EisnerNode* P_EisnerNode
@@ -22,10 +22,11 @@ cdef class EisnerParser:
     cdef PP_EisnerNode ***e
     cdef list[pair[int, int]] edge_list
     cdef int n
-    cdef int tt
+    cdef queue[EdgeRecoverNode] recover_queue
+
     def __cinit__(self):
         pass
-    
+
     def init_eisner_matrix(self):
         self.e = <PP_EisnerNode***>malloc(self.n*sizeof(PP_EisnerNode**))
         cdef int i, j, k, l
@@ -50,23 +51,21 @@ cdef class EisnerParser:
                 free(self.e[i][j])
             free(self.e[i])
 
-    def new_IGSpan(self, h, m, g, arc_weight):
-        cdef int s, t, r
-        if h < m:
-            s = h
-            t = m
-        else:
-            s = m
-            t = h
+    def new_IGSpan_right(self, h, m, g, arc_weight):
+        cdef int r
+        # must satisfy h < m:
+        if h >= m:
+            print "invalid h < m condition in new_IGSpan_right"
+            return 
 
         cdef float edge_score = arc_weight(h, m, g, 'g')
-        cdef int max_index = s
+        cdef int max_index = h
         cdef float max_score = \
-            self.e[h][s][g][0].score + self.e[m][s+1][g][0].score + edge_score
+            self.e[h][h][g][0].score + self.e[m][h+1][h][0].score + edge_score
 
         cdef float cur_score
-        for r from s < r < t by 1:
-            cur_score = self.e[h][r][g][0].score + self.e[m][r+1][g][0].score + edge_score
+        for r from h < r < m by 1:
+            cur_score = self.e[h][r][g][0].score + self.e[m][r+1][h][0].score + edge_score
             if max_score < cur_score:
                 max_score = cur_score
                 max_index = r
@@ -75,7 +74,30 @@ cdef class EisnerParser:
         self.e[h][m][g][1].mid_index = max_index
         return
 
-    def new_SSpan(self, h, m, m1, arc_weight):
+    def new_IGSpan_left(self, h, m, g, arc_weight):
+        cdef int r
+        # must satisfy h > m:
+        if h <= m:
+            print "invalid h > m condition in new_IGSpan_left"
+            return
+
+        cdef float edge_score = arc_weight(h, m, g, 'g')
+        cdef int max_index = m
+        cdef float max_score = \
+            self.e[h][m+1][g][0].score + self.e[m][m][h][0].score + edge_score
+
+        cdef float cur_score
+        for r from m < r < h by 1:
+            cur_score = self.e[h][r+1][g][0].score + self.e[m][r][h][0].score + edge_score
+            if max_score < cur_score:
+                max_score = cur_score
+                max_index = r
+
+        self.e[h][m][g][1].score = max_score
+        self.e[h][m][g][1].mid_index = max_index
+        return
+
+    def new_SSpan(self, m, m1, h, arc_weight):
         cdef int s, t, r
         if m < m1:
             s = m
@@ -84,14 +106,14 @@ cdef class EisnerParser:
             s = m1
             t = m
 
-        cdef float edge_score = arc_weight(h, s, t, 's') # must ensure s < t
+        cdef float edge_score = arc_weight(s, t, h, 's') # must ensure s < t
         cdef int max_index = s
         cdef float max_score = \
-            self.e[m][s][h][0].score + self.e[m1][s+1][h][0].score + edge_score
+            self.e[s][s][h][0].score + self.e[t][s+1][h][0].score + edge_score
 
         cdef float cur_score
         for r from s < r < t by 1:
-            cur_score = self.e[m][r][h][0].score + self.e[m1][r+1][h][0].score + edge_score
+            cur_score = self.e[s][r][h][0].score + self.e[t][r+1][h][0].score + edge_score
             if max_score < cur_score:
                 max_score = cur_score
                 max_index = r
@@ -104,6 +126,9 @@ cdef class EisnerParser:
     
     def update_IGSpan(self, h, m, g, arc_weight):
         cdef int s, t, r
+        if (h - m == 1) or (m - h == 1):
+            return
+
         if h < m:
             s = h
             t = m
@@ -112,20 +137,20 @@ cdef class EisnerParser:
             t = h
 
         cdef float edge_score = arc_weight(h, m, g, 'g')
-        cdef int max_index = s
+        cdef int max_index = s+1
         cdef float max_score = \
-            self.e[h][s][g][1].score + self.e[h][s][m][2].score + edge_score
+            self.e[h][s+1][g][1].score + self.e[m][s+1][h][2].score + edge_score
 
         cdef float cur_score
-        for r from s < r < t by 1:
-            cur_score = self.e[h][r][g][1].score + self.e[h][r][m][2].score + edge_score
+        for r from s+1 < r < t by 1:
+            cur_score = self.e[h][r][g][1].score + self.e[m][r][h][2].score + edge_score
             if max_score < cur_score:
                 max_score = cur_score
                 max_index = r
 
         if self.e[h][m][g][1].score < max_score :
             self.e[h][m][g][1].score = max_score
-            self.e[h][m][g][1].mid_index = max_index
+            self.e[h][m][g][1].mid_index = -max_index #negative index to indicate a sibling
 
         return
 
@@ -138,12 +163,12 @@ cdef class EisnerParser:
             s = m
             t = h
 
-        cdef int max_index = s
+        cdef int max_index = m
         cdef float max_score = \
-            self.e[h][s][g][1].score + self.e[s][m][h][0].score
+            self.e[h][m][g][1].score + self.e[m][m][h][0].score
 
         cdef float cur_score
-        for r from s < r <= t by 1:
+        for r from s < r < t by 1:
             cur_score = self.e[h][r][g][1].score + self.e[r][m][h][0].score 
             if max_score < cur_score:
                 max_score = cur_score
@@ -175,6 +200,122 @@ cdef class EisnerParser:
                     print self.e[s][t][g][1].score,  '\t',
                 print
 
+    cdef add_edge(self, int h, int m):
+        cdef pair[int, int] edge
+        edge.first = h
+        edge.second = m
+        self.edge_list.push_back(edge)
+
+        # print '(', h, ',', m, ')'
+
+    cdef init_recover_queue(self):
+        while not self.recover_queue.empty():
+            self.recover_queue.pop()
+
+    cdef push_recover_queue(self, h, m, x, shape):
+        cdef EdgeRecoverNode new_node
+        if h != m:
+            new_node.h = h
+            new_node.m = m
+            new_node.x = x
+            new_node.shape = shape
+            self.recover_queue.push(new_node)
+      
+    cdef get_edge_list(self):
+        cdef EdgeRecoverNode node
+        self.init_recover_queue()
+
+        if not self.edge_list.empty():
+            self.edge_list.clear()
+
+        cdef int s, mid_index
+        cdef float max_score
+        max_score = self.e[0][1][0][0].score + self.e[0][self.n-1][0][0].score
+        mid_index = 0
+
+        for s from 0 < s < self.n by 1:   
+            if max_score < (self.e[s][1][0][0].score + self.e[s][self.n-1][0][0].score):
+                max_score = self.e[s][1][0][0].score + self.e[s][self.n-1][0][0].score
+                mid_index = s
+
+        self.add_edge(0, mid_index)
+        self.push_recover_queue(mid_index, 1, 0, 0)
+        self.push_recover_queue(mid_index, self.n-1, 0, 0)
+        while not self.recover_queue.empty():
+            node = self.recover_queue.front()
+            self.recover_queue.pop()
+            
+            if node.shape == 0:
+                self.split_triangle(node)
+            if node.shape == 1:
+                self.split_trapezoid(node)
+            if node.shape == 2:
+                self.split_rectangle(node)
+ 
+        return
+
+    cdef split_triangle(self, EdgeRecoverNode node):
+        """
+        triangle: e[h][m][g][0]
+        """
+        
+        cdef int q = self.e[node.h][node.m][node.x][0].mid_index
+        
+        self.push_recover_queue(node.h, q, node.x, 1)
+        self.push_recover_queue(q, node.m, node.h, 0)
+
+        return 
+
+    cdef split_trapezoid(self, EdgeRecoverNode node):
+        """
+        trapezoid: e[h][m][g][1] 
+        """
+        self.add_edge(node.h, node.m)
+
+        cdef int q = self.e[node.h][node.m][node.x][1].mid_index
+
+        if q > 0 and node.h < node.m: # grand-grand
+            self.push_recover_queue(node.h, q, node.x, 0)
+            self.push_recover_queue(node.m, q+1, node.h, 0)
+        elif q > 0 and node.h > node.m:
+            self.push_recover_queue(node.h, q+1, node.x, 0)
+            self.push_recover_queue(node.m, q, node.h, 0)
+        elif q < 0: # grand-sibling
+            q = -q 
+            self.push_recover_queue(node.h, q, node.x, 1)
+            self.push_recover_queue(node.m, q, node.h, 2)
+        else:
+            print "invalid mid_index or (h,m) relation for trapezoid split"
+            print node.h, node.m, q
+
+        return
+
+    cdef split_rectangle(self, EdgeRecoverNode node):
+        """
+        rectangle: e[m][m1][h][3] (h is the common head)
+        """
+    
+        cdef int q = self.e[node.h][node.m][node.x][2].mid_index
+        cdef s,t
+        if node.h < node.m:
+            s = node.h
+            t = node.m
+        else:
+            s = node.m
+            t = node.h
+        self.push_recover_queue(s, q, node.x, 0)
+        self.push_recover_queue(t, q+1, node.x, 0)
+
+        return 
+
+    def update_eisner_matrix(self, s, t, g, arc_weight):
+        self.new_IGSpan_right(s, t, g, arc_weight)
+        self.new_IGSpan_left(t, s, g, arc_weight)
+        self.new_SSpan(s, t, g, arc_weight)
+        self.update_IGSpan(s, t, g, arc_weight)
+        self.update_IGSpan(t, s, g, arc_weight)
+        self.new_CGSpan(s, t, g)
+        self.new_CGSpan(t, s, g)
 
     def parse(self, sent, arc_weight):	
 
@@ -188,37 +329,12 @@ cdef class EisnerParser:
                     break
 
                 for g from 0 <= g < s by 1:
-                    self.new_IGSpan(s, t, g, arc_weight)
-                    self.new_IGSpan(t, s, g, arc_weight)
-                    self.new_SSpan(g, s, t, arc_weight)
-                    self.update_IGSpan(s, t, g, arc_weight)
-                    self.update_IGSpan(t, s, g, arc_weight)
-                    self.new_CGSpan(s, t, g)
-                    self.new_CGSpan(t, s, g)
+                    self.update_eisner_matrix(s,t,g,arc_weight)
                 
                 for g from t < g < self.n by 1:
-                    self.new_IGSpan(s, t, g, arc_weight)
-                    self.new_IGSpan(t, s, g, arc_weight)
-                    self.new_SSpan(g, s, t, arc_weight)
-                    self.update_IGSpan(s, t, g, arc_weight)
-                    self.update_IGSpan(t, s, g, arc_weight)
-                    self.new_CGSpan(s, t, g)
-                    self.new_CGSpan(t, s, g)
+                    self.update_eisner_matrix(s,t,g,arc_weight)
         
-        self.print_eisner_matrix()
-        
-        gsore = 0
-        gs = 0
-        mid_1 = 0
-        mid_2 = 0
-        for s from 0 <= s < self.n by 1:   
-            if gsore < (self.e[s][1][0][0].score + self.e[s][self.n-1][0][0].score):
-                gsore = (self.e[s][1][0][0].score + self.e[s][self.n-1][0][0].score)
-                gs = s
-                mid_1 = self.e[s][1][0][0].mid_index
-                mid_2 = self.e[s][self.n-1][0][0].mid_index
-
-        print gsore, gs, mid_1, mid_2
-
+        # self.print_eisner_matrix() 
+        self.get_edge_list()
 
         return self.edge_list
