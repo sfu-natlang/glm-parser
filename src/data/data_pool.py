@@ -59,7 +59,7 @@ class DataPool():
 	datapresent = self.has_next_data()
         if(datapresent):
            self.current_index += 1
-           if self.current_index % 1000 == :
+           if self.current_index % 1000 == 0:
                logging.debug("Data finishing %.2f%% ..." % (100*self.current_index/len(self.data_list)))
                return self.data_list[self.current_index]
 
