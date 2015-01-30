@@ -10,7 +10,8 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 
 extentions = [
-    Extension('parse.ceisner',["parse/ceisner.pyx"])
+    Extension('parse.ceisner',["parse/ceisner.pyx"]),
+    Extension('parse.ceisner3',["parse/ceisner3.pyx"])
 ]
 
 setup(
