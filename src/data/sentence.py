@@ -35,6 +35,90 @@ class Sentence():
         self.gold_global_vector = self.get_global_vector(edge_set)
         return
 
+    def find_sibling_relation(self, edge_list):
+        """
+        Find all sibling relations:
+          |---------------|
+        head-->sibling-->dep *or*
+          |---------------|
+        dep<--sibling<--head
+        (i.e. we always call the node in the middle as "the sibling")
+
+        :param edge_list: The list of edges represented as tuples
+
+        :return: A list of three-tuples: (head, dep, sibling)
+        """
+        sibling_list = []
+        edge_list_len = len(edge_list)
+
+        for first_edge_index in range(edge_list_len - 1):
+            for second_edge_index in range(first_edge_index + 1,
+                                           edge_list_len):
+                first_edge_tuple = edge_list[first_edge_index]
+                second_edge_tuple = edge_list[second_edge_index]
+                # If they do not share the same head, continue
+                if first_edge_tuple[0] != second_edge_tuple[0]:
+                    continue
+                head_index = first_edge_tuple[0]
+                dep_index = first_edge_tuple[1]
+                sib_index = second_edge_tuple[1]
+
+                # May erase this later!
+                assert dep_index != sib_index
+
+                if dep_index > head_index and sib_index > head_index:
+                    # We always call the node
+                    if dep_index > sib_index:
+                        sibling_list.append((head_index, dep_index, sib_index))
+                    else:
+                        sibling_list.append((head_index, sib_index, dep_index))
+                elif dep_index < head_index and sib_index < head_index:
+                    if dep_index > sib_index:
+                        sibling_list.append((head_index, sib_index, dep_index))
+                    else:
+                        sibling_list.append((head_index, dep_index, sib_index))
+
+        return sibling_list
+
+
+    def find_grandchild_relation(self, edge_list):
+        """
+        Find all grandchild relation:
+
+        head-->dep-->grandchild *or*
+        grandchild<--dep<--head *or*
+             |--------------|
+        grandchild  head-->dep  *or*
+         |---------------|
+        dep<--head  grandchild
+
+        i.e. There is no order constraint, as long as
+        the head, dep and grandchild node could be chained
+        using two edges. (In contrast, in sibling relation
+        this is not true. Sibling relation requires dep
+         and sibling node on the same side of the head. But
+         again direction is not a constraint in either cases)
+        """
+        grandchild_list = []
+        edge_list_len = len(edge_list)
+
+        for first_edge_index in range(edge_list_len - 1):
+            for second_edge_index in range(first_edge_index + 1,
+                                           edge_list_len):
+                first_edge_tuple = edge_list[first_edge_index]
+                second_edge_tuple = edge_list[second_edge_index]
+
+                if first_edge_tuple[1] == second_edge_tuple[0]:
+                    grandchild_list.append((first_edge_tuple[0],   # Head
+                                            first_edge_tuple[1],   # dep
+                                            second_edge_tuple[1])) # grand child
+                elif first_edge_tuple[0] == second_edge_tuple[1]:
+                    grandchild_list.append((second_edge_tuple[0],
+                                            second_edge_tuple[1],
+                                            first_edge_tuple[1]))
+        return grandchild_list
+
+
     def get_global_vector(self, edge_set):
         """
         Calculate the global vector with the current weight, the order of the feature

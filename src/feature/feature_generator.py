@@ -394,6 +394,93 @@ class FeatureGenerator():
 
         return
 
+    def get_2nd_sibling_feature(self, fv, head_index, dep_index, sib_index):
+        """
+        Add second order sibling feature to feature vector
+
+        head-->sibling-->dep *or* dep<--sibling<--head
+        head = xi, dep = xj, sibling = xk
+
+        +------------------------+
+        | xi_pos, xk_pos, xj_pos | type = 1
+        | xk_pos, xj_pos         | type = 2
+        | xk_word, xj_word       | type = 3
+        | xk_word, xj_pos        | type = 4
+        | xk_pos, xj_word        | type = 5
+        +------------------------+
+
+        (4, type, [remaining components in the above order])
+
+        :param fv: Feature vector instance. This object will be changed in-place
+        :param head_index: The index of the head node (parent node)
+        :param dep_index: The index of the dependency node (outer side node)
+        :param sib_index: The index of the sibling node (inner side node)
+        :return: None
+        """
+        # Extract POS and word
+        xi_pos = self.pos_list[head_index]
+        xj_pos = self.pos_list[dep_index]
+        xk_pos = self.pos_list[sib_index]
+        xk_word = self.word_list[sib_index]
+        xj_word = self.word_list[dep_index]
+
+        type1_str = str((4, 1, xi_pos, xk_pos, xj_pos))
+        type2_str = str((4, 2, xk_pos, xj_pos))
+        type3_str = str((4, 3, xk_word, xj_word))
+        type4_str = str((4, 4, xk_word, xj_pos))
+        type5_str = str((4, 5, xk_pos, xj_word))
+
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+
+        return
+
+    def get_2nd_grandparent_feature(self, fv, head_index, dep_index, gc_index):
+        """
+        Add geandchild feature into the feature vector
+
+        head-->dep-->gc *or* gc<--dep<--head
+        head = xi, dep = xj, gc = xk
+
+        +------------------------+
+        | xi_pos, xk_pos, xj_pos | type = 1
+        | xk_pos, xj_pos         | type = 2
+        | xk_word, xj_word       | type = 3
+        | xk_word, xj_pos        | type = 4
+        | xk_pos, xj_word        | type = 5
+        +------------------------+
+
+        (5, type, [remaining components in the above order])
+
+        :param fv: Feature vector
+        :param head_index: Index of the header
+        :param dep_index: Index of the dependent node
+        :param gc_index: Index of the grand child node
+        :return: None
+        """
+        xi_pos = self.pos_list[head_index]
+        xj_pos = self.pos_list[dep_index]
+        xk_pos = self.pos_list[gc_index]
+        xk_word = self.word_list[gc_index]
+        xj_word = self.word_list[dep_index]
+
+        type1_str = str((5, 1, xi_pos, xk_pos, xj_pos))
+        type2_str = str((5, 2, xk_pos, xj_pos))
+        type3_str = str((5, 3, xk_word, xj_word))
+        type4_str = str((5, 4, xk_word, xj_pos))
+        type5_str = str((5, 5, xk_pos, xj_word))
+
+        fv[type1_str] = 1
+        fv[type2_str] = 1
+        fv[type3_str] = 1
+        fv[type4_str] = 1
+        fv[type5_str] = 1
+
+        return
+
     def add_dir_and_dist(self,fv,head_index,dep_index):
         """
         Add additional distance and direction information in a given feature
@@ -437,16 +524,16 @@ class FeatureGenerator():
             
         return
 
-    def get_local_vector(self,head_index,dep_index):
+    def get_1st_order_local_vector(self, head_index, dep_index):
         """
-        Given an edge, return its local vector
+        Return first order features (with dost and dir annotation)
 
-        :param head_index: The index of the head node
-        :type head_index: integer
-        :param dep_index: The index of the dependency node
-        :type dep_node: integer
+        :param head_index: Head index
+        :param dep_index: Dependency index
+        :return: FeatureVector instance
         """
-        local_fv = FeatureVector()
+        local_fv = FeatureVector
+
         # Get Unigram features
         self.get_unigram_feature(local_fv,head_index,dep_index)
         # Get bigram features
@@ -461,6 +548,73 @@ class FeatureGenerator():
         # Add dir and dist information for all features. This can be done
         # uniformly since the edge is the same.
         self.add_dir_and_dist(local_fv,head_index,dep_index)
+
+        return local_fv
+
+
+    def get_local_vector(self, head_index, dep_index, third_index=None,
+                         fourth_index=None, more_index_list=None, feature_type=0):
+        """
+        Given an edge, return its local vector
+
+        third_index, fourth_index and more_index_list are added to support
+        higher order features. To support 2nd order feature, use third_index
+        as either sibling node index or grand child node index. Same rule
+        applies for fourth_index. If there are more nodes, please use
+        more_index_list.
+
+        1st-order features are added no matter which higher-order feature we
+        are using. Higher-order features are specified by argument
+        feature_type. The values are defined below:
+
+        0: Normal 1st order features;
+        1: 2nd order sibling type; third_index should be the index
+        of the sibling
+        2: 2nd order grandchild type; third_index should be the index
+        of the grandchild
+
+        (More on the way...)
+
+        :param head_index: The index of the head node
+        :type head_index: integer
+        :param dep_index: The index of the dependency node
+        :type dep_node: integer
+        """
+        # Docorated with dist and dir; do not do this again
+        local_fv_1st = self.get_1st_order_local_vector()
+        # Fast path: return directly if only 1st order are evaluated
+        if feature_type == 0:
+            return local_fv_1st
+
+        local_fv_higher_order = FeatureVector()
+        if feature_type == 1:
+            self.get_2nd_sibling_feature(local_fv_higher_order,
+                                         head_index, dep_index,
+                                         third_index)
+            # From sibling to dependent node (we assume the sibling
+            # node is between the head and dependent node)
+            self.add_dir_and_dist(local_fv_higher_order,
+                                  third_index, dep_index)
+        elif feature_type == 2:
+            self.get_2nd_grandparent_feature(local_fv_higher_order,
+                                             head_index, dep_index,
+                                             third_index)
+            # From dependent node to grand child
+            self.add_dir_and_dist(local_fv_higher_order,
+                                  dep_index,
+                                  third_index)
+        else:
+            raise ValueError("Feature type %d not supported yet" %
+                             (feature_type, ))
+
+        # Just rename
+        local_fv = local_fv_1st
+        # Merge basic 1st order features and higher order features
+        # If memory error is reported here (possibly when the set of
+        #  higher order features are large), then just add one line
+        #      local_fv_higher_order.pop(i)
+        for i in local_fv_higher_order.keys():
+            local_fv[i] = 1
         
         return local_fv
     
