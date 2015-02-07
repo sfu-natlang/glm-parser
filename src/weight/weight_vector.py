@@ -1,8 +1,24 @@
+#
+# Global Linear Model Parser
+# Simon Fraser University
+# NLP Lab
+#
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+#
+
 #import cPickle as pickle
 import sys
 
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
+from debug.debug import local_debug_flag
+
+if local_debug_flag is False:
+    from hvector._mycollections import mydefaultdict
+    from hvector.mydouble import mydouble
+else:
+    print("Local debug is on. Use dict() and float()")
+    mydefaultdict = dict
+    mydouble = float
+
 import logging
 
 logging.basicConfig(filename='glm_parser.log',

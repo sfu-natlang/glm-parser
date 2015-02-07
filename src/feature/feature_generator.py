@@ -1,3 +1,13 @@
+#
+# Global Linear Model Parser
+# Simon Fraser University
+# NLP Lab
+#
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+#
+import sys
+sys.path.append("..")
+
 from weight.weight_vector import *
 from feature.feature_vector import *
 
@@ -5,7 +15,7 @@ class FeatureGenerator():
     """
     Calculate feature for each sentence
     """
-    def __init__(self, sent=None):
+    def __init__(self, sent):
         """
         Initialize the FeatureSet instance, including a file name that might
         be used to store the database on the disk, and a dependency tree
@@ -481,7 +491,7 @@ class FeatureGenerator():
 
         return
 
-    def add_dir_and_dist(self,fv,head_index,dep_index):
+    def add_dir_and_dist(self, fv, head_index, dep_index):
         """
         Add additional distance and direction information in a given feature
         vector. All existing features will be iterated through, and new
@@ -524,15 +534,19 @@ class FeatureGenerator():
             
         return
 
-    def get_1st_order_local_vector(self, head_index, dep_index):
+    # This method could be replaced by get_higher_order_local_vector(),
+    # but is defined separately to keep interface unchanged for first
+    # order feature parser (which was implemented when we did not consider)
+    # higher order features.
+    def get_local_vector(self, head_index, dep_index):
         """
-        Return first order features (with dost and dir annotation)
+        Return first order features (with dist and dir annotation)
 
         :param head_index: Head index
         :param dep_index: Dependency index
         :return: FeatureVector instance
         """
-        local_fv = FeatureVector
+        local_fv = FeatureVector()
 
         # Get Unigram features
         self.get_unigram_feature(local_fv,head_index,dep_index)
@@ -552,26 +566,41 @@ class FeatureGenerator():
         return local_fv
 
 
-    def get_local_vector(self, head_index, dep_index, third_index=None,
-                         fourth_index=None, more_index_list=None, feature_type=0):
+    # Here defines some feature type. Used in method get_local_vector
+    FIRST_ORDER = 0
+    SECOND_ORDER_SIBLING = 1
+    SECOND_ORDER_GRANDCHILD = 2
+    SECOND_ORDER_SIBLING_ONLY = 3
+    SECOND_ORDER_GRANDCHILD_ONLY = 4
+
+    def get_second_order_local_vector(self, head_index, dep_index,
+                                      other_index_list=None,
+                                      feature_type=0):
         """
         Given an edge, return its local vector
 
-        third_index, fourth_index and more_index_list are added to support
-        higher order features. To support 2nd order feature, use third_index
-        as either sibling node index or grand child node index. Same rule
-        applies for fourth_index. If there are more nodes, please use
-        more_index_list.
+        To support higher order feature, use other_index_list. The content of
+        other_index_list is determined by argument feature_type, which specifies
+        how the content of other_index_list will be interpreted. See below.
 
         1st-order features are added no matter which higher-order feature we
         are using. Higher-order features are specified by argument
         feature_type. The values are defined below:
 
-        0: Normal 1st order features;
-        1: 2nd order sibling type; third_index should be the index
-        of the sibling
-        2: 2nd order grandchild type; third_index should be the index
-        of the grandchild
+        ----------------------------------------------------------------------------
+        | feature_type       Description                   other_index_list        |
+        |      0        Normal 1st order features       None or [] (Won't be used) |
+        |                                                                          |
+        |      1        2nd order sibling type with     [0]: Sibling index or None |
+        |               1st order feature                                          |
+        |                                                                          |
+        |      2       2nd order grand child type        [0]: grand child index    |
+        |               with 1st order feature                                     |
+        |                                                                          |
+        |      3        2nd order sibling type                    See (1)          |
+        |                                                                          |
+        |      4      2nd order grand child type                  See (2)          |
+        ----------------------------------------------------------------------------
 
         (More on the way...)
 
@@ -579,33 +608,52 @@ class FeatureGenerator():
         :type head_index: integer
         :param dep_index: The index of the dependency node
         :type dep_node: integer
+        :param other_index_list: The index of
         """
+
+        # Deal with the case when feature type == 1 (sibling)
+        # but the sibling is None. In this case the situation
+        # degrades to a normal dependency relation
+        if (feature_type == self.SECOND_ORDER_SIBLING and
+            other_index_list[0] is None):
+            feature_type = self.FIRST_ORDER
+
         # Docorated with dist and dir; do not do this again
-        local_fv_1st = self.get_1st_order_local_vector()
+        local_fv_1st = self.get_local_vector(head_index, dep_index)
         # Fast path: return directly if only 1st order are evaluated
-        if feature_type == 0:
+        if feature_type == self.FIRST_ORDER:
             return local_fv_1st
 
-        local_fv_higher_order = FeatureVector()
-        if feature_type == 1:
-            self.get_2nd_sibling_feature(local_fv_higher_order,
+        local_fv_second_order = FeatureVector()
+        if (feature_type == self.SECOND_ORDER_SIBLING or
+            feature_type == self.SECOND_ORDER_SIBLING_ONLY):
+            sibling_index = other_index_list[0]
+            self.get_2nd_sibling_feature(local_fv_second_order,
                                          head_index, dep_index,
-                                         third_index)
+                                         sibling_index)
             # From sibling to dependent node (we assume the sibling
             # node is between the head and dependent node)
-            self.add_dir_and_dist(local_fv_higher_order,
-                                  third_index, dep_index)
-        elif feature_type == 2:
-            self.get_2nd_grandparent_feature(local_fv_higher_order,
+            self.add_dir_and_dist(local_fv_second_order,
+                                  sibling_index, dep_index)
+
+            if feature_type == feature_type == self.SECOND_ORDER_SIBLING_ONLY:
+                return local_fv_second_order
+        elif (feature_type == self.SECOND_ORDER_GRANDCHILD or
+              feature_type == self.SECOND_ORDER_GRANDCHILD_ONLY):
+            grandchild_index = other_index_list[0]
+            self.get_2nd_grandparent_feature(local_fv_second_order,
                                              head_index, dep_index,
-                                             third_index)
+                                             grandchild_index)
             # From dependent node to grand child
-            self.add_dir_and_dist(local_fv_higher_order,
+            self.add_dir_and_dist(local_fv_second_order,
                                   dep_index,
-                                  third_index)
+                                  grandchild_index)
+
+            if feature_type == self.SECOND_ORDER_GRANDCHILD_ONLY:
+                return local_fv_second_order
         else:
-            raise ValueError("Feature type %d not supported yet" %
-                             (feature_type, ))
+            raise TypeError("Feature type %d not supported yet" %
+                            (feature_type, ))
 
         # Just rename
         local_fv = local_fv_1st
@@ -613,7 +661,7 @@ class FeatureGenerator():
         # If memory error is reported here (possibly when the set of
         #  higher order features are large), then just add one line
         #      local_fv_higher_order.pop(i)
-        for i in local_fv_higher_order.keys():
+        for i in local_fv_second_order.keys():
             local_fv[i] = 1
         
         return local_fv
@@ -654,3 +702,26 @@ class FeatureGenerator():
             fs.pop(fk)
         return
 
+#############################################################################
+# Unit test code
+
+def test():
+    class test_class:
+        word_list = ['ROOT', 'I', 'am', 'a', 'HAL9000', 'computer']
+        pos_list  = ['_ROOT_', 'POS-I', 'POS-am', 'POS-a',
+                     'POS-HAL9000', 'POS-computer']
+        def get_word_list(self):
+            return self.word_list
+        def get_pos_list(self):
+            return self.pos_list
+
+    sentence = test_class()
+    fg = FeatureGenerator(sentence)
+    fv = fg.get_second_order_local_vector(1, 5, [3],
+                             feature_type=FeatureGenerator.SECOND_ORDER_SIBLING_ONLY)
+    print(fv)
+
+    return
+
+if __name__ == '__main__':
+    test()

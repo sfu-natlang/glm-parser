@@ -1,5 +1,20 @@
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
+#
+# Global Linear Model Parser
+# Simon Fraser University
+# NLP Lab
+#
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+#
+
+from debug.debug import local_debug_flag
+
+if local_debug_flag is False:
+    from hvector._mycollections import mydefaultdict
+    from hvector.mydouble import mydouble
+else:
+    print("Local debug is on. Use dict() and float()")
+    mydefaultdict = dict
+    mydouble = {}
 
 class FeatureVector():
     """
@@ -10,6 +25,18 @@ class FeatureVector():
         # changed to hvector
         self.feature_dict = mydefaultdict(mydouble)
         return
+
+    def __repr__(self):
+        """
+        Print out all keys
+        """
+        rep = ''
+        sep = ''
+        for key in self.keys():
+            rep += (sep + key)
+            sep = '; '
+
+        return rep
 
     def __getitem__(self,feature_str):
         return self.feature_dict[feature_str]
@@ -22,6 +49,7 @@ class FeatureVector():
 
     def keys(self):
         return self.feature_dict.keys()
+
     def aggregate(self,another_fv):
         """
         Aggregate another feature vector into this one, no return value
