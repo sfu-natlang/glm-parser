@@ -51,14 +51,14 @@ cdef class EisnerParser:
                 free(self.e[i][j])
             free(self.e[i])
 
-    def new_IGSpan_right(self, h, m, g, arc_weight):
+    def new_IGSpan_right(self, h, m, g, sent, arc_weight):
         cdef int r
         # must satisfy h < m:
         if h >= m:
             print "invalid h < m condition in new_IGSpan_right"
             return 
 
-        cdef float edge_score = arc_weight(h, m, g, 'g')
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 'g'))
         cdef int max_index = h
         cdef float max_score = \
             self.e[h][h][g][0].score + self.e[m][h+1][h][0].score + edge_score
@@ -74,14 +74,14 @@ cdef class EisnerParser:
         self.e[h][m][g][1].mid_index = max_index
         return
 
-    def new_IGSpan_left(self, h, m, g, arc_weight):
+    def new_IGSpan_left(self, h, m, g, sent, arc_weight):
         cdef int r
         # must satisfy h > m:
         if h <= m:
             print "invalid h > m condition in new_IGSpan_left"
             return
 
-        cdef float edge_score = arc_weight(h, m, g, 'g')
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 'g'))
         cdef int max_index = m
         cdef float max_score = \
             self.e[h][m+1][g][0].score + self.e[m][m][h][0].score + edge_score
@@ -97,7 +97,7 @@ cdef class EisnerParser:
         self.e[h][m][g][1].mid_index = max_index
         return
 
-    def new_SSpan(self, m, m1, h, arc_weight):
+    def new_SSpan(self, m, m1, h, sent, arc_weight):
         cdef int s, t, r
         if m < m1:
             s = m
@@ -106,7 +106,7 @@ cdef class EisnerParser:
             s = m1
             t = m
 
-        cdef float edge_score = arc_weight(s, t, h, 's') # must ensure s < t
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(s, t, h, 's')) # must ensure s < t
         cdef int max_index = s
         cdef float max_score = \
             self.e[s][s][h][0].score + self.e[t][s+1][h][0].score + edge_score
@@ -124,7 +124,7 @@ cdef class EisnerParser:
         self.e[m1][m][h][2].mid_index = max_index
         return
     
-    def update_IGSpan(self, h, m, g, arc_weight):
+    def update_IGSpan(self, h, m, g, sent, arc_weight):
         cdef int s, t, r
         if (h - m == 1) or (m - h == 1):
             return
@@ -136,7 +136,7 @@ cdef class EisnerParser:
             s = m
             t = h
 
-        cdef float edge_score = arc_weight(h, m, g, 'g')
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 'g'))
         cdef int max_index = s+1
         cdef float max_score = \
             self.e[h][s+1][g][1].score + self.e[m][s+1][h][2].score + edge_score
@@ -308,12 +308,12 @@ cdef class EisnerParser:
 
         return 
 
-    def update_eisner_matrix(self, s, t, g, arc_weight):
-        self.new_IGSpan_right(s, t, g, arc_weight)
-        self.new_IGSpan_left(t, s, g, arc_weight)
-        self.new_SSpan(s, t, g, arc_weight)
-        self.update_IGSpan(s, t, g, arc_weight)
-        self.update_IGSpan(t, s, g, arc_weight)
+    def update_eisner_matrix(self, s, t, g, sent, arc_weight):
+        self.new_IGSpan_right(s, t, g, sent, arc_weight)
+        self.new_IGSpan_left(t, s, g, sent, arc_weight)
+        self.new_SSpan(s, t, g, sent, arc_weight)
+        self.update_IGSpan(s, t, g, sent, arc_weight)
+        self.update_IGSpan(t, s, g, sent, arc_weight)
         self.new_CGSpan(s, t, g)
         self.new_CGSpan(t, s, g)
 
@@ -329,10 +329,10 @@ cdef class EisnerParser:
                     break
 
                 for g from 0 <= g < s by 1:
-                    self.update_eisner_matrix(s,t,g,arc_weight)
+                    self.update_eisner_matrix(s,t,g,sent,arc_weight)
                 
                 for g from t < g < self.n by 1:
-                    self.update_eisner_matrix(s,t,g,arc_weight)
+                    self.update_eisner_matrix(s,t,g,sent,arc_weight)
         
         # self.print_eisner_matrix() 
         self.get_edge_list()
