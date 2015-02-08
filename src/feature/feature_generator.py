@@ -4,6 +4,7 @@
 # NLP Lab
 #
 # Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# (Please add on your name if you have authored this file)
 #
 import sys
 sys.path.append("..")
@@ -408,7 +409,11 @@ class FeatureGenerator():
         """
         Add second order sibling feature to feature vector
 
-        head-->sibling-->dep *or* dep<--sibling<--head
+          |------->>>-----|
+        head-->sibling   dep *or*
+          |-------<<<-----|
+        dep   sibling<--head
+
         head = xi, dep = xj, sibling = xk
 
         +------------------------+
@@ -452,7 +457,13 @@ class FeatureGenerator():
         """
         Add geandchild feature into the feature vector
 
-        head-->dep-->gc *or* gc<--dep<--head
+        head-->dep-->grandchild *or*
+        grandchild<--dep<--head *or*
+             |------<<<-----|
+        grandchild  head-->dep  *or*
+         |------>>>------|
+        dep<--head  grandchild
+
         head = xi, dep = xj, gc = xk
 
         +------------------------+
@@ -589,17 +600,22 @@ class FeatureGenerator():
 
         ----------------------------------------------------------------------------
         | feature_type       Description                   other_index_list        |
+        |--------------------------------------------------------------------------|
         |      0        Normal 1st order features       None or [] (Won't be used) |
         |                                                                          |
-        |      1        2nd order sibling type with     [0]: Sibling index or None |
+        |      1        2nd order sibling type with    [0]: Sibling index or None* |
         |               1st order feature                                          |
         |                                                                          |
         |      2       2nd order grand child type        [0]: grand child index    |
         |               with 1st order feature                                     |
         |                                                                          |
-        |      3        2nd order sibling type                    See (1)          |
+        |      3        2nd order sibling type**                  See (1)          |
         |                                                                          |
-        |      4      2nd order grand child type                  See (2)          |
+        |      4      2nd order grand child type**                See (2)          |
+        |--------------------------------------------------------------------------|
+        | * If [0] == None, then type 1 degrades to type 0                         |
+        | ** By default, type 3 and 4 does not include lower order features. This  |
+        | two options are useful for some applications of feature vector           |
         ----------------------------------------------------------------------------
 
         (More on the way...)
@@ -657,12 +673,18 @@ class FeatureGenerator():
 
         # Just rename
         local_fv = local_fv_1st
+        ##############################################
         # Merge basic 1st order features and higher order features
         # If memory error is reported here (possibly when the set of
-        #  higher order features are large), then just add one line
-        #      local_fv_higher_order.pop(i)
+        # higher order features are large), then just add one line:
+        #    local_fv_higher_order.pop(i)
         for i in local_fv_second_order.keys():
-            local_fv[i] = 1
+           local_fv[i] = 1
+        # We could use this single line instead:
+        #   local_fv.aggregate(local_fv_second_order)
+        # And actually it is faster than merging manually
+        # But it would not run on local machine without hvector installation
+        ##############################################
         
         return local_fv
     
@@ -706,7 +728,7 @@ class FeatureGenerator():
 # Unit test code
 
 def test():
-    class test_class:
+    class test_class:  # mocking class that behaves like a tree
         word_list = ['ROOT', 'I', 'am', 'a', 'HAL9000', 'computer']
         pos_list  = ['_ROOT_', 'POS-I', 'POS-am', 'POS-a',
                      'POS-HAL9000', 'POS-computer']
@@ -718,7 +740,7 @@ def test():
     sentence = test_class()
     fg = FeatureGenerator(sentence)
     fv = fg.get_second_order_local_vector(1, 5, [3],
-                             feature_type=FeatureGenerator.SECOND_ORDER_SIBLING_ONLY)
+                             feature_type=FeatureGenerator.SECOND_ORDER_SIBLING)
     print(fv)
 
     return
