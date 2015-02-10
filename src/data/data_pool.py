@@ -21,7 +21,7 @@ class DataPool():
         :type section_set: list(int/tuple)
         
         :param data_path: the relative or absolute path to the 'penn-wsj-deps' folder
-        (include "penn-wsj-deps")
+        (including "penn-wsj-deps")
         :type data_path: str
         
         """  
@@ -54,14 +54,16 @@ class DataPool():
         
     def get_next_data(self):
         """
-            make sure to use function has_next_data function before calling this function
+        make sure to use function has_next_data function before calling this function
         """
-	datapresent = self.has_next_data()
+        datapresent = self.has_next_data()
         if(datapresent):
            self.current_index += 1
+           # Logging how many entries we have supplied
            if self.current_index % 1000 == 0:
                logging.debug("Data finishing %.2f%% ..." % (100*self.current_index/len(self.data_list)))
-               return self.data_list[self.current_index]
+
+            return self.data_list[self.current_index]
 
     def load(self):
         """
