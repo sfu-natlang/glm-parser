@@ -10,7 +10,23 @@ logging.basicConfig(filename='glm_parser.log',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
 class DataPool():
-    
+    """
+    Data object that holds all sentences (dependency trees) and provides
+    interface for loading data from the disk and retrieving them using an
+    index.
+
+    Data are classified into sections when stored in the disk, but we
+    do not preserve such structural information, and all sentences
+    will be loaded and "flattened" to be held in a single list.
+
+    The instance maintains a current_index variable, which is used to
+    locate the last sentence object we have read. Calling get_next()
+    method will increase this by 1, and calling has_next() will test
+    this index against the total number. The value of the index is
+    persistent during get_next() and has_next() calls, and will only
+    be reset to initial value -1 when reset() is called (manually or
+    during init).
+    """
     def __init__(self, section_set=[], data_path="./penn-wsj-deps/"):
         """
         Initialize the Data set
@@ -31,21 +47,32 @@ class DataPool():
         self.reset_whole()
         self.load()
 
+        return
+
     def reset_whole(self):
         """
-        Reset the index variables and the data list
-        data list is the list of data in the feature form
+        Reset the index variables and the data list.
+
+        Restores the instance to a state when no sentence has been read
         """
         self.reset()
         self.data_list = []
 
+        return
+
     def reset(self):
         """
-        Reset only the index variables
+        Reset the index variable to the very beginning of
+        sentence list
         """
         self.current_index = -1
 
     def has_next_data(self):
+        """
+        Returns True if there is still sentence not read
+
+        False if we have reaches the end of data_list
+        """
         i = self.current_index + 1
         if i >= 0 and i < len(self.data_list):
             return True
@@ -54,39 +81,70 @@ class DataPool():
         
     def get_next_data(self):
         """
-        make sure to use function has_next_data function before calling this function
+        Return the next sentence object, which is previously read
+        from disk files.
+
+        This method does not perform index checking, sp please make sure
+        the internal index is valid by calling has_next_data()
         """
-        datapresent = self.has_next_data()
-        if(datapresent):
+        if(self.has_next_data()):
            self.current_index += 1
            # Logging how many entries we have supplied
            if self.current_index % 1000 == 0:
-               logging.debug("Data finishing %.2f%% ..." % (100*self.current_index/len(self.data_list)))
+               logging.debug("Data finishing %.2f%% ..." %
+                             (100 * self.current_index/len(self.data_list), ))
 
             return self.data_list[self.current_index]
 
+
     def load(self):
         """
-        Load the trainning data
+        For each section in the initializer, iterate through all files
+        under that section directory, and load the content of each
+        individual file into the class instance.
+
+        This method should be called after section list has been intialized
+        and before any get_data method is called.
         """
         logging.debug("Loading data...")
         for section in self.section_list:
             logging.debug("Loading section %02d " % section)
-            for file_name in os.listdir(self.data_path + "%02d" % section):
-                file_path = self.data_path + "%02d/" % section + file_name
+            # There is a slash at the end in order to append file name
+            data_path_with_section = self.data_path + ("%02d/" % (section, ))
+            for file_name in os.listdir(data_path_with_section):
+                file_path = data_path_with_section + file_name
+                # Append newly read section datas to data_list
                 self.data_list = self.data_list + self.get_data_list(file_path)
+
+        return
+
 
     def get_data_list(self, file_path):
         """
-        Form the DependencyTree list from the specified file
-        
+        Form the DependencyTree list from the specified file. The file format
+        is defined below:
+
+        ----------------------------------------------
+        [previous sentence]
+        [empty line]
+        {word} {pos} {parent index} {edge_property}
+        ...
+        ...
+        [empty line]
+        [next sentence]
+        ----------------------------------------------
+
+        * Sentences are separated by an empty line
+        * Each entry in the sentence has an implicit index
+
         :param file_path: the path to the data file
-        :type: str
+        :type file_path: str
         
         :return: a list of DependencyTree in the specified file
-        :rtype: list(DependencyTree)
+        :rtype: list(Sentence)
         """
         f = open(file_path)
+
         data_list = []
         word_list = []
         pos_list = []
@@ -96,46 +154,66 @@ class DataPool():
         for line in f:
             line = line[:-1]
             if line != '':
-                current_index = current_index + 1
+                current_index += 1
                 entity = line.split()
                 if len(entity) != 4:
-                    logging.error("invalid data!!")
+                    logging.error("Invalid data format - Length not equal to 4")
                 else:
+                    # We do not add the 'ROOT' for word and pos
+                    # They are added in class Sentence
                     word_list.append(entity[0])
                     pos_list.append(entity[1])
                     edge_set[(int(entity[2]), current_index)] = entity[3]
             else:
+                # Prevent any non-mature (i.e. trivial) sentence structure
                 if word_list != []:
+                    # Add "ROOT" for word and pos here
                     sent = Sentence(word_list,pos_list,edge_set)
                     data_list.append(sent)
-                    #print d_tree.get_word_list()
+
                 word_list = []
                 pos_list = []
                 edge_set = {}
                 current_index = 0
+
+        # DO NOT FORGET THIS!!!!!!!!!!!!
+        f.close()
+
         return data_list
+
     
     def set_section_list(self, section_set):
         """
-        Set the section list from section set
-        the section set is a list contains:
-            tuples --   representing the range of the section,
-                        i.e. (1,3) means range 1,2,3
-            int    --   single section number
-        
+        Initialize self.section_list as a list containing section
+        numbers that we are going to use for training
+
+        Argument section_set is a list of tuples or intrgers:
+
+        +------------------------------------------------------+
+        |   tuples    representing the range of the section,   |
+        |             i.e. (1,3) means range 1,2,3             |
+        |------------------------------------------------------|
+        |   int       single section number                    |
+        +------------------------------------------------------+
+
         :param section_set: the sections to be used
-        :type section_set: list(tuple/int) 
+        :type section_set: list(tuple/int)
         """
+        # First get all sections that are specified using integers
         self.section_list = [section for section in section_set if isinstance(section, int)]
-        
+
+        # Then, make all tuple (x, y) a list [x, x + 1, .. , y]
         section_sets = \
             map(lambda section_tuple: range(section_tuple[0], section_tuple[1]+1),
                 [st for st in section_set if isinstance(st, tuple)])
+
         for s_set in section_sets:
             self.section_list = self.section_list + s_set
         
-        self.section_list.sort()        
-        return  
+        # We always train using increasing order
+        self.section_list.sort()
+
+        return
 
 ##############################################################################################################
 # Scripts for testing data_pool
