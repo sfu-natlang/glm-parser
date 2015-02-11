@@ -49,6 +49,7 @@ class Sentence():
         # Set self.f_vector_dict = {(edge0, edge1): FeatureVector()}
         self.set_feature_vector_dict()
 
+        # Precompute the set of features
         self.gold_global_vector = self.get_global_vector(edge_set)
         return
 
@@ -166,6 +167,7 @@ class Sentence():
         return
 
 
+    # Both 1st and 2nd order
     def get_global_vector(self, edge_set):
         """
         Calculate the global vector with the current weight, the order of the feature
