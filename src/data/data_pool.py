@@ -94,7 +94,7 @@ class DataPool():
                 logging.debug("Data finishing %.2f%% ..." %
                              (100 * self.current_index/len(self.data_list), ))
 
-                return self.data_list[self.current_index]
+            return self.data_list[self.current_index]
 
 
     def load(self):
