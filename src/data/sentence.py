@@ -53,7 +53,7 @@ class Sentence():
         self.gold_global_vector = self.get_global_vector(edge_set)
         return
 
-    def find_sibling_relation(self, edge_list):
+    def find_sibling_relation(self):
         """
         Find all sibling relations:
           |------->>>-----|
@@ -161,8 +161,8 @@ class Sentence():
         # TODO: Clarify the type of edge_list, and constrain the
         # usage of edge_list to only through a method call
         # instead of fetch them directly from the instance
-        self.grandchild_list = self.find_grandchild_relation(self.edge_list)
-        self.sibling_list = self.find_sibling_relation(self.edge_list)
+        self.grandchild_list = self.find_grandchild_relation()
+        self.sibling_list = self.find_sibling_relation()
 
         return
 
