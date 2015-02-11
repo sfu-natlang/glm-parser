@@ -12,6 +12,8 @@
 #        |-script  -> Where this script lies
 #        |
 #        |-src     -> Where the main procedure lies
+#           |
+#           |-glm_parser.py  -> Main function
 #
 
 import os

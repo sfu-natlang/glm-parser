@@ -58,7 +58,7 @@ class AveragePerceptronLearner():
                 if data_pool.has_next_data():
                     # i yi' != yi
                     if not current_global_vector == gold_global_vector:
-                        # for each dimension s in delta_global_vector 
+                        # for each element s in delta_global_vector
                         for s in delta_global_vector.keys():
                             self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
                             self.last_change_dict[s] = self.c
