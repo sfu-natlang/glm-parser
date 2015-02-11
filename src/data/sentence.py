@@ -182,7 +182,7 @@ class Sentence():
         global_vector = FeatureVector()
 
         # 1st order
-        for head_index, dep_index in self.get_edge_set_index_only():
+        for head_index, dep_index in self.get_edge_list_index_only():
             local_vector = self.get_local_vector(head_index,dep_index)
             global_vector.aggregate(local_vector)
 
