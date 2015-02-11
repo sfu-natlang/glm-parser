@@ -13,6 +13,13 @@ logging.basicConfig(filename='glm_parser.log',
 class AveragePerceptronLearner():
 
     def __init__(self, w_vector, max_iter=1):
+        """
+        :param w_vector: A global weight vector instance that stores
+         the weight value (float)
+        :param max_iter: Maximum iterations for training the weight vector
+         Could be overridden by parameter max_iter in the method
+        :return: None
+        """
         logging.debug("Initialize AveragePerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
@@ -23,7 +30,7 @@ class AveragePerceptronLearner():
         return
 
     def sequential_learn(self, f_argmax, data_pool, max_iter=-1, d_filename=None):
-        if max_iter <=0:
+        if max_iter <= 0:
             max_iter = self.max_iter
 
         logging.debug("Starting sequential train ... ")
@@ -40,7 +47,7 @@ class AveragePerceptronLearner():
 
             # for i = 1 ... m
             while data_pool.has_next_data():
-                
+
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.gold_global_vector
@@ -70,8 +77,9 @@ class AveragePerceptronLearner():
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
                 self.c += 1
-                
-            data_pool.reset()
+
+            # Reset index, while keeping the content intact
+            data_pool.reset_index()
 
             if not d_filename == None:
                 p_fork = multiprocessing.Process(
@@ -83,13 +91,13 @@ class AveragePerceptronLearner():
         
         self.w_vector.data_dict.clear()
 
-        self.avg_weight(self.w_vector, self.c-1)
+        self.avg_weight(self.w_vector, self.c - 1)
 
         return
 
     def avg_weight(self, w_vector, count):
         if count > 0:
-            w_vector.data_dict.iaddc(self.weight_sum_dict, 1/count)
+            w_vector.data_dict.iaddc(self.weight_sum_dict, 1 / count)
         
     def dump_vector(self, d_filename, i):
         d_vector = WeightVector()

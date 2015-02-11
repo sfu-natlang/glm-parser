@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 import os, re
-from sentence import *
+from sentence import Sentence
 import logging
 
 logging.basicConfig(filename='glm_parser.log',
@@ -44,23 +44,23 @@ class DataPool():
         self.data_path = data_path
         self.set_section_list(section_set)
         
-        self.reset_whole()
+        self.reset_all()
         self.load()
 
         return
 
-    def reset_whole(self):
+    def reset_all(self):
         """
         Reset the index variables and the data list.
 
         Restores the instance to a state when no sentence has been read
         """
-        self.reset()
+        self.reset_index()
         self.data_list = []
 
         return
 
-    def reset(self):
+    def reset_index(self):
         """
         Reset the index variable to the very beginning of
         sentence list
