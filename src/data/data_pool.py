@@ -88,9 +88,9 @@ class DataPool():
         the internal index is valid by calling has_next_data()
         """
         if(self.has_next_data()):
-           self.current_index += 1
-           # Logging how many entries we have supplied
-           if self.current_index % 1000 == 0:
+            self.current_index += 1
+            # Logging how many entries we have supplied
+            if self.current_index % 1000 == 0:
                 logging.debug("Data finishing %.2f%% ..." %
                              (100 * self.current_index/len(self.data_list), ))
 
