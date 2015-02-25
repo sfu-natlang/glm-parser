@@ -5,3 +5,5 @@
 src/build/
 src/hvector/build/
 Cython-0.20.2/*
+*.spine
+result/*

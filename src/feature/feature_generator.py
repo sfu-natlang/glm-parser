@@ -625,6 +625,7 @@ class FeatureGenerator():
         xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
 
         # Prepare keys
+        # note: xj_label[1]=0 means s, =1 means r
         type0_str = str((7,0,xi_word,xj-word,(xi_xj_grm,xj_label[1])))
         type1_str = str((7,1,xi-word,xj-word,xj-pos,(xi_xj_grm,xj_label[1])))
         type2_str = str((7,2,xi-word,xj-word,xi-pos,(xi_xj_grm,xj_label[1])))
@@ -687,7 +688,7 @@ class FeatureGenerator():
             
         return
 
-    def get_local_vector(self,head_index,dep_index,is_uni_spinal=True,is_bi_spinal=False,is_conx_spinal=False,is_spinal_adjoin=False):
+    def get_local_vector(self,head_index,dep_index,is_uni_spinal=False,is_bi_spinal=False,is_conx_spinal=False,is_spinal_adjoin=True):
         """
         Given an edge, return its local vector
 
@@ -773,6 +774,7 @@ class FeatureGenerator():
     def get_grm(self, spine_m, label, spine_h, pos):
         position = label[0]
         r_or_s = label[1]
+        # is_prev not used here
         is_prev = label[2]
         
         m_node = spine_m.split("(")[1]
