@@ -29,8 +29,8 @@ class PerceptronLearner():
                 current_global_vector = f_argmax(data_instance)
                 self.update_weight(current_global_vector, gold_global_vector)
 
-            data_pool.reset()
-            if not d_filename == None:
+            data_pool.reset_index()
+            if d_filename is not None:
                 self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
 
 

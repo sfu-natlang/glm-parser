@@ -12,7 +12,12 @@
 from parse.ceisner import *
 from data.data_pool import *
 from learn.perceptron import *
-from learn.average_perceptron import *
+
+from learn.average_perceptron import AveragePerceptronLearner
+from learn.perceptron import PerceptronLearner
+
+from feature.feature_generator import FeatureGenerator
+
 from evaluate.evaluator import *
 
 from weight.weight_vector import *
@@ -20,7 +25,9 @@ import timeit
 
 class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/",
-                 l_filename=None, max_iter=1):
+                 l_filename=None, max_iter=1,
+                 learner=None,
+                 fgen=None):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -31,8 +38,19 @@ class GlmParser():
         self.test_data_pool = DataPool(test_section, data_path)
         
         self.parser = EisnerParser()
-        self.learner = AveragePerceptronLearner(self.w_vector, max_iter)
-        #self.learner = PerceptronLearner(self.w_vector, max_iter)
+
+        if learner is not None:
+            self.learner = learner(self.w_vector, max_iter)
+            #self.learner = PerceptronLearner(self.w_vector, max_iter)
+        else:
+            raise ValueError("You need to specify a learner")
+
+        if fgen is not None:
+            # Do not instanciate this; used elsewhere
+            self.fgen = fgen
+        else:
+            raise ValueError("You need to specify a feature generator")
+
         self.evaluator = Evaluator()
        
     def sequential_train(self, train_section=[], max_iter=-1, d_filename=None):
@@ -83,12 +101,30 @@ options:
     -l:     Path to an existing weight vector dump file
             example: "./Weight.db"
             
-    -d:     Path for dumping weight vector. Do not specify the suffix
-            "db" suffix will be automatically added
-            example: "./iter1.db"
+    -d:     Path for dumping weight vector. Please also specify a prefix
+            of file names, which will be added with iteration count and
+            ".db" suffix when dumping the file
+
+            example: "./weight_dump", and the resulting files could be:
+            "./weight_dump_Iter_1.db",
+            "./weight_dump_Iter_2.db"...
 
     -i:     Number of iterations
             default 1
+
+    --learner=
+            Specify a learner for weught vector training
+                "perceptron": Use simple perceptron
+                "avg_perceptron": Use average perceptron
+            default "avg_perceptron"
+
+    --fgen=
+            Specify feature generation facility
+                "default": Use default feature generator (use string as keys)
+                "hash": Use hash-based feature generator (use hashed value as keys)
+            default "default"
+            In some cases, switching to hash based fgen might improve
+            the outcome a little bit with a speed-up in computation
     
 """
 
@@ -106,9 +142,14 @@ if __name__ == "__main__":
     l_filename = None
     d_filename = None
 
+    # Default learner
+    learner = AveragePerceptron
+    fgen = FeatureGenerator
+
     try:
         opt_spec = "hb:e:t:i:p:l:d:"
-        opts, args = getopt.getopt(sys.argv[1:], opt_spec)
+        long_opt_spec = ['fgen=', 'learner=']
+        opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
             if opt == "-h":
                 print("")
@@ -130,11 +171,28 @@ if __name__ == "__main__":
                 l_filename = value
             elif opt == "-d":
                 d_filename = value
+            elif opt == "--learner":
+                if value == 'perceptron':
+                    learner = PerceptronLearner
+                elif value == 'avg_perceptron':
+                    learner = AveragePerceptron
+                else:
+                    raise ValueError("Unknown learner: %s" % (value, ))
+            elif opt == "--fgen":
+                if value == "default":
+                    fgen = FeatureGenerator
+                elif value == "hash":
+                    #### TODO ###########################
+                    fgen = None
+                else:
+                    raise ValueError("Unknown fgen: %s" % (value, ))
             else:
                 print "invalid input, see -h"
                 sys.exit(0)
                 
-        gp = GlmParser(data_path=test_data_path, l_filename=l_filename)
+        gp = GlmParser(data_path=test_data_path, l_filename=l_filename,
+                       learner=learner,
+                       fgen=fgen)
         #start = timeit.default_timer()
         if train_begin >= 0 and train_end >= train_begin:
             gp.sequential_train([(train_begin,train_end)], max_iter, d_filename)
