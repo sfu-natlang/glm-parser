@@ -44,14 +44,17 @@ class AveragePerceptronLearner():
         for t in range(max_iter): 
             logging.debug("Iteration: %d" % t)
             logging.debug("Data size: %d" % len(data_pool.data_list))
-
+            sentence_count = 1
             # for i = 1 ... m
             while data_pool.has_next_data():
-
+                print("Sentence %d" % (sentence_count, ))
+                sentence_count += 1
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.gold_global_vector
+                print("Start evaluating argmax")
                 current_global_vector = f_argmax(data_instance)
+                print("End argmax")
                 delta_global_vector = gold_global_vector - current_global_vector
                 
                 # update every iteration (more convenient for dump)
