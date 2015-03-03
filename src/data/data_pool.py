@@ -69,9 +69,12 @@ class DataPool():
 
     def has_next_data(self):
         """
-        Returns True if there is still sentence not read
+        Returns True if there is still sentence not read. This call
+        does not advence data pointer. Call to get_next_data() will
+        do the job.
 
-        False if we have reaches the end of data_list
+        :return: False if we have reaches the end of data_list
+                 True otherwise
         """
         i = self.current_index + 1
         if i >= 0 and i < len(self.data_list):
@@ -84,8 +87,9 @@ class DataPool():
         Return the next sentence object, which is previously read
         from disk files.
 
-        This method does not perform index checking, sp please make sure
-        the internal index is valid by calling has_next_data()
+        This method does not perform index checking, so please make sure
+        the internal index is valid by calling has_next_data(), or an exception
+        will be raise (which would be definitely not what you want)
         """
         if(self.has_next_data()):
             self.current_index += 1
@@ -95,6 +99,7 @@ class DataPool():
                              (100 * self.current_index/len(self.data_list), ))
 
             return self.data_list[self.current_index]
+        raise IndexError("Run out of data while calling get_next_data()")
 
 
     def load(self):
@@ -222,7 +227,10 @@ if __name__ == "__main__":
     dp = DataPool([2], "../../penn-wsj-deps/")
     i = 0
     while dp.has_next_data():
-        dp.get_next_data()
+        data = dp.get_next_data()
+        print data.word_list
+        print data.pos_list
+        print data.edge_set
 
 
 
