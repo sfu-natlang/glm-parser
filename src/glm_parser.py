@@ -143,7 +143,7 @@ if __name__ == "__main__":
     d_filename = None
 
     # Default learner
-    learner = AveragePerceptron
+    learner = AveragePerceptronLearner
     fgen = FeatureGenerator
 
     try:
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 if value == 'perceptron':
                     learner = PerceptronLearner
                 elif value == 'avg_perceptron':
-                    learner = AveragePerceptron
+                    learner = AveragePerceptronLearner
                 else:
                     raise ValueError("Unknown learner: %s" % (value, ))
             elif opt == "--fgen":
