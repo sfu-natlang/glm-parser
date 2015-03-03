@@ -58,7 +58,7 @@ cdef class EisnerParser:
             print "invalid h < m condition in new_IGSpan_right"
             return 
 
-        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 'g'))
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 2))
         cdef int max_index = h
         cdef float max_score = \
             self.e[h][h][g][0].score + self.e[m][h+1][h][0].score + edge_score
@@ -81,7 +81,7 @@ cdef class EisnerParser:
             print "invalid h > m condition in new_IGSpan_left"
             return
 
-        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 'g'))
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 2))
         cdef int max_index = m
         cdef float max_score = \
             self.e[h][m+1][g][0].score + self.e[m][m][h][0].score + edge_score
@@ -106,7 +106,7 @@ cdef class EisnerParser:
             s = m1
             t = m
 
-        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(s, t, h, 's')) # must ensure s < t
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(s, t, h, 1)) # must ensure s < t
         cdef int max_index = s
         cdef float max_score = \
             self.e[s][s][h][0].score + self.e[t][s+1][h][0].score + edge_score
@@ -136,7 +136,7 @@ cdef class EisnerParser:
             s = m
             t = h
 
-        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 'g'))
+        cdef float edge_score = arc_weight(sent.get_second_order_local_vector(h, m, g, 2))
         cdef int max_index = s+1
         cdef float max_score = \
             self.e[h][s+1][g][1].score + self.e[m][s+1][h][2].score + edge_score
