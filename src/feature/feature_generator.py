@@ -6,8 +6,6 @@
 # Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
 # (Please add on your name if you have authored this file)
 #
-import sys
-sys.path.append("..")
 
 from weight.weight_vector import *
 from feature.feature_vector import *
