@@ -572,6 +572,9 @@ class FeatureGenerator():
         # uniformly since the edge is the same.
         self.add_dir_and_dist(local_fv,head_index,dep_index)
 
+        #self.get_second_order_local_vector(head_index, dep_index, [0], 3)
+        #self.get_second_order_local_vector(head_index, dep_index, [0], 4)
+
         return local_fv
 
 

@@ -23,6 +23,8 @@ from feature.feature_generator import FeatureGenerator
 from evaluate.evaluator import *
 
 from weight.weight_vector import *
+import debug.debug
+
 import timeit
 
 class GlmParser():
@@ -115,6 +117,10 @@ options:
     -i:     Number of iterations
             default 1
 
+    -a:     Turn on time accounting (output time usage before termination)
+            If combined with --debug-run-number then before termination it also
+            prints out average time usage
+
     --learner=
             Specify a learner for weught vector training
                 "perceptron": Use simple perceptron
@@ -136,6 +142,14 @@ options:
             default "1st-order"
             Some parser might not work correctly with the infrastructure, which keeps
             changing all the time. If this happens please file an issue on github page
+
+    --debug-run-number=[int]
+            Only run the first [int] sentences. Usually combined with option -a to gather
+            time usage information
+            If combined with -a, then time usage information is available, and it will print
+            out average time usage before termination
+            *** Caution: Overrides -t (no evaluation will be conducted), and partially
+            overrides -b -e (Only run specified number of sentences)
     
 """
 
@@ -159,8 +173,8 @@ if __name__ == "__main__":
     parser = parse.ceisner3.EisnerParser
 
     try:
-        opt_spec = "hb:e:t:i:p:l:d:"
-        long_opt_spec = ['fgen=', 'learner=', 'parser=']
+        opt_spec = "ahb:e:t:i:p:l:d:"
+        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -183,6 +197,16 @@ if __name__ == "__main__":
                 l_filename = value
             elif opt == "-d":
                 d_filename = value
+            elif opt == '-a':
+                print("Time accounting is ON")
+                debug.debug.time_accounting_flag = True
+            elif opt == '--debug-run-number':
+                debug.debug.run_first_num = int(value)
+                if debug.debug.run_first_num <= 0:
+                    raise ValueError("Illegal integer: %d" %
+                                     (debug.debug.run_first_num, ))
+                else:
+                    print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt == "--learner":
                 if value == 'perceptron':
                     learner = PerceptronLearner
