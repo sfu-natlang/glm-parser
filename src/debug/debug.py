@@ -14,4 +14,4 @@
 #
 # Please make sure this flag is set to False before running
 # real tests
-local_debug_flag = True
+local_debug_flag = False
