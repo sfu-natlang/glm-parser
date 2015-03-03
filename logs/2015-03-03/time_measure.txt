@@ -23,4 +23,6 @@ The result is posted below:
 
 All values are average time for one sentence
 
+From the above table, we could observe that, switcing from 1st-order parser to higher order nearly introduces a 10-times slow down, while switch between features are less observable, though still having a 0.85-times slow down.
+
 
