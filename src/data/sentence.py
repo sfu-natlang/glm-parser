@@ -25,9 +25,13 @@ class Sentence():
 
     Data member:
 
-    +========================================================
-    |
-    |
+    +=======================================================================+
+    | gold_global_vector: A vector that contains all features for all       |
+    |                     edges, including first order and second order     |
+    | grandchild_list: A list of three-tuples that locates all grand child  |
+    |                  relation derived from sentence                       |
+    | sibling_list: See above (grandchild_list)                             |
+    +=======================================================================+
     """
     
     def __init__(self, word_list, pos_list=None, edge_set=None):
@@ -68,8 +72,8 @@ class Sentence():
         # Set self.f_vector_dict = {(edge0, edge1): FeatureVector()}
         self.set_feature_vector_dict()
 
-        # Precompute the set of features
-        self.gold_global_vector = self.get_global_vector(edge_set)
+        # Precompute the set of gold features
+        self.gold_global_vector = self.get_global_vector(self.edge_list)
         return
 
     def find_sibling_relation(self):
@@ -192,8 +196,10 @@ class Sentence():
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
 
-        :param edge_set: the set of edges represented as tuples
-        :type: list(tuple(integer, integer))
+        Global vector currently consists of three parts: the first order fatures,
+        second order sibling features, and third order features. We compute them
+        separately, although there are options of computing them in single call,
+        we choose not to use it regarding code redability.
         
         :return: The global vector of the sentence with the current weight
         :rtype: list
@@ -201,11 +207,11 @@ class Sentence():
         global_vector = FeatureVector()
 
         # 1st order
-        for head_index, dep_index in self.get_edge_list_index_only():
-            local_vector = self.get_local_vector(head_index,dep_index)
+        for head_index, dep_index in edge_set:
+            local_vector = self.get_local_vector(head_index, dep_index)
             global_vector.aggregate(local_vector)
 
-        # 2nd order sibling
+        # 2nd order sibling only
         for head_index, dep_index, sib_index in self.sibling_list:
             local_vector = \
                 self.get_second_order_local_vector(head_index,
@@ -214,7 +220,7 @@ class Sentence():
                                                    FeatureGenerator.SECOND_ORDER_SIBLING_ONLY)
             global_vector.aggregate(local_vector)
 
-        # 2nd order grand child
+        # 2nd order grand child only
         for head_index, dep_index, grand_index in self.grandchild_list:
             local_vector = \
                 self.get_second_order_local_vector(head_index,
@@ -239,20 +245,30 @@ class Sentence():
         
         # assume there is no two egde having the same start and end index
         for edge0, edge1 in self.get_edge_list_index_only():
+            # First order local vector only
             self.f_vector_dict[(edge0, edge1)] = \
                 self.f_gen.get_local_vector(edge0, edge1)
         return
 
 
-    # def update_feature_vector_dict(self, head_index, dep_index):
-    #    self.f_vector_dict[(head_index, dep_index)] = \
-    #            self.f_gen.get_local_vector(head_index, dep_index)
-
     def get_local_vector(self, head_index, dep_index):
+        """
+        Return first order local vector, given the head index and dependency index
+
+        We make use of the local cache (self.f_vector_dict). If one local vector
+        has already been calculated and cached in self.f_vector_dict, then we
+        just return the cached version (consistency guaranteed). If it is the first
+        time we compute them, then extract features using FeatureGenerator
+
+        * Please notice that self.f_gen.get_local_vector() is an obsolete
+         call, and actually it only returns first order features
+        """
+        # If fv not cached in the instance
         if not (head_index, dep_index) in self.f_vector_dict:
+            # Only returns first order feature (obsolete call)
             lv = self.f_gen.get_local_vector(head_index, dep_index)
-            #self.update_feature_vector_dict(head_index, dep_index)
         else:
+            # Compute a new one
             lv = self.f_vector_dict[(head_index, dep_index)]
 
         return lv
@@ -348,6 +364,9 @@ class Sentence():
         """
         Return a list of all existing edges
 
+        *** OBSOLETE *** Avoid using this method. Unless you really want to
+        carry a third (useless) element in return object
+
         :return: A list of tuples, the first two elements are head index and
             dependent index, and the last element is edge type
         :rtype: tuple(integer,integer,str)
@@ -375,7 +394,9 @@ def test():
     word_list = ['__ROOT__', 'I', 'am', 'a', 'HAL9000', 'computer', '.']
     pos_list = ['POS-ROOT', 'POS-I', 'POS-am', 'POS-a', 'POS-HAL9000', 'POS-computer',
                 'POS-.']
-    edge_set = {(0, 2): 'root-to-am', (0, 1): 'artificial-edge'}
+    edge_set = {(0, 2): 'root-to-am', (0, 1): 'artificial-edge',
+                (2, 4): 'artificial-edge2',
+                (2, 3): 'ae3'}
 
     s = Sentence(word_list, pos_list, edge_set)
     print(s.grandchild_list)
