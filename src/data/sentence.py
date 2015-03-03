@@ -22,6 +22,12 @@ class Sentence():
     This class also provides interfaces to manipulate the information, including
     retriving nodes, edges, types, modifying nodes, edges, types, and other
     relevant tasks.
+
+    Data member:
+
+    +========================================================
+    |
+    |
     """
     
     def __init__(self, word_list, pos_list=None, edge_set=None):
@@ -30,12 +36,25 @@ class Sentence():
         initializer could store it as tree nodes. If no initlization parameter
         is provided then it just construct an empty tree.
 
-        :param word_str: A string of words, or a list of words. No ROOT needed
-        :type word_str: str/list(str)
+        Edge set is a dict object, but it is also pre-computed into a list
+        of edges and cached inside the instance. The objective is to avoid
+        computing edges each time they are needed. Similarily the total
+        number of edges is cached, though it is just a notational convenience
+
+        :param word_list: A list of words. We assume ROOT has been added
+        :type word_list: list(str)
+        :param pos_list: A list of POS tag. We assume ROOT has been added
+        :type pos_list: list(str)
+        :param edge_set: A dictionary object, whose keys are all edges
+        (first element being the head and second element being the dep)
+        and values are edge property
+        :type edge_set: dict[(int, int)] -> str
         """
         
         self.set_word_list(word_list)
         self.set_pos_list(pos_list)
+        # This will store the dict, dict.keys() and len(dict.keys())
+        # into the instance
         self.set_edge_list(edge_set)
 
         # Set sibling and grandchild relation
@@ -349,3 +368,18 @@ class Sentence():
         """
         return self.edge_list_index_only
 
+
+# Unit test
+
+def test():
+    word_list = ['__ROOT__', 'I', 'am', 'a', 'HAL9000', 'computer', '.']
+    pos_list = ['POS-ROOT', 'POS-I', 'POS-am', 'POS-a', 'POS-HAL9000', 'POS-computer',
+                'POS-.']
+    edge_set = {(0, 2): 'root-to-am', (0, 1): 'artificial-edge'}
+
+    s = Sentence(word_list, pos_list, edge_set)
+    print(s.grandchild_list)
+    print(s.sibling_list)
+
+if __name__ == '__main__':
+    test()

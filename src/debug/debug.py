@@ -7,6 +7,9 @@
 # (Please add on your name if you have authored this file)
 #
 
+import sys
+if '..' not in sys.path:
+    sys.path.append('..')
 
 # This flag enables you to debug glm-parser components
 # on a non-linux (e.g Win32) machine, or machine without
