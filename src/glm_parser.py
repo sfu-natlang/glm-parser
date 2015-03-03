@@ -9,7 +9,9 @@
 # (Please add on your name if you have authored this file)
 #
 
-from parse.ceisner3 import *
+import parse.ceisner
+import parse.ceisner3
+
 from data.data_pool import *
 from learn.perceptron import *
 
@@ -27,7 +29,8 @@ class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/",
                  l_filename=None, max_iter=1,
                  learner=None,
-                 fgen=None):
+                 fgen=None,
+                 parser=None):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -37,7 +40,7 @@ class GlmParser():
         self.train_data_pool = DataPool(train_section, data_path)
         self.test_data_pool = DataPool(test_section, data_path)
         
-        self.parser = EisnerParser()
+        self.parser = parser()
 
         if learner is not None:
             self.learner = learner(self.w_vector, max_iter)
@@ -125,6 +128,14 @@ options:
             default "default"
             In some cases, switching to hash based fgen might improve
             the outcome a little bit with a speed-up in computation
+
+    --parser=
+            Specify the parser
+                "1st-order" First order parser
+                "3rd-order" Third order parser
+            default "1st-order"
+            Some parser might not work correctly with the infrastructure, which keeps
+            changing all the time. If this happens please file an issue on github page
     
 """
 
@@ -145,10 +156,11 @@ if __name__ == "__main__":
     # Default learner
     learner = AveragePerceptronLearner
     fgen = FeatureGenerator
+    parser = parse.ceisner3.EisnerParser
 
     try:
         opt_spec = "hb:e:t:i:p:l:d:"
-        long_opt_spec = ['fgen=', 'learner=']
+        long_opt_spec = ['fgen=', 'learner=', 'parser=']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -174,25 +186,39 @@ if __name__ == "__main__":
             elif opt == "--learner":
                 if value == 'perceptron':
                     learner = PerceptronLearner
+                    print("Using perceptron learner")
                 elif value == 'avg_perceptron':
                     learner = AveragePerceptronLearner
+                    print("Using average perceptron learner")
                 else:
                     raise ValueError("Unknown learner: %s" % (value, ))
             elif opt == "--fgen":
                 if value == "default":
                     fgen = FeatureGenerator
+                    print("Using string based feature generator")
                 elif value == "hash":
                     #### TODO ###########################
                     fgen = None
+                    print("Using hash based feature generator")
                 else:
                     raise ValueError("Unknown fgen: %s" % (value, ))
+            elif opt == "--parser":
+                if value == '1st-order':
+                    parser = parse.ceisner.EisnerParser
+                    print("Using first order Eisner parser")
+                elif value == "3rd-order":
+                    parser = parse.ceisner3.EisnerParser
+                    print("Using third order Eisner parser")
+                else:
+                    raise ValueError("Unknown parser: %s" % (value, ))
             else:
-                print "invalid input, see -h"
+                print "Invalid argument, try -h"
                 sys.exit(0)
                 
         gp = GlmParser(data_path=test_data_path, l_filename=l_filename,
                        learner=learner,
-                       fgen=fgen)
+                       fgen=fgen,
+                       parser=parser)
         #start = timeit.default_timer()
         if train_begin >= 0 and train_end >= train_begin:
             gp.sequential_train([(train_begin,train_end)], max_iter, d_filename)

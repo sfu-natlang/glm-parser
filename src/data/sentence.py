@@ -313,7 +313,9 @@ class Sentence():
         #    raise TypeError("Unknown 2nd order feature type")
 
         # Key for caching dict
-        k = (head_index, dep_index, another_index)
+        # We try hash() function. If this degrades the accuracy, then just switch back
+        # to using tuples
+        k = hash((head_index, dep_index, another_index))
 
         # If feature_type == 0 we will fetch a None. This enables detection of
         # degraded performance

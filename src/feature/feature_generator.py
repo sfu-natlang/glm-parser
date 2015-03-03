@@ -638,7 +638,7 @@ class FeatureGenerator():
         # For these two types there is not need to compute first order
         if feature_type == self.SECOND_ORDER_GRANDCHILD_ONLY or \
             feature_type == self.SECOND_ORDER_SIBLING_ONLY:
-                # Empty one
+                # Empty one. In this case local_fv_1st should not be used
                 local_fv_1st = None
         else:
             # Decorated with dist and dir; do not do this again
