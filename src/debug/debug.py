@@ -29,3 +29,8 @@ time_accounting_flag = False
 # Usually used for evaluating time usage by running a limited set of sentences
 run_first_num = -1
 
+# If this is set to a positive value (mostly a small integer, i.e. 1, 3)
+# then feature generators are forced to generate features of this order
+# no matter which parser we are using
+force_feature_order = -1
+

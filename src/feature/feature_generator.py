@@ -10,6 +10,8 @@
 from weight.weight_vector import *
 from feature.feature_vector import *
 
+import debug.debug
+
 class FeatureGenerator():
     """
     Calculate feature for each sentence
@@ -572,8 +574,9 @@ class FeatureGenerator():
         # uniformly since the edge is the same.
         self.add_dir_and_dist(local_fv,head_index,dep_index)
 
-        #self.get_second_order_local_vector(head_index, dep_index, [0], 3)
-        #self.get_second_order_local_vector(head_index, dep_index, [0], 4)
+        if debug.debug.force_feature_order == 3:
+            self.get_second_order_local_vector(head_index, dep_index, [0], 3)
+            self.get_second_order_local_vector(head_index, dep_index, [0], 4)
 
         return local_fv
 
@@ -629,7 +632,8 @@ class FeatureGenerator():
         """
         #print("Start get_2nd_order_feature")
 
-        #return self.get_local_vector(head_index, dep_index)
+        if debug.debug.force_feature_order == 1:
+            return self.get_local_vector(head_index, dep_index)
 
         # Deal with the case when feature type == 1 (sibling)
         # but the sibling is None. In this case the situation

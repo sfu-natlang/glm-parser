@@ -122,7 +122,7 @@ options:
             prints out average time usage
 
     --learner=
-            Specify a learner for weught vector training
+            Specify a learner for weight vector training
                 "perceptron": Use simple perceptron
                 "avg_perceptron": Use average perceptron
             default "avg_perceptron"
@@ -150,6 +150,15 @@ options:
             out average time usage before termination
             *** Caution: Overrides -t (no evaluation will be conducted), and partially
             overrides -b -e (Only run specified number of sentences)
+
+    --force-feature-order=[1st/3rd]
+            Force to generate features of certain order, no matter which parser we are using
+            This option is mostly used for debugging, as we may would like to measure the
+            efficiency of parser or feature generator separately, which are tightly coupled.
+                "1st": Force 1st-order feature
+                "3rd": Force 3rd-order feature
+            default None (No forcing)
+            *** This option does NOT override --parser
     
 """
 
@@ -174,7 +183,8 @@ if __name__ == "__main__":
 
     try:
         opt_spec = "ahb:e:t:i:p:l:d:"
-        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=']
+        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=',
+                         'force-feature-order=']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -235,6 +245,15 @@ if __name__ == "__main__":
                     print("Using third order Eisner parser")
                 else:
                     raise ValueError("Unknown parser: %s" % (value, ))
+            elif opt == '--force-feature-order':
+                if value == '1st':
+                    debug.debug.force_feature_order = 1
+                    print("Force 1st order feature")
+                elif value == '3rd':
+                    debug.debug.force_feature_order = 3
+                    print("Force 3rd order feature")
+                else:
+                    raise ValueError("Illegal feature order: %s" % (value, ))
             else:
                 print "Invalid argument, try -h"
                 sys.exit(0)
@@ -253,5 +272,5 @@ if __name__ == "__main__":
 
     except getopt.GetoptError, e:
         print "invalid arguments!! \n" + HELP_MSG
-        sys.exit(1)
+        raise
 
