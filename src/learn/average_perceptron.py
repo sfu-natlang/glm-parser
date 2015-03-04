@@ -50,6 +50,7 @@ class AveragePerceptronLearner():
             logging.debug("Data size: %d" % len(data_pool.data_list))
             sentence_count = 1
             argmax_time_total = 0.0
+
             # for i = 1 ... m
             while data_pool.has_next_data():
                 print("Sentence %d" % (sentence_count, ))
@@ -64,6 +65,7 @@ class AveragePerceptronLearner():
                     after_time = time.clock()
                     time_usage = after_time - before_time
                     argmax_time_total += time_usage
+                    print("Sentence length: %d" % (len(data_instance.word_list) - 1))
                     print("Time usage: %f" % (time_usage, ))
                     logging.debug("Time usage %f" % (time_usage, ))
                 else:
