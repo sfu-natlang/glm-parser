@@ -23,7 +23,9 @@ from feature.feature_generator import FeatureGenerator
 from evaluate.evaluator import *
 
 from weight.weight_vector import *
+
 import debug.debug
+import debug.interact
 
 import timeit
 
@@ -117,7 +119,7 @@ options:
     -i:     Number of iterations
             default 1
 
-    -a:     Turn on time accounting (output time usage before termination)
+    -a:     Turn on time accounting (output time usage for each sentence)
             If combined with --debug-run-number then before termination it also
             prints out average time usage
 
@@ -159,6 +161,10 @@ options:
                 "3rd": Force 3rd-order feature
             default None (No forcing)
             *** This option does NOT override --parser
+
+    --interactive
+            Use interactive version of glm-parser, in which you have access to some
+            critical points ("breakpoints") in the procedure
     
 """
 
@@ -180,11 +186,13 @@ if __name__ == "__main__":
     learner = AveragePerceptronLearner
     fgen = FeatureGenerator
     parser = parse.ceisner3.EisnerParser
+    # Main driver is glm_parser instance defined in this file
+    glm_parser = GlmParser
 
     try:
         opt_spec = "ahb:e:t:i:p:l:d:"
         long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=',
-                         'force-feature-order=']
+                         'force-feature-order=', 'interactive']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -254,23 +262,31 @@ if __name__ == "__main__":
                     print("Force 3rd order feature")
                 else:
                     raise ValueError("Illegal feature order: %s" % (value, ))
+            elif opt == '--interactive':
+                glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
+                glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
+                glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
+                DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
+                learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
+                print("Enable interactive mode")
             else:
                 print "Invalid argument, try -h"
                 sys.exit(0)
                 
-        gp = GlmParser(data_path=test_data_path, l_filename=l_filename,
-                       learner=learner,
-                       fgen=fgen,
-                       parser=parser)
-        #start = timeit.default_timer()
+        gp = glm_parser(data_path=test_data_path, l_filename=l_filename,
+                        learner=learner,
+                        fgen=fgen,
+                        parser=parser)
+
         if train_begin >= 0 and train_end >= train_begin:
             gp.sequential_train([(train_begin,train_end)], max_iter, d_filename)
-        #end = timeit.default_timer()
-        #print end - start
+
         if not testsection == []:
             gp.evaluate(testsection)
 
     except getopt.GetoptError, e:
-        print "invalid arguments!! \n" + HELP_MSG
+        print("Invalid argument. \n")
+        print(HELP_MSG)
+        # Make sure we know what's the error
         raise
 

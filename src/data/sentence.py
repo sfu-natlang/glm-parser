@@ -294,6 +294,9 @@ class Sentence():
 
         return lv
 
+    if None is None:
+        pass
+
     def get_second_order_local_vector(self, head_index, dep_index,
                                       another_index,
                                       feature_type):
