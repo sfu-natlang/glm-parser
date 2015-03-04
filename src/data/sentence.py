@@ -72,8 +72,27 @@ class Sentence():
         # Set self.f_vector_dict = {(edge0, edge1): FeatureVector()}
         self.set_feature_vector_dict()
 
+        # Initialize feature cache for 2nd order features
+        self.set_second_order_feature_cache()
+
         # Precompute the set of gold features
-        self.gold_global_vector = self.get_global_vector()
+        self.gold_global_vector = self.get_global_vector(self.edge_list)
+        return
+
+    def set_second_order_feature_cache(self):
+        """
+        Caches second features in the instance. If they are needed in the future
+        then we just fetch them from the cache rather than recompute each time
+
+        This cache is a list of dict objects. Each dict object holds feature vector
+        instance of type i, where i is the index into the list.
+
+        Be aware that we already have a cache for 1st order feature elsewhere, so
+        please use dedicated first order feature generator to ensure performance.
+        It is recommended that the index 0 is set to None to detect performance degradation
+        """
+        self.second_order_feature_cache_list = [None, {}, {}, {}, {}]
+
         return
 
     def find_sibling_relation(self):
@@ -191,7 +210,7 @@ class Sentence():
 
 
     # Both 1st and 2nd order
-    def get_global_vector(self):
+    def get_global_vector(self, edge_set):
         """
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
@@ -207,8 +226,8 @@ class Sentence():
         global_vector = FeatureVector()
 
         # 1st order
-        for head_index, dep_index in self.get_edge_list_index_only():
-            local_vector = self.get_local_vector(head_index,dep_index)
+        for head_index, dep_index in edge_set:
+            local_vector = self.get_local_vector(head_index, dep_index)
             global_vector.aggregate(local_vector)
 
         # 2nd order sibling only
@@ -243,7 +262,7 @@ class Sentence():
         # to save computation for the same feature
         self.f_vector_dict = {}
         
-        # assume there is no two egde having the same start and end index
+        # assume there is no two egdes having the same start and end index
         for edge0, edge1 in self.get_edge_list_index_only():
             # First order local vector only
             self.f_vector_dict[(edge0, edge1)] = \
@@ -264,14 +283,19 @@ class Sentence():
          call, and actually it only returns first order features
         """
         # If fv not cached in the instance
-        if not (head_index, dep_index) in self.f_vector_dict:
-            # Only returns first order feature (obsolete call)
+        if (head_index, dep_index) not in self.f_vector_dict:
+            # Only returns first order feature
             lv = self.f_gen.get_local_vector(head_index, dep_index)
+            # Add into cache (actually this scenario could not happen)
+            self.f_vector_dict[(head_index, dep_index)] = lv
         else:
             # Compute a new one
             lv = self.f_vector_dict[(head_index, dep_index)]
 
         return lv
+
+    if None is None:
+        pass
 
     def get_second_order_local_vector(self, head_index, dep_index,
                                       another_index,
@@ -291,10 +315,27 @@ class Sentence():
         #    feature_type != FeatureGenerator.SECOND_ORDER_GRANDCHILD_ONLY):
         #    raise TypeError("Unknown 2nd order feature type")
 
-        second_order_fv = self.f_gen.get_second_order_local_vector(head_index,
-                                                                   dep_index,
-                                                                   [another_index],
-                                                                   feature_type)
+        # Key for caching dict
+        # We try hash() function. If this degrades the accuracy, then just switch back
+        # to using tuples
+        k = hash((head_index, dep_index, another_index))
+
+        # If feature_type == 0 we will fetch a None. This enables detection of
+        # degraded performance
+        d = self.second_order_feature_cache_list[feature_type]
+
+        if k not in d:
+            # The argument are slightly different (must use list for the 3rd argument)
+            second_order_fv = self.f_gen.get_second_order_local_vector(head_index,
+                                                                       dep_index,
+                                                                       [another_index],
+                                                                       feature_type)
+            # And store it into the cache for future use
+            d[k] = second_order_fv
+        else:
+            # Directly get it from the cache
+            second_order_fv = d[k]
+
         return second_order_fv
 
     

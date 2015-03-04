@@ -9,7 +9,9 @@
 # (Please add on your name if you have authored this file)
 #
 
-from parse.ceisner import *
+import parse.ceisner
+import parse.ceisner3
+
 from data.data_pool import *
 from learn.perceptron import *
 
@@ -21,13 +23,18 @@ from feature.feature_generator import FeatureGenerator
 from evaluate.evaluator import *
 
 from weight.weight_vector import *
+
+import debug.debug
+import debug.interact
+
 import timeit
 
 class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/",
                  l_filename=None, max_iter=1,
                  learner=None,
-                 fgen=None):
+                 fgen=None,
+                 parser=None):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -37,7 +44,7 @@ class GlmParser():
         self.train_data_pool = DataPool(train_section, data_path)
         self.test_data_pool = DataPool(test_section, data_path)
         
-        self.parser = EisnerParser()
+        self.parser = parser()
 
         if learner is not None:
             self.learner = learner(self.w_vector, max_iter)
@@ -112,8 +119,12 @@ options:
     -i:     Number of iterations
             default 1
 
+    -a:     Turn on time accounting (output time usage for each sentence)
+            If combined with --debug-run-number then before termination it also
+            prints out average time usage
+
     --learner=
-            Specify a learner for weught vector training
+            Specify a learner for weight vector training
                 "perceptron": Use simple perceptron
                 "avg_perceptron": Use average perceptron
             default "avg_perceptron"
@@ -125,6 +136,35 @@ options:
             default "default"
             In some cases, switching to hash based fgen might improve
             the outcome a little bit with a speed-up in computation
+
+    --parser=
+            Specify the parser
+                "1st-order" First order parser
+                "3rd-order" Third order parser
+            default "1st-order"
+            Some parser might not work correctly with the infrastructure, which keeps
+            changing all the time. If this happens please file an issue on github page
+
+    --debug-run-number=[int]
+            Only run the first [int] sentences. Usually combined with option -a to gather
+            time usage information
+            If combined with -a, then time usage information is available, and it will print
+            out average time usage before termination
+            *** Caution: Overrides -t (no evaluation will be conducted), and partially
+            overrides -b -e (Only run specified number of sentences)
+
+    --force-feature-order=[1st/3rd]
+            Force to generate features of certain order, no matter which parser we are using
+            This option is mostly used for debugging, as we may would like to measure the
+            efficiency of parser or feature generator separately, which are tightly coupled.
+                "1st": Force 1st-order feature
+                "3rd": Force 3rd-order feature
+            default None (No forcing)
+            *** This option does NOT override --parser
+
+    --interactive
+            Use interactive version of glm-parser, in which you have access to some
+            critical points ("breakpoints") in the procedure
     
 """
 
@@ -145,10 +185,14 @@ if __name__ == "__main__":
     # Default learner
     learner = AveragePerceptronLearner
     fgen = FeatureGenerator
+    parser = parse.ceisner3.EisnerParser
+    # Main driver is glm_parser instance defined in this file
+    glm_parser = GlmParser
 
     try:
-        opt_spec = "hb:e:t:i:p:l:d:"
-        long_opt_spec = ['fgen=', 'learner=']
+        opt_spec = "ahb:e:t:i:p:l:d:"
+        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=',
+                         'force-feature-order=', 'interactive']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
             if opt == "-h":
@@ -171,37 +215,78 @@ if __name__ == "__main__":
                 l_filename = value
             elif opt == "-d":
                 d_filename = value
+            elif opt == '-a':
+                print("Time accounting is ON")
+                debug.debug.time_accounting_flag = True
+            elif opt == '--debug-run-number':
+                debug.debug.run_first_num = int(value)
+                if debug.debug.run_first_num <= 0:
+                    raise ValueError("Illegal integer: %d" %
+                                     (debug.debug.run_first_num, ))
+                else:
+                    print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt == "--learner":
                 if value == 'perceptron':
                     learner = PerceptronLearner
+                    print("Using perceptron learner")
                 elif value == 'avg_perceptron':
                     learner = AveragePerceptronLearner
+                    print("Using average perceptron learner")
                 else:
                     raise ValueError("Unknown learner: %s" % (value, ))
             elif opt == "--fgen":
                 if value == "default":
                     fgen = FeatureGenerator
+                    print("Using string based feature generator")
                 elif value == "hash":
                     #### TODO ###########################
                     fgen = None
+                    print("Using hash based feature generator")
                 else:
                     raise ValueError("Unknown fgen: %s" % (value, ))
+            elif opt == "--parser":
+                if value == '1st-order':
+                    parser = parse.ceisner.EisnerParser
+                    print("Using first order Eisner parser")
+                elif value == "3rd-order":
+                    parser = parse.ceisner3.EisnerParser
+                    print("Using third order Eisner parser")
+                else:
+                    raise ValueError("Unknown parser: %s" % (value, ))
+            elif opt == '--force-feature-order':
+                if value == '1st':
+                    debug.debug.force_feature_order = 1
+                    print("Force 1st order feature")
+                elif value == '3rd':
+                    debug.debug.force_feature_order = 3
+                    print("Force 3rd order feature")
+                else:
+                    raise ValueError("Illegal feature order: %s" % (value, ))
+            elif opt == '--interactive':
+                glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
+                glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
+                glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
+                DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
+                learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
+                print("Enable interactive mode")
             else:
-                print "invalid input, see -h"
+                print "Invalid argument, try -h"
                 sys.exit(0)
                 
-        gp = GlmParser(data_path=test_data_path, l_filename=l_filename,
-                       learner=learner,
-                       fgen=fgen)
-        #start = timeit.default_timer()
+        gp = glm_parser(data_path=test_data_path, l_filename=l_filename,
+                        learner=learner,
+                        fgen=fgen,
+                        parser=parser)
+
         if train_begin >= 0 and train_end >= train_begin:
             gp.sequential_train([(train_begin,train_end)], max_iter, d_filename)
-        #end = timeit.default_timer()
-        #print end - start
+
         if not testsection == []:
             gp.evaluate(testsection)
 
     except getopt.GetoptError, e:
-        print "invalid arguments!! \n" + HELP_MSG
-        sys.exit(1)
+        print("Invalid argument. \n")
+        print(HELP_MSG)
+        # Make sure we know what's the error
+        raise
 

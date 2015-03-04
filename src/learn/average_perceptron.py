@@ -4,6 +4,10 @@ import multiprocessing
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
 from weight.weight_vector import *
+# Time accounting and control
+import debug.debug
+import time
+import sys
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
@@ -44,14 +48,30 @@ class AveragePerceptronLearner():
         for t in range(max_iter): 
             logging.debug("Iteration: %d" % t)
             logging.debug("Data size: %d" % len(data_pool.data_list))
+            sentence_count = 1
+            argmax_time_total = 0.0
 
             # for i = 1 ... m
             while data_pool.has_next_data():
-
+                print("Sentence %d" % (sentence_count, ))
+                sentence_count += 1
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.gold_global_vector
-                current_global_vector = f_argmax(data_instance)
+
+                if debug.debug.time_accounting_flag is True:
+                    before_time = time.clock()
+                    current_global_vector = f_argmax(data_instance)
+                    after_time = time.clock()
+                    time_usage = after_time - before_time
+                    argmax_time_total += time_usage
+                    print("Sentence length: %d" % (len(data_instance.word_list) - 1))
+                    print("Time usage: %f" % (time_usage, ))
+                    logging.debug("Time usage %f" % (time_usage, ))
+                else:
+                    # Just run the procedure without any interference
+                    current_global_vector = f_argmax(data_instance)
+
                 delta_global_vector = gold_global_vector - current_global_vector
                 
                 # update every iteration (more convenient for dump)
@@ -77,6 +97,15 @@ class AveragePerceptronLearner():
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
                 self.c += 1
+
+                # If exceeds the value set in debug config file, just stop and exit
+                # immediately
+                if sentence_count > debug.debug.run_first_num > 0:
+                    print("Average time for each sentence: %f" % (argmax_time_total / debug.debug.run_first_num))
+                    logging.debug("Average time for each sentence: %f" % (argmax_time_total / debug.debug.run_first_num))
+                    sys.exit(1)
+
+            # End while(data_pool.has_next_data())
 
             # Reset index, while keeping the content intact
             data_pool.reset_index()

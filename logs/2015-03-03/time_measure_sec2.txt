@@ -1,0 +1,113 @@
+python glm_parser.py -i 1 -b 2 -e 2 -t 0,1,22,24 -p ~/Documents/penn-wsj-deps/ --parser=1st-order --debug-run-number=50 --force-feature-order=1st -a
+Using first order Eisner parser
+Debug run number = 50
+Time accounting is ON
+
+Sentence 1
+Time usage: 0.062012
+Sentence 2
+Time usage: 0.044786
+Sentence 3
+Time usage: 0.098185
+Sentence 4
+Time usage: 0.029911
+Sentence 5
+Time usage: 0.062051
+Sentence 6
+Time usage: 0.007212
+Sentence 7
+Time usage: 0.167458
+Sentence 8
+Time usage: 0.006163
+Sentence 9
+Time usage: 0.171511
+Sentence 10
+Time usage: 0.011545
+
+/////////////////////////////
+
+python glm_parser.py -i 1 -b 2 -e 2 -t 0,1,22,24 -p ~/Documents/penn-wsj-deps/ --parser=1st-order --debug-run-number=50 --force-feature-order=3rd -a
+Using first order Eisner parser
+Debug run number = 50
+Force 3rd order feature
+Time accounting is ON
+
+Sentence 1
+Time usage: 0.072457
+Sentence 2
+Time usage: 0.064719
+Sentence 3
+Time usage: 0.120975
+Sentence 4
+Time usage: 0.037629
+Sentence 5
+Time usage: 0.077599
+Sentence 6
+Time usage: 0.008689
+Sentence 7
+Time usage: 0.206681
+Sentence 8
+Time usage: 0.009710
+Sentence 9
+Time usage: 0.208990
+Sentence 10
+Time usage: 0.024911
+
+//////////////////////////////
+
+python glm_parser.py -i 1 -b 2 -e 2 -t 0,1,22,24 -p ~/Documents/penn-wsj-deps/ --parser=3rd-order --debug-run-number=10 --force-feature-order=1st -a
+Using third order Eisner parser
+Debug run number = 10
+Force 1st order feature
+Time accounting is ON
+
+Sentence 1
+Time usage: 0.959477
+Sentence 2
+Time usage: 0.744245
+Sentence 3
+Time usage: 2.406525
+Sentence 4
+Time usage: 0.372230
+Sentence 5
+Time usage: 2.102918
+Sentence 6
+Time usage: 0.051529
+Sentence 7
+Time usage: 5.076747
+Sentence 8
+Time usage: 0.041707
+Sentence 9
+Time usage: 6.728355
+Sentence 10
+Time usage: 0.105709
+
+//////////////////////////////
+
+python glm_parser.py -i 1 -b 2 -e 2 -t 0,1,22,24 -p ~/Documents/penn-wsj-deps/ --parser=3rd-order --debug-run-number=10 --force-feature-order=3rd -a
+Using third order Eisner parser
+Debug run number = 10
+Force 3rd order feature
+Time accounting is ON
+
+Sentence 1
+Time usage: 1.377225
+Sentence 2
+Time usage: 1.119335
+Sentence 3
+Time usage: 3.634372
+Sentence 4
+Time usage: 0.566063
+Sentence 5
+Time usage: 2.641560
+Sentence 6
+Time usage: 0.079925
+Sentence 7
+Time usage: 7.448291
+Sentence 8
+Time usage: 0.077679
+Sentence 9
+Time usage: 10.365851
+Sentence 10
+Time usage: 0.144905
+

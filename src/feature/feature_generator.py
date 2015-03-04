@@ -10,6 +10,8 @@
 from weight.weight_vector import *
 from feature.feature_vector import *
 
+import debug.debug
+
 class FeatureGenerator():
     """
     Calculate feature for each sentence
@@ -572,6 +574,10 @@ class FeatureGenerator():
         # uniformly since the edge is the same.
         self.add_dir_and_dist(local_fv,head_index,dep_index)
 
+        if debug.debug.force_feature_order == 3:
+            self.get_second_order_local_vector(head_index, dep_index, [0], 3)
+            self.get_second_order_local_vector(head_index, dep_index, [0], 4)
+
         return local_fv
 
 
@@ -624,23 +630,36 @@ class FeatureGenerator():
         :type dep_node: integer
         :param other_index_list: The index of
         """
+        #print("Start get_2nd_order_feature")
+
+        if debug.debug.force_feature_order == 1:
+            return self.get_local_vector(head_index, dep_index)
 
         # Deal with the case when feature type == 1 (sibling)
         # but the sibling is None. In this case the situation
         # degrades to a normal dependency relation
-        if (feature_type == self.SECOND_ORDER_SIBLING and
-            other_index_list[0] is None):
+        if feature_type == self.SECOND_ORDER_SIBLING and \
+             other_index_list[0] is None:
             feature_type = self.FIRST_ORDER
 
-        # Docorated with dist and dir; do not do this again
-        local_fv_1st = self.get_local_vector(head_index, dep_index)
+        # For these two types there is not need to compute first order
+        if feature_type == self.SECOND_ORDER_GRANDCHILD_ONLY or \
+            feature_type == self.SECOND_ORDER_SIBLING_ONLY:
+                # Empty one. In this case local_fv_1st should not be used
+                local_fv_1st = None
+        else:
+            # Decorated with dist and dir; do not do this again
+            local_fv_1st = self.get_local_vector(head_index, dep_index)
+
         # Fast path: return directly if only 1st order are evaluated
         if feature_type == self.FIRST_ORDER:
             return local_fv_1st
 
+        # Initialize an empty local vector to hold all 2nd order features (sibling or grandchild)
         local_fv_second_order = FeatureVector()
+
         if (feature_type == self.SECOND_ORDER_SIBLING or
-            feature_type == self.SECOND_ORDER_SIBLING_ONLY):
+             feature_type == self.SECOND_ORDER_SIBLING_ONLY):
             sibling_index = other_index_list[0]
             self.get_2nd_sibling_feature(local_fv_second_order,
                                          head_index, dep_index,
@@ -650,7 +669,7 @@ class FeatureGenerator():
             self.add_dir_and_dist(local_fv_second_order,
                                   sibling_index, dep_index)
 
-            if feature_type == feature_type == self.SECOND_ORDER_SIBLING_ONLY:
+            if feature_type == self.SECOND_ORDER_SIBLING_ONLY:
                 return local_fv_second_order
         elif (feature_type == self.SECOND_ORDER_GRANDCHILD or
               feature_type == self.SECOND_ORDER_GRANDCHILD_ONLY):
@@ -677,13 +696,15 @@ class FeatureGenerator():
         # higher order features are large), then just add one line:
         #    local_fv_higher_order.pop(i)
         for i in local_fv_second_order.keys():
-           local_fv[i] = 1
+            local_fv[i] = 1
         # We could use this single line instead:
         #   local_fv.aggregate(local_fv_second_order)
         # And actually it is faster than merging manually
         # But it would not run on local machine without hvector installation
         ##############################################
-        
+
+        #print("End get_2nd_order_feature")
+
         return local_fv
     
     def print_local_vector(self,head_index,dep_index):
