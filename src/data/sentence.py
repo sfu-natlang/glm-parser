@@ -115,7 +115,7 @@ class Sentence():
         """
         See the same function in class FeatureGeneratorBase
         """
-        self.fgen.dump_feature_request(suffix)
+        self.f_gen.dump_feature_request(suffix)
         return
 
 
