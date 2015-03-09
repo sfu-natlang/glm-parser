@@ -82,7 +82,7 @@ class FeatureGeneratorBase:
         Please make sure fv does not include any decorated features (with
         dir and dist)
         """
-        key = (h, d, o, t)
+        key = str(h, d, o, t)
 
         if key in self.feature_request_log:
             self.feature_request_log[key] += 1
