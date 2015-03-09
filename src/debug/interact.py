@@ -16,8 +16,6 @@ from learn.perceptron import *
 from learn.average_perceptron import AveragePerceptronLearner
 from learn.perceptron import PerceptronLearner
 
-from feature.feature_generator import FeatureGenerator
-
 from evaluate.evaluator import *
 
 from weight.weight_vector import *

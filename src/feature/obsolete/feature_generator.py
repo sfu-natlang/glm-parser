@@ -7,8 +7,8 @@
 # (Please add on your name if you have authored this file)
 #
 
-from weight.weight_vector import *
-from feature.feature_vector import *
+# Dict-like object that stores features
+from feature.feature_vector import FeatureVector
 
 import debug.debug
 
@@ -27,21 +27,12 @@ class FeatureGenerator():
         :param sent: The dependency tree that you want to train on
         :type sent: DependencyTree
         """
-        # If you want a disk database with write through, use
-        # self.w_vector = DataBackend("shelve_write_through")
-        # If you want a disk data base with write back, use
-        # self.w_vector = DataBackend("shelve_write_back")
-        # If you want a memory database, use
-        #self.w_vector = WeightVector()
-        # We do this during initialization. For later stages if you need to
-        # change the tree then just call that method manually
-    
-        if not sent == None:
+        if sent is not None:
             self.word_list = sent.get_word_list()
-	    self.pos_list = sent.get_pos_list()
-            # Add five gram word list
+            self.pos_list = sent.get_pos_list()
+            # Pre-compute and cache five-gram for this sentence
             self.compute_five_gram()
-			
+
         return
 
     def compute_five_gram(self):
@@ -67,45 +58,8 @@ class FeatureGenerator():
                 self.five_gram_word_list.append(word[0:5])
             else:
                 self.five_gram_word_list.append(None)
+        return
 
-    #def dump(self,filename=None):
-        """
-        Save the content of the database to a disk file. The file name is given
-        in the parameter. For persistent data objects, it will call the sync()
-        method. But for memory dict it will call pickle procedure to implement
-        the dump operation.
-
-        :param filename: The name of the saved dump file. This will override
-        the file name provided in the constructor
-        :type filename: str
-        """
-    #    if filename == None:
-    #        if self.database_filename == None:
-    #            raise ValueError("""You must provide a file name or use the
-    #                                default file name.""")
-            # If None is passed then use the default file name provided to
-            # the constructor
-    #        else:
-    #            filename = self.database_filename
-        # This should work for both mem dict and persistent data object
-    #    self.w_vector.dump(filename)
-    #    return
-
-    #def load(self,filename=None):
-        """
-        Load the content of a database from the disk file. For shelve types this
-        could be saved, since shelve always works on disk file. However if you
-        are using memory dictionary, each time you want to continue your job,
-        you need to load the previous dumped one.
-        """
-    #    if filename == None:
-    #        if self.database_filename == None:
-    #            raise ValueError("""You must provide a file name or use the
-    #                                default file name.""")
-    #        else:
-    #            filename = self.database_filename
-    #    self.w_vector.load(filename)
-    #    return
     
     def get_unigram_feature(self,fv,head_index,dep_index,five_gram=True):
         """

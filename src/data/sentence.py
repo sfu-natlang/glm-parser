@@ -8,8 +8,8 @@
 #
 
 import copy
-from feature.feature_generator import FeatureGenerator
 from feature.feature_vector import FeatureVector
+
 
 class Sentence():
     """
@@ -28,13 +28,10 @@ class Sentence():
     +=======================================================================+
     | gold_global_vector: A vector that contains all features for all       |
     |                     edges, including first order and second order     |
-    | grandchild_list: A list of three-tuples that locates all grand child  |
-    |                  relation derived from sentence                       |
-    | sibling_list: See above (grandchild_list)                             |
     +=======================================================================+
     """
     
-    def __init__(self, word_list, pos_list=None, edge_set=None):
+    def __init__(self, word_list, pos_list=None, edge_set=None, fgen=None):
         """
         Initialize a dependency tree. If you provide a sentence then the
         initializer could store it as tree nodes. If no initlization parameter
@@ -50,9 +47,11 @@ class Sentence():
         :param pos_list: A list of POS tag. We assume ROOT has been added
         :type pos_list: list(str)
         :param edge_set: A dictionary object, whose keys are all edges
-        (first element being the head and second element being the dep)
-        and values are edge property
+                        (first element being the head and second element being the dep)
+                        and values are edge property
         :type edge_set: dict[(int, int)] -> str
+        :param fgen: Feature generator class
+        :type fgen: Feature Generator class object
         """
         
         self.set_word_list(word_list)
@@ -60,157 +59,16 @@ class Sentence():
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
         self.set_edge_list(edge_set)
-
-        # Set sibling and grandchild relation
-        # i.e. self.grandchild_list and self.sibling_list
-        self.set_second_order_relation()
         
-        self.f_gen = FeatureGenerator(self)
+        self.f_gen = fgen(self)
 
-        # Initialize local feature cache to pre-compute all
-        # possible features.
-        # Set self.f_vector_dict = {(edge0, edge1): FeatureVector()}
-        self.set_feature_vector_dict()
-
-        # Initialize feature cache for 2nd order features
-        self.set_second_order_feature_cache()
-
-        # Precompute the set of gold features
-        self.gold_global_vector = self.get_global_vector(self.edge_list)
-        return
-
-    def set_second_order_feature_cache(self):
-        """
-        Caches second features in the instance. If they are needed in the future
-        then we just fetch them from the cache rather than recompute each time
-
-        This cache is a list of dict objects. Each dict object holds feature vector
-        instance of type i, where i is the index into the list.
-
-        Be aware that we already have a cache for 1st order feature elsewhere, so
-        please use dedicated first order feature generator to ensure performance.
-        It is recommended that the index 0 is set to None to detect performance degradation
-        """
-        self.second_order_feature_cache_list = [None, {}, {}, {}, {}]
-
-        return
-
-    def find_sibling_relation(self):
-        """
-        Find all sibling relations:
-          |------->>>-----|
-        head-->sibling   dep *or*
-          |-------<<<-----|
-        dep   sibling<--head
-        (i.e. we always call the node in the middle as "the sibling")
-
-        :param edge_list: The list of edges represented as tuples
-
-        :return: A list of three-tuples: (head, dep, sibling)
-        """
-        # We could afford this since this method is only called once
-        # when sentence is initialized
-        # edge_list could be either list or set, which is a design problem
-        edge_list = self.get_edge_list_index_only()
-
-        sibling_list = []
-        edge_list_len = self.get_edge_list_len()
-
-        for first_edge_index in range(edge_list_len - 1):
-            for second_edge_index in range(first_edge_index + 1,
-                                           edge_list_len):
-                first_edge_tuple = edge_list[first_edge_index]
-                second_edge_tuple = edge_list[second_edge_index]
-                # If they do not share the same head, continue
-                if first_edge_tuple[0] != second_edge_tuple[0]:
-                    continue
-                head_index = first_edge_tuple[0]
-                dep_index = first_edge_tuple[1]
-                sib_index = second_edge_tuple[1]
-
-                # May erase this later!
-                assert dep_index != sib_index
-
-                if dep_index > head_index and sib_index > head_index:
-                    # We always call the node
-                    if dep_index > sib_index:
-                        sibling_list.append((head_index, # Head
-                                             dep_index,  # Dep
-                                             sib_index)) # Sibling
-                    else:
-                        sibling_list.append((head_index, # Head
-                                             sib_index,  # Dep (although the var
-                                                         # name is sib_index)
-                                             dep_index)) # Sibling
-                elif dep_index < head_index and sib_index < head_index:
-                    if dep_index > sib_index:
-                        sibling_list.append((head_index, # Head
-                                             sib_index,  # Dep
-                                             dep_index)) # Sibling
-                    else:
-                        sibling_list.append((head_index, # Head
-                                             dep_index,  # Dep
-                                             sib_index)) # Sibling
-
-        return sibling_list
-
-
-    def find_grandchild_relation(self):
-        """
-        Find all grandchild relation:
-
-        head-->dep-->grandchild *or*
-        grandchild<--dep<--head *or*
-             |------<<<-----|
-        grandchild  head-->dep  *or*
-         |------>>>------|
-        dep<--head  grandchild
-
-        i.e. There is no order constraint, as long as
-        the head, dep and grandchild node could be chained
-        using two edges. (In contrast, in sibling relation
-        this is not true. Sibling relation requires dep
-         and sibling node on the same side of the head. But
-         again direction is not a constraint in either cases)
-        """
-        edge_list = self.get_edge_list_index_only()
-
-        grandchild_list = []
-        edge_list_len = self.get_edge_list_len()
-
-        for first_edge_index in range(edge_list_len - 1):
-            for second_edge_index in range(first_edge_index + 1,
-                                           edge_list_len):
-                first_edge_tuple = edge_list[first_edge_index]
-                second_edge_tuple = edge_list[second_edge_index]
-
-                if first_edge_tuple[1] == second_edge_tuple[0]:
-                    grandchild_list.append((first_edge_tuple[0],   # Head
-                                            first_edge_tuple[1],   # dep
-                                            second_edge_tuple[1])) # grand child
-                elif first_edge_tuple[0] == second_edge_tuple[1]:
-                    grandchild_list.append((second_edge_tuple[0],
-                                            second_edge_tuple[1],
-                                            first_edge_tuple[1]))
-        return grandchild_list
-
-    def set_second_order_relation(self):
-        """
-        Store second order relation into class instance
-            * Sibling relation
-            * Grand child relation
-        """
-        # TODO: Clarify the type of edge_list, and constrain the
-        # usage of edge_list to only through a method call
-        # instead of fetch them directly from the instance
-        self.grandchild_list = self.find_grandchild_relation()
-        self.sibling_list = self.find_sibling_relation()
-
+        # Pre-compute the set of gold features
+        self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
         return
 
 
     # Both 1st and 2nd order
-    def get_global_vector(self, edge_set):
+    def get_global_vector(self, edge_list):
         """
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
@@ -223,51 +81,9 @@ class Sentence():
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
-        global_vector = FeatureVector()
-
-        # 1st order
-        for head_index, dep_index in edge_set:
-            local_vector = self.get_local_vector(head_index, dep_index)
-            global_vector.aggregate(local_vector)
-
-        # 2nd order sibling only
-        for head_index, dep_index, sib_index in self.sibling_list:
-            local_vector = \
-                self.get_second_order_local_vector(head_index,
-                                                   dep_index,
-                                                   sib_index,
-                                                   FeatureGenerator.SECOND_ORDER_SIBLING_ONLY)
-            global_vector.aggregate(local_vector)
-
-        # 2nd order grand child only
-        for head_index, dep_index, grand_index in self.grandchild_list:
-            local_vector = \
-                self.get_second_order_local_vector(head_index,
-                                                   dep_index,
-                                                   grand_index,
-                                                   FeatureGenerator.SECOND_ORDER_GRANDCHILD_ONLY)
-            global_vector.aggregate(local_vector)
+        global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
         return global_vector
-        
-    def set_feature_vector_dict(self):
-        """
-        feature_vector_dict:
-            the dictionary of edge to its corresponding feature vector
-            i.e.   feature_vector_dict[(0,1)] = FeatureVector()
-        """
-
-        # Act as a cache for local vectors, in which some of them
-        # might be evaluated for several times, and we want
-        # to save computation for the same feature
-        self.f_vector_dict = {}
-        
-        # assume there is no two egdes having the same start and end index
-        for edge0, edge1 in self.get_edge_list_index_only():
-            # First order local vector only
-            self.f_vector_dict[(edge0, edge1)] = \
-                self.f_gen.get_local_vector(edge0, edge1)
-        return
 
 
     def get_local_vector(self, head_index, dep_index):
@@ -282,20 +98,11 @@ class Sentence():
         * Please notice that self.f_gen.get_local_vector() is an obsolete
          call, and actually it only returns first order features
         """
-        # If fv not cached in the instance
-        if (head_index, dep_index) not in self.f_vector_dict:
-            # Only returns first order feature
-            lv = self.f_gen.get_local_vector(head_index, dep_index)
-            # Add into cache (actually this scenario could not happen)
-            self.f_vector_dict[(head_index, dep_index)] = lv
-        else:
-            # Compute a new one
-            lv = self.f_vector_dict[(head_index, dep_index)]
+
+        lv = self.f_gen.get_local_vector(head_index, dep_index, None, 0)
 
         return lv
 
-    if None is None:
-        pass
 
     def get_second_order_local_vector(self, head_index, dep_index,
                                       another_index,
@@ -311,30 +118,10 @@ class Sentence():
         FeatureGenerator.get_second_order_local_vector() doc string.
 
         """
-        #if (feature_type != FeatureGenerator.SECOND_ORDER_SIBLING_ONLY and
-        #    feature_type != FeatureGenerator.SECOND_ORDER_GRANDCHILD_ONLY):
-        #    raise TypeError("Unknown 2nd order feature type")
-
-        # Key for caching dict
-        # We try hash() function. If this degrades the accuracy, then just switch back
-        # to using tuples
-        k = hash((head_index, dep_index, another_index))
-
-        # If feature_type == 0 we will fetch a None. This enables detection of
-        # degraded performance
-        d = self.second_order_feature_cache_list[feature_type]
-
-        if k not in d:
-            # The argument are slightly different (must use list for the 3rd argument)
-            second_order_fv = self.f_gen.get_second_order_local_vector(head_index,
-                                                                       dep_index,
-                                                                       [another_index],
-                                                                       feature_type)
-            # And store it into the cache for future use
-            d[k] = second_order_fv
-        else:
-            # Directly get it from the cache
-            second_order_fv = d[k]
+        second_order_fv = self.f_gen.get_local_vector(head_index,
+                                                      dep_index,
+                                                      [another_index],
+                                                      feature_type)
 
         return second_order_fv
 

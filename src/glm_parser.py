@@ -18,8 +18,6 @@ from learn.perceptron import *
 from learn.average_perceptron import AveragePerceptronLearner
 from learn.perceptron import PerceptronLearner
 
-from feature.feature_generator import FeatureGenerator
-
 from evaluate.evaluator import *
 
 from weight.weight_vector import *
@@ -40,9 +38,15 @@ class GlmParser():
         self.data_path = data_path
 
         self.w_vector = WeightVector(l_filename)
+
+        if fgen is not None:
+            # Do not instanciate this; used elsewhere
+            self.fgen = fgen
+        else:
+            raise ValueError("You need to specify a feature generator")
         
-        self.train_data_pool = DataPool(train_section, data_path)
-        self.test_data_pool = DataPool(test_section, data_path)
+        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen)
+        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen)
         
         self.parser = parser()
 
@@ -52,17 +56,11 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a learner")
 
-        if fgen is not None:
-            # Do not instanciate this; used elsewhere
-            self.fgen = fgen
-        else:
-            raise ValueError("You need to specify a feature generator")
-
         self.evaluator = Evaluator()
        
     def sequential_train(self, train_section=[], max_iter=-1, d_filename=None):
         if not train_section == []:
-            train_data_pool = DataPool(train_section, self.data_path)
+            train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen)
         else:
             train_data_pool = self.train_data_pool
             
@@ -73,7 +71,7 @@ class GlmParser():
     
     def evaluate(self, test_section=[]):
         if not test_section == []:
-            test_data_pool = DataPool(test_section, self.data_path)
+            test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen)
         else:
             test_data_pool = self.test_data_pool
 
@@ -184,7 +182,7 @@ if __name__ == "__main__":
 
     # Default learner
     learner = AveragePerceptronLearner
-    fgen = FeatureGenerator
+    fgen = None
     parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
@@ -235,15 +233,22 @@ if __name__ == "__main__":
                 else:
                     raise ValueError("Unknown learner: %s" % (value, ))
             elif opt == "--fgen":
-                if value == "default":
-                    fgen = FeatureGenerator
-                    print("Using string based feature generator")
-                elif value == "hash":
-                    #### TODO ###########################
-                    fgen = None
-                    print("Using hash based feature generator")
+                root = 'feature.'
+                module = getattr(__import__(root + value, globals(), locals(), [], -1), value)
+                class_count = 0
+                class_name = None
+                for obj_name in dir(module):
+                    if hasattr(getattr(module, obj_name), 'get_local_vector'):
+                        class_count += 1
+                        class_name = obj_name
+                        print("Feature generator detected: %s" % (obj_name, ))
+                if class_count < 1:
+                    raise ValueError("No feature generator found!")
+                elif class_count > 1:
+                    raise ValueError("Found multiple feature generator!")
                 else:
-                    raise ValueError("Unknown fgen: %s" % (value, ))
+                    fgen = getattr(module, class_name)
+                    print("Using feature generator: %s" % (class_name, ))
             elif opt == "--parser":
                 if value == '1st-order':
                     parser = parse.ceisner.EisnerParser
@@ -278,8 +283,8 @@ if __name__ == "__main__":
                         fgen=fgen,
                         parser=parser)
 
-        if train_begin >= 0 and train_end >= train_begin:
-            gp.sequential_train([(train_begin,train_end)], max_iter, d_filename)
+        if train_end >= train_begin >= 0:
+            gp.sequential_train([(train_begin, train_end)], max_iter, d_filename)
 
         if not testsection == []:
             gp.evaluate(testsection)

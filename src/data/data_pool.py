@@ -27,7 +27,8 @@ class DataPool():
     be reset to initial value -1 when reset() is called (manually or
     during init).
     """
-    def __init__(self, section_set=[], data_path="./penn-wsj-deps/"):
+    def __init__(self, section_set=[], data_path="./penn-wsj-deps/",
+                 fgen=None):
         """
         Initialize the Data set
         
@@ -45,7 +46,7 @@ class DataPool():
         self.set_section_list(section_set)
         
         self.reset_all()
-        self.load()
+        self.load(fgen)
 
         return
 
@@ -102,13 +103,13 @@ class DataPool():
         raise IndexError("Run out of data while calling get_next_data()")
 
 
-    def load(self):
+    def load(self, fgen):
         """
         For each section in the initializer, iterate through all files
         under that section directory, and load the content of each
         individual file into the class instance.
 
-        This method should be called after section list has been intialized
+        This method should be called after section list has been initalized
         and before any get_data method is called.
         """
         logging.debug("Loading data...")
@@ -118,13 +119,13 @@ class DataPool():
             data_path_with_section = self.data_path + ("%02d/" % (section, ))
             for file_name in os.listdir(data_path_with_section):
                 file_path = data_path_with_section + file_name
-                # Append newly read section datas to data_list
-                self.data_list = self.data_list + self.get_data_list(file_path)
+                # Append newly read section data to data_list
+                self.data_list = self.data_list + self.get_data_list(file_path, fgen)
 
         return
 
 
-    def get_data_list(self, file_path):
+    def get_data_list(self, file_path, fgen):
         """
         Form the DependencyTree list from the specified file. The file format
         is defined below:
@@ -173,7 +174,7 @@ class DataPool():
                 # Prevent any non-mature (i.e. trivial) sentence structure
                 if word_list != []:
                     # Add "ROOT" for word and pos here
-                    sent = Sentence(word_list,pos_list,edge_set)
+                    sent = Sentence(word_list, pos_list, edge_set, fgen)
                     data_list.append(sent)
 
                 word_list = []
