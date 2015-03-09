@@ -267,7 +267,7 @@ if __name__ == "__main__":
                 DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
                 learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
                 print("Enable interactive mode")
-            elif opt == 'log-feature-request':
+            elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
                 print("Enable feature reuqest log")
             else:
