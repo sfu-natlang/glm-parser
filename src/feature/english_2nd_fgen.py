@@ -184,7 +184,7 @@ class SecondOrderFeatureGenerator():
         if debug.debug.log_feature_request_flag is True:
                 self.first_order_generator.log_feature_request(head_index,
                                                                dep_index,
-                                                               other_index_list[0],
+                                                               other_index_list,
                                                                feature_type)
 
         # Deal with the case when feature type == 1 (sibling)
