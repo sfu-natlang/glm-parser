@@ -96,7 +96,7 @@ class FeatureGeneratorBase:
         Dump feature request for this instance of fgen into a file named
             "feature_request_[suffix].log"
         """
-        if debug.debug.log_feature_request is True:
+        if debug.debug.log_feature_request_flag is True:
             filename = "feature_request_%s.log" % (suffix, )
             fp = open(filename, 'w')
             for i in self.feature_request_log:
