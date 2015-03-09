@@ -98,6 +98,9 @@ class AveragePerceptronLearner():
 
                 self.c += 1
 
+                if debug.debug.log_feature_request_flag is True:
+                    data_instance.dump_feature_request("%s" % (sentence_count, ))
+
                 # If exceeds the value set in debug config file, just stop and exit
                 # immediately
                 if sentence_count > debug.debug.run_first_num > 0:

@@ -128,12 +128,16 @@ options:
             default "avg_perceptron"
 
     --fgen=
-            Specify feature generation facility
-                "default": Use default feature generator (use string as keys)
-                "hash": Use hash-based feature generator (use hashed value as keys)
-            default "default"
-            In some cases, switching to hash based fgen might improve
-            the outcome a little bit with a speed-up in computation
+            Specify feature generation facility by a python file name (mandatory).
+            The file will be searched under /feature directory, and the class
+            object that has a get_local_vector() interface will be recognized
+            as the feature generator and put into use automatically.
+
+            If multiple eligible objects exist, an error will be reported.
+
+            For developers: please make sure there is only one such class object
+            under fgen source files. Even import statement may introduce other
+            modules that is eligible to be a fgen. Be careful.
 
     --parser=
             Specify the parser
@@ -151,18 +155,15 @@ options:
             *** Caution: Overrides -t (no evaluation will be conducted), and partially
             overrides -b -e (Only run specified number of sentences)
 
-    --force-feature-order=[1st/3rd]
-            Force to generate features of certain order, no matter which parser we are using
-            This option is mostly used for debugging, as we may would like to measure the
-            efficiency of parser or feature generator separately, which are tightly coupled.
-                "1st": Force 1st-order feature
-                "3rd": Force 3rd-order feature
-            default None (No forcing)
-            *** This option does NOT override --parser
-
     --interactive
             Use interactive version of glm-parser, in which you have access to some
             critical points ("breakpoints") in the procedure
+
+    --log-feature-request
+            Log each feature request based on feature type. This is helpful for
+            analyzing feature usage and building feature caching utility.
+            Upon exiting the main program will dump feature request information
+            into a file "feature_request.log"
     
 """
 
@@ -258,15 +259,6 @@ if __name__ == "__main__":
                     print("Using third order Eisner parser")
                 else:
                     raise ValueError("Unknown parser: %s" % (value, ))
-            elif opt == '--force-feature-order':
-                if value == '1st':
-                    debug.debug.force_feature_order = 1
-                    print("Force 1st order feature")
-                elif value == '3rd':
-                    debug.debug.force_feature_order = 3
-                    print("Force 3rd order feature")
-                else:
-                    raise ValueError("Illegal feature order: %s" % (value, ))
             elif opt == '--interactive':
                 glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
                 glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
@@ -274,6 +266,9 @@ if __name__ == "__main__":
                 DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
                 learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
                 print("Enable interactive mode")
+            elif opt == 'log-feature-request':
+                debug.debug.log_feature_request_flag = True
+                print("Enable feature reuqest log")
             else:
                 print "Invalid argument, try -h"
                 sys.exit(0)

@@ -68,6 +68,42 @@ class FeatureGeneratorBase:
         # Pre-compute and cache five-gram for this sentence
         self.compute_five_gram()
 
+        # Feature request log is kept under class, not instance, because instance
+        # do not share data
+        if debug.debug.log_feature_request_flag is True:
+            self.feature_request_log = {}
+
+        return
+
+    def log_feature_request(self, h, d, o, t):
+        """
+        Log every feature inside fv into feature request log
+
+        Please make sure fv does not include any decorated features (with
+        dir and dist)
+        """
+        key = (h, d, o, t)
+
+        if key in self.feature_request_log:
+            self.feature_request_log[key] += 1
+        else:
+            self.feature_request_log[key] = 1
+
+        return
+
+    def dump_feature_request(self, suffix):
+        """
+        Dump feature request for this instance of fgen into a file named
+            "feature_request_[suffix].log"
+        """
+        if debug.debug.log_feature_request is True:
+            filename = "feature_request_%s.log" % (suffix, )
+            fp = open(filename, 'w')
+            for i in self.feature_request_log:
+                fp.write("'%s' %s\n" % (str(i),
+                                      self.feature_request_log[i]))
+            fp.close()
+
         return
 
     def compute_five_gram(self):

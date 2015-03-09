@@ -10,6 +10,50 @@
 import copy
 from feature.feature_vector import FeatureVector
 
+"""
+Some basic comcepts are depicted here:
+
+Global vector: A dict-like object that stores mapping like below:
+    {
+        'feature_string1': 1.0,
+        'feature_string2': 1.0,
+        'feature_string3': 1.0,
+        ...
+    }
+    It holds all features derived from all edges in a given tree
+    structure, therefore, the global vector contains information
+    about every edge in the tree.
+
+Local vector: Similar to the global vector, except that it only
+stores features derived from a single edge. In order to derive
+a global vector from local vectors, we just aggregate them and
+take the union of all local features.
+
+Feature caching: Feature is generally computed given three indexes:
+the head index, dependency index, and extra index (sibling, grand child,
+or None). Computing features for frequently-queried index combinations
+are tiresome, and slows down overall performance, therefore, we decide
+to cache some frequently used local vector.
+
+argmax *OR* gold edge set ->
+edge ->
+(h[ead], d[dpendency], o[ther]) ->
+local vector -(aggregate)->
+global vector
+
+         (h, d, o)
+       |----------->|
+argmax |            | feature generator
+       |<-----------|
+          local_fv
+           (same)
+       |----------->|
+       |            | weight vector database
+       |<-----------|
+        score (float)
+
+(How argmax query features from fgen)
+"""
 
 class Sentence():
     """
@@ -53,7 +97,8 @@ class Sentence():
         :param fgen: Feature generator class
         :type fgen: Feature Generator class object
         """
-        
+        # Used to compute cache key from (h, d, o, type) tuple
+        self.cache_key_func = hash
         self.set_word_list(word_list)
         self.set_pos_list(pos_list)
         # This will store the dict, dict.keys() and len(dict.keys())
@@ -64,6 +109,13 @@ class Sentence():
 
         # Pre-compute the set of gold features
         self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+        return
+
+    def dump_feature_request(self, suffix):
+        """
+        See the same function in class FeatureGeneratorBase
+        """
+        self.fgen.dump_feature_request(suffix)
         return
 
 
@@ -89,17 +141,11 @@ class Sentence():
     def get_local_vector(self, head_index, dep_index):
         """
         Return first order local vector, given the head index and dependency index
-
-        We make use of the local cache (self.f_vector_dict). If one local vector
-        has already been calculated and cached in self.f_vector_dict, then we
-        just return the cached version (consistency guaranteed). If it is the first
-        time we compute them, then extract features using FeatureGenerator
-
-        * Please notice that self.f_gen.get_local_vector() is an obsolete
-         call, and actually it only returns first order features
         """
+        cache_key = self.cache_key_func((head_index, dep_index, 0, 0))
 
-        lv = self.f_gen.get_local_vector(head_index, dep_index, None, 0)
+
+        lv = self.f_gen.get_local_vector(head_index, dep_index, 0, 0)
 
         return lv
 
