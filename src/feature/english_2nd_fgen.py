@@ -181,6 +181,12 @@ class SecondOrderFeatureGenerator():
         :type dep_node: integer
         :param other_index_list: The index of
         """
+        if debug.debug.log_feature_request_flag is True:
+                self.first_order_generator.log_feature_request(head_index,
+                                                               dep_index,
+                                                               other_index_list[0],
+                                                               feature_type)
+
         # Deal with the case when feature type == 1 (sibling)
         # but the sibling is None. In this case the situation
         # degrades to a normal dependency relation
@@ -210,6 +216,7 @@ class SecondOrderFeatureGenerator():
             self.get_2nd_sibling_feature(local_fv_second_order,
                                          head_index, dep_index,
                                          sibling_index)
+
             # From sibling to dependent node (we assume the sibling
             # node is between the head and dependent node)
             self.first_order_generator.add_dir_and_dist(local_fv_second_order,
@@ -224,6 +231,7 @@ class SecondOrderFeatureGenerator():
             self.get_2nd_grandparent_feature(local_fv_second_order,
                                              head_index, dep_index,
                                              grandchild_index)
+
             # From dependent node to grand child
             self.first_order_generator.add_dir_and_dist(local_fv_second_order,
                                                         dep_index,
@@ -373,6 +381,9 @@ class SecondOrderFeatureGenerator():
             fv.aggregate(local_fv)
 
         return fv
+
+    def dump_feature_request(self, suffix):
+        self.first_order_generator.dump_feature_request(suffix)
 
 
 ##################################################################
