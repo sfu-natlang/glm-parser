@@ -374,10 +374,6 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         # For future improvements please put all other features here
         # ...
 
-        # Enable logging before it is decorated
-        if debug.debug.log_feature_request_flag is True:
-            self.log_feature_request(local_fv)
-
         # Add dir and dist information for all features. This can be done
         # uniformly since the edge is the same.
         self.add_dir_and_dist(local_fv,head_index,dep_index)
