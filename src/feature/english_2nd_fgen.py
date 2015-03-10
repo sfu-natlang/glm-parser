@@ -141,6 +141,21 @@ class SecondOrderFeatureGenerator():
 
         return
 
+    def cache_feature_for_edge_list(self, edge_list):
+        """
+        Compute cached feature for edge list
+        """
+        for head, dep in edge_list:
+            key = (head, dep)
+            
+            if key in self.first_order_feature_cache:
+                continue
+
+            # This is safe, and will not incur infinite recursion
+            # Be careful when implementing second order feature cache
+            self.first_order_feature_cache[key] = \
+                self.first_order_generator.get_local_vector(head, dep)
+
     def set_feature_cache(self):
         """
         Called during initialization
@@ -154,12 +169,7 @@ class SecondOrderFeatureGenerator():
         self.first_order_feature_cache = {}
         self.second_order_feature_cache = {}
 
-        for head, dep in self.gold_edge_list:
-            key = (head, dep)
-            # This is safe, and will not incur infinite recursion
-            # Be careful when implementing second order feature cache
-            self.first_order_feature_cache[key] = \
-                self.first_order_generator.get_local_vector(head, dep)
+        self.cache_feature_for_edge_list(self.gold_edge_list)
 
         return
 
