@@ -91,6 +91,10 @@ class FeatureGeneratorBase:
 
         return
 
+    # In normal case, each feature is only requestst for less than
+    # or equal to 2 times
+    NORMAL_MAX_FEATURE_REQUEST_COUNT = 2
+
     def dump_feature_request(self, suffix):
         """
         Dump feature request for this instance of fgen into a file named
@@ -100,8 +104,14 @@ class FeatureGeneratorBase:
             filename = "feature_request_%s.log" % (suffix, )
             fp = open(filename, 'w')
             for i in self.feature_request_log:
-                fp.write("'%s' %s\n" % (str(i),
+                fp.write("'%s' %s" % (str(i),
                                       self.feature_request_log[i]))
+                # Annotate those count > 2 (to signify frequently requested features)
+                if self.feature_request_log[i] > \
+                    self.NORMAL_MAX_FEATURE_REQUEST_COUNT:
+                    fp.write(' *')
+                fp.write('\n')
+
             fp.close()
 
         return

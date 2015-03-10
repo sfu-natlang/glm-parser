@@ -79,7 +79,8 @@ class GlmParser():
         
     def compute_argmax(self, sentence):
         current_edge_set = self.parser.parse(sentence, self.w_vector.get_vector_score)
-        current_global_vector = sentence.get_global_vector(current_edge_set)
+        sentence.set_current_global_vector(current_edge_set)
+        current_global_vector = sentence.current_global_vector
 
         return current_global_vector
 
