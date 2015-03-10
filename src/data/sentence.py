@@ -125,7 +125,11 @@ class Sentence():
         """
         This is similar to caching the gold global vector. Current global vector
         is derived from current edge set, which is a result from parser. Since this
+<<<<<<< HEAD
         global vector may be used several times, it improves performance to cache
+=======
+        global vector may be used several times, it improves perfprmance to cache
+>>>>>>> cdf94d9a3c631cd0e65125ef90ed4fb571c5e342
         it inside the instance.
 
         The cache needs to be refreshed every time a new current edge set is
@@ -134,7 +138,11 @@ class Sentence():
         :param edge_list: Return value from parser
         :return: None
         """
+<<<<<<< HEAD
         self.current_global_vector = self.get_global_vector(edge_list)
+=======
+        self.current_global_vector = self.get_global_vector(edge_set)
+>>>>>>> cdf94d9a3c631cd0e65125ef90ed4fb571c5e342
         return
 
 
