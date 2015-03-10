@@ -101,12 +101,6 @@ class AveragePerceptronLearner():
                 if debug.debug.log_feature_request_flag is True:
                     data_instance.dump_feature_request("%s" % (sentence_count, ))
 
-                print("First order cache hit rate: %f" % (float(data_instance.f_gen.first_order_cache_hit) / \
-                                              float(data_instance.f_gen.first_order_cache_total), ))
-                data_instance.f_gen.first_order_cache_hit = 0
-                data_instance.f_gen.first_order_cache_total = 1
-
-
                 # If exceeds the value set in debug config file, just stop and exit
                 # immediately
                 if sentence_count > debug.debug.run_first_num > 0:

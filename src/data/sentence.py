@@ -137,7 +137,7 @@ class Sentence():
         :return: None
         """
         self.current_global_vector = self.get_global_vector(edge_list)
-        self.cache_feature_for_edge_list(edge_list)
+        #~self.cache_feature_for_edge_list(edge_list)
 
         return
 
@@ -153,10 +153,10 @@ class Sentence():
         self.f_gen.dump_feature_request(suffix)
         return
 
-    def cache_feature_for_edge_list(self, edge_list):
-        # Compute cached feature for a given edge list
-        self.f_gen.cache_feature_for_edge_list(edge_list)
-        return
+    #~def cache_feature_for_edge_list(self, edge_list):
+    #~    # Compute cached feature for a given edge list
+    #~    self.f_gen.cache_feature_for_edge_list(edge_list)
+    #~    return
 
 
     # Both 1st and 2nd order

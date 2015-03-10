@@ -28,12 +28,12 @@ class SecondOrderFeatureGenerator():
         self.word_list = self.first_order_generator.word_list
         self.pos_list = self.first_order_generator.pos_list
 
-        # Get edge from sentence instance
-        # Does not require first order fgen to do this, so we put it
-        # only in second order fgen
-        self.gold_edge_list = sent.get_edge_list_index_only()
+        #~# Get edge from sentence instance
+        #~# Does not require first order fgen to do this, so we put it
+        #~# only in second order fgen
+        #~self.gold_edge_list = sent.get_edge_list_index_only()
 
-        self.set_feature_cache()
+        #~self.set_feature_cache()
 
         self.key_gen_func = self.first_order_generator.key_gen_func
         self.five_gram_word_list = self.first_order_generator.five_gram_word_list
@@ -141,42 +141,42 @@ class SecondOrderFeatureGenerator():
 
         return
 
-    def cache_feature_for_edge_list(self, edge_list):
-        """
-        Compute cached feature for edge list
-        """
-        for head, dep in edge_list:
-            key = (head, dep)
+    #~def cache_feature_for_edge_list(self, edge_list):
+    #~    """
+    #~    Compute cached feature for edge list
+    #~    """
+    #~    for head, dep in edge_list:
+    #~        key = (head, dep)
 
-            if key in self.first_order_feature_cache:
-                continue
+    #~        if key in self.first_order_feature_cache:
+    #~            continue
 
-            # This is safe, and will not incur infinite recursion
-            # Be careful when implementing second order feature cache
-            self.first_order_feature_cache[key] = \
-                self.first_order_generator.get_local_vector(head, dep)
+    #~        # This is safe, and will not incur infinite recursion
+    #~        # Be careful when implementing second order feature cache
+    #~        self.first_order_feature_cache[key] = \
+    #~            self.first_order_generator.get_local_vector(head, dep)
 
-        return
+    #~    return
 
-    def set_feature_cache(self):
-        """
-        Called during initialization
+    #~def set_feature_cache(self):
+    #~    """
+    #~    Called during initialization
 
-        This method sets two dict-like object inside fgen instance, one
-        for first order feature cache, another for second order feature cache
+    #~    This method sets two dict-like object inside fgen instance, one
+    #~    for first order feature cache, another for second order feature cache
 
-        Also it fills first order feature cache with first order features
-        derived from the gold edge set (in sentence object)
-        """
-        self.first_order_feature_cache = {}
-        self.second_order_feature_cache = {}
+    #~    Also it fills first order feature cache with first order features
+    #~    derived from the gold edge set (in sentence object)
+    #~    """
+    #~    self.first_order_feature_cache = {}
+    #~    self.second_order_feature_cache = {}
 
-        self.cache_feature_for_edge_list(self.gold_edge_list)
+    #~    self.cache_feature_for_edge_list(self.gold_edge_list)
 
-        self.first_order_cache_total = 1
-        self.first_order_cache_hit = 0
+    #~    self.first_order_cache_total = 1
+    #~    self.first_order_cache_hit = 0
 
-        return
+    #~    return
 
     # Here defines some feature type. Used in method get_local_vector
     FIRST_ORDER = 0
