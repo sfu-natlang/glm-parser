@@ -72,6 +72,11 @@ class Sentence():
     +=======================================================================+
     | gold_global_vector: A vector that contains all features for all       |
     |                     edges, including first order and second order     |
+    | current_global_vector: Similar to gold_global_vector, except that     |
+    |                        it is derived from current edge set, rather    |
+    |                        than the optimal gold edge set                 |
+    |                        Only valid after call to                       |
+    |                        set_current_global_vector()                    |
     +=======================================================================+
     """
     
@@ -104,12 +109,37 @@ class Sentence():
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
         self.set_edge_list(edge_set)
-        
+        # Initialize a feature cache with first order features
+        # from gold edge set
+        self.set_feature_cache()
+
+        # Each sentence instance has a exclusive fgen instance
+        # we could store some data inside fgen instance, such as cache
+        # THIS MUST BE PUT AFTER set_edge_list()
         self.f_gen = fgen(self)
 
         # Pre-compute the set of gold features
         self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+        # During initialization is has not been known yet. We will fill this later
+        self.current_global_vector = None
         return
+
+    def set_current_global_vector(self, edge_list):
+        """
+        This is similar to caching the gold global vector. Current global vector
+        is derived from current edge set, which is a result from parser. Since this
+        global vector may be used several times, it improves perfprmance to cache
+        it inside the instance.
+
+        The cache needs to be refreshed every time a new current edge set is
+        available.
+
+        :param edge_list: Return value from parser
+        :return: None
+        """
+        self.current_global_vector = self.get_global_vector(edge_set)
+        return
+
 
     def dump_feature_request(self, suffix):
         """
@@ -141,11 +171,11 @@ class Sentence():
     def get_local_vector(self, head_index, dep_index):
         """
         Return first order local vector, given the head index and dependency index
+
+        Just a wrapper to self.get_second_order_local_vector()
         """
-        cache_key = self.cache_key_func((head_index, dep_index, 0, 0))
 
-
-        lv = self.f_gen.get_local_vector(head_index, dep_index, 0, 0)
+        lv = self.get_second_order_local_vector(head_index, dep_index, 0, 0)
 
         return lv
 

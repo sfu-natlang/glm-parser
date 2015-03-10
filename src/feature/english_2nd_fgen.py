@@ -13,6 +13,7 @@ import feature_vector
 import english_1st_fgen
 import debug.debug
 
+import copy
 
 class SecondOrderFeatureGenerator():
     """
@@ -26,6 +27,14 @@ class SecondOrderFeatureGenerator():
         # Make shortcuts - Not necessary, but saves some key strokes
         self.word_list = self.first_order_generator.word_list
         self.pos_list = self.first_order_generator.pos_list
+
+        # Get edge from sentence instance
+        # Does not require first order fgen to do this, so we put it
+        # only in second order fgen
+        self.gold_edge_list = sent.get_edge_list_index_only()
+
+        self.set_feature_cache()
+
         self.key_gen_func = self.first_order_generator.key_gen_func
         self.five_gram_word_list = self.first_order_generator.five_gram_word_list
 
@@ -132,6 +141,28 @@ class SecondOrderFeatureGenerator():
 
         return
 
+    def set_feature_cache(self):
+        """
+        Called during initialization
+
+        This method sets two dict-like object inside fgen instance, one
+        for first order feature cache, another for second order feature cache
+
+        Also it fills first order feature cache with first order features
+        derived from the gold edge set (in sentence object)
+        """
+        self.first_order_feature_cache = {}
+        self.second_order_feature_cache = {}
+
+        for head, dep in self.gold_edge_list:
+            key = (head, dep)
+            # This is safe, and will not incur infinite recursion
+            # Be careful when implementing second order feature cache
+            self.first_order_feature_cache[key] = \
+                self.first_order_generator.get_local_vector(head_index, dep_index)
+
+        return
+
     # Here defines some feature type. Used in method get_local_vector
     FIRST_ORDER = 0
     SECOND_ORDER_SIBLING = 1
@@ -200,12 +231,23 @@ class SecondOrderFeatureGenerator():
                 # Empty one. In this case local_fv_1st should not be used
                 local_fv_1st = None
         else:
-            # Decorated with dist and dir; do not do this again
-            local_fv_1st = self.first_order_generator.get_local_vector(head_index, dep_index)
+            key = (head_index, dep_index)
+            # WE COMPUTE FIRST ORDER FEATURE HERE!!!!
+            if key in self.first_order_feature_cache:
+                # cache hit: retrieve from the cache (and probably copy later)
+                local_fv_1st = self.first_order_feature_cache(key)
+            else:
+                # Decorated with dist and dir; do not do this again
+                local_fv_1st = self.first_order_generator.get_local_vector(head_index, dep_index)
 
         # Fast path: return directly if only 1st order are evaluated
         if feature_type == self.FIRST_ORDER:
+            # Make sure the returned value is not written!!
             return local_fv_1st
+        else:
+            # We will make change to the reference, so just copy it, to avoid
+            # writing into the cached value
+            local_fv_1st = copy.copy(local_fv_1st)
 
         # Initialize an empty local vector to hold all 2nd order features (sibling or grandchild)
         local_fv_second_order = feature_vector.FeatureVector()
