@@ -152,9 +152,9 @@ options:
             Only run the first [int] sentences. Usually combined with option -a to gather
             time usage information
             If combined with -a, then time usage information is available, and it will print
-            out average time usage before termination
+            out average time usage after each iteration
             *** Caution: Overrides -t (no evaluation will be conducted), and partially
-            overrides -b -e (Only run specified number of sentences)
+            overrides -b -e (Only run specified number of sentences) -i (Run forever)
 
     --interactive
             Use interactive version of glm-parser, in which you have access to some

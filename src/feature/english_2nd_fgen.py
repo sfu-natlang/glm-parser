@@ -147,7 +147,7 @@ class SecondOrderFeatureGenerator():
         """
         for head, dep in edge_list:
             key = (head, dep)
-            
+
             if key in self.first_order_feature_cache:
                 continue
 
@@ -155,6 +155,8 @@ class SecondOrderFeatureGenerator():
             # Be careful when implementing second order feature cache
             self.first_order_feature_cache[key] = \
                 self.first_order_generator.get_local_vector(head, dep)
+
+        return
 
     def set_feature_cache(self):
         """
@@ -170,6 +172,9 @@ class SecondOrderFeatureGenerator():
         self.second_order_feature_cache = {}
 
         self.cache_feature_for_edge_list(self.gold_edge_list)
+
+        self.first_order_cache_total = 1
+        self.first_order_cache_hit = 0
 
         return
 
@@ -222,6 +227,7 @@ class SecondOrderFeatureGenerator():
         :type dep_node: integer
         :param other_index_list: The index of
         """
+
         if debug.debug.log_feature_request_flag is True:
                 self.first_order_generator.log_feature_request(head_index,
                                                                dep_index,
@@ -241,23 +247,26 @@ class SecondOrderFeatureGenerator():
                 # Empty one. In this case local_fv_1st should not be used
                 local_fv_1st = None
         else:
-            key = (head_index, dep_index)
-            # WE COMPUTE FIRST ORDER FEATURE HERE!!!!
-            if key in self.first_order_feature_cache:
-                # cache hit: retrieve from the cache (and probably copy later)
-                local_fv_1st = self.first_order_feature_cache[key]
-            else:
-                # Decorated with dist and dir; do not do this again
-                local_fv_1st = self.first_order_generator.get_local_vector(head_index, dep_index)
+            #~key = (head_index, dep_index)
+            #~self.first_order_cache_total += 1
+            #~# WE COMPUTE FIRST ORDER FEATURE HERE!!!!
+            #~if key in self.first_order_feature_cache:
+            #~    # cache hit: retrieve from the cache (and probably copy later)
+            #~    local_fv_1st = self.first_order_feature_cache[key]
+            #~    self.first_order_cache_hit += 1
+            #~else:
+            #~    # Decorated with dist and dir; do not do this again
+            #~    local_fv_1st = self.first_order_generator.get_local_vector(head_index, dep_index)
+            local_fv_1st = self.first_order_generator.get_local_vector(head_index, dep_index)
 
         # Fast path: return directly if only 1st order are evaluated
         if feature_type == self.FIRST_ORDER:
             # Make sure the returned value is not written!!
             return local_fv_1st
-        else:
-            # We will make change to the reference, so just copy it, to avoid
-            # writing into the cached value
-            local_fv_1st = copy.copy(local_fv_1st)
+        #~else:
+        #~    # We will make change to the reference, so just copy it, to avoid
+        #~    # writing into the cached value
+        #~    local_fv_1st = copy.copy(local_fv_1st)
 
         # Initialize an empty local vector to hold all 2nd order features (sibling or grandchild)
         local_fv_second_order = feature_vector.FeatureVector()

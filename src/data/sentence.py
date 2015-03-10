@@ -119,6 +119,8 @@ class Sentence():
         self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
         # During initialization is has not been known yet. We will fill this later
         self.current_global_vector = None
+
+        self.set_second_order_cache()
         return
 
     def set_current_global_vector(self, edge_list):
@@ -137,6 +139,10 @@ class Sentence():
         self.current_global_vector = self.get_global_vector(edge_list)
         self.cache_feature_for_edge_list(edge_list)
 
+        return
+
+    def set_second_order_cache(self):
+        self.second_order_cache = {}
         return
 
 
@@ -159,10 +165,10 @@ class Sentence():
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
 
-        Global vector currently consists of three parts: the first order fatures,
+        Global vector currently consists of three parts: the first order features,
         second order sibling features, and third order features. We compute them
         separately, although there are options of computing them in single call,
-        we choose not to use it regarding code redability.
+        we choose not to use it regarding code readability.
         
         :return: The global vector of the sentence with the current weight
         :rtype: list
@@ -198,10 +204,16 @@ class Sentence():
         FeatureGenerator.get_second_order_local_vector() doc string.
 
         """
+        key = (head_index, dep_index, another_index, feature_type)
+        if key in self.second_order_cache:
+            return self.second_order_cache[key]
+
         second_order_fv = self.f_gen.get_local_vector(head_index,
                                                       dep_index,
                                                       [another_index],
                                                       feature_type)
+
+        self.second_order_cache[key] = second_order_fv
 
         return second_order_fv
 

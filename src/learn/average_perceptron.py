@@ -101,12 +101,20 @@ class AveragePerceptronLearner():
                 if debug.debug.log_feature_request_flag is True:
                     data_instance.dump_feature_request("%s" % (sentence_count, ))
 
+                print("First order cache hit rate: %f" % (float(data_instance.f_gen.first_order_cache_hit) / \
+                                              float(data_instance.f_gen.first_order_cache_total), ))
+                data_instance.f_gen.first_order_cache_hit = 0
+                data_instance.f_gen.first_order_cache_total = 1
+
+
                 # If exceeds the value set in debug config file, just stop and exit
                 # immediately
                 if sentence_count > debug.debug.run_first_num > 0:
                     print("Average time for each sentence: %f" % (argmax_time_total / debug.debug.run_first_num))
                     logging.debug("Average time for each sentence: %f" % (argmax_time_total / debug.debug.run_first_num))
-                    sys.exit(1)
+                    data_pool.reset_index()
+                    sentence_count = 1
+                    argmax_time_total = 0.0
 
             # End while(data_pool.has_next_data())
 

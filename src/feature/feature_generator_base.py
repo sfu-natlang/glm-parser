@@ -42,7 +42,7 @@ class FeatureGeneratorBase:
     """
 
     # See __init__ below
-    key_gen_func = str
+    key_gen_func = hash
 
     def __init__(self, sent):
         """
