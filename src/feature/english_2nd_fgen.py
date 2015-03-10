@@ -235,11 +235,7 @@ class SecondOrderFeatureGenerator():
             # WE COMPUTE FIRST ORDER FEATURE HERE!!!!
             if key in self.first_order_feature_cache:
                 # cache hit: retrieve from the cache (and probably copy later)
-<<<<<<< HEAD
                 local_fv_1st = self.first_order_feature_cache[key]
-=======
-                local_fv_1st = self.first_order_feature_cache(key)
->>>>>>> cdf94d9a3c631cd0e65125ef90ed4fb571c5e342
             else:
                 # Decorated with dist and dir; do not do this again
                 local_fv_1st = self.first_order_generator.get_local_vector(head_index, dep_index)
