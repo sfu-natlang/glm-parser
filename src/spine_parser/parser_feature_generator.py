@@ -1,38 +1,22 @@
 from weight.weight_vector import *
 from feature.feature_vector import *
 
-class FeatureGenerator():
+class ParserFeatureGenerator():
     """
     Calculate feature for each sentence
     """
     def __init__(self, sent=None):
-        """
-        Initialize the FeatureSet instance, including a file name that might
-        be used to store the database on the disk, and a dependency tree
-        that provides only word list and pos list (i.e. no edge information)
-        to the instance. The dependency tree should not be further modified
-        after refistered into the instance, in order to maintain consistency.
 
-        :param sent: The dependency tree that you want to train on
-        :type sent: DependencyTree
-        """
-        # If you want a disk database with write through, use
-        # self.w_vector = DataBackend("shelve_write_through")
-        # If you want a disk data base with write back, use
-        # self.w_vector = DataBackend("shelve_write_back")
-        # If you want a memory database, use
-        #self.w_vector = WeightVector()
-        # We do this during initialization. For later stages if you need to
-        # change the tree then just call that method manually
-    
         if not sent == None:
             self.word_list = sent.get_word_list()
+            # TO DO
+            # pos_list and spine_list should come from the tagger not gold data
             self.pos_list = sent.get_pos_list()
             self.spine_list = sent.get_spine_list()
 
             # Add five gram word list
             self.compute_five_gram()
-			
+            
         return
 
     def compute_five_gram(self):
@@ -597,7 +581,7 @@ class FeatureGenerator():
 
         return
 
-    def get_spinal_adjoin_feature(self,fv,head_index,dep_index):  
+    def get_spinal_adjoin_feature(self,fv,head_index,dep_index,join_pos,r_or_s):  
         """
         Add all spine-adjoin features (GRM) into a given feature vector instance.
         asic features are represented using a tuple. The first element is
@@ -619,7 +603,8 @@ class FeatureGenerator():
         xj_pos = self.pos_list[dep_index]
         xi_spine = self.spine_list[dep_index-1]
         xj_spine = self.spine_list[head_index-1]
-        xj_label = self.label_list[dep_index-1]
+        # assume is_prev=0 this time, this information is not used in parsing
+        xj_label = (join_pos, r_or_s, 0); 
         
         # Map the label to GRM
         xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
@@ -688,7 +673,7 @@ class FeatureGenerator():
             
         return
 
-    def get_local_vector(self,head_index,dep_index,is_uni_spinal=False,is_bi_spinal=False,is_conx_spinal=False,is_spinal_adjoin=True):
+    def get_local_vector(self,head_index,dep_index,join_pos,r_or_s,is_uni_spinal=False,is_bi_spinal=False,is_conx_spinal=False,is_spinal_adjoin=True):
         """
         Given an edge, return its local vector
 
@@ -723,9 +708,8 @@ class FeatureGenerator():
             # Get contextual-spinal features
             self.get_contextual_spinal_feature(local_fv,head_index,dep_index)
 
-        # not sure what grm is used for here   
         if is_spinal_adjoin:
-            self.get_spinal_adjoin_feature(local_fv,head_index,dep_index,grm)
+            self.get_spinal_adjoin_feature(local_fv,head_index,dep_index,join_pos,r_or_s)
 
         # For future improvements please put all other features here
         # ...

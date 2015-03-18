@@ -66,7 +66,48 @@ cdef class EisnerParser:
         else:
             s = modifier
             t = head
-            
+
+        """
+        cdef int join_pos, join_number, r_or_s, max_index
+        cdef float edge_score, max_score, edge_score
+
+        # can score be negative?
+        # compute max or min here?
+        cdef float temp_max = 0 
+
+        h_spine = self.psent.spine_list[head]
+        join_number = h_spine.count('(')
+        escore_list = []
+
+        for join_pos from 0 <= join_pos < join_number by 1:
+            for r_or_s from in [0, 1]:
+                edge_score = arc_weight(self.psent.get_local_vector(head, modifier, join_pos, r_or_s))
+                escore_list.append(edge_score);
+                if edge_score > temp_max:
+                    temp_max = edge_score
+
+        cdef int max_index = s
+        cdef int max_join_pos = 0
+        cdef int max_rors = 0
+        cdef float max_score = \
+            self.e[s][s][1][0].score + self.e[s+1][t][0][0].score + temp_max
+
+        cdef float cur_score
+        for q from s < q < t by 1:
+            for join_pos from 0 <= join_pos < join_number by 1:
+                for r_or_s from in [0, 1]:
+                    cur_score = self.e[s][q][1][0].score + self.e[q+1][t][0][0].score + escore_list[join_pos*2+r_or_s]
+                    if max_score < cur_score:
+                        max_score = cur_score
+                        max_index = q
+                        max_join_pos = join_pos
+                        max_rors = r_or_s
+
+        return max_score, max_index, max_rors, max_join_pos
+        """
+
+
+
         cdef float edge_score = arc_weight(sent.get_local_vector(head, modifier))
         cdef int max_index = s
         cdef float max_score = \
@@ -221,12 +262,13 @@ cdef class EisnerParser:
         return
     
     def parse(self, sent, arc_weight):	
-
+        
         self.n = len(sent.word_list)
         self.init_eisner_matrix()
 
         cdef int m, s, t, q
-        
+        self.psent = ParserFeatureGenerator(sent);
+
         #TODO: try for m in range(1,self.n)
         for m from 1 <= m < self.n by 1: 
             for s from 0 <= s < self.n by 1:
