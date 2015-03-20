@@ -10,10 +10,6 @@
 #
 
 from data.data_pool import *
-from learn.perceptron import *
-
-from learn.average_perceptron import AveragePerceptronLearner
-from learn.perceptron import PerceptronLearner
 
 from evaluate.evaluator import *
 
@@ -303,7 +299,7 @@ if __name__ == "__main__":
                 print("Enable interactive mode")
             elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
-                print("Enable feature reuqest log")
+                print("Enable feature request log")
             else:
                 print "Invalid argument, try -h"
                 sys.exit(0)
