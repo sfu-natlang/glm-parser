@@ -9,9 +9,6 @@
 # (Please add on your name if you have authored this file)
 #
 
-import parse.ceisner
-import parse.ceisner3
-
 from data.data_pool import *
 from learn.perceptron import *
 
@@ -124,9 +121,8 @@ options:
 
     --learner=
             Specify a learner for weight vector training
-                "perceptron": Use simple perceptron
-                "avg_perceptron": Use average perceptron
-            default "avg_perceptron"
+
+            default "average_perceptron"; alternative "perceptron"
 
     --fgen=
             Specify feature generation facility by a python file name (mandatory).
@@ -138,15 +134,20 @@ options:
 
             For developers: please make sure there is only one such class object
             under fgen source files. Even import statement may introduce other
-            modules that is eligible to be a fgen. Be careful.
+            modules that is eligible to be an fgen. Be careful.
+
+            default "english_2nd_fgen"; alternative "english_1st_fgen"
 
     --parser=
-            Specify the parser
-                "1st-order" First order parser
-                "3rd-order" Third order parser
-            default "1st-order"
+            Specify the parser using parser module name (i.e. .py file name without suffix).
+            The recognition rule is the same as --fgen switch. A valid parser object
+            must possess "parse" attribute in order to be recognized as a parser
+            implementation.
+
             Some parser might not work correctly with the infrastructure, which keeps
             changing all the time. If this happens please file an issue on github page
+
+            default "ceisner3"; alternative "ceisner"
 
     --debug-run-number=[int]
             Only run the first [int] sentences. Usually combined with option -a to gather
@@ -168,6 +169,58 @@ options:
     
 """
 
+def get_class_from_module(attr_name, module_path, module_name,
+                          silent=False):
+    """
+    This procedure is used by argument processing. It returns a class object
+    given a module path and attribute name.
+
+    Basically what it does is to find the module using module path, and then
+    iterate through all objects inside that module's namespace (including those
+    introduced by import statements). For each object in the name space, this
+    function would then check existence of attr_name, i.e. the desired interface
+    name (could be any attribute fetch-able by getattr() built-in). If and only if
+    one such desired interface exists then the object containing that interface
+    would be returned, which is mostly a class, but could theoretically be anything
+    object instance with a specified attribute.
+
+    If import error happens (i.e. module could not be found/imported), or there is/are
+    no/more than one interface(s) existing, then exception will be raised.
+
+    :param attr_name: The name of the desired interface
+    :type attr_name: str
+    :param module_path: The path of the module. Relative to src/
+    :type module_path: str
+    :param module_name: Name of the module e.g. file name
+    :type module_name: str
+    :param silent: Whether to report existences of interface objects
+    :return: class object
+    """
+    # Load module by import statement (mimic using __import__)
+    # We first load the module (i.e. directory) and then fetch its attribute (i.e. py file)
+    module_obj = getattr(__import__(module_path + '.' + module_name,
+                                    globals(),   # Current global
+                                    locals(),    # Current local
+                                    [],          # I don't know what is this
+                                    -1), module_name)
+    intf_class_count = 0
+    intf_class_name = None
+    for obj_name in dir(module_obj):
+        if hasattr(getattr(module_obj, obj_name), attr_name):
+            intf_class_count += 1
+            intf_class_name = obj_name
+            if silent is False:
+                print("Interface object %s detected\n\t with interface %s" %
+                      (obj_name, attr_name))
+    if intf_class_count < 1:
+        raise ImportError("Interface object with attribute %s not found" % (attr_name, ))
+    elif intf_class_count > 1:
+        raise ImportError("Could not resolve arbitrary on attribute %s" % (attr_name, ))
+    else:
+        class_obj = getattr(module_obj, intf_class_name)
+        return class_obj
+
+
 MAJOR_VERSION = 1
 MINOR_VERSION = 0
 
@@ -183,9 +236,15 @@ if __name__ == "__main__":
     d_filename = None
 
     # Default learner
-    learner = AveragePerceptronLearner
-    fgen = None
-    parser = parse.ceisner3.EisnerParser
+    #learner = AveragePerceptronLearner
+    learner = get_class_from_module('sequential_learn', 'learn', 'average_perceptron',
+                                    silent=True)
+    # Default feature generator (2dnd, english)
+    fgen = get_class_from_module('get_local_vector', 'feature', 'english_2nd_fgen',
+                                 silent=True)
+    parser = get_class_from_module('parse', 'parse', 'ceisner3',
+                                   silent=True)
+    # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
 
@@ -227,40 +286,14 @@ if __name__ == "__main__":
                 else:
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt == "--learner":
-                if value == 'perceptron':
-                    learner = PerceptronLearner
-                    print("Using perceptron learner")
-                elif value == 'avg_perceptron':
-                    learner = AveragePerceptronLearner
-                    print("Using average perceptron learner")
-                else:
-                    raise ValueError("Unknown learner: %s" % (value, ))
+                learner = get_class_from_module('sequential_learn', 'learn', value)
+                print("Using learner: %s (%s)" % (learner.__name__, value))
             elif opt == "--fgen":
-                root = 'feature.'
-                module = getattr(__import__(root + value, globals(), locals(), [], -1), value)
-                class_count = 0
-                class_name = None
-                for obj_name in dir(module):
-                    if hasattr(getattr(module, obj_name), 'get_local_vector'):
-                        class_count += 1
-                        class_name = obj_name
-                        print("Feature generator detected: %s" % (obj_name, ))
-                if class_count < 1:
-                    raise ValueError("No feature generator found!")
-                elif class_count > 1:
-                    raise ValueError("Found multiple feature generator!")
-                else:
-                    fgen = getattr(module, class_name)
-                    print("Using feature generator: %s" % (class_name, ))
+                fgen = get_class_from_module('get_local_vector', 'feature', value)
+                print("Using feature generator: %s (%s)" % (fgen.__name__, value))
             elif opt == "--parser":
-                if value == '1st-order':
-                    parser = parse.ceisner.EisnerParser
-                    print("Using first order Eisner parser")
-                elif value == "3rd-order":
-                    parser = parse.ceisner3.EisnerParser
-                    print("Using third order Eisner parser")
-                else:
-                    raise ValueError("Unknown parser: %s" % (value, ))
+                parser = get_class_from_module('parse', 'parse', value)
+                print("Using parser: %s (%s)" % (parser.__name__, value))
             elif opt == '--interactive':
                 glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
                 glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
