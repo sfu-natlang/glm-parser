@@ -73,6 +73,9 @@ class FeatureGeneratorBase:
         if debug.debug.log_feature_request_flag is True:
             self.feature_request_log = {}
 
+        self.dir_dist_cache = {}
+        self.precompute_dir_and_dist()
+
         return
 
     def log_feature_request(self, h, d, o, t):
@@ -166,6 +169,33 @@ class FeatureGeneratorBase:
         # It's pure virtual function
         raise NotImplementedError
 
+
+    def precompute_dir_and_dist(self):
+        """
+        Pre-compute dir and dist information for all head-dep relation in the
+        sentence (since each fgen instance is related to a sentence, this could
+        be done once and for all). This would save us some time but consumes more
+        memory. Subsequent calls for add_dir_and_dist() will just look up for
+        entries in the cache and mix it with regular features.
+
+        :return: None
+        """
+        # We only loop in one direction (left->right) and add two piece of information:
+        for i in range(0, len(self.word_list)):
+            for j in range(i + 1, len(self.pos_list)):
+                dist = j - i
+                if dist > 5:
+                    if dist < 10:
+                        dist = 5
+                    else:
+                        dist = 10
+
+                self.dir_dist_cache[(i, j)] = (0, dist)
+                self.dir_dist_cache[(j, i)] = (1, dist)
+
+        return
+
+
     def add_dir_and_dist(self, fv, head_index, dep_index):
         """
         Add additional distance and direction information in a given feature
@@ -186,23 +216,11 @@ class FeatureGeneratorBase:
         :param dep_index: The index of the dependency node
         :type dep_node: integer
         """
-        if head_index < dep_index:
-            dist = dep_index - head_index + 1
-            direction = 0 #'R'
-        else:
-            dist = head_index - dep_index + 1
-            direction = 1 #'L'
-
-        if dist > 5:
-            if dist < 10:
-                dist = 5
-            else:
-                dist = 10
-
         key_gen_func = self.key_gen_func
-        # This is dangerous: we are modifying the dict while adding content
         for feature in fv.keys():
-            new_feature_str = key_gen_func((feature,direction,dist))
+            direction, dist = self.dir_dist_cache[head_index, dep_index]
+
+            new_feature_str = key_gen_func((feature, direction, dist))
             fv[new_feature_str] = 1
 
         return
