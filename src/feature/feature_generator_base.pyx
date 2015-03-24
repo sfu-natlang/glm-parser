@@ -25,7 +25,7 @@ import debug.debug
 #################################################################################################
 
 
-class FeatureGeneratorBase:
+cdef class FeatureGeneratorBase:
     """
     Base class for all feature generators. All feature generator must inherit from this class,
     and should implement all interfaces defined below
@@ -43,6 +43,8 @@ class FeatureGeneratorBase:
 
     # See __init__ below
     key_gen_func = hash
+
+    #cdef list five_gram_word_list
 
     def __init__(self, sent):
         """
@@ -72,9 +74,6 @@ class FeatureGeneratorBase:
         # do not share data
         if debug.debug.log_feature_request_flag is True:
             self.feature_request_log = {}
-
-        self.dir_dist_cache = {}
-        self.precompute_dir_and_dist()
 
         return
 
@@ -169,32 +168,15 @@ class FeatureGeneratorBase:
         # It's pure virtual function
         raise NotImplementedError
 
+    def get_dir_and_dist(self, head_index, dep_index):
+        if head_index > dep_index:
+            direction = 0
+            dist = head_index - dep_index
+        else:
+            direction = 1
+            dist = dep_index - head_index
 
-    def precompute_dir_and_dist(self):
-        """
-        Pre-compute dir and dist information for all head-dep relation in the
-        sentence (since each fgen instance is related to a sentence, this could
-        be done once and for all). This would save us some time but consumes more
-        memory. Subsequent calls for add_dir_and_dist() will just look up for
-        entries in the cache and mix it with regular features.
-
-        :return: None
-        """
-        # We only loop in one direction (left->right) and add two piece of information:
-        for i in range(0, len(self.word_list)):
-            for j in range(i + 1, len(self.pos_list)):
-                dist = j - i
-                if dist > 5:
-                    if dist < 10:
-                        dist = 5
-                    else:
-                        dist = 10
-
-                self.dir_dist_cache[(i, j)] = (0, dist)
-                self.dir_dist_cache[(j, i)] = (1, dist)
-
-        return
-
+        return direction, dist
 
     def add_dir_and_dist(self, fv, head_index, dep_index):
         """
@@ -216,11 +198,25 @@ class FeatureGeneratorBase:
         :param dep_index: The index of the dependency node
         :type dep_node: integer
         """
-        key_gen_func = self.key_gen_func
-        for feature in fv.keys():
-            direction, dist = self.dir_dist_cache[head_index, dep_index]
+        cdef int dist, direction
 
-            new_feature_str = key_gen_func((feature, direction, dist))
+        if head_index < dep_index:
+            dist = dep_index - head_index + 1
+            direction = 0 #'R'
+        else:
+            dist = head_index - dep_index + 1
+            direction = 1 #'L'
+
+        if dist > 5:
+            if dist < 10:
+                dist = 5
+            else:
+                dist = 10
+
+        key_gen_func = self.key_gen_func
+        # This is dangerous: we are modifying the dict while adding content
+        for feature in fv.keys():
+            new_feature_str = key_gen_func((feature,direction,dist))
             fv[new_feature_str] = 1
 
         return
