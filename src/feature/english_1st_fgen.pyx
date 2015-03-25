@@ -49,7 +49,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         integer 0, indicating that it is a unigram feature. The second element
         is also an integer, the value to meaning mapping is listed above:
 
-            (0,type,xi/xj_[word,pos])
+            (type,xi/xj_[word,pos])
 
         :param fv: A feature vector instance
         :type fv: FeatureVector
@@ -66,12 +66,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         key_gen_func = self.key_gen_func
 
         # Prepare keys
-        type0_str = key_gen_func((0,0,xi_word,xi_pos))
-        type1_str = key_gen_func((0,1,xi_word))
-        type2_str = key_gen_func((0,2,xi_pos))
-        type3_str = key_gen_func((0,3,xj_word,xj_pos))
-        type4_str = key_gen_func((0,4,xj_word))
-        type5_str = key_gen_func((0,5,xj_pos))
+        type0_str = key_gen_func((0,xi_word,xi_pos))
+        type1_str = key_gen_func((1,xi_word))
+        type2_str = key_gen_func((2,xi_pos))
+        type3_str = key_gen_func((3,xj_word,xj_pos))
+        type4_str = key_gen_func((4,xj_word))
+        type5_str = key_gen_func((5,xj_pos))
 
         # Set all unigram features to 1
         #fv[type0_str] = 1
@@ -101,8 +101,8 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         xj_word_5 = self.five_gram_word_list[dep_index]
 
         if xi_word_5 is not None:
-            type0_str_5 = key_gen_func((0, 0, xi_word_5, xi_pos))
-            type1_str_5 = key_gen_func((0, 1, xi_word_5))
+            type0_str_5 = key_gen_func((0, xi_word_5, xi_pos))
+            type1_str_5 = key_gen_func((1, xi_word_5))
             fv.append(type0_str_5)
             fv.append(type1_str_5)
 
@@ -110,8 +110,8 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(key_gen_func((direction, dist, type1_str_5)))
 
         if xj_word_5 is not None:
-            type3_str_5 = key_gen_func((0,3,xj_word,xj_pos))
-            type4_str_5 = key_gen_func((0,4,xj_word))
+            type3_str_5 = key_gen_func((3,xj_word,xj_pos))
+            type4_str_5 = key_gen_func((4,xj_word))
             fv.append(type3_str_5)
             fv.append(type4_str_5)
 
@@ -127,20 +127,20 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         should already exist in the feature vector instance. Unigram features
         are:
             +----------------------------------+
-            | xi-word, xi-pos, xj-word, xj-pos | type = 0
-            | xi-pos, xj-word, xj-pos          | type = 1
-            | xi-word, xj-word, xj-pos         | type = 2
-            | xi-word, xi-pos, xj-pos          | type = 3
-            | xi-word, xi-pos, xj-word         | type = 4
-            | xi-word, xj-word                 | type = 5
-            | xi-pos, xj-pos                   | type = 6
+            | xi-word, xi-pos, xj-word, xj-pos | type = 10
+            | xi-pos, xj-word, xj-pos          | type = 11
+            | xi-word, xj-word, xj-pos         | type = 12
+            | xi-word, xi-pos, xj-pos          | type = 13
+            | xi-word, xi-pos, xj-word         | type = 14
+            | xi-word, xj-word                 | type = 15
+            | xi-pos, xj-pos                   | type = 16
             +----------------------------------+
 
         Basic features are represented using a tuple. The first element is
         integer 1, indicating that it is a bigram feature. The second element
         is also an integer, the value to meaning mapping is listed above:
 
-            (1,type,xi/xj_[word,pos,word,pos])
+            (type,xi/xj_[word,pos,word,pos])
 
         :param fv: A feature vector instance
         :type fv: FeatureVector
@@ -156,13 +156,13 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
         # Prepare keys
-        type0_str = key_gen_func((1,0,xi_word,xi_pos,xj_word,xj_pos))
-        type1_str = key_gen_func((1,1,xi_pos,xj_word,xj_pos))
-        type2_str = key_gen_func((1,2,xi_word,xj_word,xj_pos))
-        type3_str = key_gen_func((1,3,xi_word,xi_pos,xj_pos))
-        type4_str = key_gen_func((1,4,xi_word,xi_pos,xj_word))
-        type5_str = key_gen_func((1,5,xi_word,xj_word))
-        type6_str = key_gen_func((1,6,xi_pos,xj_pos))
+        type0_str = key_gen_func((10,xi_word,xi_pos,xj_word,xj_pos))
+        type1_str = key_gen_func((11,xi_pos,xj_word,xj_pos))
+        type2_str = key_gen_func((12,xi_word,xj_word,xj_pos))
+        type3_str = key_gen_func((13,xi_word,xi_pos,xj_pos))
+        type4_str = key_gen_func((14,xi_word,xi_pos,xj_word))
+        type5_str = key_gen_func((15,xi_word,xj_word))
+        type6_str = key_gen_func((16,xi_pos,xj_pos))
 
         # Set all unigram features to 1
         fv.append(type0_str)
@@ -190,12 +190,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         # that word)
 
         if xi_word_5 is not None and xj_word_5 is not None:
-            type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
-            type1_str_5 = key_gen_func((1,1,xi_pos,xj_word_5,xj_pos))
-            type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word_5,xj_pos))
-            type3_str_5 = key_gen_func((1,3,xi_word_5,xi_pos,xj_pos))
-            type4_str_5 = key_gen_func((1,4,xi_word_5,xi_pos,xj_word_5))
-            type5_str_5 = key_gen_func((1,5,xi_word_5,xj_word_5))
+            type0_str_5 = key_gen_func((10,xi_word_5,xi_pos,xj_word_5,xj_pos))
+            type1_str_5 = key_gen_func((11,xi_pos,xj_word_5,xj_pos))
+            type2_str_5 = key_gen_func((12,xi_word_5,xj_word_5,xj_pos))
+            type3_str_5 = key_gen_func((13,xi_word_5,xi_pos,xj_pos))
+            type4_str_5 = key_gen_func((14,xi_word_5,xi_pos,xj_word_5))
+            type5_str_5 = key_gen_func((15,xi_word_5,xj_word_5))
             fv.append(type0_str_5)
             fv.append(type1_str_5)
             fv.append(type2_str_5)
@@ -211,11 +211,11 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(key_gen_func((direction, dist, type5_str_5)))
 
         elif xi_word_5 is not None:
-            type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
-            type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word_5,xj_pos))
-            type3_str_5 = key_gen_func((1,3,xi_word_5,xi_pos,xj_pos))
-            type4_str_5 = key_gen_func((1,4,xi_word_5,xi_pos,xj_word_5))
-            type5_str_5 = key_gen_func((1,5,xi_word_5,xj_word_5))
+            type0_str_5 = key_gen_func((10,xi_word_5,xi_pos,xj_word_5,xj_pos))
+            type2_str_5 = key_gen_func((12,xi_word_5,xj_word_5,xj_pos))
+            type3_str_5 = key_gen_func((13,xi_word_5,xi_pos,xj_pos))
+            type4_str_5 = key_gen_func((14,xi_word_5,xi_pos,xj_word_5))
+            type5_str_5 = key_gen_func((15,xi_word_5,xj_word_5))
             fv.append(type0_str_5)
             fv.append(type2_str_5)
             fv.append(type3_str_5)
@@ -229,11 +229,11 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(key_gen_func((direction, dist, type5_str_5)))
 
         elif xj_word_5 is not None:
-            type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
-            type1_str_5 = key_gen_func((1,1,xi_pos,xj_word_5,xj_pos))
-            type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word_5,xj_pos))
-            type4_str_5 = key_gen_func((1,4,xi_word_5,xi_pos,xj_word_5))
-            type5_str_5 = key_gen_func((1,5,xi_word_5,xj_word_5))
+            type0_str_5 = key_gen_func((10,xi_word_5,xi_pos,xj_word_5,xj_pos))
+            type1_str_5 = key_gen_func((11,xi_pos,xj_word_5,xj_pos))
+            type2_str_5 = key_gen_func((12,xi_word_5,xj_word_5,xj_pos))
+            type4_str_5 = key_gen_func((14,xi_word_5,xi_pos,xj_word_5))
+            type5_str_5 = key_gen_func((15,xi_word_5,xj_word_5))
             fv.append(type0_str_5)
             fv.append(type1_str_5)
             fv.append(type2_str_5)
@@ -258,7 +258,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         +------------------------+
         (For all xb in the middle of xi and xj)
 
-        (2,xi-pos,xb-pos,xj-pos)
+        (20,xi-pos,xb-pos,xj-pos)
 
         :param head_index: The index of the head node
         :type head_index: integer
@@ -288,7 +288,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         for between_index in range(start_index + 1, end_index):
             xb_pos = self.pos_list[between_index]
             # Add all words between xi and xj into the feature
-            feature_str = key_gen_func((2,xi_pos,xb_pos,xj_pos))
+            feature_str = key_gen_func((20,xi_pos,xb_pos,xj_pos))
             # Binary function
             fv.append(feature_str)
             fv.append(key_gen_func((direction, dist, feature_str)))
@@ -300,23 +300,23 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         Add surrounding POS features into the feature vector. These features are
 
         +------------------------------------+
-        | xi_pos, xi+1_pos, xj-1_pos, xj_pos | type = 0
-        | xi_pos, xi+1_pos,         , xj_pos | type = 10
-        | xi_pos,           xj-1_pos, xj_pos | type = 20
-        | xi-1_pos, xi_pos, xj-1_pos, xj_pos | type = 1
-        |           xi_pos, xj-1_pos, xj_pos | type = 11
-        | xi-1_pos, xi_pos,           xj_pos | type = 21
-        | xi_pos, xi+1_pos, xj_pos, xj+1_pos | type = 2
-        | xi_pos,           xj_pos, xj+1_pos | type = 12
-        | xi_pos, xi+1_pos, xj_pos           | type = 22
-        | xi-1_pos, xi_pos, xj_pos, xj+1_pos | type = 3
-        |           xi_pos, xj_pos, xj+1_pos | type = 13
-        | xi-1_pos, xi_pos, xj_pos           | type = 23
+        | xi_pos, xi+1_pos, xj-1_pos, xj_pos | type = 30
+        | xi_pos, xi+1_pos,         , xj_pos | type = 310
+        | xi_pos,           xj-1_pos, xj_pos | type = 320
+        | xi-1_pos, xi_pos, xj-1_pos, xj_pos | type = 31
+        |           xi_pos, xj-1_pos, xj_pos | type = 311
+        | xi-1_pos, xi_pos,           xj_pos | type = 321
+        | xi_pos, xi+1_pos, xj_pos, xj+1_pos | type = 32
+        | xi_pos,           xj_pos, xj+1_pos | type = 312
+        | xi_pos, xi+1_pos, xj_pos           | type = 322
+        | xi-1_pos, xi_pos, xj_pos, xj+1_pos | type = 33
+        |           xi_pos, xj_pos, xj+1_pos | type = 313
+        | xi-1_pos, xi_pos, xj_pos           | type = 323
         +------------------------------------+
         If xi or xj is at the boundary (the first word or the last word) then
         there will be out of bound error. In this case we just put a None
 
-        (3,type,xi_pos,xi[+/-1]_pos,xi[+/-1]_pos,xj[+/-1]_pos,xj[+/-1]_pos)
+        (type,xi_pos,xi[+/-1]_pos,xi[+/-1]_pos,xj[+/-1]_pos,xj[+/-1]_pos)
 
         :param head_index: The index of the head node
         :type head_index: integer
@@ -353,21 +353,21 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         key_gen_func = self.key_gen_func
 
-        type0_str = key_gen_func((3,0,xi_pos,xiplus_pos,xjminus_pos,xj_pos))
-        type10_str = key_gen_func((3,10,xi_pos,xjminus_pos,xj_pos))
-        type20_str = key_gen_func((3,20,xi_pos,xiplus_pos,xj_pos))
+        type0_str = key_gen_func((30,xi_pos,xiplus_pos,xjminus_pos,xj_pos))
+        type10_str = key_gen_func((310,xi_pos,xjminus_pos,xj_pos))
+        type20_str = key_gen_func((320,xi_pos,xiplus_pos,xj_pos))
 
-        type1_str = key_gen_func((3,1,ximinus_pos,xi_pos,xjminus_pos,xj_pos))
-        type11_str = key_gen_func((3,11,xi_pos,xjminus_pos,xj_pos))
-        type21_str = key_gen_func((3,21,ximinus_pos,xi_pos,xj_pos))
+        type1_str = key_gen_func((31,ximinus_pos,xi_pos,xjminus_pos,xj_pos))
+        type11_str = key_gen_func((311,xi_pos,xjminus_pos,xj_pos))
+        type21_str = key_gen_func((321,ximinus_pos,xi_pos,xj_pos))
 
-        type2_str = key_gen_func((3,2,xi_pos,xiplus_pos,xj_pos,xjplus_pos))
-        type12_str = key_gen_func((3,12,xi_pos,xj_pos,xjplus_pos))
-        type22_str = key_gen_func((3,22,xi_pos,xiplus_pos,xj_pos))
+        type2_str = key_gen_func((32,xi_pos,xiplus_pos,xj_pos,xjplus_pos))
+        type12_str = key_gen_func((312,xi_pos,xj_pos,xjplus_pos))
+        type22_str = key_gen_func((322,xi_pos,xiplus_pos,xj_pos))
 
-        type3_str = key_gen_func((3,3,ximinus_pos,xi_pos,xj_pos,xjplus_pos))
-        type13_str = key_gen_func((3,13,xi_pos,xj_pos,xjplus_pos))
-        type23_str = key_gen_func((3,23,ximinus_pos,xi_pos,xj_pos))
+        type3_str = key_gen_func((33,ximinus_pos,xi_pos,xj_pos,xjplus_pos))
+        type13_str = key_gen_func((313,xi_pos,xj_pos,xjplus_pos))
+        type23_str = key_gen_func((323,ximinus_pos,xi_pos,xj_pos))
 
         fv.append(type0_str)
         fv.append(type10_str)

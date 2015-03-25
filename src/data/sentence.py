@@ -158,7 +158,6 @@ class Sentence():
     #~    self.f_gen.cache_feature_for_edge_list(edge_list)
     #~    return
 
-
     def convert_list_vector_to_dict(self, fv):
         ret_fv = FeatureVector()
         for i in fv:
@@ -183,6 +182,7 @@ class Sentence():
         global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
         return self.convert_list_vector_to_dict(global_vector)
+        #return global_vector
 
 
     def get_local_vector(self, head_index, dep_index):
@@ -199,7 +199,7 @@ class Sentence():
 
     def get_second_order_local_vector(self, head_index, dep_index,
                                       another_index,
-                                      feature_type, return_list=True):
+                                      feature_type):
         """
         Return second order local vector (and probably with 1st order vector).
 
@@ -223,10 +223,8 @@ class Sentence():
         #self.second_order_cache[key] = second_order_fv
 
         # Optimization: return a list to compute weight vector
-        if return_list is True:
-            return second_order_fv
-        else:
-            return self.convert_list_vector_to_dict(second_order_fv)
+        return second_order_fv
+
 
     
     def set_word_list(self,word_list):

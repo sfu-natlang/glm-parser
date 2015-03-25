@@ -25,7 +25,7 @@ import debug.debug
 #################################################################################################
 
 
-cdef class FeatureGeneratorBase:
+class FeatureGeneratorBase:
     """
     Base class for all feature generators. All feature generator must inherit from this class,
     and should implement all interfaces defined below
@@ -198,7 +198,7 @@ cdef class FeatureGeneratorBase:
         :param dep_index: The index of the dependency node
         :type dep_node: integer
         """
-        cdef int dist, direction
+        #cdef int dist, direction
 
         if head_index < dep_index:
             dist = dep_index - head_index + 1

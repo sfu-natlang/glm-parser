@@ -53,14 +53,14 @@ class SecondOrderFeatureGenerator():
         head = xi, dep = xj, sibling = xk
 
         +------------------------+
-        | xi_pos, xk_pos, xj_pos | type = 1
-        | xk_pos, xj_pos         | type = 2
-        | xk_word, xj_word       | type = 3
-        | xk_word, xj_pos        | type = 4
-        | xk_pos, xj_word        | type = 5
+        | xi_pos, xk_pos, xj_pos | type = 41
+        | xk_pos, xj_pos         | type = 42
+        | xk_word, xj_word       | type = 43
+        | xk_word, xj_pos        | type = 44
+        | xk_pos, xj_word        | type = 45
         +------------------------+
 
-        (4, type, [remaining components in the above order])
+        (type, [remaining components in the above order])
 
         :param fv: Feature vector instance. This object will be changed in-place
         :param head_index: The index of the head node (parent node)
@@ -77,11 +77,11 @@ class SecondOrderFeatureGenerator():
 
         key_gen_func = self.key_gen_func
 
-        type1_str = key_gen_func((4, 1, xi_pos, xk_pos, xj_pos))
-        type2_str = key_gen_func((4, 2, xk_pos, xj_pos))
-        type3_str = key_gen_func((4, 3, xk_word, xj_word))
-        type4_str = key_gen_func((4, 4, xk_word, xj_pos))
-        type5_str = key_gen_func((4, 5, xk_pos, xj_word))
+        type1_str = key_gen_func((41, xi_pos, xk_pos, xj_pos))
+        type2_str = key_gen_func((42, xk_pos, xj_pos))
+        type3_str = key_gen_func((43, xk_word, xj_word))
+        type4_str = key_gen_func((44, xk_word, xj_pos))
+        type5_str = key_gen_func((45, xk_pos, xj_word))
 
         fv.append(type1_str)
         fv.append(type2_str)
@@ -111,14 +111,14 @@ class SecondOrderFeatureGenerator():
         head = xi, dep = xj, gc = xk
 
         +------------------------+
-        | xi_pos, xk_pos, xj_pos | type = 1
-        | xk_pos, xj_pos         | type = 2
-        | xk_word, xj_word       | type = 3
-        | xk_word, xj_pos        | type = 4
-        | xk_pos, xj_word        | type = 5
+        | xi_pos, xk_pos, xj_pos | type = 51
+        | xk_pos, xj_pos         | type = 52
+        | xk_word, xj_word       | type = 53
+        | xk_word, xj_pos        | type = 54
+        | xk_pos, xj_word        | type = 55
         +------------------------+
 
-        (5, type, [remaining components in the above order])
+        (type, [remaining components in the above order])
 
         :param fv: Feature vector
         :param head_index: Index of the header
@@ -134,11 +134,11 @@ class SecondOrderFeatureGenerator():
 
         key_gen_func = self.key_gen_func
 
-        type1_str = key_gen_func((5, 1, xi_pos, xk_pos, xj_pos))
-        type2_str = key_gen_func((5, 2, xk_pos, xj_pos))
-        type3_str = key_gen_func((5, 3, xk_word, xj_word))
-        type4_str = key_gen_func((5, 4, xk_word, xj_pos))
-        type5_str = key_gen_func((5, 5, xk_pos, xj_word))
+        type1_str = key_gen_func((51, xi_pos, xk_pos, xj_pos))
+        type2_str = key_gen_func((52, xk_pos, xj_pos))
+        type3_str = key_gen_func((53, xk_word, xj_word))
+        type4_str = key_gen_func((54, xk_word, xj_pos))
+        type5_str = key_gen_func((55, xk_pos, xj_word))
 
         fv.append(type1_str)
         fv.append(type2_str)
@@ -251,10 +251,10 @@ class SecondOrderFeatureGenerator():
         """
 
         if debug.debug.log_feature_request_flag is True:
-                self.first_order_generator.log_feature_request(head_index,
-                                                               dep_index,
-                                                               other_index_list,
-                                                               feature_type)
+            self.first_order_generator.log_feature_request(head_index,
+                                                           dep_index,
+                                                           other_index_list,
+                                                           feature_type)
 
         # Deal with the case when feature type == 1 (sibling)
         # but the sibling is None. In this case the situation
@@ -398,7 +398,7 @@ class SecondOrderFeatureGenerator():
         Recover sibling feature and grandchild feature from a list of edges
         The process consists of two stages:
             * Find sibling and grandchild relation respectively
-            * Generate feature for them and aggregate into one feature vector
+            * Generate feature for them
         """
         sibling_list = self.find_sibling_relation(edge_list)
         grandchild_list = self.find_grandchild_relation(edge_list)
@@ -417,6 +417,7 @@ class SecondOrderFeatureGenerator():
             local_fv = self.add_local_vector(fv, head, dep,
                                              [gc],
                                              self.SECOND_ORDER_GRANDCHILD_ONLY)
+        #print 'edge recovery'
 
         return fv
 
