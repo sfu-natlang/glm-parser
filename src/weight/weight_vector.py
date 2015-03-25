@@ -134,7 +134,7 @@ class WeightVector():
         logging.debug("Total Feature Num: %d " % len(self.data_dict))
         fp = open(filename,"w")
         for key in self.data_dict.keys():
-            fp.write(key + "    " + str(self.data_dict[key]) + "\n")
+            fp.write(str(key) + "    " + str(self.data_dict[key]) + "\n")
         #pickle.dump(self.data_dict,fp,-1)
         fp.close()
         return
