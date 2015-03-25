@@ -296,7 +296,7 @@ cdef class EisnerParser:
 
     cdef split_rectangle(self, EdgeRecoverNode node):
         """
-        rectangle: e[m][m1][h][3] (h is the common head)
+        rectangle: e[m][m1][h][2] (h is the common head)
         """
     
         cdef int q = self.e[node.h][node.m][node.x][2].mid_index
@@ -322,7 +322,6 @@ cdef class EisnerParser:
         self.new_CGSpan(t, s, g)
 
     def parse(self, sent, arc_weight):	
-
         self.n = len(sent.word_list)
         self.init_eisner_matrix()
 
@@ -340,5 +339,6 @@ cdef class EisnerParser:
         
         # self.print_eisner_matrix() 
         self.get_edge_list()
+        self.delete_eisner_matrix()
 
         return self.edge_list
