@@ -1,4 +1,8 @@
-Initialization: C[s][s][d][c] = 0.0  anys, d, c
+Initialization: C[s][s][d][c] = 0.0 (any s, d, c)
+
+d is the direction of the subtree
+c indicates if the subtree is complete (c=1, no more dependents; c=0, needs to be completed)
+
 for k : 1..n
 	for s : 1..n
 		t = s + k
