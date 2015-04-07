@@ -16,7 +16,7 @@ if __name__ == "__main__":
     for head,mod in edge_set:
         h_spine = psent.spine_list[head]
         join_number = h_spine.count('(')
-        for join_pos from 0 <= join_pos < join_number by 1:
+        for join_pos in range(join_number):
             for r_or_s from in [0, 1]:
                 local_vector = psent.get_local_vector(head, modifier, join_pos, r_or_s)
                 global_vector.aggregate(local_vector)

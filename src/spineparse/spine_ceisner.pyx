@@ -83,8 +83,8 @@ cdef class EisnerParser:
         cdef int max_join_pos = 0
         cdef int max_rors = 0
 
-        for join_pos from 0 <= join_pos < join_number by 1:
-            for r_or_s from in [0, 1]:
+        for join_pos in range(join_number):
+            for r_or_s in range(2):
                 edge_score = arc_weight(self.psent.get_local_vector(head, modifier, join_pos, r_or_s))
                 escore_list.append(edge_score);
                 if edge_score > max_escore:
