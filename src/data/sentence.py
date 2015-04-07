@@ -145,12 +145,14 @@ class Sentence():
         """
         return [(i[0],i[1],self.edge_list[i]) for i in self.edge_list.keys()]
     
+    #TODO: a spine for ROOT?
     def set_spine_list(self, spine_list):
         self.spine_list = spine_list
 
     def get_spine_list(self):
         return self.spine_list
 
+    #TODO: a label for ROOT?
     def set_label_list(self, label_list):
         self.label_list = label_list
 
