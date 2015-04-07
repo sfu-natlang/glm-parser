@@ -11,3 +11,6 @@ python setup.py build_ext --inplace
 
 cd hvector
 python setup.py install --install-lib .
+
+cd $project_path'/src'
+python test_spine_feature.py
