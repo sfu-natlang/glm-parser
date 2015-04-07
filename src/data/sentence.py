@@ -32,6 +32,11 @@ class Sentence():
         self.set_edge_list(edge_set)
         self.set_spine_list(spine_list)
         self.set_label_list(label_list)
+        
+        # test part
+        print(self.word_list)
+        for label in self.label_list:
+            print label
             
         self.f_gen = FeatureGenerator(self)
         
