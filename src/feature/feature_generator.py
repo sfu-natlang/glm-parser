@@ -630,7 +630,7 @@ class FeatureGenerator():
         type0_str = str((7,0,xi_word,xj_word,(xi_xj_grm,xj_label[1])))
         type1_str = str((7,1,xi_word,xj_word,xj_pos,(xi_xj_grm,xj_label[1])))
         type2_str = str((7,2,xi_word,xj_word,xi_pos,(xi_xj_grm,xj_label[1])))
-        type3_str = str((7,3,xi_word,xj_word,xi_pos,xj-pos,(xi_xj_grm,xj_label[1])))
+        type3_str = str((7,3,xi_word,xj_word,xi_pos,xj_pos,(xi_xj_grm,xj_label[1])))
         type4_str = str((7,4,xi_word,xi_pos,xj_pos,(xi_xj_grm,xj_label[1])))
         type5_str = str((7,5,xi_pos,xj_word,xj_pos,(xi_xj_grm,xj_label[1])))
         type6_str = str((7,6,xi_pos,xj_pos,(xi_xj_grm,xj_label[1])))
