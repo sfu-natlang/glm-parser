@@ -145,16 +145,18 @@ class Sentence():
         """
         return [(i[0],i[1],self.edge_list[i]) for i in self.edge_list.keys()]
     
-    #TODO: a spine for ROOT?
+    #TODO: a spine for ROOT? otherwise the index will out of range
     def set_spine_list(self, spine_list):
-        self.spine_list = spine_list
+        self.spine_list = ['()'] + spine_list
 
     def get_spine_list(self):
         return self.spine_list
 
-    #TODO: a label for ROOT?
+    #TODO: a label for ROOT? otherwise the index will out of range
     def set_label_list(self, label_list):
-        self.label_list = label_list
+        # create a fake root label, won't be used in futher program
+        root_label = (1, 0, 0);
+        self.label_list = [root_label] + label_list
 
     def get_label_list(self):
         return self.label_list
