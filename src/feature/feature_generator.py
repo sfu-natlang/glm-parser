@@ -723,9 +723,10 @@ class FeatureGenerator():
             # Get contextual-spinal features
             self.get_contextual_spinal_feature(local_fv,head_index,dep_index)
 
-        # not sure what grm is used for here   
+        # not sure what grm is used for here
+        # delete grm because it causes error   
         if is_spinal_adjoin:
-            self.get_spinal_adjoin_feature(local_fv,head_index,dep_index,grm)
+            self.get_spinal_adjoin_feature(local_fv,head_index,dep_index)
 
         # For future improvements please put all other features here
         # ...

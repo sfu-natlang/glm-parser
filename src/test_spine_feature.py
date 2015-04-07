@@ -11,7 +11,7 @@ if __name__ == "__main__":
     data_instance = data_pool.get_next_data()
     psent = ParserFeatureGenerator(data_instance)
     edge_list = data_instance.get_edge_list()
-    
+
     global_vector = FeatureVector()
     for head,mod in edge_set:
         h_spine = psent.spine_list[head]
