@@ -18,7 +18,7 @@ if __name__ == "__main__":
         join_number = h_spine.count('(')
         for join_pos in range(join_number):
             for r_or_s in range(2):
-                local_vector = psent.get_local_vector(head, modifier, join_pos, r_or_s)
+                local_vector = psent.get_local_vector(head, modifier, join_pos+1, r_or_s)
                 global_vector.aggregate(local_vector)
                 
     filename = "spinefeature.log"

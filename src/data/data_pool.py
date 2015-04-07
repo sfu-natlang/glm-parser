@@ -117,8 +117,9 @@ class DataPool():
                         # If there is a previous modifier
                             is_prev = 1
                     else:
-                        # Skip the root
-                        label_list.append((None, None, None))
+                        # Don't skip the root, give it a label
+                        # Assume it is a sibling join ?
+                        label_list.append((1, 0, 0))
                         continue
                     
                     position = int(elem[-3])

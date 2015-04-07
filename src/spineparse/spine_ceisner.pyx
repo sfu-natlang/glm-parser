@@ -85,7 +85,8 @@ cdef class EisnerParser:
 
         for join_pos in range(join_number):
             for r_or_s in range(2):
-                edge_score = arc_weight(self.psent.get_local_vector(head, modifier, join_pos, r_or_s))
+                # count of the position starts at 1
+                edge_score = arc_weight(self.psent.get_local_vector(head, modifier, join_pos+1, r_or_s))
                 escore_list.append(edge_score);
                 if edge_score > max_escore:
                     max_escore = edge_score
