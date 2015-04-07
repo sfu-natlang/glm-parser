@@ -29,6 +29,7 @@ class FeatureGenerator():
             self.word_list = sent.get_word_list()
             self.pos_list = sent.get_pos_list()
             self.spine_list = sent.get_spine_list()
+            self.label_list = sent.get_label_list()
 
             # Add five gram word list
             self.compute_five_gram()
