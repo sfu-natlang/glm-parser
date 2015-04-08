@@ -132,7 +132,7 @@ class DataPool():
                         # Generate the sentence feature vectore
                         sent = Sentence(word_list, pos_list, edge_set, spine_list, label_list)
                         data_list.append(sent) 
-                    print self.get_derivation(edge_set, spine_list, label_list)
+                    # print self.get_derivation(edge_set, spine_list, label_list)
                     word_list = []
                     pos_list = []
                     edge_set = {}
@@ -143,6 +143,7 @@ class DataPool():
 
     def get_derivation(self, edge_set, spine_list, label_list):
         # Form E
+        # maybe '(ROOT)'? 
         spine_list.insert(0, 'ROOT')
         E = zip(range(0, len(spine_list)+1), spine_list)
 

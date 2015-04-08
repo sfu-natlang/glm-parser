@@ -410,8 +410,8 @@ class ParserFeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
 
         # Prepare keys
         type0_str = str((4,0,xi_spine))
@@ -472,8 +472,8 @@ class ParserFeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
         # Prepare keys
         type0_str = str((5,0,xi_word,xi_spine,xj_word))
         type1_str = str((5,1,xi_word,xi_spine,xj_word,xj_pos))
@@ -544,8 +544,8 @@ class ParserFeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
 
         # Prepare keys
         type0_str = str((6,0,xi_word,xi_spine,xj_word))
@@ -601,8 +601,8 @@ class ParserFeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
         # assume is_prev=0 this time, this information is not used in parsing
         xj_label = (join_pos, r_or_s, 0); 
         

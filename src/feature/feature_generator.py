@@ -427,8 +427,8 @@ class FeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
 
         # Prepare keys
         type0_str = str((4,0,xi_spine))
@@ -489,8 +489,8 @@ class FeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
         # Prepare keys
         type0_str = str((5,0,xi_word,xi_spine,xj_word))
         type1_str = str((5,1,xi_word,xi_spine,xj_word,xj_pos))
@@ -561,8 +561,8 @@ class FeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
 
         # Prepare keys
         type0_str = str((6,0,xi_word,xi_spine,xj_word))
@@ -618,9 +618,9 @@ class FeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index-1]
-        xj_spine = self.spine_list[head_index-1]
-        xj_label = self.label_list[dep_index-1]
+        xi_spine = self.spine_list[dep_index]
+        xj_spine = self.spine_list[head_index]
+        xj_label = self.label_list[dep_index]
         
         # Map the label to GRM
         xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
