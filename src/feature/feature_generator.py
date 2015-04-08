@@ -775,7 +775,8 @@ class FeatureGenerator():
             # We would like to keep the two dictionaries as small as possible
             fs.pop(fk)
         return
-
+    
+    # TODO: bugs, refers to conll paper
     def get_grm(self, spine_m, label, spine_h, pos):
         position = label[0]
         r_or_s = label[1]
