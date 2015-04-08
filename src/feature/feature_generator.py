@@ -623,6 +623,8 @@ class FeatureGenerator():
         xj_label = self.label_list[dep_index]
         
         # Map the label to GRM
+        print(xi_word, xi_spine)
+        print(xj_word, xj_spine, xj_label)
         xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
 
         # Prepare keys
