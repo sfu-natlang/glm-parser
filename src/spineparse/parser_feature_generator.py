@@ -601,8 +601,8 @@ class ParserFeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index]
-        xj_spine = self.spine_list[head_index]
+        xi_spine = self.spine_list[head_index]
+        xj_spine = self.spine_list[dep_index]
         # assume is_prev=0 this time, this information is not used in parsing
         xj_label = (join_pos, r_or_s, 0); 
         

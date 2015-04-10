@@ -618,8 +618,8 @@ class FeatureGenerator():
         xi_pos = self.pos_list[head_index]
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
-        xi_spine = self.spine_list[dep_index]
-        xj_spine = self.spine_list[head_index]
+        xi_spine = self.spine_list[head_index]
+        xj_spine = self.spine_list[dep_index]
         xj_label = self.label_list[dep_index]
         
         # Map the label to GRM
