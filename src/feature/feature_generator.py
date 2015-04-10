@@ -626,6 +626,7 @@ class FeatureGenerator():
         print(xi_word, xi_spine)
         print(xj_word, xj_spine, xj_label)
         xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
+        print(xi_xj_grm)
 
         # Prepare keys
         # note: xj_label[1]=0 means s, =1 means r
