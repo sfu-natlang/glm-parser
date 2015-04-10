@@ -762,14 +762,16 @@ class ParserFeatureGenerator():
         # is_prev not used here
         is_prev = label[2]
         
-        m_node = spine_m.split("(")[1]
-        h_node = spine_h.split("(")[int(position)]
+        m_node = spine_m.replace(" ", "").split("(")[1]
+        h_node = spine_h.replace(" ", "").split("(")[int(position)]
+        h_next = spine_h.replace(" ", "").split("(")[int(position) + 1]
+        if h_next[0]==")":
+            h_next = pos
 
         # If it is a regular adjoin
         if r_or_s:
             return (h_node, h_node, m_node)
         # If it is a sibling adjoin
         else:
-            return (h_node, pos, m_node)
-
+            return (h_node, h_next, m_node)
 
