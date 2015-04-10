@@ -11,9 +11,9 @@ if __name__ == "__main__":
     data_instance = data_pool.get_next_data()
     psent = ParserFeatureGenerator(data_instance)
     edge_list = data_instance.get_edge_list()
-
+    
     global_vector = FeatureVector()
-    for head,mod in edge_list:
+    for head,mod,tag in edge_list:
         h_spine = psent.spine_list[head]
         join_number = h_spine.count('(')
         for join_pos in range(join_number):
