@@ -625,7 +625,7 @@ class FeatureGenerator():
         # Map the label to GRM
         print(xi_word, xi_spine)
         print(xj_word, xj_spine, xj_label)
-        xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos)
+        xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos, xj_pos)
         print(xi_xj_grm)
 
         # Prepare keys
@@ -778,17 +778,21 @@ class FeatureGenerator():
         return
     
     # TODO: bugs, refers to conll paper
-    def get_grm(self, spine_m, label, spine_h, pos):
+    def get_grm(self, spine_m, label, spine_h, pos_h, pos_m):
         position = label[0]
         r_or_s = label[1]
         # is_prev not used here
         is_prev = label[2]
         
         m_node = spine_m.replace(" ", "").split("(")[1]
+        if m_node[0]==")":
+            m_node = pos_m
+
         h_node = spine_h.replace(" ", "").split("(")[int(position)]
+
         h_next = spine_h.replace(" ", "").split("(")[int(position) + 1]
         if h_next[0]==")":
-            h_next = pos
+            h_next = pos_h
 
         # If it is a regular adjoin
         if r_or_s:
