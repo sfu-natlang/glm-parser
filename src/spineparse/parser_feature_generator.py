@@ -607,7 +607,10 @@ class ParserFeatureGenerator():
         xj_label = (join_pos, r_or_s, 0); 
         
         # Map the label to GRM
+        print(xi_word, xi_spine, xi_pos)
+        print(xj_word, xj_spine, xj_pos, xj_label)
         xi_xj_grm = self.get_grm(xj_spine, xj_label, xi_spine, xi_pos, xj_pos)
+        print(xi_xj_grm)
 
         # Prepare keys
         # note: xj_label[1]=0 means s, =1 means r
