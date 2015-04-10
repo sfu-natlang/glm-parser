@@ -72,7 +72,7 @@ cdef class EisnerParser:
         cdef float edge_score, max_score
         
         h_spine = self.psent.spine_list[head]
-        join_number = h_spine.count('(')
+        join_number = h_spine.count('(') - 1
         escore_list = []
 
         # can score be negative? yes

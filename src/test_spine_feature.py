@@ -15,7 +15,7 @@ if __name__ == "__main__":
     global_vector = FeatureVector()
     for head,mod,tag in edge_list:
         h_spine = psent.spine_list[head]
-        join_number = h_spine.count('(')
+        join_number = h_spine.count('(') - 1
         for join_pos in range(join_number):
             for r_or_s in range(2):
                 local_vector = psent.get_local_vector(head, mod, join_pos+1, r_or_s)
