@@ -147,7 +147,7 @@ class Sentence():
     
     #TODO: a spine for ROOT? otherwise the index will out of range
     def set_spine_list(self, spine_list):
-        self.spine_list = ['()'] + spine_list
+        self.spine_list = ['( ROOT ( ))'] + spine_list
 
     def get_spine_list(self):
         return self.spine_list
