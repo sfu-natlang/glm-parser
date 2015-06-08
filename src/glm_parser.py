@@ -21,7 +21,7 @@ import debug.interact
 import timeit
 
 class GlmParser():
-    def __init__(self, train_section=[], test_section=[], data_path="./penn-wsj-deps/",
+    def __init__(self, train_section=[], test_section=[], data_path="../../penn-wsj-deps/",
                  l_filename=None, max_iter=1,
                  learner=None,
                  fgen=None,
