@@ -2,6 +2,9 @@
 *.so
 *.egg-info
 .DS_Store
+docs/*.log
+docs/*.aux
+docs/*.pdf
 src/*.log
 src/build/*
 src/hvector/build/*
