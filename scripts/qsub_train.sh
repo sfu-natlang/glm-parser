@@ -1,6 +1,6 @@
 #!/bin/bash
 
-script_path="/home/yulanh/glm-parser/trunk/scripts"
+script_path=$(python get_path.py)
 
 cat <<EOS | qsub -
 

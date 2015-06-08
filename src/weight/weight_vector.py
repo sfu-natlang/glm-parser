@@ -1,8 +1,25 @@
+#
+# Global Linear Model Parser
+# Simon Fraser University
+# NLP Lab
+#
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# (Please add on your name if you have authored this file)
+#
+
 #import cPickle as pickle
 import sys
 
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
+from debug.debug import local_debug_flag
+
+if local_debug_flag is False:
+    from hvector._mycollections import mydefaultdict
+    from hvector.mydouble import mydouble
+else:
+    print("Local debug is on. Use dict() and float()")
+    mydefaultdict = dict
+    mydouble = float
+
 import logging
 
 logging.basicConfig(filename='glm_parser.log',
@@ -61,7 +78,7 @@ class WeightVector():
     #    return sub_vector
         
     def get_vector_score(self, fv):
-        score = self.data_dict.evaluate(fv.keys())
+        score = self.data_dict.evaluate(fv)
         return score
 
     def load(self,filename):
@@ -117,7 +134,7 @@ class WeightVector():
         logging.debug("Total Feature Num: %d " % len(self.data_dict))
         fp = open(filename,"w")
         for key in self.data_dict.keys():
-            fp.write(key + "    " + str(self.data_dict[key]) + "\n")
+            fp.write(str(key) + "    " + str(self.data_dict[key]) + "\n")
         #pickle.dump(self.data_dict,fp,-1)
         fp.close()
         return

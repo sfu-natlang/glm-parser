@@ -10,7 +10,12 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 
 extentions = [
-    Extension('parse.ceisner',["parse/ceisner.pyx"])
+    Extension('parse.ceisner',["parse/ceisner.pyx"]),
+    Extension('parse.ceisner3',["parse/ceisner3.pyx"]),
+    Extension('feature.feature_generator_base', ["feature/feature_generator_base.pyx"]),
+    Extension('feature.english_1st_fgen', ["feature/english_1st_fgen.pyx"]),
+    Extension('feature.english_2nd_fgen', ["feature/english_2nd_fgen.pyx"]),
+    Extension('feature.feature_vector', ["feature/feature_vector.pyx"]),
 ]
 
 setup(
