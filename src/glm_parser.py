@@ -227,7 +227,7 @@ if __name__ == "__main__":
     train_end = -1
     testsection = []
     max_iter = 1
-    test_data_path = "../../../penn-wsj-deps/"  #"./penn-wsj-deps/"
+    test_data_path = "../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     l_filename = None
     d_filename = None
 
