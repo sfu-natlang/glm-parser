@@ -40,3 +40,5 @@ We are testing on section 02.
 The data for training is in the directory after `-p`. 
 The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
 
+The training progress and the result on the testing section is saved to `glm_parser.log`
+

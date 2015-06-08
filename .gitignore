@@ -1,2 +1,13 @@
 *.pyc
 src/glm_parser.log
+*.so
+.DS_Store
+src/build/*
+src/hvector/build/*
+*.egg-info
+src/feature/english_1st_fgen.c
+src/feature/english_2nd_fgen.c
+src/feature/feature_generator_base.c
+src/feature/feature_vector.c
+src/parse/ceisner.cpp
+src/parse/ceisner3.cpp
