@@ -27,3 +27,16 @@ Set up the Cython libraries and classes:
 Or if you are on a RCG machine such as `linux.cs.sfu.ca` or `queen.rcg.sfu.ca` then do:
 
     sh scripts/setup_env.sh
+
+Sample run
+----------
+
+Here is a sample training run of the parser:
+
+    python glm_parser.py -b 2 -e 2 -t 0 -p ~/data/glm-parser-data/penn-wsj-deps/ -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
+
+In this example we are starting at section 02 for training and ending at section 02. 
+We are testing on section 02. 
+The data for training is in the directory after `-p`. 
+The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
+
