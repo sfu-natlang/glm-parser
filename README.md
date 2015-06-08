@@ -6,3 +6,24 @@ This project implements a parser for natural language that uses a general linear
 Part of the system replicates the following paper:
 
 Xavier Carreras, Michael Collins, and Terry Koo. TAG, Dynamic Programming and the Perceptron for Efficient, Feature-rich Parsing. In Proceedings of CONLL 2008. http://www.cs.columbia.edu/~mcollins/papers/conll.final.pdf
+
+Get started
+-----------
+
+Install a version of Python 2.x that includes Cython such as the anaconda Python distribution (or install Python 2.x and then Cython).
+
+Set up the Cython libraries and classes:
+
+    cd src
+    echo "Compile Cython classes ..."
+    python setup.py build_ext --inplace
+
+
+    echo "Compile hvector ..."
+    cd hvector
+    python setup.py install --install-lib .
+    cd ../..
+
+Or if you are on a RCG machine such as `linux.cs.sfu.ca` or `queen.rcg.sfu.ca` then do:
+
+    sh scripts/setup_env.sh
