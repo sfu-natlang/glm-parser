@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     #default data section: section 2
     data_section = [2]
-    data_path = "../../penn-wsj-deps/"
+    data_path = "./penn-wsj-deps/"
 
     test_count = 0
     pass_count = 0
