@@ -382,6 +382,19 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append(type13_str)
         fv.append(type23_str)
 
+        fv.append(key_gen_func((direction, dist, type0_str)))
+        fv.append(key_gen_func((direction, dist, type10_str)))
+        fv.append(key_gen_func((direction, dist, type20_str)))
+        fv.append(key_gen_func((direction, dist, type1_str)))
+        fv.append(key_gen_func((direction, dist, type11_str)))
+        fv.append(key_gen_func((direction, dist, type21_str)))
+        fv.append(key_gen_func((direction, dist, type2_str)))
+        fv.append(key_gen_func((direction, dist, type12_str)))
+        fv.append(key_gen_func((direction, dist, type22_str)))
+        fv.append(key_gen_func((direction, dist, type3_str)))
+        fv.append(key_gen_func((direction, dist, type13_str)))
+        fv.append(key_gen_func((direction, dist, type23_str)))
+
         return
 
     def get_local_vector(self, head_index, dep_index, other_index_list=None,
