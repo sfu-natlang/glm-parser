@@ -181,8 +181,8 @@ class Sentence():
         """
         global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
-        return self.convert_list_vector_to_dict(global_vector)
-        #return global_vector
+        #return self.convert_list_vector_to_dict(global_vector)
+        return global_vector
 
 
     def get_local_vector(self, head_index, dep_index):

@@ -78,7 +78,7 @@ class WeightVector():
     #    return sub_vector
         
     def get_vector_score(self, fv):
-        score = self.data_dict.evaluate(fv)
+        score = self.data_dict.evaluate(fv.keys())
         return score
 
     def load(self,filename):

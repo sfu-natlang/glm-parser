@@ -144,6 +144,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         :param fv: A feature vector instance
         :type fv: FeatureVector
+
         :param head_index: The index of the head node
         :type head_index: integer
         :paramn dep_index: The index of the dependency node
@@ -397,10 +398,13 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         features, but we keep them for compatibility purpose.
         """
         local_fv = []
+        fv = feature_vector.FeatureVector()
 
         self.add_local_vector(local_fv, head_index, dep_index)
+        for feature in local_fv:
+            fv[feature] = 1
 
-        return local_fv
+        return fv
 
     def add_local_vector(self, local_fv, head_index, dep_index):
         """
@@ -432,8 +436,13 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         implied by edge list
         """
         fv = []
+        fvdict = feature_vector.FeatureVector()
+
         for head, dep in edge_list:
             self.add_local_vector(fv, head, dep)
+        
+        for i in fv:
+            fvdict[i] = 1
 
-        return fv
+        return fvdict
 
