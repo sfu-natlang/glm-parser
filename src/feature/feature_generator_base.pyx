@@ -42,7 +42,7 @@ class FeatureGeneratorBase:
     """
 
     # See __init__ below
-    key_gen_func = hash
+    key_gen_func = str 
 
     #cdef list five_gram_word_list
 
