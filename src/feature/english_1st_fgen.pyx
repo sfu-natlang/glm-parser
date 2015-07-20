@@ -211,7 +211,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(key_gen_func((direction, dist, type4_str_5)))
             fv.append(key_gen_func((direction, dist, type5_str_5)))
 
-        elif xi_word_5 is not None:
+        if xi_word_5 is not None:
             type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
             type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word_5,xj_pos))
             type3_str_5 = key_gen_func((1,3,xi_word_5,xi_pos,xj_pos))
@@ -229,7 +229,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(key_gen_func((direction, dist, type4_str_5)))
             fv.append(key_gen_func((direction, dist, type5_str_5)))
 
-        elif xj_word_5 is not None:
+        if xj_word_5 is not None:
             type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
             type1_str_5 = key_gen_func((1,1,xi_pos,xj_word_5,xj_pos))
             type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word_5,xj_pos))
@@ -382,6 +382,18 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append(type3_str)
         fv.append(type13_str)
         fv.append(type23_str)
+        fv.append(key_gen_func((direction, dist, type0_str)))
+        fv.append(key_gen_func((direction, dist, type10_str)))
+        fv.append(key_gen_func((direction, dist, type20_str)))
+        fv.append(key_gen_func((direction, dist, type1_str)))
+        fv.append(key_gen_func((direction, dist, type11_str)))
+        fv.append(key_gen_func((direction, dist, type21_str)))
+        fv.append(key_gen_func((direction, dist, type2_str)))
+        fv.append(key_gen_func((direction, dist, type12_str)))
+        fv.append(key_gen_func((direction, dist, type22_str)))
+        fv.append(key_gen_func((direction, dist, type3_str)))
+        fv.append(key_gen_func((direction, dist, type13_str)))
+        fv.append(key_gen_func((direction, dist, type23_str)))
 
         return
 
