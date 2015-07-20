@@ -171,10 +171,10 @@ class FeatureGeneratorBase:
     def get_dir_and_dist(self, head_index, dep_index):
         if head_index > dep_index:
             direction = 0
-            dist = head_index - dep_index
+            dist = head_index - dep_index + 1
         else:
             direction = 1
-            dist = dep_index - head_index
+            dist = dep_index - head_index + 1
         
         if dist > 5:
             if dist < 10:
