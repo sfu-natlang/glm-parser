@@ -88,12 +88,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append(type4_str)
         fv.append(type5_str)
 
-        fv.append(key_gen_func((direction, dist, type0_str)))
-        fv.append(key_gen_func((direction, dist, type1_str)))
-        fv.append(key_gen_func((direction, dist, type2_str)))
-        fv.append(key_gen_func((direction, dist, type3_str)))
-        fv.append(key_gen_func((direction, dist, type4_str)))
-        fv.append(key_gen_func((direction, dist, type5_str)))
+        fv.append(key_gen_func((type0_str, direction, dist)))
+        fv.append(key_gen_func((type1_str, direction, dist)))
+        fv.append(key_gen_func((type2_str, direction, dist)))
+        fv.append(key_gen_func((type3_str, direction, dist)))
+        fv.append(key_gen_func((type4_str, direction, dist)))
+        fv.append(key_gen_func((type5_str, direction, dist)))
 
         # Add five gram features. Detect xi and xj separately
 
@@ -106,8 +106,8 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(type0_str_5)
             fv.append(type1_str_5)
 
-            fv.append(key_gen_func((direction, dist, type0_str_5)))
-            fv.append(key_gen_func((direction, dist, type1_str_5)))
+            fv.append(key_gen_func((type0_str_5)))
+            fv.append(key_gen_func((type1_str_5)))
 
         if xj_word_5 is not None:
             type3_str_5 = key_gen_func((0,3,xj_word,xj_pos))
@@ -115,8 +115,8 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(type3_str_5)
             fv.append(type4_str_5)
 
-            fv.append(key_gen_func((direction, dist, type3_str_5)))
-            fv.append(key_gen_func((direction, dist, type4_str_5)))
+            fv.append(key_gen_func((type3_str_5)))
+            fv.append(key_gen_func((type4_str_5)))
 
         return
 
@@ -174,13 +174,13 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append(type5_str)
         fv.append(type6_str)
 
-        fv.append(key_gen_func((direction, dist, type0_str)))
-        fv.append(key_gen_func((direction, dist, type1_str)))
-        fv.append(key_gen_func((direction, dist, type2_str)))
-        fv.append(key_gen_func((direction, dist, type3_str)))
-        fv.append(key_gen_func((direction, dist, type4_str)))
-        fv.append(key_gen_func((direction, dist, type5_str)))
-        fv.append(key_gen_func((direction, dist, type6_str)))
+        fv.append(key_gen_func((type0_str, direction, dist)))
+        fv.append(key_gen_func((type1_str, direction, dist)))
+        fv.append(key_gen_func((type2_str, direction, dist)))
+        fv.append(key_gen_func((type3_str, direction, dist)))
+        fv.append(key_gen_func((type4_str, direction, dist)))
+        fv.append(key_gen_func((type5_str, direction, dist)))
+        fv.append(key_gen_func((type6_str, direction, dist)))
 
         xi_word_5 = self.five_gram_word_list[head_index]
         xj_word_5 = self.five_gram_word_list[dep_index]
@@ -204,12 +204,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(type4_str_5)
             fv.append(type5_str_5)
 
-            fv.append(key_gen_func((direction, dist, type0_str_5)))
-            fv.append(key_gen_func((direction, dist, type1_str_5)))
-            fv.append(key_gen_func((direction, dist, type2_str_5)))
-            fv.append(key_gen_func((direction, dist, type3_str_5)))
-            fv.append(key_gen_func((direction, dist, type4_str_5)))
-            fv.append(key_gen_func((direction, dist, type5_str_5)))
+            fv.append(key_gen_func((type0_str_5)))
+            fv.append(key_gen_func((type1_str_5)))
+            fv.append(key_gen_func((type2_str_5)))
+            fv.append(key_gen_func((type3_str_5)))
+            fv.append(key_gen_func((type4_str_5)))
+            fv.append(key_gen_func((type5_str_5)))
 
         if xi_word_5 is not None:
             type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
@@ -223,11 +223,11 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(type4_str_5)
             fv.append(type5_str_5)
 
-            fv.append(key_gen_func((direction, dist, type0_str_5)))
-            fv.append(key_gen_func((direction, dist, type2_str_5)))
-            fv.append(key_gen_func((direction, dist, type3_str_5)))
-            fv.append(key_gen_func((direction, dist, type4_str_5)))
-            fv.append(key_gen_func((direction, dist, type5_str_5)))
+            fv.append(key_gen_func((type0_str_5)))
+            fv.append(key_gen_func((type2_str_5)))
+            fv.append(key_gen_func((type3_str_5)))
+            fv.append(key_gen_func((type4_str_5)))
+            fv.append(key_gen_func((type5_str_5)))
 
         if xj_word_5 is not None:
             type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
@@ -241,11 +241,11 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append(type4_str_5)
             fv.append(type5_str_5)
 
-            fv.append(key_gen_func((direction, dist, type0_str_5)))
-            fv.append(key_gen_func((direction, dist, type1_str_5)))
-            fv.append(key_gen_func((direction, dist, type2_str_5)))
-            fv.append(key_gen_func((direction, dist, type4_str_5)))
-            fv.append(key_gen_func((direction, dist, type5_str_5)))
+            fv.append(key_gen_func((type0_str_5)))
+            fv.append(key_gen_func((type1_str_5)))
+            fv.append(key_gen_func((type2_str_5)))
+            fv.append(key_gen_func((type4_str_5)))
+            fv.append(key_gen_func((type5_str_5)))
 
         return
 
@@ -292,7 +292,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             feature_str = key_gen_func((2,xi_pos,xb_pos,xj_pos))
             # Binary function
             fv.append(feature_str)
-            fv.append(key_gen_func((direction, dist, feature_str)))
+            fv.append(key_gen_func((feature_str, direction, dist)))
 
         return
 
@@ -382,18 +382,18 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append(type3_str)
         fv.append(type13_str)
         fv.append(type23_str)
-        fv.append(key_gen_func((direction, dist, type0_str)))
-        fv.append(key_gen_func((direction, dist, type10_str)))
-        fv.append(key_gen_func((direction, dist, type20_str)))
-        fv.append(key_gen_func((direction, dist, type1_str)))
-        fv.append(key_gen_func((direction, dist, type11_str)))
-        fv.append(key_gen_func((direction, dist, type21_str)))
-        fv.append(key_gen_func((direction, dist, type2_str)))
-        fv.append(key_gen_func((direction, dist, type12_str)))
-        fv.append(key_gen_func((direction, dist, type22_str)))
-        fv.append(key_gen_func((direction, dist, type3_str)))
-        fv.append(key_gen_func((direction, dist, type13_str)))
-        fv.append(key_gen_func((direction, dist, type23_str)))
+        fv.append(key_gen_func((type0_str, direction, dist)))
+        fv.append(key_gen_func((type10_str, direction, dist)))
+        fv.append(key_gen_func((type20_str, direction, dist)))
+        fv.append(key_gen_func((type1_str, direction, dist)))
+        fv.append(key_gen_func((type11_str, direction, dist)))
+        fv.append(key_gen_func((type21_str, direction, dist)))
+        fv.append(key_gen_func((type2_str, direction, dist)))
+        fv.append(key_gen_func((type12_str, direction, dist)))
+        fv.append(key_gen_func((type22_str, direction, dist)))
+        fv.append(key_gen_func((type3_str, direction, dist)))
+        fv.append(key_gen_func((type13_str, direction, dist)))
+        fv.append(key_gen_func((type23_str, direction, dist)))
 
         return
 
