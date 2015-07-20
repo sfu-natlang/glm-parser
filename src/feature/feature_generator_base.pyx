@@ -175,6 +175,12 @@ class FeatureGeneratorBase:
         else:
             direction = 1
             dist = dep_index - head_index
+        
+        if dist > 5:
+            if dist < 10:
+                dist = 5
+            else:
+                dist = 10
 
         return direction, dist
 
