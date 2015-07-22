@@ -410,13 +410,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         features, but we keep them for compatibility purpose.
         """
         local_fv = []
-        fv = feature_vector.FeatureVector()
 
         self.add_local_vector(local_fv, head_index, dep_index)
-        for feature in local_fv:
-            fv[feature] = 1
 
-        return fv
+        return local_fv
 
     def add_local_vector(self, local_fv, head_index, dep_index):
         """
@@ -448,13 +445,9 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         implied by edge list
         """
         fv = []
-        fvdict = feature_vector.FeatureVector()
 
         for head, dep in edge_list:
             self.add_local_vector(fv, head, dep)
         
-        for i in fv:
-            fvdict[i] = 1
-
-        return fvdict
+        return fv
 
