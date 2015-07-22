@@ -1,8 +1,11 @@
 Sentence:
 
+John hit the ball with the bat
 root,RT -> hit,V -> with, P -> bat,N
-           /    \
-       John, N   ball, N -> the, D
+           /    \               /
+       John, N   ball, N     the, D
+                  /
+                the, D
 
 edge (hit, with)
 Unigram features
