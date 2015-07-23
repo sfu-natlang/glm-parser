@@ -26,16 +26,16 @@ def main():
     fv = []
     direction, dist = sent.f_gen.get_dir_and_dist(2, 5)
     print "Unigram features"
-    sent.f_gen.get_unigram_feature(fv, 2, 5, direction, dist)
+    fv = sent.f_gen.get_unigram_feature(2, 5, direction, dist)
     print_fv_and_clear(fv)
     print "Bigram features"
-    sent.f_gen.get_bigram_feature(fv, 2, 5, direction, dist)
+    fv = sent.f_gen.get_bigram_feature(2, 5, direction, dist)
     print_fv_and_clear(fv)
     print "In-between features"
-    sent.f_gen.get_in_between_feature(fv, 2, 5, direction, dist)
+    fv = sent.f_gen.get_in_between_feature(2, 5, direction, dist)
     print_fv_and_clear(fv)
     print "Surrounding features"
-    sent.f_gen.get_surrounding_feature(fv, 2, 5, direction, dist)
+    fv = sent.f_gen.get_surrounding_feature(2, 5, direction, dist)
     print_fv_and_clear(fv)
 
     return 

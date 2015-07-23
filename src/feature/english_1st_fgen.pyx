@@ -30,7 +30,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         feature_generator_base.FeatureGeneratorBase.__init__(self, sent)
         return
 
-    def get_unigram_feature(self, fv, head_index, dep_index, direction, dist):
+    def get_unigram_feature(self, head_index, dep_index, direction, dist):
         """
         Add all unigram features into a given feature vector instance.
         There should be no conflict about feature strings, i.e. no feature
@@ -63,55 +63,32 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
 
-        key_gen_func = self.key_gen_func
         local_fv = []
 
         # Prepare keys
-        type0_str = key_gen_func((0,0,xi_word,xi_pos))
-        type1_str = key_gen_func((0,1,xi_word))
-        type2_str = key_gen_func((0,2,xi_pos))
-        type3_str = key_gen_func((0,3,xj_word,xj_pos))
-        type4_str = key_gen_func((0,4,xj_word))
-        type5_str = key_gen_func((0,5,xj_pos))
-
-        # Set all unigram features to 1
-        #fv[type0_str] = 1
-        #fv[type1_str] = 1
-        #fv[type2_str] = 1
-        #fv[type3_str] = 1
-        #fv[type4_str] = 1
-        #fv[type5_str] = 1
-
-        local_fv.append(type0_str)
-        local_fv.append(type1_str)
-        local_fv.append(type2_str)
-        local_fv.append(type3_str)
-        local_fv.append(type4_str)
-        local_fv.append(type5_str)
+        local_fv.append( (0,0,xi_word,xi_pos) )
+        local_fv.append( (0,1,xi_word) )
+        local_fv.append( (0,2,xi_pos) )
+        local_fv.append( (0,3,xj_word,xj_pos) )
+        local_fv.append( (0,4,xj_word) )
+        local_fv.append( (0,5,xj_pos) )
 
         # Add five gram features. Detect xi and xj separately
 
-        xi_word_5 = self.five_gram_word_list[head_index]
-        xj_word_5 = self.five_gram_word_list[dep_index]
+        if len(xi_word) > 5:
+            xi_word_5 = self.five_gram_word_list[head_index]
+            local_fv.append( (0,6, xi_word_5, xi_pos) )
+            local_fv.append( (0,7, xi_word_5) )
 
-        if xi_word_5 is not None:
-            type0_str_5 = key_gen_func((0,0, xi_word_5, xi_pos))
-            type1_str_5 = key_gen_func((0,1, xi_word_5))
-            local_fv.append(type0_str_5)
-            local_fv.append(type1_str_5)
+        if len(xj_word) > 5:
+            xj_word_5 = self.five_gram_word_list[dep_index]
+            local_fv.append( (0,8,xj_word,xj_pos) )
+            local_fv.append( (0,9,xj_word) )
 
+        dir_dist_fv = self.get_dir_dist_feature(local_fv, direction, dist)
+        return local_fv + dir_dist_fv
 
-        if xj_word_5 is not None:
-            type3_str_5 = key_gen_func((0,3,xj_word,xj_pos))
-            type4_str_5 = key_gen_func((0,4,xj_word))
-            local_fv.append(type3_str_5)
-            local_fv.append(type4_str_5)
-
-
-        self.get_dist_direction_feature(fv, local_fv, dist, direction)
-        return
-
-    def get_bigram_feature(self, fv, head_index, dep_index, direction, dist):
+    def get_bigram_feature(self, head_index, dep_index, direction, dist):
         """
         Add all bigram features into a given feature vector instance.
         There should be no conflict about feature strings, i.e. no feature
@@ -141,7 +118,6 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :paramn dep_index: The index of the dependency node
         :type dep_index: integer
         """
-        key_gen_func = self.key_gen_func
         local_fv = []
 
         xi_word = self.word_list[head_index]
@@ -149,22 +125,13 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         xj_word = self.word_list[dep_index]
         xj_pos = self.pos_list[dep_index]
         # Prepare keys
-        type0_str = key_gen_func((1,0,xi_word,xi_pos,xj_word,xj_pos))
-        type1_str = key_gen_func((1,1,xi_pos,xj_word,xj_pos))
-        type2_str = key_gen_func((1,2,xi_word,xj_word,xj_pos))
-        type3_str = key_gen_func((1,3,xi_word,xi_pos,xj_pos))
-        type4_str = key_gen_func((1,4,xi_word,xi_pos,xj_word))
-        type5_str = key_gen_func((1,5,xi_word,xj_word))
-        type6_str = key_gen_func((1,6,xi_pos,xj_pos))
-
-        # Set all unigram features to 1
-        local_fv.append(type0_str)
-        local_fv.append(type1_str)
-        local_fv.append(type2_str)
-        local_fv.append(type3_str)
-        local_fv.append(type4_str)
-        local_fv.append(type5_str)
-        local_fv.append(type6_str)
+        local_fv.append( (1,0,xi_word,xi_pos,xj_word,xj_pos) )
+        local_fv.append( (1,1,xi_pos,xj_word,xj_pos) )
+        local_fv.append( (1,2,xi_word,xj_word,xj_pos) )
+        local_fv.append( (1,3,xi_word,xi_pos,xj_pos) )
+        local_fv.append( (1,4,xi_word,xi_pos,xj_word) )
+        local_fv.append( (1,5,xi_word,xj_word) )
+        local_fv.append( (1,6,xi_pos,xj_pos) )
 
         xi_word_5 = self.five_gram_word_list[head_index]
         xj_word_5 = self.five_gram_word_list[dep_index]
@@ -173,49 +140,18 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         # exist in the fv, so we only pick up those truly changes
         # (i.e. the five gram exists, and the feature itself contains
         # that word)
+        if len(xi_word) > 5 or len(xj_word) > 5:
+            local_fv.append( (1,7,xi_word_5,xi_pos,xj_word_5,xj_pos) )
+            local_fv.append( (1,8,xi_pos,xj_word_5,xj_pos) )
+            local_fv.append( (1,9,xi_word_5,xj_word_5,xj_pos) )
+            local_fv.append( (1,10,xi_word_5,xi_pos,xj_pos) )
+            local_fv.append( (1,11,xi_word_5,xi_pos,xj_word_5) )
+            local_fv.append( (1,12,xi_word_5,xj_word_5) )
 
-        if xi_word_5 is not None and xj_word_5 is not None:
-            type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word_5,xj_pos))
-            type1_str_5 = key_gen_func((1,1,xi_pos,xj_word_5,xj_pos))
-            type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word_5,xj_pos))
-            type3_str_5 = key_gen_func((1,3,xi_word_5,xi_pos,xj_pos))
-            type4_str_5 = key_gen_func((1,4,xi_word_5,xi_pos,xj_word_5))
-            type5_str_5 = key_gen_func((1,5,xi_word_5,xj_word_5))
-            local_fv.append(type0_str_5)
-            local_fv.append(type1_str_5)
-            local_fv.append(type2_str_5)
-            local_fv.append(type3_str_5)
-            local_fv.append(type4_str_5)
-            local_fv.append(type5_str_5)
+        dir_dist_fv = self.get_dir_dist_feature(local_fv, direction, dist)
+        return local_fv + dir_dist_fv
 
-        elif xi_word_5 is not None:
-            type0_str_5 = key_gen_func((1,0,xi_word_5,xi_pos,xj_word,xj_pos))
-            type2_str_5 = key_gen_func((1,2,xi_word_5,xj_word,xj_pos))
-            type3_str_5 = key_gen_func((1,3,xi_word_5,xi_pos,xj_pos))
-            type4_str_5 = key_gen_func((1,4,xi_word_5,xi_pos,xj_word))
-            type5_str_5 = key_gen_func((1,5,xi_word_5,xj_word))
-            local_fv.append(type0_str_5)
-            local_fv.append(type2_str_5)
-            local_fv.append(type3_str_5)
-            local_fv.append(type4_str_5)
-            local_fv.append(type5_str_5)
-
-        elif xj_word_5 is not None:
-            type0_str_5 = key_gen_func((1,0,xi_word,xi_pos,xj_word_5,xj_pos))
-            type1_str_5 = key_gen_func((1,1,xi_pos,xj_word_5,xj_pos))
-            type2_str_5 = key_gen_func((1,2,xi_word,xj_word_5,xj_pos))
-            type4_str_5 = key_gen_func((1,4,xi_word,xi_pos,xj_word_5))
-            type5_str_5 = key_gen_func((1,5,xi_word,xj_word_5))
-            local_fv.append(type0_str_5)
-            local_fv.append(type1_str_5)
-            local_fv.append(type2_str_5)
-            local_fv.append(type4_str_5)
-            local_fv.append(type5_str_5)
-        
-        self.get_dist_direction_feature(fv, local_fv, dist, direction)
-        return
-
-    def get_in_between_feature(self, fv, head_index, dep_index, direction, dist):
+    def get_in_between_feature(self, head_index, dep_index, direction, dist):
         """
         Add in-between features in to a feature vector instance. These features
         are:
@@ -243,27 +179,25 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         # If these two words are adjacent then we do not need to add anything
         # since there is no in-between features
         if start_index + 1 == end_index:
-            return
+            return []
 
         # Fetch the two pos tag for xi and xj
         xi_pos = self.pos_list[head_index]
         xj_pos = self.pos_list[dep_index]
 
-        key_gen_func = self.key_gen_func
-        local_fv = []
+        local_fv = set()
 
         # Iterate through [start_index + 1,end_index - 1]
         for between_index in range(start_index + 1, end_index):
             xb_pos = self.pos_list[between_index]
             # Add all words between xi and xj into the feature
-            feature_str = key_gen_func((2,xi_pos,xb_pos,xj_pos))
-            # Binary function
-            local_fv.append(feature_str)
+            local_fv.add( (2,0,xi_pos,xb_pos,xj_pos) )
 
-        self.get_dist_direction_feature(fv, local_fv, dist, direction)
-        return
+        fv = list(local_fv)
+        dir_dist_fv = self.get_dir_dist_feature(fv, direction, dist)
+        return fv + dir_dist_fv
 
-    def get_surrounding_feature(self, fv, head_index, dep_index, direction, dist):
+    def get_surrounding_feature(self, head_index, dep_index, direction, dist):
         """
         Add surrounding POS features into the feature vector. These features are
 
@@ -319,57 +253,39 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         else:
             xjminus_pos = self.pos_list[dep_index - 1]
 
-        key_gen_func = self.key_gen_func
         local_fv = []
 
-        type0_str = key_gen_func((3,0,xi_pos,xiplus_pos,xjminus_pos,xj_pos))
-        type10_str = key_gen_func((3,10,xi_pos,xjminus_pos,xj_pos))
-        type20_str = key_gen_func((3,20,xi_pos,xiplus_pos,xj_pos))
+        local_fv.append( (3,0,xi_pos,xiplus_pos,xjminus_pos,xj_pos) )
+        local_fv.append( (3,10,xi_pos,xjminus_pos,xj_pos) )
+        local_fv.append( (3,20,xi_pos,xiplus_pos,xj_pos) )
 
-        type1_str = key_gen_func((3,1,ximinus_pos,xi_pos,xjminus_pos,xj_pos))
-        type11_str = key_gen_func((3,11,xi_pos,xjminus_pos,xj_pos))
-        type21_str = key_gen_func((3,21,ximinus_pos,xi_pos,xj_pos))
+        local_fv.append( (3,1,ximinus_pos,xi_pos,xjminus_pos,xj_pos) )
+        local_fv.append( (3,11,xi_pos,xjminus_pos,xj_pos) )
+        local_fv.append( (3,21,ximinus_pos,xi_pos,xj_pos) )
 
-        type2_str = key_gen_func((3,2,xi_pos,xiplus_pos,xj_pos,xjplus_pos))
-        type12_str = key_gen_func((3,12,xi_pos,xj_pos,xjplus_pos))
-        type22_str = key_gen_func((3,22,xi_pos,xiplus_pos,xj_pos))
+        local_fv.append( (3,2,xi_pos,xiplus_pos,xj_pos,xjplus_pos) )
+        local_fv.append( (3,12,xi_pos,xj_pos,xjplus_pos) )
+        local_fv.append( (3,22,xi_pos,xiplus_pos,xj_pos) )
 
-        type3_str = key_gen_func((3,3,ximinus_pos,xi_pos,xj_pos,xjplus_pos))
-        type13_str = key_gen_func((3,13,xi_pos,xj_pos,xjplus_pos))
-        type23_str = key_gen_func((3,23,ximinus_pos,xi_pos,xj_pos))
+        local_fv.append( (3,3,ximinus_pos,xi_pos,xj_pos,xjplus_pos) )
+        local_fv.append( (3,13,xi_pos,xj_pos,xjplus_pos) )
+        local_fv.append( (3,23,ximinus_pos,xi_pos,xj_pos) )
 
-        local_fv.append(type0_str)
-        local_fv.append(type10_str)
-        local_fv.append(type20_str)
-        local_fv.append(type1_str)
-        local_fv.append(type11_str)
-        local_fv.append(type21_str)
-        local_fv.append(type2_str)
-        local_fv.append(type12_str)
-        local_fv.append(type22_str)
-        local_fv.append(type3_str)
-        local_fv.append(type13_str)
-        local_fv.append(type23_str)
-        
-        self.get_dist_direction_feature(fv, local_fv, dist, direction)
+        dir_dist_fv = self.get_dir_dist_feature(local_fv, direction, dist)
+        return local_fv + dir_dist_fv
 
-        return
-
-    def get_dist_direction_feature(self, fv, local_fv, dist, direction):
+    def get_dir_dist_feature(self, local_fv, direction, dist):
         """ 
         Add direction and dist attachment to all the features
         in the local_fv. Notice: local_fv shouldn't already have
         features with dist and direction attachment
         """
-        fv_len = len(local_fv)
-        key_gen_func = self.key_gen_func
-
-        for i in range(fv_len):
-            feature = local_fv[i]
-            fv.append(feature)
-            fv.append(key_gen_func((feature, direction, dist)))
-        
-        return 
+        dir_dist_fv = []
+        for feature in local_fv:
+            new_prefix = (feature[0], feature[1]*10+9)
+            new_suffix = (direction, dist)
+            dir_dist_fv.append( new_prefix + feature[2:] + new_suffix )
+        return dir_dist_fv
 
     def get_local_vector(self, head_index, dep_index, other_index_list=None,
                          feature_type=None):
@@ -383,35 +299,25 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         Argument other_index_list and feature_type is not used for first order
         features, but we keep them for compatibility purpose.
         """
-        local_fv = []
-
-        self.add_local_vector(local_fv, head_index, dep_index)
-
-        return local_fv
-
-    def add_local_vector(self, local_fv, head_index, dep_index):
-        """
-        An alternative and lightweight version of get_local_vector
-
-        It differs from get_local_vector() in two aspects. First, it takes a
-        local vector object as argument, which saves time if that fv already has
-        some features added (most probably, higher order features). Besides,
-        this method only takes head index and dependency index, which is quite convenient
-        to use
-        """
         # Get dir and dist information prior to any computation
         direction, dist = self.get_dir_and_dist(head_index, dep_index)
 
+        fv = []
         # Get Unigram features
-        self.get_unigram_feature(local_fv, head_index, dep_index, direction, dist)
+        fv += self.get_unigram_feature(head_index, dep_index, direction, dist)
         # Get bigram features
-        self.get_bigram_feature(local_fv, head_index, dep_index, direction, dist)
+        fv += self.get_bigram_feature(head_index, dep_index, direction, dist)
         # Get in-between features
-        self.get_in_between_feature(local_fv, head_index, dep_index, direction, dist)
+        fv += self.get_in_between_feature(head_index, dep_index, direction, dist)
         # Get surrounding feature
-        self.get_surrounding_feature(local_fv, head_index, dep_index, direction, dist)
+        fv += self.get_surrounding_feature(head_index, dep_index, direction, dist)
 
-        return
+        setfv = set(fv)
+        duplicates = [ x for x in fv if fv.count(x) > 1 ]
+        if len(duplicates) > 0:
+            raise ValueError("fv has duplicates: %s" % (duplicates))
+
+        return map(str, fv)
 
     def recover_feature_from_edges(self, edge_list):
         """
@@ -421,7 +327,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv = []
 
         for head, dep in edge_list:
-            self.add_local_vector(fv, head, dep)
+            fv += self.get_local_vector(head, dep)
         
         return fv
 

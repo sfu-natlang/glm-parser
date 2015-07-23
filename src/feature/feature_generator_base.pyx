@@ -140,7 +140,7 @@ class FeatureGeneratorBase:
             if len(word) > 5:
                 self.five_gram_word_list.append(word[0:5])
             else:
-                self.five_gram_word_list.append(None)
+                self.five_gram_word_list.append(word)
         return
 
     def get_local_vector(self, head_index, dep_index, other_index_list=None,
@@ -170,10 +170,10 @@ class FeatureGeneratorBase:
 
     def get_dir_and_dist(self, head_index, dep_index):
         if head_index > dep_index:
-            direction = 0
+            direction = 'L'
             dist = head_index - dep_index
         else:
-            direction = 1
+            direction = 'R'
             dist = dep_index - head_index
         
         if dist > 5:
