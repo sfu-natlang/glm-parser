@@ -102,6 +102,8 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
+    def get_sent_num(self):
+        return len(self.data_list)
 
     def load(self, fgen):
         """
@@ -220,6 +222,7 @@ class DataPool():
         self.section_list.sort()
 
         return
+
 
 ##############################################################################################################
 # Scripts for testing data_pool
@@ -461,5 +464,3 @@ class DataSet():
             return None
         else:
             return left_list[0]
-       
-
