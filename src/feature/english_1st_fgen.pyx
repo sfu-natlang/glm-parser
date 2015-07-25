@@ -3,7 +3,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Yizhou Wang
 # (Please add on your name if you have authored this file)
 #
 
@@ -43,16 +43,18 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             | xj-word, xj-pos | type = 3
             | xj-word         | type = 4
             | xj-pos          | type = 5
+            | xi-word-5,xi-pos| type = 6
+            | xi-word-5       | type = 7
+            | xj-word-5,xj-pos| type = 8
+            | xj-word-5       | type = 9
             +-----------------+
 
         Basic features are represented using a tuple. The first element is
         integer 0, indicating that it is a unigram feature. The second element
         is also an integer, the value to meaning mapping is listed above:
 
-            (type,xi/xj_[word,pos])
+            (0,type,xi/xj_[word,pos])
 
-        :param fv: A feature vector instance
-        :type fv: FeatureVector
         :param head_index: The index of the head node
         :type head_index: integer
         :paramn dep_index: The index of the dependency node
@@ -82,8 +84,8 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         if len(xj_word) > 5:
             xj_word_5 = self.five_gram_word_list[dep_index]
-            local_fv.append( (0,8,xj_word,xj_pos) )
-            local_fv.append( (0,9,xj_word) )
+            local_fv.append( (0,8,xj_word_5,xj_pos) )
+            local_fv.append( (0,9,xj_word_5) )
 
         dir_dist_fv = self.get_dir_dist_feature(local_fv, direction, dist)
         return local_fv + dir_dist_fv
@@ -95,23 +97,26 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         should already exist in the feature vector instance. Unigram features
         are:
             +----------------------------------+
-            | xi-word, xi-pos, xj-word, xj-pos | type = 10
-            | xi-pos, xj-word, xj-pos          | type = 11
-            | xi-word, xj-word, xj-pos         | type = 12
-            | xi-word, xi-pos, xj-pos          | type = 13
-            | xi-word, xi-pos, xj-word         | type = 14
-            | xi-word, xj-word                 | type = 15
-            | xi-pos, xj-pos                   | type = 16
+            | xi-word, xi-pos, xj-word, xj-pos | type = 0
+            | xi-pos, xj-word, xj-pos          | type = 1
+            | xi-word, xj-word, xj-pos         | type = 2
+            | xi-word, xi-pos, xj-pos          | type = 3
+            | xi-word, xi-pos, xj-word         | type = 4
+            | xi-word, xj-word                 | type = 5
+            | xi-pos, xj-pos                   | type = 6
+            | xi-word-5,xi-pos,xj-word-5,xj-pos| type = 7
+            | xi-pos, xj-word-5, xj-pos        | type = 8
+            | xi-word-5, xj-word-5, xj-pos     | type = 9
+            | xi-word-5, xi-pos, xj-pos        | type = 10
+            | xi-word-5, xi-pos, xj-word-5     | type = 11
+            | xi-word-5, xj-word-5             | type = 12
             +----------------------------------+
 
         Basic features are represented using a tuple. The first element is
         integer 1, indicating that it is a bigram feature. The second element
         is also an integer, the value to meaning mapping is listed above:
 
-            (type,xi/xj_[word,pos,word,pos])
-
-        :param fv: A feature vector instance
-        :type fv: FeatureVector
+            (1,type,xi/xj_[word,pos,word,pos])
 
         :param head_index: The index of the head node
         :type head_index: integer
@@ -157,11 +162,11 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         are:
 
         +------------------------+
-        | xi-pos, xb-pos, xj-pos | No type information
+        | xi-pos, xb-pos, xj-pos | type = 0
         +------------------------+
         (For all xb in the middle of xi and xj)
 
-        (20,xi-pos,xb-pos,xj-pos)
+        (2,type,xi-pos,xb-pos,xj-pos)
 
         :param head_index: The index of the head node
         :type head_index: integer
@@ -202,23 +207,23 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         Add surrounding POS features into the feature vector. These features are
 
         +------------------------------------+
-        | xi_pos, xi+1_pos, xj-1_pos, xj_pos | type = 30
-        | xi_pos, xi+1_pos,         , xj_pos | type = 310
-        | xi_pos,           xj-1_pos, xj_pos | type = 320
-        | xi-1_pos, xi_pos, xj-1_pos, xj_pos | type = 31
-        |           xi_pos, xj-1_pos, xj_pos | type = 311
-        | xi-1_pos, xi_pos,           xj_pos | type = 321
-        | xi_pos, xi+1_pos, xj_pos, xj+1_pos | type = 32
-        | xi_pos,           xj_pos, xj+1_pos | type = 312
-        | xi_pos, xi+1_pos, xj_pos           | type = 322
-        | xi-1_pos, xi_pos, xj_pos, xj+1_pos | type = 33
-        |           xi_pos, xj_pos, xj+1_pos | type = 313
-        | xi-1_pos, xi_pos, xj_pos           | type = 323
+        | xi_pos, xi+1_pos, xj-1_pos, xj_pos | type = 0
+        | xi_pos, xi+1_pos,         , xj_pos | type = 10
+        | xi_pos,           xj-1_pos, xj_pos | type = 20
+        | xi-1_pos, xi_pos, xj-1_pos, xj_pos | type = 1
+        |           xi_pos, xj-1_pos, xj_pos | type = 11
+        | xi-1_pos, xi_pos,           xj_pos | type = 21
+        | xi_pos, xi+1_pos, xj_pos, xj+1_pos | type = 2
+        | xi_pos,           xj_pos, xj+1_pos | type = 12
+        | xi_pos, xi+1_pos, xj_pos           | type = 22
+        | xi-1_pos, xi_pos, xj_pos, xj+1_pos | type = 3
+        |           xi_pos, xj_pos, xj+1_pos | type = 13
+        | xi-1_pos, xi_pos, xj_pos           | type = 23
         +------------------------------------+
         If xi or xj is at the boundary (the first word or the last word) then
         there will be out of bound error. In this case we just put a None
 
-        (type,xi_pos,xi[+/-1]_pos,xi[+/-1]_pos,xj[+/-1]_pos,xj[+/-1]_pos)
+        (3,type,xi_pos,xi[+/-1]_pos,xi[+/-1]_pos,xj[+/-1]_pos,xj[+/-1]_pos)
 
         :param head_index: The index of the head node
         :type head_index: integer
