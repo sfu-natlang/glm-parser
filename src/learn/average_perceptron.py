@@ -53,7 +53,7 @@ class AveragePerceptronLearner():
 
             # for i = 1 ... m
             while data_pool.has_next_data():
-                print("Sentence %d" % (sentence_count, ))
+                print("Iteration: %d, Sentence %d" % (t, sentence_count))
                 sentence_count += 1
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
