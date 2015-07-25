@@ -287,7 +287,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         """
         dir_dist_fv = []
         for feature in local_fv:
-            new_prefix = (feature[0], feature[1]*10+9)
+            new_prefix = (4, feature[0], feature[1])
             new_suffix = (direction, dist)
             dir_dist_fv.append( new_prefix + feature[2:] + new_suffix )
         return dir_dist_fv
@@ -317,10 +317,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         # Get surrounding feature
         fv += self.get_surrounding_feature(head_index, dep_index, direction, dist)
 
-        setfv = set(fv)
-        duplicates = [ x for x in fv if fv.count(x) > 1 ]
-        if len(duplicates) > 0:
-            raise ValueError("fv has duplicates: %s" % (duplicates))
+        if False:
+            # debug if there are duplicates
+            setfv = set(fv)
+            duplicates = [ x for x in fv if fv.count(x) > 1 ]
+            if len(duplicates) > 0:
+                raise ValueError("fv has duplicates: %s" % (duplicates))
 
         return map(str, fv)
 
