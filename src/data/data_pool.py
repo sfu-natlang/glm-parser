@@ -102,9 +102,6 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
-    def get_sent_num(self):
-        return len(self.data_list)
-
     def load(self, fgen):
         """
         For each section in the initializer, iterate through all files
@@ -223,9 +220,14 @@ class DataPool():
 
         return
 
+    def get_sent_num(self):
+        return len(self.data_list)
 
 ##############################################################################################################
-# Scripts for testing data_pool
+## end of class DataPool
+
+##############################################################################################################
+# Scripts for testing DataPool
 
 if __name__ == "__main__":
     dp = DataPool([2], "../../penn-wsj-deps/")
