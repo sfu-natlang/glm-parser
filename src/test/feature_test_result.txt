@@ -1,0 +1,45 @@
+Sentence:
+
+John hit the ball with the bat
+root,RT -> hit,V -> with, P -> bat,N
+           /    \               /
+       John, N   ball, N     the, D
+                  /
+                the, D
+
+edge (hit, with)
+Unigram features
+(0, 0, 'hit', 'V')
+(0, 1, 'hit')
+(0, 2, 'V')
+(0, 3, 'with', 'P')
+(0, 4, 'with')
+(0, 5, 'P')
+
+Bigram features
+(1, 0, 'hit', 'V', 'with', 'P')
+(1, 1, 'V', 'with', 'P')
+(1, 2, 'hit', 'with', 'P')
+(1, 3, 'hit', 'V', 'P')
+(1, 4, 'hit', 'V', 'with')
+(1, 5, 'hit', 'with')
+(1, 6, 'V', 'P')
+
+In-between features
+(2, 'V', 'D', 'P')
+(2, 'V', 'N', 'P')
+
+Surrounding features
+(3, 0, 'V', 'D', 'N', 'P')
+(3, 10, 'V', 'N', 'P')
+(3, 20, 'V', 'D', 'P')
+(3, 1, 'N', 'V', 'N', 'P')
+(3, 11, 'V', 'N', 'P')
+(3, 21, 'N', 'V', 'P')
+(3, 2, 'V', 'D', 'P', 'D')
+(3, 12, 'V', 'P', 'D')
+(3, 22, 'V', 'D', 'P')
+(3, 3, 'N', 'V', 'P', 'D')
+(3, 13, 'V', 'P', 'D')
+(3, 23, 'N', 'V', 'P')
+
