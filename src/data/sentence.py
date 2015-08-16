@@ -161,7 +161,7 @@ class Sentence():
     def convert_list_vector_to_dict(self, fv):
         ret_fv = FeatureVector()
         for i in fv:
-            ret_fv[i] = 1
+            ret_fv[i] += 1
         return ret_fv
 
 

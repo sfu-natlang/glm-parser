@@ -42,7 +42,8 @@ class Evaluator():
 
     def evaluate(self, data_pool, parser, w_vector):
         logging.debug("Start evaluating ...")
-        logging.info("Feature count: %d" % len(w_vector.data_dict))
+        f_vector = [x for x in w_vector.data_dict.keys() if w_vector.data_dict[x] != 0.0]
+        logging.info("Feature count: %d" % len(f_vector))
         while data_pool.has_next_data():  
             sent = data_pool.get_next_data()
             
