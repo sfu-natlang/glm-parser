@@ -42,8 +42,6 @@ class Evaluator():
 
     def evaluate(self, data_pool, parser, w_vector):
         logging.debug("Start evaluating ...")
-        f_vector = [x for x in w_vector.data_dict.keys() if w_vector.data_dict[x] != 0.0]
-        logging.info("Feature count: %d" % len(f_vector))
         while data_pool.has_next_data():  
             sent = data_pool.get_next_data()
             
@@ -59,6 +57,8 @@ class Evaluator():
                parser.parse(sent, w_vector.get_vector_score)
              
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+        f_vector = [x for x in w_vector.data_dict.keys() if w_vector.data_dict[x] != 0.0]
+        logging.info("Feature count: %d" % len(f_vector))
         logging.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
         self.unlabeled_attachment_accuracy(data_pool.get_sent_num())
