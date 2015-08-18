@@ -13,4 +13,4 @@ cd hvector
 python setup.py install --install-lib .
 
 cd ..
-python glm_parser.py -i 30 -b 2 -e 21 -t 1,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d '/cs/natlang-projects/glm-parser/new_results/Weight' --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
+python glm_parser.py -i 30 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d '/cs/natlang-projects/glm-parser/new_results/Weight' --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
