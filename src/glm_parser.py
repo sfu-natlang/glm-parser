@@ -19,6 +19,7 @@ import debug.debug
 import debug.interact
 
 import timeit
+import time
 
 class GlmParser():
     def __init__(self, train_section=[], test_section=[], data_path="../../penn-wsj-deps/",
@@ -62,13 +63,13 @@ class GlmParser():
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename)
     
-    def evaluate(self, test_section=[]):
+    def evaluate(self, training_time,  test_section=[]):
         if not test_section == []:
             test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen)
         else:
             test_data_pool = self.test_data_pool
 
-        self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector)
+        self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector, training_time)
         
     def compute_argmax(self, sentence):
         current_edge_set = self.parser.parse(sentence, self.w_vector.get_vector_score)
@@ -309,11 +310,15 @@ if __name__ == "__main__":
                         fgen=fgen,
                         parser=parser)
 
+        training_time = None
         if train_end >= train_begin >= 0:
+            start_time = time.clock()
             gp.sequential_train([(train_begin, train_end)], max_iter, d_filename)
+            end_time = time.clock()
+            training_time = end_time - start_time
 
         if not testsection == []:
-            gp.evaluate(testsection)
+            gp.evaluate(training_time, testsection)
 
     except getopt.GetoptError, e:
         print("Invalid argument. \n")
