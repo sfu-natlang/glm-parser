@@ -52,7 +52,7 @@ class GlmParser():
 
         self.evaluator = Evaluator()
        
-    def sequential_train(self, train_section=[], max_iter=-1, d_filename=None):
+    def sequential_train(self, train_section=[], max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_section == []:
             train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen)
         else:
@@ -61,7 +61,7 @@ class GlmParser():
         if max_iter == -1:
             max_iter = self.max_iter
             
-        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename)
+        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
     
     def evaluate(self, training_time,  test_section=[]):
         if not test_section == []:
@@ -108,6 +108,11 @@ options:
             example: "./weight_dump", and the resulting files could be:
             "./weight_dump_Iter_1.db",
             "./weight_dump_Iter_2.db"...
+
+    -f:     Frequency of dumping weight vector. The weight vecotr of last
+            iteration will always be dumped
+            example: "-i 6 -f 2"
+            weight vector will be dumpled at iteration 0, 2, 4, 5.
 
     -i:     Number of iterations
             default 1
@@ -231,6 +236,7 @@ if __name__ == "__main__":
     test_data_path = "../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     l_filename = None
     d_filename = None
+    dump_freq = 1
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -246,7 +252,7 @@ if __name__ == "__main__":
     glm_parser = GlmParser
 
     try:
-        opt_spec = "ahb:e:t:i:p:l:d:"
+        opt_spec = "ahb:e:t:i:p:l:d:f:"
         long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
                          'log-feature-request']
@@ -275,6 +281,8 @@ if __name__ == "__main__":
             elif opt == '-a':
                 print("Time accounting is ON")
                 debug.debug.time_accounting_flag = True
+            elif opt == '-f':
+                dump_freq = int(value)
             elif opt == '--debug-run-number':
                 debug.debug.run_first_num = int(value)
                 if debug.debug.run_first_num <= 0:
@@ -313,7 +321,7 @@ if __name__ == "__main__":
         training_time = None
         if train_end >= train_begin >= 0:
             start_time = time.clock()
-            gp.sequential_train([(train_begin, train_end)], max_iter, d_filename)
+            gp.sequential_train([(train_begin, train_end)], max_iter, d_filename, dump_freq)
             end_time = time.clock()
             training_time = end_time - start_time
 

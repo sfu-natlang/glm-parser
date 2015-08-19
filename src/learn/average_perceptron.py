@@ -33,7 +33,7 @@ class AveragePerceptronLearner():
         self.c = 1
         return
 
-    def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None):
+    def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
             max_iter = self.max_iter
 
@@ -116,12 +116,13 @@ class AveragePerceptronLearner():
             data_pool.reset_index()
 
             if d_filename is not None:
-                p_fork = multiprocessing.Process(
-                    target=self.dump_vector,
-                    args=(d_filename, t))
+                if t % dump_freq == 0 or t == max_iter - 1:
+                    p_fork = multiprocessing.Process(
+                        target=self.dump_vector,
+                        args=(d_filename, t))
                 
-                p_fork.start()
-                #self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
+                    p_fork.start()
+                    #self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
         
         self.w_vector.data_dict.clear()
 

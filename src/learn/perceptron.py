@@ -14,7 +14,7 @@ class PerceptronLearner():
         self.max_iter = max_iter
         return
 
-    def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None):
+    def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
             max_iter = self.max_iter
             
@@ -31,7 +31,8 @@ class PerceptronLearner():
 
             data_pool.reset_index()
             if d_filename is not None:
-                self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
+                if t % dump_freq == 0 or t == max_iter - 1:
+                    self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
 
 
     def update_weight(self, current_global_vector, gold_global_vector):
