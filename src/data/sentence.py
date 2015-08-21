@@ -185,18 +185,36 @@ class Sentence():
         #return global_vector
 
 
-    def get_local_vector(self, head_index, dep_index):
+    def get_local_vector(self, 
+                         head_index,
+                         dep_index,
+                         another_index_list = [],
+                         feature_type = 0):
         """
-        Return first order local vector, given the head index and dependency index
+        Return local vector from fgen
 
-        Just a wrapper to self.get_second_order_local_vector()
+        Argument another_index could be either sibling index or
+        grand child index. It is implicitly defined by argument
+        feature_type. 
+        
+        The last two arguments will not be used by english_
+        1st_fgen
+
+        For possible values of feature_type, please refer to
+        FeatureGenerator.get_second_order_local_vector() doc string.
+
         """
 
-        lv = self.get_second_order_local_vector(head_index, dep_index, 0, 0)
+
+        lv = self.f_gen.get_local_vector(head_index,
+                                         dep_index,
+                                         another_index_list,
+                                         feature_type)
 
         return lv
 
 
+    '''
     def get_second_order_local_vector(self, head_index, dep_index,
                                       another_index,
                                       feature_type):
@@ -224,8 +242,8 @@ class Sentence():
 
         # Optimization: return a list to compute weight vector
         return second_order_fv
-
-
+        '''
+        
     
     def set_word_list(self,word_list):
         """
