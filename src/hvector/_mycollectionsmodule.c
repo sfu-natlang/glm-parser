@@ -340,6 +340,8 @@ defdict_iaddci(defdictobject *self, PyObject *args)
       item = _defdict_get(self, key);
       item->value += item2->value * c_value;
       item->second += item2->second * c_value;      
+      if (item->value == 0.0) 
+        PyDict_DelItem((PyObject *)self, key);
     }
     Py_RETURN_NONE; // "void" type function
 }  
