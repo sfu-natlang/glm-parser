@@ -8,7 +8,7 @@ sys.path.insert(0,parentdir)
 from collections import defaultdict
 from feature import english_1st_fgen, pos_fgen
 from data.data_pool import *
-# To Do: for test!!!!
+
 def get_feats_for_word(index,fv):
     feats = [fv[index]]
     for i in range(index+1, len(fv)):
@@ -90,12 +90,6 @@ if __name__ == '__main__':
     start = time.time()
     feat_vec = avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
-    fv = []
-    pos_feat = pos_fgen.Pos_feat_gen(data.word_list,data.pos_list)
-    pos_feat.get_pos_feature(fv)
-    output = perc.perc_test(feat_vec,data.word_list,fv,tagset, tagset[0])
-    print output
-    print data.pos_list
     
 '''   
     #for test:
