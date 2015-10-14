@@ -90,7 +90,8 @@ def get_feats_for_word(index,fv):
 def perc_test(feat_vec, word_list, feat_list, tagset, default_tag):
     output = []
     labels = copy.deepcopy(word_list)
-    labels[0] = '_B-1'
+    #labels[0] = '_B-1'
+    labels.insert(0,'_B-1')
     labels.insert(0, '_B-2') # first two 'words' are B_-2 B_-1
     labels.append("_B+1")
     labels.append("_B+2")

@@ -1,4 +1,5 @@
 
+from __future__ import division
 import perc
 import time
 import os,sys,inspect
@@ -8,6 +9,7 @@ sys.path.insert(0,parentdir)
 from collections import defaultdict
 from feature import english_1st_fgen, pos_fgen
 from data.data_pool import *
+
 
 def get_feats_for_word(index,fv):
     feats = [fv[index]]
@@ -32,6 +34,7 @@ def avg_perc_train(train_data, tagset, n):
     num_updates = 0
     for round in range(0,epochs):
         num_mistakes = 0
+        print len(train_data)
         for (word_list, pos_list) in train_data:
             fv = []
             pos_feat = pos_fgen.Pos_feat_gen(word_list,pos_list)
@@ -68,58 +71,66 @@ def avg_perc_train(train_data, tagset, n):
         weight_vec[feat, tag] = avg_vec[feat, tag] / num_updates
     return weight_vec
 
+def sent_evaluate(result_list, gold_list):
+    if isinstance(result_list, list):
+        result_set = set(result_list)
+    if isinstance(gold_list, list):
+        gold_set = set(gold_list)
+    intersect_set = result_set.intersection(gold_set)
+    correct_num = len(intersect_set)
+    gold_set_size = len(gold_set)   
+    return correct_num, gold_set_size
+
+def result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,correct_num, gold_set_size):
+    unlabeled_correct_num += correct_num
+    unlabeled_gold_set_size += gold_set_size
+    return unlabeled_correct_num, unlabeled_gold_set_size
+
 if __name__ == '__main__':
-   
+    unlabeled_correct_num = 0
+    unlabeled_gold_set_size = 0
     # each element in the feat_vec dictionary is:
     # key=feature_id value=weight
     numepochs = 1
     feat_vec = {}
-    tagset = ['CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
+    tagset = ['ROOT','CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
     'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$','WRB','.',',',':','(',')']
     train_data = []
     data_path = "/Users/vivian/data/penn-wsj-deps/"
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
-    data_pool = DataPool([2], data_path, fgen=fgen)
+    data_pool = DataPool([(2,21)], data_path,fgen)
     sentence_count = 1
+    print "loading data..."
     while data_pool.has_next_data():
-        #print("Sentence %d" % sentence_count)
+        print("Sentence %d" % sentence_count)
         sentence_count+=1
         data = data_pool.get_next_data()
         train_data.append((data.word_list,data.pos_list))
-    print sentence_count
+    print "perceptron training..."
     start = time.time()
     feat_vec = avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
-    
-'''   
-    #for test:
-    data_path = "/Users/vivian/data/penn-wsj-deps/"
-    train_data = []
-    fgen = english_1st_fgen.FirstOrderFeatureGenerator
-    data_pool = DataPool([2],data_path,fgen)
-    data = data_pool.get_next_data()
-    train_data.append((data.word_list,data.pos_list))
-    for (word_list, pos_list) in train_data:
+    test_data = []
+    data_pool = DataPool([0,1,22,24], data_path,fgen)
+    while data_pool.has_next_data():
+        data = data_pool.get_next_data()
+        test_data.append((data.word_list,data.pos_list))
+    print "testing"
+    for (word_list, pos_list) in test_data:
     #generate features for thee word list...      
         fv = []
         pos_feat = pos_fgen.Pos_feat_gen(word_list,pos_list)
         pos_feat.get_pos_feature(fv)
-        #print fv
-        index = 0
-        tagset = ['CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP',
-        'NNPS','PDT','POS','PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG',
-        'VBN','VBP','VBZ','WDT','WP','WP$','WRB','.',',',':','(',')']
-        default_tag = tagset[0]
-        output = perc.perc_test({},word_list,fv,tagset, default_tag)
-        print output
-        for word in range(2,len(word_list)-2):
-            (index,feats) = get_feats_for_word(index,fv)
-            print word_list[word]
-            print pos_list[word]
-            print index
-            print feats
+        output = perc.perc_test(feat_vec,word_list,fv,tagset,tagset[0])
+        #print word_list, " ", len(word_list)
+        #print output, " ", len(output)
+        #print pos_list, " ", len(pos_list)
+        cnum, gnum = sent_evaluate(output,pos_list)
+        unlabeled_correct_num, unlabeled_gold_set_size=result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,cnum,gnum)
+        #print "accuraccy:%d, %d" %(unlabeled_correct_num,unlabeled_gold_set_size)
+    acc = unlabeled_correct_num /unlabeled_gold_set_size
+    print "whole accraccy: ", acc
 
-'''
         
 
 
