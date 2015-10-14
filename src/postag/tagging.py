@@ -96,7 +96,8 @@ if __name__ == '__main__':
     tagset = ['ROOT','CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
     'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$','WRB','.',',',':','(',')']
     train_data = []
-    data_path = "/Users/vivian/data/penn-wsj-deps/"
+    #data_path = "/Users/vivian/data/penn-wsj-deps/"
+    data_path = sys.argv[1]
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
     data_pool = DataPool([(2,21)], data_path,fgen)
     sentence_count = 1
