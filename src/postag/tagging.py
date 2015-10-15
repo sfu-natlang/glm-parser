@@ -21,7 +21,7 @@ def get_feats_for_word(index,fv):
         feats.append(feat)
     return (index, feats)
 
-def avg_perc_train(train_data, tagset, n):
+def avg_perc_train(train_data, tagset, epochs):
     if len(tagset) <= 0:
         raise valueError("Empty tagset")
     default_tag = tagset[0]
@@ -29,8 +29,6 @@ def avg_perc_train(train_data, tagset, n):
     weight_vec = defaultdict(int)
     avg_vec = defaultdict(int)
     last_iter = {}
-
-    epochs = n
     num_updates = 0
     for round in range(0,epochs):
         num_mistakes = 0
@@ -92,40 +90,44 @@ if __name__ == '__main__':
     # each element in the feat_vec dictionary is:
     # key=feature_id value=weight
     feat_vec = {}
-    tagset = ['ROOT','CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
-    'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$','WRB','.',',',':','(',')']
+    tagset = ['CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
+    'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$',
+    'WRB','.',',',':','(',')']
     train_data = []
     #data_path = "/Users/vivian/data/penn-wsj-deps/"
     data_path = sys.argv[1]
-    numepochs = sys.argv[2]
+    numepochs = int(sys.argv[2])
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
     data_pool = DataPool([(2,21)], data_path,fgen)
     sentence_count = 1
     print "loading data..."
     while data_pool.has_next_data():
-        print("Sentence %d" % sentence_count)
         sentence_count+=1
         data = data_pool.get_next_data()
         train_data.append((data.word_list,data.pos_list))
+    print("Sentence Number: %d" % sentence_count)
+    
     print "perceptron training..."
     start = time.time()
     feat_vec = avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
+    
+    print "Evaluating..."
     test_data = []
     data_pool = DataPool([0,1,22,24], data_path,fgen)
     while data_pool.has_next_data():
         data = data_pool.get_next_data()
         test_data.append((data.word_list,data.pos_list))
-    print "testing"
+    
     for (word_list, pos_list) in test_data:
-    #generate features for thee word list...      
+        #generate features for thee word list...      
         fv = []
         pos_feat = pos_fgen.Pos_feat_gen(word_list,pos_list)
         pos_feat.get_pos_feature(fv)
         output = perc.perc_test(feat_vec,word_list,fv,tagset,tagset[0])
         #print word_list, " ", len(word_list)
-        #print output, " ", len(output)
-        #print pos_list, " ", len(pos_list)
+        print output, " ", len(output)
+        print pos_list, " ", len(pos_list)
         cnum, gnum = sent_evaluate(output,pos_list)
         unlabeled_correct_num, unlabeled_gold_set_size=result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,cnum,gnum)
         #print "accuraccy:%d, %d" %(unlabeled_correct_num,unlabeled_gold_set_size)
