@@ -35,12 +35,12 @@ def avg_perc_train(train_data, tagset, epochs):
         print len(train_data)
         for (word_list, pos_list) in train_data:
             fv = []
-            pos_feat = pos_fgen.Pos_feat_gen(word_list,pos_list)
+            pos_feat = pos_fgen.Pos_feat_gen(word_list,tagset)
             pos_feat.get_pos_feature(fv)
             if len(fv) == 0:
                 raise ValueError("features do not align with input sentence")
             #TO DO: modify perc!!!!!
-            output = perc.perc_test(weight_vec,word_list,fv,tagset, default_tag)
+            output = perc.perc_test(weight_vec,word_list,fv,tagset,default_tag)
             num_updates += 1
             if output != pos_list:
                 num_mistakes += 1
@@ -70,14 +70,16 @@ def avg_perc_train(train_data, tagset, epochs):
     return weight_vec
 
 def sent_evaluate(result_list, gold_list):
-    if isinstance(result_list, list):
-        result_set = set(result_list)
-    if isinstance(gold_list, list):
-        gold_set = set(gold_list)
-    intersect_set = result_set.intersection(gold_set)
-    correct_num = len(intersect_set)
-    gold_set_size = len(gold_set)   
-    return correct_num, gold_set_size
+    result_size = len(result_list)
+    gold_size = len(gold_list)
+    if(result_size!=gold_size): 
+        raise ValueError("tag results do not align with gold results")
+    correct_num = 0
+    for i in range(result_size):
+        if result_list[i] == gold_list[i]:
+            correct_num += 1
+  
+    return correct_num, gold_size
 
 def result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,correct_num, gold_set_size):
     unlabeled_correct_num += correct_num
@@ -122,7 +124,7 @@ if __name__ == '__main__':
     for (word_list, pos_list) in test_data:
         #generate features for thee word list...      
         fv = []
-        pos_feat = pos_fgen.Pos_feat_gen(word_list,pos_list)
+        pos_feat = pos_fgen.Pos_feat_gen(word_list,tagset)
         pos_feat.get_pos_feature(fv)
         output = perc.perc_test(feat_vec,word_list,fv,tagset,tagset[0])
         #print word_list, " ", len(word_list)
