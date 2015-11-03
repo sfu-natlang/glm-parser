@@ -32,25 +32,30 @@ def avg_perc_train(train_data, tagset, epochs):
     num_updates = 0
     for round in range(0,epochs):
         num_mistakes = 0
-        print len(train_data)
+        trian_sent = 0
         for (word_list, pos_list) in train_data:
-            fv = []
-            pos_feat = pos_fgen.Pos_feat_gen(word_list,tagset)
-            pos_feat.get_pos_feature(fv)
-            if len(fv) == 0:
+            gold_fv = []
+            pos_feat = pos_fgen.Pos_feat_gen(word_list)
+            pos_feat.get_sent_pos_feature(gold_fv,pos_list)
+            if len(gold_fv) == 0:
                 raise ValueError("features do not align with input sentence")
             #TO DO: modify perc!!!!!
-            output = perc.perc_test(weight_vec,word_list,fv,tagset,default_tag)
+            output = perc.perc_test(weight_vec,word_list,tagset,default_tag)
             num_updates += 1
             if output != pos_list:
+                out_fv = []
+                pos_feat.get_sent_pos_feature(out_fv,output)
                 num_mistakes += 1
-                feat_index = 0
+                feat_index_g = 0
+                feat_index_o = 0
                 for i in range(0,len(output)):
-                    (feat_index,feats) = get_feats_for_word(feat_index,fv)
+                    (feat_index_g,true_feats) = get_feats_for_word(feat_index_g,gold_fv)
+                    (feat_index_o,out_feats) = get_feats_for_word(feat_index_o,out_fv)
                     feat_vec_update = defaultdict(int)
-                    for feat in feats:
-                        output_feat = true_feat = feat
-                        feat_vec_update[output_feat,output[i]] += -1
+                    for j in range(len(out_feats)):
+                        out_feat = out_feats[j]
+                        true_feat = true_feats[j]
+                        feat_vec_update[out_feat,output[i]] += -1
                         feat_vec_update[true_feat,pos_list[i]] += 1
                     for (upd_feat, upd_tag) in feat_vec_update:
                         if feat_vec_update[upd_feat, upd_tag] != 0:
@@ -60,6 +65,8 @@ def avg_perc_train(train_data, tagset, epochs):
                             else:
                                 avg_vec[upd_feat, upd_tag] = weight_vec[upd_feat, upd_tag]
                             last_iter[upd_feat, upd_tag] = num_updates
+            trian_sent+=1
+            print "training sentence:", trian_sent
         print >>sys.stderr, "number of mistakes:", num_mistakes
     for (feat, tag) in weight_vec:
         if (feat, tag) in last_iter:
@@ -100,7 +107,7 @@ if __name__ == '__main__':
     data_path = sys.argv[1]
     numepochs = int(sys.argv[2])
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
-    data_pool = DataPool([(2,21)], data_path,fgen)
+    data_pool = DataPool([(2,3)], data_path,fgen)
     sentence_count = 1
     print "loading data..."
     while data_pool.has_next_data():
@@ -113,20 +120,17 @@ if __name__ == '__main__':
     start = time.time()
     feat_vec = avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
-    
+
     print "Evaluating..."
     test_data = []
-    data_pool = DataPool([0,1,22,24], data_path,fgen)
+    #data_pool = DataPool([0,1,22,24], data_path,fgen)
+    data_pool = DataPool([(2,3)], data_path,fgen)
     while data_pool.has_next_data():
         data = data_pool.get_next_data()
         test_data.append((data.word_list,data.pos_list))
     
     for (word_list, pos_list) in test_data:
-        #generate features for thee word list...      
-        fv = []
-        pos_feat = pos_fgen.Pos_feat_gen(word_list,tagset)
-        pos_feat.get_pos_feature(fv)
-        output = perc.perc_test(feat_vec,word_list,fv,tagset,tagset[0])
+        output = perc.perc_test(feat_vec,word_list,tagset,tagset[0])
         #print word_list, " ", len(word_list)
         print output, " ", len(output)
         print pos_list, " ", len(pos_list)
@@ -135,7 +139,6 @@ if __name__ == '__main__':
         #print "accuraccy:%d, %d" %(unlabeled_correct_num,unlabeled_gold_set_size)
     acc = unlabeled_correct_num /unlabeled_gold_set_size
     print "whole accraccy: ", acc
-
         
 
 
