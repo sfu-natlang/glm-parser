@@ -83,15 +83,6 @@ def get_maxvalue(viterbi_dict):
     if maxvalue[1] is None:
         raise ValueError("max value tag for this word is None")
     return maxvalue
-def get_feats_for_word(index,fv):
-    feats = [fv[index]]
-    for i in range(index+1, len(fv)):
-        feat = fv[i]
-        if feat[0] == 0:
-            index = i
-            break
-        feats.append(feat)
-    return (index, feats)
 
 def perc_test(feat_vec, word_list, tagset, default_tag):
     output = []
@@ -141,8 +132,7 @@ def perc_test(feat_vec, word_list, tagset, default_tag):
                     if (feat, tag) in feat_vec:
                         weight += feat_vec[feat, tag]
 
-                prev_tag_weight = weight
-                prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
+                prev_list.append( (weight + prev_value, prev_tag) )
 
             (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer

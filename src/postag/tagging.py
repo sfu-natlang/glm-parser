@@ -110,10 +110,14 @@ if __name__ == '__main__':
     data_pool = DataPool([(2,3)], data_path,fgen)
     sentence_count = 1
     print "loading data..."
+    count = 0
     while data_pool.has_next_data():
         sentence_count+=1
         data = data_pool.get_next_data()
         train_data.append((data.word_list,data.pos_list))
+        count+=1
+        if count==100:
+            break
     print("Sentence Number: %d" % sentence_count)
     
     print "perceptron training..."
@@ -124,16 +128,14 @@ if __name__ == '__main__':
     print "Evaluating..."
     test_data = []
     #data_pool = DataPool([0,1,22,24], data_path,fgen)
+
     data_pool = DataPool([(2,3)], data_path,fgen)
     while data_pool.has_next_data():
         data = data_pool.get_next_data()
         test_data.append((data.word_list,data.pos_list))
-    
+        break
     for (word_list, pos_list) in test_data:
         output = perc.perc_test(feat_vec,word_list,tagset,tagset[0])
-        #print word_list, " ", len(word_list)
-        print output, " ", len(output)
-        print pos_list, " ", len(pos_list)
         cnum, gnum = sent_evaluate(output,pos_list)
         unlabeled_correct_num, unlabeled_gold_set_size=result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,cnum,gnum)
         #print "accuraccy:%d, %d" %(unlabeled_correct_num,unlabeled_gold_set_size)
