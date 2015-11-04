@@ -19,17 +19,13 @@ def main():
     'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$',
     'WRB','.',',',':','(',')']
     fv = []
-    dp = data_pool.DataPool([2], "/Users/vivian/data/penn-wsj-deps/",english_1st_fgen.FirstOrderFeatureGenerator)
-    i = 0
-    while dp.has_next_data():
-        data = dp.get_next_data()
-        print data.word_list
-        print data.pos_list
-        pos_feat = pos_fgen.Pos_feat_gen(data.word_list)
-        pos_feat.get_pos_feature(fv,3,'CC','CD')
-        for t in fv:
-            print t
-        break
+
+    word_list = ["John", "hit", "the", "ball", "with", "the", "bat"]
+    pos_feat = pos_fgen.Pos_feat_gen(word_list)
+    pos_feat.get_pos_feature(fv,2,'CC','CD')
+    for t in fv:
+        print t
+
     return 
 
 if __name__ == "__main__":

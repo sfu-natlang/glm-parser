@@ -29,13 +29,14 @@ class Pos_feat_gen():
 	    fv.append((11,self.wl[i][-3:]))
 	    fv.append((12,self.wl[i][-4:]))
 	    fv.append((13,pretag_1))
-	    fv.append((14,pretag_2))
+	    fv.append((14,pretag_1,pretag_2))
 	    if(self.contains_digits(self.wl[i])):
 	        fv.append((15,"hasNumber"))
 	    if(self.contains_hyphen(self.wl[i])):
 	        fv.append((16,"hasHyphen"))
 	    if(self.contains_upper(self.wl[i])):
 	        fv.append((17,"hasUpperCase"))
+	'''
 	def get_sent_pos_feature(self, fv, poslist):
 		nwl = copy.deepcopy(self.wl)
 		npl = copy.deepcopy(poslist)
@@ -59,15 +60,15 @@ class Pos_feat_gen():
 		    fv.append((10,nwl[i][-2:]))
 		    fv.append((11,nwl[i][-3:]))
 		    fv.append((12,nwl[i][-4:]))
-		    fv.append((13,npl[i-1]))
-		    fv.append((14,npl[i-1],npl[i-2]))
+		    #fv.append((13,npl[i-1]))
+		    #fv.append((14,npl[i-1],npl[i-2]))
 		    if(self.contains_digits(nwl[i])):
 		        fv.append((15,"hasNumber"))
 		    if(self.contains_hyphen(nwl[i])):
 		        fv.append((16,"hasHyphen"))
 		    if(self.contains_upper(nwl[i])):
 		        fv.append((17,"hasUpperCase"))
-
+	'''
 
 
     

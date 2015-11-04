@@ -2,6 +2,7 @@
 from __future__ import division
 import perc
 import time
+import copy
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -25,7 +26,6 @@ def avg_perc_train(train_data, tagset, epochs):
     if len(tagset) <= 0:
         raise valueError("Empty tagset")
     default_tag = tagset[0]
-
     weight_vec = defaultdict(int)
     avg_vec = defaultdict(int)
     last_iter = {}
@@ -34,29 +34,33 @@ def avg_perc_train(train_data, tagset, epochs):
         num_mistakes = 0
         trian_sent = 0
         for (word_list, pos_list) in train_data:
-            gold_fv = []
-            pos_feat = pos_fgen.Pos_feat_gen(word_list)
-            pos_feat.get_sent_pos_feature(gold_fv,pos_list)
-            if len(gold_fv) == 0:
-                raise ValueError("features do not align with input sentence")
-            #TO DO: modify perc!!!!!
             output = perc.perc_test(weight_vec,word_list,tagset,default_tag)
             num_updates += 1
             if output != pos_list:
-                out_fv = []
-                pos_feat.get_sent_pos_feature(out_fv,output)
+                
                 num_mistakes += 1
-                feat_index_g = 0
-                feat_index_o = 0
-                for i in range(0,len(output)):
-                    (feat_index_g,true_feats) = get_feats_for_word(feat_index_g,gold_fv)
-                    (feat_index_o,out_feats) = get_feats_for_word(feat_index_o,out_fv)
+                labels = copy.deepcopy(word_list)
+                labels.insert(0,'_B-1')
+                labels.insert(0, '_B-2') # first two 'words' are B_-2 B_-1
+                labels.append("_B+1")
+                labels.append("_B+2")
+                pos_feat = pos_fgen.Pos_feat_gen(labels)
+                pre1 = 'B_-1'
+                pre2 = 'B_-2'
+                for i in range(2,len(labels)-2):
+                    out_fv = []
+                    pos_feat.get_pos_feature(out_fv,i,pre1,pre2)
+                    #print "word: ",labels[i]
+                    #print "features: ", out_fv
+                    pre2 = pre1
+                    pre1 = output[i-2]
+                    #(feat_index_o,out_feats) = get_feats_for_word(feat_index_o,out_fv)
                     feat_vec_update = defaultdict(int)
-                    for j in range(len(out_feats)):
-                        out_feat = out_feats[j]
-                        true_feat = true_feats[j]
-                        feat_vec_update[out_feat,output[i]] += -1
-                        feat_vec_update[true_feat,pos_list[i]] += 1
+                    for j in range(len(out_fv)):
+                        out_feat = out_fv[j]
+                        feat_vec_update[out_feat,output[i-2]] += -1
+                        feat_vec_update[out_feat,pos_list[i-2]] += 1
+                    #print ". feature: ",feat_vec_update[((0, '.'),'.')]
                     for (upd_feat, upd_tag) in feat_vec_update:
                         if feat_vec_update[upd_feat, upd_tag] != 0:
                             weight_vec[upd_feat, upd_tag] += feat_vec_update[upd_feat,upd_tag]
@@ -107,33 +111,32 @@ if __name__ == '__main__':
     data_path = sys.argv[1]
     numepochs = int(sys.argv[2])
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
-    data_pool = DataPool([(2,3)], data_path,fgen)
-    sentence_count = 1
+    data_pool = DataPool([(2,21)], data_path,fgen)
+    sentence_count = 0
     print "loading data..."
-    count = 0
     while data_pool.has_next_data():
         sentence_count+=1
         data = data_pool.get_next_data()
+        del data.word_list[0]
+        del data.pos_list[0]
         train_data.append((data.word_list,data.pos_list))
-        count+=1
-        if count==100:
-            break
     print("Sentence Number: %d" % sentence_count)
     
     print "perceptron training..."
     start = time.time()
     feat_vec = avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
-
+    
     print "Evaluating..."
     test_data = []
     #data_pool = DataPool([0,1,22,24], data_path,fgen)
 
-    data_pool = DataPool([(2,3)], data_path,fgen)
+    data_pool = DataPool([(0,1,22,24)], data_path,fgen)
     while data_pool.has_next_data():
         data = data_pool.get_next_data()
+        del data.word_list[0]
+        del data.pos_list[0]
         test_data.append((data.word_list,data.pos_list))
-        break
     for (word_list, pos_list) in test_data:
         output = perc.perc_test(feat_vec,word_list,tagset,tagset[0])
         cnum, gnum = sent_evaluate(output,pos_list)
@@ -141,7 +144,8 @@ if __name__ == '__main__':
         #print "accuraccy:%d, %d" %(unlabeled_correct_num,unlabeled_gold_set_size)
     acc = unlabeled_correct_num /unlabeled_gold_set_size
     print "whole accraccy: ", acc
-        
+    
+
 
 
 
