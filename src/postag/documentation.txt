@@ -1,0 +1,9 @@
+Documentation
+
+run tagging.py:
+
+python tagging.py /Users/vivian/data/penn-wsj-deps/ 1
+
+test:
+
+python ../test/test_tagging.py /Users/vivian/data/penn-wsj-deps/

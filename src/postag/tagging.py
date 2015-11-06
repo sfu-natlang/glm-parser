@@ -3,31 +3,38 @@ from __future__ import division
 import perc
 import time
 import copy
+import logging
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir) 
 from collections import defaultdict
 from feature import english_1st_fgen, pos_fgen
-from data.data_pool import *
+from data import data_pool
+from hvector._mycollections import mydefaultdict
+from hvector.mydouble import mydouble
+from weight import weight_vector
 
-
-def get_feats_for_word(index,fv):
-    feats = [fv[index]]
-    for i in range(index+1, len(fv)):
-        feat = fv[i]
-        if feat[0] == 0:
-            index = i
-            break
-        feats.append(feat)
-    return (index, feats)
+logging.basicConfig(filename='glm_parser.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
+# def get_feats_for_word(index,fv):
+#     feats = [fv[index]]
+#     for i in range(index+1, len(fv)):
+#         feat = fv[i]
+#         if feat[0] == 0:
+#             index = i
+#             break
+#         feats.append(feat)
+#     return (index, feats)
 
 def avg_perc_train(train_data, tagset, epochs):
     if len(tagset) <= 0:
         raise valueError("Empty tagset")
-    default_tag = tagset[0]
-    weight_vec = defaultdict(int)
-    avg_vec = defaultdict(int)
+    default_tag = 'WP$'
+    weight_vec = mydefaultdict(mydouble)
+    avg_vec = mydefaultdict(mydouble)
     last_iter = {}
     num_updates = 0
     for round in range(0,epochs):
@@ -80,43 +87,30 @@ def avg_perc_train(train_data, tagset, epochs):
         weight_vec[feat, tag] = avg_vec[feat, tag] / num_updates
     return weight_vec
 
-def sent_evaluate(result_list, gold_list):
-    result_size = len(result_list)
-    gold_size = len(gold_list)
-    if(result_size!=gold_size): 
-        raise ValueError("tag results do not align with gold results")
-    correct_num = 0
-    for i in range(result_size):
-        if result_list[i] == gold_list[i]:
-            correct_num += 1
-  
-    return correct_num, gold_size
+def dump_vector(filename, i, fv):
+    w_vector = weight_vector.WeightVector()
+    w_vector.data_dict.iadd(fv)
+    w_vector.dump(filename + "_Iter_%d.db"%i)
+    w_vector.data_dict.clear()
 
-def result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,correct_num, gold_set_size):
-    unlabeled_correct_num += correct_num
-    unlabeled_gold_set_size += gold_set_size
-    return unlabeled_correct_num, unlabeled_gold_set_size
 
 if __name__ == '__main__':
-    unlabeled_correct_num = 0
-    unlabeled_gold_set_size = 0
     # each element in the feat_vec dictionary is:
     # key=feature_id value=weight
-    feat_vec = {}
     tagset = ['CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
     'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$',
-    'WRB','.',',',':','(',')']
+    'WRB','.',',',':','(',')','``','-LRB-','-RRB-',"''"]
     train_data = []
     #data_path = "/Users/vivian/data/penn-wsj-deps/"
     data_path = sys.argv[1]
     numepochs = int(sys.argv[2])
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
-    data_pool = DataPool([(2,21)], data_path,fgen)
-    sentence_count = 0
     print "loading data..."
-    while data_pool.has_next_data():
+    dp = data_pool.DataPool([(2,21)], data_path,fgen)
+    sentence_count = 0
+    while dp.has_next_data():
         sentence_count+=1
-        data = data_pool.get_next_data()
+        data = dp.get_next_data()
         del data.word_list[0]
         del data.pos_list[0]
         train_data.append((data.word_list,data.pos_list))
@@ -126,24 +120,8 @@ if __name__ == '__main__':
     start = time.time()
     feat_vec = avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
-    
-    print "Evaluating..."
-    test_data = []
-    #data_pool = DataPool([0,1,22,24], data_path,fgen)
 
-    data_pool = DataPool([(0,1,22,24)], data_path,fgen)
-    while data_pool.has_next_data():
-        data = data_pool.get_next_data()
-        del data.word_list[0]
-        del data.pos_list[0]
-        test_data.append((data.word_list,data.pos_list))
-    for (word_list, pos_list) in test_data:
-        output = perc.perc_test(feat_vec,word_list,tagset,tagset[0])
-        cnum, gnum = sent_evaluate(output,pos_list)
-        unlabeled_correct_num, unlabeled_gold_set_size=result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,cnum,gnum)
-        #print "accuraccy:%d, %d" %(unlabeled_correct_num,unlabeled_gold_set_size)
-    acc = unlabeled_correct_num /unlabeled_gold_set_size
-    print "whole accraccy: ", acc
+    dump_vector("fv",numepochs,feat_vec)
     
 
 
