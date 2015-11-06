@@ -77,8 +77,6 @@ def avg_perc_train(train_data, tagset, epochs):
                                 avg_vec[upd_feat, upd_tag] = weight_vec[upd_feat, upd_tag]
                             last_iter[upd_feat, upd_tag] = num_updates
             trian_sent+=1
-            print "training sentence:", trian_sent
-        print >>sys.stderr, "number of mistakes:", num_mistakes
     for (feat, tag) in weight_vec:
         if (feat, tag) in last_iter:
             avg_vec[feat, tag] += (num_updates - last_iter[feat, tag]) * weight_vec[feat, tag]
