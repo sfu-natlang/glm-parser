@@ -1,128 +1,103 @@
-
 from __future__ import division
-import perc
-import time
-import copy
-import logging
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir) 
-from collections import defaultdict
-from feature import english_1st_fgen, pos_fgen
-from data import data_pool
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
-from weight import weight_vector
+import gzip # use compressed data files
+import copy, operator, optparse
+from feature import pos_fgen
 
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
-# def get_feats_for_word(index,fv):
-#     feats = [fv[index]]
-#     for i in range(index+1, len(fv)):
-#         feat = fv[i]
-#         if feat[0] == 0:
-#             index = i
-#             break
-#         feats.append(feat)
-#     return (index, feats)
-
-def avg_perc_train(train_data, tagset, epochs):
-    if len(tagset) <= 0:
-        raise valueError("Empty tagset")
-    default_tag = 'WP$'
-    weight_vec = mydefaultdict(mydouble)
-    avg_vec = mydefaultdict(mydouble)
-    last_iter = {}
-    num_updates = 0
-    for round in range(0,epochs):
-        num_mistakes = 0
-        trian_sent = 0
-        for (word_list, pos_list) in train_data:
-            output = perc.perc_test(weight_vec,word_list,tagset,default_tag)
-            num_updates += 1
-            if output != pos_list:
-                
-                num_mistakes += 1
-                labels = copy.deepcopy(word_list)
-                labels.insert(0,'_B-1')
-                labels.insert(0, '_B-2') # first two 'words' are B_-2 B_-1
-                labels.append("_B+1")
-                labels.append("_B+2")
-                pos_feat = pos_fgen.Pos_feat_gen(labels)
-                pre1 = 'B_-1'
-                pre2 = 'B_-2'
-                for i in range(2,len(labels)-2):
-                    out_fv = []
-                    pos_feat.get_pos_feature(out_fv,i,pre1,pre2)
-                    #print "word: ",labels[i]
-                    #print "features: ", out_fv
-                    pre2 = pre1
-                    pre1 = output[i-2]
-                    #(feat_index_o,out_feats) = get_feats_for_word(feat_index_o,out_fv)
-                    feat_vec_update = defaultdict(int)
-                    for j in range(len(out_fv)):
-                        out_feat = out_fv[j]
-                        feat_vec_update[out_feat,output[i-2]] += -1
-                        feat_vec_update[out_feat,pos_list[i-2]] += 1
-                    #print ". feature: ",feat_vec_update[((0, '.'),'.')]
-                    for (upd_feat, upd_tag) in feat_vec_update:
-                        if feat_vec_update[upd_feat, upd_tag] != 0:
-                            weight_vec[upd_feat, upd_tag] += feat_vec_update[upd_feat,upd_tag]
-                            if (upd_feat, upd_tag) in last_iter:
-                                avg_vec[upd_feat, upd_tag] += (num_updates - last_iter[upd_feat, upd_tag]) * weight_vec[upd_feat, upd_tag]
-                            else:
-                                avg_vec[upd_feat, upd_tag] = weight_vec[upd_feat, upd_tag]
-                            last_iter[upd_feat, upd_tag] = num_updates
-            trian_sent+=1
-    for (feat, tag) in weight_vec:
-        if (feat, tag) in last_iter:
-            avg_vec[feat, tag] += (num_updates - last_iter[feat, tag]) * weight_vec[feat, tag]
+def get_maxvalue(viterbi_dict):
+    maxvalue = (None, None) # maxvalue has tuple (tag, value)
+    for tag in viterbi_dict.keys():
+        value = viterbi_dict[tag] # value is (score, backpointer)
+        if maxvalue[1] is None:
+            maxvalue = (tag, value[0])
+        elif maxvalue[1] < value[0]:
+            maxvalue = (tag, value[0])
         else:
-            avg_vec[feat, tag] = weight_vec[feat, tag]
-        weight_vec[feat, tag] = avg_vec[feat, tag] / num_updates
-    return weight_vec
+            pass # no change to maxvalue
+    if maxvalue[1] is None:
+        raise ValueError("max value tag for this word is None")
+    return maxvalue
 
-def dump_vector(filename, i, fv):
-    w_vector = weight_vector.WeightVector()
-    w_vector.data_dict.iadd(fv)
-    w_vector.dump(filename + "_Iter_%d.db"%i)
-    w_vector.data_dict.clear()
+def perc_test(feat_vec, labeled_list, tagset, default_tag):
+    output = []
+    labels = copy.deepcopy(labeled_list)
+    # add in the start and end buffers for the context
+    labels.insert(0, 'B_-1')
+    labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1
+    labels.append('B_+1')
+    labels.append('B_+2') # last two 'words' are B_+1 B_+2
+
+    # size of the viterbi data structure
+    N = len(labels)
+
+    # Set up the data structure for viterbi search
+    viterbi = {}
+    for i in range(0, N):
+        viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple
+
+    # We do not tag the first two and last two words
+    # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words 
+    viterbi[0]['B_-2'] = (0.0, '')
+    viterbi[1]['B_-1'] = (0.0, 'B_-2')
+    # find the value of best_tag for each word i in the input
+    # feat_index = 0
+    pos_feat = pos_fgen.Pos_feat_gen(labels)
+    for i in range(2, N-2):
+        word = labels[i]
+        # if len(feats) == 0:
+        #     print >>sys.stderr, " ".join(labels), " ".join(feat_list), "\n"
+        #     raise ValueError("features do not align with input sentence")
+
+        #fields = labels[i].split()
+        #(word, postag) = (fields[0], fields[1])
+        found_tag = False
+        for tag in tagset:
+            #has_bigram_feat = False
+            # weight = 0.0
+            # # sum up the weights for all features except the bigram features
+            # for feat in feats:
+            #     #if feat == 'B': has_bigram_feat = True
+            #     if (feat, tag) in feat_vec:
+            #         weight += feat_vec[feat, tag]
+            #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
+            prev_list = []
+            for prev_tag in viterbi[i-1]:
+                feats = []
+                (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
+                pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)
+                weight = 0.0
+                # sum up the weights for all features except the bigram features
+                for feat in feats:
+                #if feat == 'B': has_bigram_feat = True
+                    if (feat, tag) in feat_vec:
+                        weight += feat_vec[feat, tag]
+            #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
+                prev_tag_weight = weight
+                # if has_bigram_feat:
+                #     prev_tag_feat = "B:" + prev_tag
+                #     if (prev_tag_feat, tag) in feat_vec:
+                #         prev_tag_weight += feat_vec[prev_tag_feat, tag]
+                prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
+            (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
+            #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
+            if best_weight != 0.0:
+                viterbi[i][tag] = (best_weight, backpointer)
+                found_tag = True
+        if found_tag is False:
+            viterbi[i][default_tag] = (0.0, default_tag)
 
 
-if __name__ == '__main__':
-    # each element in the feat_vec dictionary is:
-    # key=feature_id value=weight
-    tagset = ['CC','CD','DT','EX','FW','IN','JJ','JJR','JJS','LS','MD','NN','NNS','NNP','NNPS','PDT','POS',
-    'PRP','PRP$','RB','RBR','RBS','RP','SYM','TO','UH','VB','VBD','VBG','VBN','VBP','VBZ','WDT','WP','WP$',
-    'WRB','.',',',':','(',')','``','-LRB-','-RRB-',"''"]
-    train_data = []
-    #data_path = "/Users/vivian/data/penn-wsj-deps/"
-    data_path = sys.argv[1]
-    numepochs = int(sys.argv[2])
-    fgen = english_1st_fgen.FirstOrderFeatureGenerator
-    print "loading data..."
-    dp = data_pool.DataPool([(2,21)], data_path,fgen)
-    sentence_count = 0
-    while dp.has_next_data():
-        sentence_count+=1
-        data = dp.get_next_data()
-        del data.word_list[0]
-        del data.pos_list[0]
-        train_data.append((data.word_list,data.pos_list))
-    print("Sentence Number: %d" % sentence_count)
-    
-    print "perceptron training..."
-    start = time.time()
-    feat_vec = avg_perc_train(train_data, tagset, numepochs)
-    print time.time()-start
+    # recover the best sequence using backpointers
+    maxvalue = get_maxvalue(viterbi[N-3])
+    best_tag = maxvalue[0]
+    for i in range(N-3, 1, -1):
+        output.insert(0,best_tag)
+        (value, backpointer) = viterbi[i][best_tag]
+        best_tag = backpointer
 
-    dump_vector("fv",numepochs,feat_vec)
-    
-
-
-
+    return output
 
 

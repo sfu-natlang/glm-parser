@@ -1,9 +1,11 @@
 Documentation
 
-run tagging.py:
+1. Train model using data section [2-21]:
 
-python tagging.py /Users/vivian/data/penn-wsj-deps/ 1
+python perctrain.py tagset.txt /Users/vivian/data/penn-wsj-deps/ 1 
 
-test:
+2. Test tagging using data section [0,1,22,24]:
 
-python ../test/test_tagging.py /Users/vivian/data/penn-wsj-deps/
+python posevaluate.py tagset.txt /Users/vivian/data/penn-wsj-deps/ fv_Iter_1.db 
+
+Overall Accuracy: 96%
