@@ -10,6 +10,8 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 
 extentions = [
+	Extension('postag.tagging',["postag/tagging.pyx"]),
+	Extension('feature.pos_fgen',["feature/pos_fgen.pyx"]),
     Extension('parse.ceisner',["parse/ceisner.pyx"]),
     Extension('parse.ceisner3',["parse/ceisner3.pyx"]),
     Extension('feature.feature_generator_base', ["feature/feature_generator_base.pyx"]),
