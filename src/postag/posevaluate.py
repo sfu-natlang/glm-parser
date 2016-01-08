@@ -6,6 +6,7 @@ from feature import english_1st_fgen, pos_fgen
 from data import data_pool
 from weight import weight_vector
 import tagging,perctrain
+from collections import defaultdict
 
 def sent_evaluate(result_list, gold_list):
     result_size = len(result_list)
@@ -32,8 +33,16 @@ if __name__ == "__main__":
     tagset = perctrain.read_tagset(tagset_path)
     feat_vec = weight_vector.WeightVector()
     feat_vec.load_posfv(fv_path)
+    arr = [0]*45
+    matrix = [arr]*45
+    dic = defaultdict(int)
+    i = 1
+    for t in tagset:
+        dic[t] = i
+        i+=1
+
     print "Evaluating..."
-    dp = data_pool.DataPool([(0,1,22,24)], data_path,fgen)
+    dp = data_pool.DataPool([(0)], data_path,fgen)
     #dp = data_pool.DataPool([(2,3)], data_path,fgen)
     while dp.has_next_data():
         data = dp.get_next_data()
@@ -46,6 +55,18 @@ if __name__ == "__main__":
         output = tagging.perc_test(feat_vec.data_dict,word_list,tagset,tagset[0])
         cnum, gnum = sent_evaluate(output,pos_list)
         correct_num, gold_set_size = result_evaluate(correct_num,gold_set_size,cnum,gnum)
+        for i in range(len(output)):
+            gold_index = dic[pos_list[i]]
+            out_index = dic[output[i]]
+            if(gold_index==0):
+                print pos_list[i]
+            #matrix[gold_index][out_index] += 1
     acc = float(correct_num) /gold_set_size
     print "whole accraccy: ", acc
-    
+    '''
+    for i in range(45):
+        print i, " : "
+        for j in range(45):
+            print matrix[i][j]," ",
+        print
+    '''

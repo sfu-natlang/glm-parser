@@ -49,19 +49,30 @@ def avg_perc_train(train_data, tagset, epochs):
                 labels.insert(0, '_B-2') # first two 'words' are B_-2 B_-1
                 labels.append("_B+1")
                 labels.append("_B+2")
+                #pos_list.insert(0,'B_-1')
+                #pos_list.insert(0,'B_-2')
                 pos_feat = pos_fgen.Pos_feat_gen(labels)
                 pre1 = 'B_-1'
                 pre2 = 'B_-2'
+                g_pre1 = "B_-1"
+                g_pre2 = "B_-2"
+                #gold_out_fv = []
+                #pos_feat.get_pos_feature(gold_out_fv,pos_list)
                 for i in range(2,len(labels)-2):
-                    out_fv = []
-                    pos_feat.get_pos_feature(out_fv,i,pre1,pre2)
+                    true_out_fv = []
+                    gold_out_fv = []
+                    pos_feat.get_pos_feature(true_out_fv,i,pre1,pre2)
+                    pos_feat.get_pos_feature(gold_out_fv,i,g_pre1,g_pre2)
                     pre2 = pre1
                     pre1 = output[i-2]
+                    g_pre2 = g_pre1
+                    g_pre1 = pos_list[i-2]
                     feat_vec_update = defaultdict(int)
-                    for j in range(len(out_fv)):
-                        out_feat = out_fv[j]
-                        feat_vec_update[out_feat,output[i-2]] += -1
-                        feat_vec_update[out_feat,pos_list[i-2]] += 1
+                    for j in range(len(true_out_fv)):
+                        true_out_feat = true_out_fv[j]
+                        gold_out_feat = gold_out_fv[j]
+                        feat_vec_update[true_out_feat,output[i-2]] += -1
+                        feat_vec_update[gold_out_feat,pos_list[i-2]] += 1
                     for (upd_feat, upd_tag) in feat_vec_update:
                         if feat_vec_update[upd_feat, upd_tag] != 0:
                             weight_vec[upd_feat, upd_tag] += feat_vec_update[upd_feat,upd_tag]
@@ -71,8 +82,8 @@ def avg_perc_train(train_data, tagset, epochs):
                                 avg_vec[upd_feat, upd_tag] = weight_vec[upd_feat, upd_tag]
                             last_iter[upd_feat, upd_tag] = num_updates
             trian_sent+=1
-            #print "training sentence:", trian_sent
-        #print >>sys.stderr, "number of mistakes:", num_mistakes
+            print "training sentence:", trian_sent
+        print >>sys.stderr, "number of mistakes:", num_mistakes, " iteration:", round
     for (feat, tag) in weight_vec:
         if (feat, tag) in last_iter:
             avg_vec[feat, tag] += (num_updates - last_iter[feat, tag]) * weight_vec[feat, tag]
@@ -98,7 +109,7 @@ if __name__ == '__main__':
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
 
     print "loading data..."
-    dp = data_pool.DataPool([(2)], data_path,fgen)
+    dp = data_pool.DataPool([(2,5)], data_path,fgen)
     sentence_count = 0
     while dp.has_next_data():
     #for i in range(100):
