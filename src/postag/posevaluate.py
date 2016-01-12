@@ -33,10 +33,9 @@ if __name__ == "__main__":
     tagset = perctrain.read_tagset(tagset_path)
     feat_vec = weight_vector.WeightVector()
     feat_vec.load_posfv(fv_path)
-    arr = [0]*45
-    matrix = [arr]*45
+    matrix = [[0 for x in range(45)] for x in range(45)] 
     dic = defaultdict(int)
-    i = 1
+    i = 0
     for t in tagset:
         dic[t] = i
         i+=1
@@ -44,11 +43,13 @@ if __name__ == "__main__":
     print "Evaluating..."
     dp = data_pool.DataPool([(0)], data_path,fgen)
     #dp = data_pool.DataPool([(2,3)], data_path,fgen)
+    n=0
     while dp.has_next_data():
         data = dp.get_next_data()
         del data.word_list[0]
         del data.pos_list[0]
         test_data.append((data.word_list,data.pos_list))
+        n+=1
 
     correct_num = gold_set_size = 0
     for (word_list, pos_list) in test_data:
@@ -58,15 +59,13 @@ if __name__ == "__main__":
         for i in range(len(output)):
             gold_index = dic[pos_list[i]]
             out_index = dic[output[i]]
-            if(gold_index==0):
-                print pos_list[i]
-            #matrix[gold_index][out_index] += 1
+            '''if(gold_index==0):
+                print pos_list[i]'''
+            matrix[gold_index][out_index] += 1
     acc = float(correct_num) /gold_set_size
     print "whole accraccy: ", acc
-    '''
     for i in range(45):
         print i, " : "
         for j in range(45):
             print matrix[i][j]," ",
         print
-    '''

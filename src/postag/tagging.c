@@ -436,6 +436,76 @@ static const char *__pyx_f[] = {
 };
 
 /*--- Type declarations ---*/
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test;
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr;
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr;
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr;
+
+/* "postag/tagging.pyx":33
+ *     return weight
+ * 
+ * def perc_test(feat_vec, labeled_list, tagset, default_tag):             # <<<<<<<<<<<<<<
+ *     output = []
+ *     labels = copy.deepcopy(labeled_list)
+ */
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test {
+  PyObject_HEAD
+  PyObject *__pyx_v_S;
+  PyObject *__pyx_v_T;
+  PyObject *__pyx_v_U;
+  PyObject *__pyx_v_feat_vec;
+  PyObject *__pyx_v_k;
+  PyObject *__pyx_v_n;
+  PyObject *__pyx_v_pi;
+  PyObject *__pyx_v_pos_feat;
+  PyObject *__pyx_v_s;
+  PyObject *__pyx_v_u;
+};
+
+
+/* "postag/tagging.pyx":65
+ *         for u in U:
+ *             for s in S:
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))             # <<<<<<<<<<<<<<
+ * 
+ * # Store the tag sequence as an array
+ */
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr {
+  PyObject_HEAD
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *__pyx_outer_scope;
+  PyObject *__pyx_v_t;
+  PyObject *__pyx_t_0;
+  Py_ssize_t __pyx_t_1;
+  PyObject *(*__pyx_t_2)(PyObject *);
+};
+
+
+/* "postag/tagging.pyx":71
+ * 
+ *         # Calculate the tag sequence by following the back pointers
+ *     prob, tag[n-1], tag[n] = max((max(((pi[(n, u, s)], u, s) for s in S)) for u in U))             # <<<<<<<<<<<<<<
+ *     #max((max(((pi[(n, u, s)] + get_weight(u,s,'STOP',pos_feat,n+1,feat_vec), u, s) for s in S)) for u in U))
+ *     for k in range(n-2, 0, -1):
+ */
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr {
+  PyObject_HEAD
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *__pyx_outer_scope;
+  PyObject *__pyx_v_genexpr;
+  PyObject *__pyx_v_u;
+  PyObject *__pyx_t_0;
+  Py_ssize_t __pyx_t_1;
+  PyObject *(*__pyx_t_2)(PyObject *);
+};
+
+struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr {
+  PyObject_HEAD
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *__pyx_outer_scope;
+  PyObject *__pyx_v_s;
+  PyObject *__pyx_t_0;
+  Py_ssize_t __pyx_t_1;
+  PyObject *(*__pyx_t_2)(PyObject *);
+};
+
 
 /* --- Runtime support code (head) --- */
 #ifndef CYTHON_REFNANNY
@@ -570,6 +640,33 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[], \
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args, \
     const char* function_name);
 
+static CYTHON_INLINE int __Pyx_PySequence_Contains(PyObject* item, PyObject* seq, int eq) {
+    int result = PySequence_Contains(seq, item);
+    return unlikely(result < 0) ? result : (result == (eq == Py_EQ));
+}
+
+static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname);
+
+#if PY_MAJOR_VERSION >= 3
+static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key) {
+    PyObject *value;
+    value = PyDict_GetItemWithError(d, key);
+    if (unlikely(!value)) {
+        if (!PyErr_Occurred()) {
+            PyObject* args = PyTuple_Pack(1, key);
+            if (likely(args))
+                PyErr_SetObject(PyExc_KeyError, args);
+            Py_XDECREF(args);
+        }
+        return NULL;
+    }
+    Py_INCREF(value);
+    return value;
+}
+#else
+    #define __Pyx_PyDict_GetItem(d, key) PyObject_GetItem(d, key)
+#endif
+
 static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
 
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -592,26 +689,6 @@ static PyObject* __Pyx_PyObject_CallMethod1(PyObject* obj, PyObject* method_name
 
 static CYTHON_INLINE int __Pyx_PyObject_Append(PyObject* L, PyObject* x);
 
-#if PY_MAJOR_VERSION >= 3
-static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key) {
-    PyObject *value;
-    value = PyDict_GetItemWithError(d, key);
-    if (unlikely(!value)) {
-        if (!PyErr_Occurred()) {
-            PyObject* args = PyTuple_Pack(1, key);
-            if (likely(args))
-                PyErr_SetObject(PyExc_KeyError, args);
-            Py_XDECREF(args);
-        }
-        return NULL;
-    }
-    Py_INCREF(value);
-    return value;
-}
-#else
-    #define __Pyx_PyDict_GetItem(d, key) PyObject_GetItem(d, key)
-#endif
-
 static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
 
 static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
@@ -620,10 +697,15 @@ static CYTHON_INLINE int __Pyx_IterFinish(void);
 
 static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
 
-static CYTHON_INLINE int __Pyx_PySequence_Contains(PyObject* item, PyObject* seq, int eq) {
-    int result = PySequence_Contains(seq, item);
-    return unlikely(result < 0) ? result : (result == (eq == Py_EQ));
-}
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyList_GetSlice(PyObject* src, Py_ssize_t start, Py_ssize_t stop);
+static CYTHON_INLINE PyObject* __Pyx_PyTuple_GetSlice(PyObject* src, Py_ssize_t start, Py_ssize_t stop);
+#else
+#define __Pyx_PyList_GetSlice(seq, start, stop)   PySequence_GetSlice(seq, start, stop)
+#define __Pyx_PyTuple_GetSlice(seq, start, stop)  PySequence_GetSlice(seq, start, stop)
+#endif
+
+#include <string.h>
 
 static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name);
 
@@ -652,59 +734,115 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
 
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
+static PyTypeObject* __Pyx_FetchCommonType(PyTypeObject* type);
+
+static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb);
+
+#define __Pyx_Generator_USED
+#include <structmember.h>
+#include <frameobject.h>
+typedef PyObject *(*__pyx_generator_body_t)(PyObject *, PyObject *);
+typedef struct {
+    PyObject_HEAD
+    __pyx_generator_body_t body;
+    PyObject *closure;
+    PyObject *exc_type;
+    PyObject *exc_value;
+    PyObject *exc_traceback;
+    PyObject *gi_weakreflist;
+    PyObject *classobj;
+    PyObject *yieldfrom;
+    PyObject *gi_name;
+    PyObject *gi_qualname;
+    int resume_label;
+    char is_running;
+} __pyx_GeneratorObject;
+static __pyx_GeneratorObject *__Pyx_Generator_New(__pyx_generator_body_t body,
+                                                  PyObject *closure, PyObject *name, PyObject *qualname);
+static int __pyx_Generator_init(void);
+static int __Pyx_Generator_clear(PyObject* self);
+#if 1 || PY_VERSION_HEX < 0x030300B0
+static int __Pyx_PyGen_FetchStopIterationValue(PyObject **pvalue);
+#else
+#define __Pyx_PyGen_FetchStopIterationValue(pvalue) PyGen_FetchStopIterationValue(pvalue)
+#endif
+
 static int __Pyx_check_binary_version(void);
 
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 
 /* Module declarations from 'postag.tagging' */
+static PyTypeObject *__pyx_ptype_6postag_7tagging___pyx_scope_struct__perc_test = 0;
+static PyTypeObject *__pyx_ptype_6postag_7tagging___pyx_scope_struct_1_genexpr = 0;
+static PyTypeObject *__pyx_ptype_6postag_7tagging___pyx_scope_struct_2_genexpr = 0;
+static PyTypeObject *__pyx_ptype_6postag_7tagging___pyx_scope_struct_3_genexpr = 0;
 #define __Pyx_MODULE_NAME "postag.tagging"
 int __pyx_module_is_main_postag__tagging = 0;
 
 /* Implementation of 'postag.tagging' */
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_range;
-static PyObject *__pyx_builtin_sorted;
+static PyObject *__pyx_builtin_max;
 static PyObject *__pyx_pf_6postag_7tagging_get_maxvalue(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_viterbi_dict); /* proto */
-static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_feat_vec, PyObject *__pyx_v_labeled_list, PyObject *__pyx_v_tagset, PyObject *__pyx_v_default_tag); /* proto */
-static char __pyx_k_N[] = "N";
-static char __pyx_k_i[] = "i";
-static char __pyx_k__5[] = "";
+static PyObject *__pyx_pf_6postag_7tagging_2get_weight(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_t, PyObject *__pyx_v_u, PyObject *__pyx_v_s, PyObject *__pyx_v_pos_feat, PyObject *__pyx_v_k, PyObject *__pyx_v_feat_vec); /* proto */
+static PyObject *__pyx_pf_6postag_7tagging_9perc_test_genexpr(PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_6postag_7tagging_9perc_test_7genexpr_genexpr(PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_6postag_7tagging_9perc_test_3genexpr(PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_6postag_7tagging_4perc_test(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_feat_vec, PyObject *__pyx_v_labeled_list, PyObject *__pyx_v_tagset, CYTHON_UNUSED PyObject *__pyx_v_default_tag); /* proto */
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct__perc_test(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct_1_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct_2_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct_3_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static char __pyx_k_S[] = "S";
+static char __pyx_k_T[] = "T";
+static char __pyx_k_U[] = "U";
+static char __pyx_k_k[] = "k";
+static char __pyx_k_n[] = "n";
+static char __pyx_k_s[] = "s";
+static char __pyx_k_t[] = "t";
+static char __pyx_k_u[] = "u";
+static char __pyx_k__6[] = "";
+static char __pyx_k_bp[] = "bp";
 static char __pyx_k_os[] = "os";
-static char __pyx_k_key[] = "key";
+static char __pyx_k_pi[] = "pi";
+static char __pyx_k_max[] = "max";
 static char __pyx_k_sys[] = "sys";
 static char __pyx_k_tag[] = "tag";
-static char __pyx_k_B__1[] = "B_-1";
-static char __pyx_k_B__2[] = "B_-2";
+static char __pyx_k_B__1[] = "_B_-1";
+static char __pyx_k_B__2[] = "_B_-2";
+static char __pyx_k_args[] = "args";
 static char __pyx_k_copy[] = "copy";
 static char __pyx_k_feat[] = "feat";
 static char __pyx_k_gzip[] = "gzip";
 static char __pyx_k_keys[] = "keys";
 static char __pyx_k_main[] = "__main__";
 static char __pyx_k_path[] = "path";
+static char __pyx_k_prob[] = "prob";
+static char __pyx_k_send[] = "send";
 static char __pyx_k_test[] = "__test__";
-static char __pyx_k_word[] = "word";
+static char __pyx_k_close[] = "close";
 static char __pyx_k_feats[] = "feats";
 static char __pyx_k_range[] = "range";
+static char __pyx_k_throw[] = "throw";
 static char __pyx_k_value[] = "value";
-static char __pyx_k_B__1_2[] = "B_+1";
-static char __pyx_k_B__2_2[] = "B_+2";
+static char __pyx_k_B__1_2[] = "_B_+1";
+static char __pyx_k_B__1_3[] = "B_-1";
+static char __pyx_k_B__2_2[] = "_B_+2";
+static char __pyx_k_B__2_3[] = "B_-2";
 static char __pyx_k_append[] = "append";
 static char __pyx_k_import[] = "__import__";
 static char __pyx_k_insert[] = "insert";
 static char __pyx_k_labels[] = "labels";
 static char __pyx_k_output[] = "output";
-static char __pyx_k_sorted[] = "sorted";
 static char __pyx_k_tagset[] = "tagset";
 static char __pyx_k_weight[] = "weight";
 static char __pyx_k_abspath[] = "abspath";
 static char __pyx_k_dirname[] = "dirname";
 static char __pyx_k_feature[] = "feature";
+static char __pyx_k_genexpr[] = "genexpr";
 static char __pyx_k_getfile[] = "getfile";
 static char __pyx_k_inspect[] = "inspect";
-static char __pyx_k_reverse[] = "reverse";
-static char __pyx_k_viterbi[] = "viterbi";
-static char __pyx_k_best_tag[] = "best_tag";
 static char __pyx_k_deepcopy[] = "deepcopy";
 static char __pyx_k_feat_vec[] = "feat_vec";
 static char __pyx_k_maxvalue[] = "maxvalue";
@@ -712,17 +850,11 @@ static char __pyx_k_operator[] = "operator";
 static char __pyx_k_optparse[] = "optparse";
 static char __pyx_k_pos_feat[] = "pos_feat";
 static char __pyx_k_pos_fgen[] = "pos_fgen";
-static char __pyx_k_prev_tag[] = "prev_tag";
-static char __pyx_k_found_tag[] = "found_tag";
 static char __pyx_k_parentdir[] = "parentdir";
 static char __pyx_k_perc_test[] = "perc_test";
-static char __pyx_k_prev_list[] = "prev_list";
 static char __pyx_k_ValueError[] = "ValueError";
 static char __pyx_k_currentdir[] = "currentdir";
-static char __pyx_k_itemgetter[] = "itemgetter";
-static char __pyx_k_prev_value[] = "prev_value";
-static char __pyx_k_backpointer[] = "backpointer";
-static char __pyx_k_best_weight[] = "best_weight";
+static char __pyx_k_get_weight[] = "get_weight";
 static char __pyx_k_default_tag[] = "default_tag";
 static char __pyx_k_Pos_feat_gen[] = "Pos_feat_gen";
 static char __pyx_k_currentframe[] = "currentframe";
@@ -731,24 +863,28 @@ static char __pyx_k_labeled_list[] = "labeled_list";
 static char __pyx_k_viterbi_dict[] = "viterbi_dict";
 static char __pyx_k_postag_tagging[] = "postag.tagging";
 static char __pyx_k_get_pos_feature[] = "get_pos_feature";
-static char __pyx_k_prev_tag_weight[] = "prev_tag_weight";
-static char __pyx_k_prev_backpointer[] = "prev_backpointer";
+static char __pyx_k_perc_test_locals_genexpr[] = "perc_test.<locals>.genexpr";
 static char __pyx_k_Users_vivian_glm_parser_src_pos[] = "/Users/vivian/glm-parser/src/postag/tagging.pyx";
+static char __pyx_k_perc_test_locals_genexpr_locals[] = "perc_test.<locals>.genexpr.<locals>.genexpr";
 static char __pyx_k_max_value_tag_for_this_word_is_N[] = "max value tag for this word is None";
 static PyObject *__pyx_kp_s_B__1;
 static PyObject *__pyx_kp_s_B__1_2;
+static PyObject *__pyx_kp_s_B__1_3;
 static PyObject *__pyx_kp_s_B__2;
 static PyObject *__pyx_kp_s_B__2_2;
-static PyObject *__pyx_n_s_N;
+static PyObject *__pyx_kp_s_B__2_3;
 static PyObject *__pyx_n_s_Pos_feat_gen;
+static PyObject *__pyx_n_s_S;
+static PyObject *__pyx_n_s_T;
+static PyObject *__pyx_n_s_U;
 static PyObject *__pyx_kp_s_Users_vivian_glm_parser_src_pos;
 static PyObject *__pyx_n_s_ValueError;
-static PyObject *__pyx_kp_s__5;
+static PyObject *__pyx_kp_s__6;
 static PyObject *__pyx_n_s_abspath;
 static PyObject *__pyx_n_s_append;
-static PyObject *__pyx_n_s_backpointer;
-static PyObject *__pyx_n_s_best_tag;
-static PyObject *__pyx_n_s_best_weight;
+static PyObject *__pyx_n_s_args;
+static PyObject *__pyx_n_s_bp;
+static PyObject *__pyx_n_s_close;
 static PyObject *__pyx_n_s_copy;
 static PyObject *__pyx_n_s_currentdir;
 static PyObject *__pyx_n_s_currentframe;
@@ -759,23 +895,24 @@ static PyObject *__pyx_n_s_feat;
 static PyObject *__pyx_n_s_feat_vec;
 static PyObject *__pyx_n_s_feats;
 static PyObject *__pyx_n_s_feature;
-static PyObject *__pyx_n_s_found_tag;
+static PyObject *__pyx_n_s_genexpr;
 static PyObject *__pyx_n_s_get_maxvalue;
 static PyObject *__pyx_n_s_get_pos_feature;
+static PyObject *__pyx_n_s_get_weight;
 static PyObject *__pyx_n_s_getfile;
 static PyObject *__pyx_n_s_gzip;
-static PyObject *__pyx_n_s_i;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_insert;
 static PyObject *__pyx_n_s_inspect;
-static PyObject *__pyx_n_s_itemgetter;
-static PyObject *__pyx_n_s_key;
+static PyObject *__pyx_n_s_k;
 static PyObject *__pyx_n_s_keys;
 static PyObject *__pyx_n_s_labeled_list;
 static PyObject *__pyx_n_s_labels;
 static PyObject *__pyx_n_s_main;
+static PyObject *__pyx_n_s_max;
 static PyObject *__pyx_kp_s_max_value_tag_for_this_word_is_N;
 static PyObject *__pyx_n_s_maxvalue;
+static PyObject *__pyx_n_s_n;
 static PyObject *__pyx_n_s_operator;
 static PyObject *__pyx_n_s_optparse;
 static PyObject *__pyx_n_s_os;
@@ -783,41 +920,40 @@ static PyObject *__pyx_n_s_output;
 static PyObject *__pyx_n_s_parentdir;
 static PyObject *__pyx_n_s_path;
 static PyObject *__pyx_n_s_perc_test;
+static PyObject *__pyx_n_s_perc_test_locals_genexpr;
+static PyObject *__pyx_n_s_perc_test_locals_genexpr_locals;
+static PyObject *__pyx_n_s_pi;
 static PyObject *__pyx_n_s_pos_feat;
 static PyObject *__pyx_n_s_pos_fgen;
 static PyObject *__pyx_n_s_postag_tagging;
-static PyObject *__pyx_n_s_prev_backpointer;
-static PyObject *__pyx_n_s_prev_list;
-static PyObject *__pyx_n_s_prev_tag;
-static PyObject *__pyx_n_s_prev_tag_weight;
-static PyObject *__pyx_n_s_prev_value;
+static PyObject *__pyx_n_s_prob;
 static PyObject *__pyx_n_s_range;
-static PyObject *__pyx_n_s_reverse;
-static PyObject *__pyx_n_s_sorted;
+static PyObject *__pyx_n_s_s;
+static PyObject *__pyx_n_s_send;
 static PyObject *__pyx_n_s_sys;
+static PyObject *__pyx_n_s_t;
 static PyObject *__pyx_n_s_tag;
 static PyObject *__pyx_n_s_tagset;
 static PyObject *__pyx_n_s_test;
+static PyObject *__pyx_n_s_throw;
+static PyObject *__pyx_n_s_u;
 static PyObject *__pyx_n_s_value;
-static PyObject *__pyx_n_s_viterbi;
 static PyObject *__pyx_n_s_viterbi_dict;
 static PyObject *__pyx_n_s_weight;
-static PyObject *__pyx_n_s_word;
 static PyObject *__pyx_float_0_0;
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_2;
-static PyObject *__pyx_int_3;
 static PyObject *__pyx_int_neg_1;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
-static PyObject *__pyx_tuple__6;
+static PyObject *__pyx_tuple__5;
 static PyObject *__pyx_tuple__7;
-static PyObject *__pyx_tuple__8;
 static PyObject *__pyx_tuple__9;
 static PyObject *__pyx_tuple__11;
+static PyObject *__pyx_codeobj__8;
 static PyObject *__pyx_codeobj__10;
 static PyObject *__pyx_codeobj__12;
 
@@ -1074,7 +1210,7 @@ static PyObject *__pyx_pf_6postag_7tagging_get_maxvalue(CYTHON_UNUSED PyObject *
  *         raise ValueError("max value tag for this word is None")
  *     return maxvalue             # <<<<<<<<<<<<<<
  * 
- * def perc_test(feat_vec, labeled_list, tagset, default_tag):
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_maxvalue);
@@ -1109,19 +1245,325 @@ static PyObject *__pyx_pf_6postag_7tagging_get_maxvalue(CYTHON_UNUSED PyObject *
 /* "postag/tagging.pyx":24
  *     return maxvalue
  * 
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):             # <<<<<<<<<<<<<<
+ *     weight = 0.0
+ *     feats = []
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6postag_7tagging_3get_weight(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_6postag_7tagging_3get_weight = {"get_weight", (PyCFunction)__pyx_pw_6postag_7tagging_3get_weight, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6postag_7tagging_3get_weight(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_t = 0;
+  PyObject *__pyx_v_u = 0;
+  PyObject *__pyx_v_s = 0;
+  PyObject *__pyx_v_pos_feat = 0;
+  PyObject *__pyx_v_k = 0;
+  PyObject *__pyx_v_feat_vec = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("get_weight (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_t,&__pyx_n_s_u,&__pyx_n_s_s,&__pyx_n_s_pos_feat,&__pyx_n_s_k,&__pyx_n_s_feat_vec,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_t)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_u)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_weight", 1, 6, 6, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  2:
+        if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_s)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_weight", 1, 6, 6, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  3:
+        if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pos_feat)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_weight", 1, 6, 6, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  4:
+        if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_k)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_weight", 1, 6, 6, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case  5:
+        if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_feat_vec)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_weight", 1, 6, 6, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_weight") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+    }
+    __pyx_v_t = values[0];
+    __pyx_v_u = values[1];
+    __pyx_v_s = values[2];
+    __pyx_v_pos_feat = values[3];
+    __pyx_v_k = values[4];
+    __pyx_v_feat_vec = values[5];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("get_weight", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("postag.tagging.get_weight", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_6postag_7tagging_2get_weight(__pyx_self, __pyx_v_t, __pyx_v_u, __pyx_v_s, __pyx_v_pos_feat, __pyx_v_k, __pyx_v_feat_vec);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6postag_7tagging_2get_weight(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_t, PyObject *__pyx_v_u, PyObject *__pyx_v_s, PyObject *__pyx_v_pos_feat, PyObject *__pyx_v_k, PyObject *__pyx_v_feat_vec) {
+  PyObject *__pyx_v_weight = NULL;
+  PyObject *__pyx_v_feats = NULL;
+  PyObject *__pyx_v_feat = NULL;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  Py_ssize_t __pyx_t_5;
+  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_7;
+  int __pyx_t_8;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("get_weight", 0);
+
+  /* "postag/tagging.pyx":25
+ * 
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):
+ *     weight = 0.0             # <<<<<<<<<<<<<<
+ *     feats = []
+ *     pos_feat.get_pos_feature(feats,k+1,t,u)
+ */
+  __Pyx_INCREF(__pyx_float_0_0);
+  __pyx_v_weight = __pyx_float_0_0;
+
+  /* "postag/tagging.pyx":26
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):
+ *     weight = 0.0
+ *     feats = []             # <<<<<<<<<<<<<<
+ *     pos_feat.get_pos_feature(feats,k+1,t,u)
+ *     for feat in feats:
+ */
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_feats = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":27
+ *     weight = 0.0
+ *     feats = []
+ *     pos_feat.get_pos_feature(feats,k+1,t,u)             # <<<<<<<<<<<<<<
+ *     for feat in feats:
+ *         if (feat, s) in feat_vec:
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_pos_feat, __pyx_n_s_get_pos_feature); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyNumber_Add(__pyx_v_k, __pyx_int_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = NULL;
+  __pyx_t_5 = 0;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_5 = 1;
+    }
+  }
+  __pyx_t_6 = PyTuple_New(4+__pyx_t_5); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_6);
+  if (__pyx_t_4) {
+    PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4); __Pyx_GIVEREF(__pyx_t_4); __pyx_t_4 = NULL;
+  }
+  __Pyx_INCREF(__pyx_v_feats);
+  PyTuple_SET_ITEM(__pyx_t_6, 0+__pyx_t_5, __pyx_v_feats);
+  __Pyx_GIVEREF(__pyx_v_feats);
+  PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_3);
+  __Pyx_INCREF(__pyx_v_t);
+  PyTuple_SET_ITEM(__pyx_t_6, 2+__pyx_t_5, __pyx_v_t);
+  __Pyx_GIVEREF(__pyx_v_t);
+  __Pyx_INCREF(__pyx_v_u);
+  PyTuple_SET_ITEM(__pyx_t_6, 3+__pyx_t_5, __pyx_v_u);
+  __Pyx_GIVEREF(__pyx_v_u);
+  __pyx_t_3 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":28
+ *     feats = []
+ *     pos_feat.get_pos_feature(feats,k+1,t,u)
+ *     for feat in feats:             # <<<<<<<<<<<<<<
+ *         if (feat, s) in feat_vec:
+ *             weight += feat_vec[feat, s]
+ */
+  __pyx_t_1 = __pyx_v_feats; __Pyx_INCREF(__pyx_t_1); __pyx_t_5 = 0;
+  for (;;) {
+    if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_1)) break;
+    #if CYTHON_COMPILING_IN_CPYTHON
+    __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_2); __pyx_t_5++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    #else
+    __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    #endif
+    __Pyx_XDECREF_SET(__pyx_v_feat, __pyx_t_2);
+    __pyx_t_2 = 0;
+
+    /* "postag/tagging.pyx":29
+ *     pos_feat.get_pos_feature(feats,k+1,t,u)
+ *     for feat in feats:
+ *         if (feat, s) in feat_vec:             # <<<<<<<<<<<<<<
+ *             weight += feat_vec[feat, s]
+ *     return weight
+ */
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_v_feat);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_feat);
+    __Pyx_GIVEREF(__pyx_v_feat);
+    __Pyx_INCREF(__pyx_v_s);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_s);
+    __Pyx_GIVEREF(__pyx_v_s);
+    __pyx_t_7 = (__Pyx_PySequence_Contains(__pyx_t_2, __pyx_v_feat_vec, Py_EQ)); if (unlikely(__pyx_t_7 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_8 = (__pyx_t_7 != 0);
+    if (__pyx_t_8) {
+
+      /* "postag/tagging.pyx":30
+ *     for feat in feats:
+ *         if (feat, s) in feat_vec:
+ *             weight += feat_vec[feat, s]             # <<<<<<<<<<<<<<
+ *     return weight
+ * 
+ */
+      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_INCREF(__pyx_v_feat);
+      PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_feat);
+      __Pyx_GIVEREF(__pyx_v_feat);
+      __Pyx_INCREF(__pyx_v_s);
+      PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_s);
+      __Pyx_GIVEREF(__pyx_v_s);
+      __pyx_t_6 = PyObject_GetItem(__pyx_v_feat_vec, __pyx_t_2); if (unlikely(__pyx_t_6 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyNumber_InPlaceAdd(__pyx_v_weight, __pyx_t_6); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __Pyx_DECREF_SET(__pyx_v_weight, __pyx_t_2);
+      __pyx_t_2 = 0;
+      goto __pyx_L5;
+    }
+    __pyx_L5:;
+
+    /* "postag/tagging.pyx":28
+ *     feats = []
+ *     pos_feat.get_pos_feature(feats,k+1,t,u)
+ *     for feat in feats:             # <<<<<<<<<<<<<<
+ *         if (feat, s) in feat_vec:
+ *             weight += feat_vec[feat, s]
+ */
+  }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":31
+ *         if (feat, s) in feat_vec:
+ *             weight += feat_vec[feat, s]
+ *     return weight             # <<<<<<<<<<<<<<
+ * 
+ * def perc_test(feat_vec, labeled_list, tagset, default_tag):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_v_weight);
+  __pyx_r = __pyx_v_weight;
+  goto __pyx_L0;
+
+  /* "postag/tagging.pyx":24
+ *     return maxvalue
+ * 
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):             # <<<<<<<<<<<<<<
+ *     weight = 0.0
+ *     feats = []
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_AddTraceback("postag.tagging.get_weight", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_weight);
+  __Pyx_XDECREF(__pyx_v_feats);
+  __Pyx_XDECREF(__pyx_v_feat);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "postag/tagging.pyx":33
+ *     return weight
+ * 
  * def perc_test(feat_vec, labeled_list, tagset, default_tag):             # <<<<<<<<<<<<<<
  *     output = []
  *     labels = copy.deepcopy(labeled_list)
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6postag_7tagging_3perc_test(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6postag_7tagging_3perc_test = {"perc_test", (PyCFunction)__pyx_pw_6postag_7tagging_3perc_test, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6postag_7tagging_3perc_test(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_6postag_7tagging_5perc_test(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_6postag_7tagging_5perc_test = {"perc_test", (PyCFunction)__pyx_pw_6postag_7tagging_5perc_test, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6postag_7tagging_5perc_test(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_feat_vec = 0;
   PyObject *__pyx_v_labeled_list = 0;
   PyObject *__pyx_v_tagset = 0;
-  PyObject *__pyx_v_default_tag = 0;
+  CYTHON_UNUSED PyObject *__pyx_v_default_tag = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -1150,21 +1592,21 @@ static PyObject *__pyx_pw_6postag_7tagging_3perc_test(PyObject *__pyx_self, PyOb
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_labeled_list)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_tagset)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_default_tag)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "perc_test") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "perc_test") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -1181,42 +1623,592 @@ static PyObject *__pyx_pw_6postag_7tagging_3perc_test(PyObject *__pyx_self, PyOb
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("perc_test", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("postag.tagging.perc_test", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6postag_7tagging_2perc_test(__pyx_self, __pyx_v_feat_vec, __pyx_v_labeled_list, __pyx_v_tagset, __pyx_v_default_tag);
+  __pyx_r = __pyx_pf_6postag_7tagging_4perc_test(__pyx_self, __pyx_v_feat_vec, __pyx_v_labeled_list, __pyx_v_tagset, __pyx_v_default_tag);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
+static PyObject *__pyx_gb_6postag_7tagging_9perc_test_2generator(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_feat_vec, PyObject *__pyx_v_labeled_list, PyObject *__pyx_v_tagset, PyObject *__pyx_v_default_tag) {
-  PyObject *__pyx_v_output = NULL;
+/* "postag/tagging.pyx":65
+ *         for u in U:
+ *             for s in S:
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))             # <<<<<<<<<<<<<<
+ * 
+ * # Store the tag sequence as an array
+ */
+
+static PyObject *__pyx_pf_6postag_7tagging_9perc_test_genexpr(PyObject *__pyx_self) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *__pyx_cur_scope;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("genexpr", 0);
+  __pyx_cur_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *)__pyx_tp_new_6postag_7tagging___pyx_scope_struct_1_genexpr(__pyx_ptype_6postag_7tagging___pyx_scope_struct_1_genexpr, __pyx_empty_tuple, NULL);
+  if (unlikely(!__pyx_cur_scope)) {
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __Pyx_GOTREF(__pyx_cur_scope);
+  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *) __pyx_self;
+  __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
+  __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
+  {
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_6postag_7tagging_9perc_test_2generator, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_perc_test_locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_cur_scope);
+    __Pyx_RefNannyFinishContext();
+    return (PyObject *) gen;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("postag.tagging.perc_test.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_gb_6postag_7tagging_9perc_test_2generator(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+{
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *__pyx_cur_scope = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *)__pyx_generator->closure);
+  PyObject *__pyx_r = NULL;
+  PyObject *__pyx_t_1 = NULL;
+  Py_ssize_t __pyx_t_2;
+  PyObject *(*__pyx_t_3)(PyObject *);
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  Py_ssize_t __pyx_t_8;
+  PyObject *__pyx_t_9 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("None", 0);
+  switch (__pyx_generator->resume_label) {
+    case 0: goto __pyx_L3_first_run;
+    case 1: goto __pyx_L6_resume_from_yield;
+    default: /* CPython raises the right error here */
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __pyx_L3_first_run:;
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_T)) { __Pyx_RaiseClosureNameError("T"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_T)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_T)) {
+    __pyx_t_1 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_T; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
+    __pyx_t_3 = NULL;
+  } else {
+    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_T); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  for (;;) {
+    if (likely(!__pyx_t_3)) {
+      if (likely(PyList_CheckExact(__pyx_t_1))) {
+        if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_COMPILING_IN_CPYTHON
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #endif
+      } else {
+        if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_COMPILING_IN_CPYTHON
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #endif
+      }
+    } else {
+      __pyx_t_4 = __pyx_t_3(__pyx_t_1);
+      if (unlikely(!__pyx_t_4)) {
+        PyObject* exc_type = PyErr_Occurred();
+        if (exc_type) {
+          if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        }
+        break;
+      }
+      __Pyx_GOTREF(__pyx_t_4);
+    }
+    __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_t);
+    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_t, __pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_4);
+    __pyx_t_4 = 0;
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_pi)) { __Pyx_RaiseClosureNameError("pi"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_pi == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_k)) { __Pyx_RaiseClosureNameError("k"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    __pyx_t_4 = PyNumber_Subtract(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_k, __pyx_int_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u)) { __Pyx_RaiseClosureNameError("u"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_4);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_v_t);
+    PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_cur_scope->__pyx_v_t);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_t);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __pyx_t_4 = 0;
+    __pyx_t_4 = __Pyx_PyDict_GetItem(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_pi, __pyx_t_5); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_weight); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_6);
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u)) { __Pyx_RaiseClosureNameError("u"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_s)) { __Pyx_RaiseClosureNameError("s"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_pos_feat)) { __Pyx_RaiseClosureNameError("pos_feat"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_k)) { __Pyx_RaiseClosureNameError("k"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_feat_vec)) { __Pyx_RaiseClosureNameError("feat_vec"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    __pyx_t_7 = NULL;
+    __pyx_t_8 = 0;
+    if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_7)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_7);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+        __pyx_t_8 = 1;
+      }
+    }
+    __pyx_t_9 = PyTuple_New(6+__pyx_t_8); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_9);
+    if (__pyx_t_7) {
+      PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
+    }
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_v_t);
+    PyTuple_SET_ITEM(__pyx_t_9, 0+__pyx_t_8, __pyx_cur_scope->__pyx_v_t);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_t);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_s);
+    PyTuple_SET_ITEM(__pyx_t_9, 2+__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_s);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_s);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_pos_feat);
+    PyTuple_SET_ITEM(__pyx_t_9, 3+__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_pos_feat);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_pos_feat);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_k);
+    PyTuple_SET_ITEM(__pyx_t_9, 4+__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_k);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_k);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_feat_vec);
+    PyTuple_SET_ITEM(__pyx_t_9, 5+__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_feat_vec);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_feat_vec);
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_9, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_6 = PyNumber_Add(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
+    __Pyx_GIVEREF(__pyx_t_6);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_v_t);
+    PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_cur_scope->__pyx_v_t);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_t);
+    __pyx_t_6 = 0;
+    __pyx_r = __pyx_t_5;
+    __pyx_t_5 = 0;
+    __Pyx_XGIVEREF(__pyx_t_1);
+    __pyx_cur_scope->__pyx_t_0 = __pyx_t_1;
+    __pyx_cur_scope->__pyx_t_1 = __pyx_t_2;
+    __pyx_cur_scope->__pyx_t_2 = __pyx_t_3;
+    __Pyx_XGIVEREF(__pyx_r);
+    __Pyx_RefNannyFinishContext();
+    /* return from generator, yielding value */
+    __pyx_generator->resume_label = 1;
+    return __pyx_r;
+    __pyx_L6_resume_from_yield:;
+    __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
+    __pyx_cur_scope->__pyx_t_0 = 0;
+    __Pyx_XGOTREF(__pyx_t_1);
+    __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
+    __pyx_t_3 = __pyx_cur_scope->__pyx_t_2;
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* function exit code */
+  PyErr_SetNone(PyExc_StopIteration);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_AddTraceback("genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_generator->resume_label = -1;
+  __Pyx_Generator_clear((PyObject*)__pyx_generator);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+}
+static PyObject *__pyx_gb_6postag_7tagging_9perc_test_5generator1(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_6postag_7tagging_9perc_test_7genexpr_2generator2(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+
+/* "postag/tagging.pyx":71
+ * 
+ *         # Calculate the tag sequence by following the back pointers
+ *     prob, tag[n-1], tag[n] = max((max(((pi[(n, u, s)], u, s) for s in S)) for u in U))             # <<<<<<<<<<<<<<
+ *     #max((max(((pi[(n, u, s)] + get_weight(u,s,'STOP',pos_feat,n+1,feat_vec), u, s) for s in S)) for u in U))
+ *     for k in range(n-2, 0, -1):
+ */
+
+static PyObject *__pyx_pf_6postag_7tagging_9perc_test_7genexpr_genexpr(PyObject *__pyx_self) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *__pyx_cur_scope;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("genexpr", 0);
+  __pyx_cur_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *)__pyx_tp_new_6postag_7tagging___pyx_scope_struct_3_genexpr(__pyx_ptype_6postag_7tagging___pyx_scope_struct_3_genexpr, __pyx_empty_tuple, NULL);
+  if (unlikely(!__pyx_cur_scope)) {
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __Pyx_GOTREF(__pyx_cur_scope);
+  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *) __pyx_self;
+  __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
+  __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
+  {
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_6postag_7tagging_9perc_test_7genexpr_2generator2, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_perc_test_locals_genexpr_locals); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_cur_scope);
+    __Pyx_RefNannyFinishContext();
+    return (PyObject *) gen;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("postag.tagging.perc_test.genexpr.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_gb_6postag_7tagging_9perc_test_7genexpr_2generator2(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+{
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *__pyx_cur_scope = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *)__pyx_generator->closure);
+  PyObject *__pyx_r = NULL;
+  PyObject *__pyx_t_1 = NULL;
+  Py_ssize_t __pyx_t_2;
+  PyObject *(*__pyx_t_3)(PyObject *);
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("None", 0);
+  switch (__pyx_generator->resume_label) {
+    case 0: goto __pyx_L3_first_run;
+    case 1: goto __pyx_L6_resume_from_yield;
+    default: /* CPython raises the right error here */
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __pyx_L3_first_run:;
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_S)) { __Pyx_RaiseClosureNameError("S"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_S)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_S)) {
+    __pyx_t_1 = __pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_S; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
+    __pyx_t_3 = NULL;
+  } else {
+    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_S); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  for (;;) {
+    if (likely(!__pyx_t_3)) {
+      if (likely(PyList_CheckExact(__pyx_t_1))) {
+        if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_COMPILING_IN_CPYTHON
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #endif
+      } else {
+        if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_COMPILING_IN_CPYTHON
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #endif
+      }
+    } else {
+      __pyx_t_4 = __pyx_t_3(__pyx_t_1);
+      if (unlikely(!__pyx_t_4)) {
+        PyObject* exc_type = PyErr_Occurred();
+        if (exc_type) {
+          if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        }
+        break;
+      }
+      __Pyx_GOTREF(__pyx_t_4);
+    }
+    __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_s);
+    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_s, __pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_4);
+    __pyx_t_4 = 0;
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_pi)) { __Pyx_RaiseClosureNameError("pi"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_pi == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_n)) { __Pyx_RaiseClosureNameError("n"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u)) { __Pyx_RaiseClosureNameError("u"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_n);
+    PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_n);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_n);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_v_s);
+    PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_cur_scope->__pyx_v_s);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_s);
+    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_cur_scope->__pyx_outer_scope->__pyx_outer_scope->__pyx_v_pi, __pyx_t_4); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u)) { __Pyx_RaiseClosureNameError("u"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+    __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_5);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_u);
+    __Pyx_INCREF(__pyx_cur_scope->__pyx_v_s);
+    PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_cur_scope->__pyx_v_s);
+    __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_s);
+    __pyx_t_5 = 0;
+    __pyx_r = __pyx_t_4;
+    __pyx_t_4 = 0;
+    __Pyx_XGIVEREF(__pyx_t_1);
+    __pyx_cur_scope->__pyx_t_0 = __pyx_t_1;
+    __pyx_cur_scope->__pyx_t_1 = __pyx_t_2;
+    __pyx_cur_scope->__pyx_t_2 = __pyx_t_3;
+    __Pyx_XGIVEREF(__pyx_r);
+    __Pyx_RefNannyFinishContext();
+    /* return from generator, yielding value */
+    __pyx_generator->resume_label = 1;
+    return __pyx_r;
+    __pyx_L6_resume_from_yield:;
+    __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
+    __pyx_cur_scope->__pyx_t_0 = 0;
+    __Pyx_XGOTREF(__pyx_t_1);
+    __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
+    __pyx_t_3 = __pyx_cur_scope->__pyx_t_2;
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* function exit code */
+  PyErr_SetNone(PyExc_StopIteration);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_generator->resume_label = -1;
+  __Pyx_Generator_clear((PyObject*)__pyx_generator);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+}
+
+static PyObject *__pyx_pf_6postag_7tagging_9perc_test_3genexpr(PyObject *__pyx_self) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *__pyx_cur_scope;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("genexpr", 0);
+  __pyx_cur_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)__pyx_tp_new_6postag_7tagging___pyx_scope_struct_2_genexpr(__pyx_ptype_6postag_7tagging___pyx_scope_struct_2_genexpr, __pyx_empty_tuple, NULL);
+  if (unlikely(!__pyx_cur_scope)) {
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __Pyx_GOTREF(__pyx_cur_scope);
+  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *) __pyx_self;
+  __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
+  __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
+  {
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_6postag_7tagging_9perc_test_5generator1, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_perc_test_locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_cur_scope);
+    __Pyx_RefNannyFinishContext();
+    return (PyObject *) gen;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("postag.tagging.perc_test.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_gb_6postag_7tagging_9perc_test_5generator1(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+{
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *__pyx_cur_scope = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)__pyx_generator->closure);
+  PyObject *__pyx_r = NULL;
+  PyObject *__pyx_t_1 = NULL;
+  Py_ssize_t __pyx_t_2;
+  PyObject *(*__pyx_t_3)(PyObject *);
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("None", 0);
+  switch (__pyx_generator->resume_label) {
+    case 0: goto __pyx_L3_first_run;
+    case 1: goto __pyx_L6_resume_from_yield;
+    default: /* CPython raises the right error here */
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __pyx_L3_first_run:;
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_U)) { __Pyx_RaiseClosureNameError("U"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
+  if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_U)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_U)) {
+    __pyx_t_1 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_U; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
+    __pyx_t_3 = NULL;
+  } else {
+    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_U); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  for (;;) {
+    if (likely(!__pyx_t_3)) {
+      if (likely(PyList_CheckExact(__pyx_t_1))) {
+        if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_COMPILING_IN_CPYTHON
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #endif
+      } else {
+        if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_COMPILING_IN_CPYTHON
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        #endif
+      }
+    } else {
+      __pyx_t_4 = __pyx_t_3(__pyx_t_1);
+      if (unlikely(!__pyx_t_4)) {
+        PyObject* exc_type = PyErr_Occurred();
+        if (exc_type) {
+          if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        }
+        break;
+      }
+      __Pyx_GOTREF(__pyx_t_4);
+    }
+    __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_u);
+    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_u, __pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_4);
+    __pyx_t_4 = 0;
+    __pyx_t_4 = __pyx_pf_6postag_7tagging_9perc_test_7genexpr_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_4);
+    __pyx_t_4 = 0;
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_max, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_r = __pyx_t_4;
+    __pyx_t_4 = 0;
+    __Pyx_XGIVEREF(__pyx_t_1);
+    __pyx_cur_scope->__pyx_t_0 = __pyx_t_1;
+    __pyx_cur_scope->__pyx_t_1 = __pyx_t_2;
+    __pyx_cur_scope->__pyx_t_2 = __pyx_t_3;
+    __Pyx_XGIVEREF(__pyx_r);
+    __Pyx_RefNannyFinishContext();
+    /* return from generator, yielding value */
+    __pyx_generator->resume_label = 1;
+    return __pyx_r;
+    __pyx_L6_resume_from_yield:;
+    __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
+    __pyx_cur_scope->__pyx_t_0 = 0;
+    __Pyx_XGOTREF(__pyx_t_1);
+    __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
+    __pyx_t_3 = __pyx_cur_scope->__pyx_t_2;
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* function exit code */
+  PyErr_SetNone(PyExc_StopIteration);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_generator->resume_label = -1;
+  __Pyx_Generator_clear((PyObject*)__pyx_generator);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+}
+
+/* "postag/tagging.pyx":33
+ *     return weight
+ * 
+ * def perc_test(feat_vec, labeled_list, tagset, default_tag):             # <<<<<<<<<<<<<<
+ *     output = []
+ *     labels = copy.deepcopy(labeled_list)
+ */
+
+static PyObject *__pyx_pf_6postag_7tagging_4perc_test(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_feat_vec, PyObject *__pyx_v_labeled_list, PyObject *__pyx_v_tagset, CYTHON_UNUSED PyObject *__pyx_v_default_tag) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *__pyx_cur_scope;
+  CYTHON_UNUSED PyObject *__pyx_v_output = NULL;
   PyObject *__pyx_v_labels = NULL;
-  PyObject *__pyx_v_N = NULL;
-  PyObject *__pyx_v_viterbi = NULL;
-  PyObject *__pyx_v_i = NULL;
-  PyObject *__pyx_v_pos_feat = NULL;
-  CYTHON_UNUSED PyObject *__pyx_v_word = NULL;
-  int __pyx_v_found_tag;
+  PyObject *__pyx_v_bp = NULL;
   PyObject *__pyx_v_tag = NULL;
-  PyObject *__pyx_v_prev_list = NULL;
-  PyObject *__pyx_v_prev_tag = NULL;
-  PyObject *__pyx_v_feats = NULL;
-  PyObject *__pyx_v_prev_value = NULL;
-  PyObject *__pyx_v_prev_backpointer = NULL;
-  PyObject *__pyx_v_weight = NULL;
-  PyObject *__pyx_v_feat = NULL;
-  PyObject *__pyx_v_prev_tag_weight = NULL;
-  PyObject *__pyx_v_best_weight = NULL;
-  PyObject *__pyx_v_backpointer = NULL;
-  PyObject *__pyx_v_maxvalue = NULL;
-  PyObject *__pyx_v_best_tag = NULL;
-  CYTHON_UNUSED PyObject *__pyx_v_value = NULL;
+  CYTHON_UNUSED PyObject *__pyx_v_prob = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1226,44 +2218,51 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
   int __pyx_t_5;
   Py_ssize_t __pyx_t_6;
   PyObject *(*__pyx_t_7)(PyObject *);
-  Py_ssize_t __pyx_t_8;
-  PyObject *(*__pyx_t_9)(PyObject *);
-  Py_ssize_t __pyx_t_10;
-  PyObject *(*__pyx_t_11)(PyObject *);
-  PyObject *__pyx_t_12 = NULL;
+  int __pyx_t_8;
+  Py_ssize_t __pyx_t_9;
+  PyObject *(*__pyx_t_10)(PyObject *);
+  Py_ssize_t __pyx_t_11;
+  PyObject *(*__pyx_t_12)(PyObject *);
   PyObject *__pyx_t_13 = NULL;
   PyObject *__pyx_t_14 = NULL;
-  PyObject *(*__pyx_t_15)(PyObject *);
-  Py_ssize_t __pyx_t_16;
-  int __pyx_t_17;
-  int __pyx_t_18;
+  PyObject *__pyx_t_15 = NULL;
+  PyObject *(*__pyx_t_16)(PyObject *);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("perc_test", 0);
+  __pyx_cur_scope = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)__pyx_tp_new_6postag_7tagging___pyx_scope_struct__perc_test(__pyx_ptype_6postag_7tagging___pyx_scope_struct__perc_test, __pyx_empty_tuple, NULL);
+  if (unlikely(!__pyx_cur_scope)) {
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __Pyx_GOTREF(__pyx_cur_scope);
+  __pyx_cur_scope->__pyx_v_feat_vec = __pyx_v_feat_vec;
+  __Pyx_INCREF(__pyx_cur_scope->__pyx_v_feat_vec);
+  __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_feat_vec);
 
-  /* "postag/tagging.pyx":25
+  /* "postag/tagging.pyx":34
  * 
  * def perc_test(feat_vec, labeled_list, tagset, default_tag):
  *     output = []             # <<<<<<<<<<<<<<
  *     labels = copy.deepcopy(labeled_list)
  *     # add in the start and end buffers for the context
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_output = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "postag/tagging.pyx":26
+  /* "postag/tagging.pyx":35
  * def perc_test(feat_vec, labeled_list, tagset, default_tag):
  *     output = []
  *     labels = copy.deepcopy(labeled_list)             # <<<<<<<<<<<<<<
  *     # add in the start and end buffers for the context
- *     labels.insert(0, 'B_-1')
+ *     labels.insert(0, '_B_-1')
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_copy); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_copy); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_deepcopy); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_deepcopy); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -1277,16 +2276,16 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
     }
   }
   if (!__pyx_t_2) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_labeled_list); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_labeled_list); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
   } else {
-    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2); __Pyx_GIVEREF(__pyx_t_2); __pyx_t_2 = NULL;
     __Pyx_INCREF(__pyx_v_labeled_list);
     PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_v_labeled_list);
     __Pyx_GIVEREF(__pyx_v_labeled_list);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
@@ -1294,192 +2293,62 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
   __pyx_v_labels = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "postag/tagging.pyx":28
+  /* "postag/tagging.pyx":37
  *     labels = copy.deepcopy(labeled_list)
  *     # add in the start and end buffers for the context
- *     labels.insert(0, 'B_-1')             # <<<<<<<<<<<<<<
- *     labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1
- *     labels.append('B_+1')
+ *     labels.insert(0, '_B_-1')             # <<<<<<<<<<<<<<
+ *     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
+ *     labels.append('_B_+1')
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_labels, __pyx_n_s_insert); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_labels, __pyx_n_s_insert); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 37; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 37; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "postag/tagging.pyx":29
- *     # add in the start and end buffers for the context
- *     labels.insert(0, 'B_-1')
- *     labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1             # <<<<<<<<<<<<<<
- *     labels.append('B_+1')
- *     labels.append('B_+2') # last two 'words' are B_+1 B_+2
- */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_labels, __pyx_n_s_insert); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "postag/tagging.pyx":30
- *     labels.insert(0, 'B_-1')
- *     labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1
- *     labels.append('B_+1')             # <<<<<<<<<<<<<<
- *     labels.append('B_+2') # last two 'words' are B_+1 B_+2
- * 
- */
-  __pyx_t_5 = __Pyx_PyObject_Append(__pyx_v_labels, __pyx_kp_s_B__1_2); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-
-  /* "postag/tagging.pyx":31
- *     labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1
- *     labels.append('B_+1')
- *     labels.append('B_+2') # last two 'words' are B_+1 B_+2             # <<<<<<<<<<<<<<
- * 
- *     # size of the viterbi data structure
- */
-  __pyx_t_5 = __Pyx_PyObject_Append(__pyx_v_labels, __pyx_kp_s_B__2_2); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-
-  /* "postag/tagging.pyx":34
- * 
- *     # size of the viterbi data structure
- *     N = len(labels)             # <<<<<<<<<<<<<<
- * 
- *     # Set up the data structure for viterbi search
- */
-  __pyx_t_6 = PyObject_Length(__pyx_v_labels); if (unlikely(__pyx_t_6 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_N = __pyx_t_1;
-  __pyx_t_1 = 0;
-
-  /* "postag/tagging.pyx":37
- * 
- *     # Set up the data structure for viterbi search
- *     viterbi = {}             # <<<<<<<<<<<<<<
- *     for i in range(0, N):
- *         viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple
- */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 37; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_viterbi = ((PyObject*)__pyx_t_1);
-  __pyx_t_1 = 0;
 
   /* "postag/tagging.pyx":38
- *     # Set up the data structure for viterbi search
- *     viterbi = {}
- *     for i in range(0, N):             # <<<<<<<<<<<<<<
- *         viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple
- * 
+ *     # add in the start and end buffers for the context
+ *     labels.insert(0, '_B_-1')
+ *     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1             # <<<<<<<<<<<<<<
+ *     labels.append('_B_+1')
+ *     labels.append('_B_+2') # last two 'words' are B_+1 B_+2
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(__pyx_int_0);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_int_0);
-  __Pyx_GIVEREF(__pyx_int_0);
-  __Pyx_INCREF(__pyx_v_N);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_N);
-  __Pyx_GIVEREF(__pyx_v_N);
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_1, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_labels, __pyx_n_s_insert); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
-    __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_6 = 0;
-    __pyx_t_7 = NULL;
-  } else {
-    __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  for (;;) {
-    if (likely(!__pyx_t_7)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_1)) break;
-        #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        #endif
-      } else {
-        if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
-        #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        #endif
-      }
-    } else {
-      __pyx_t_3 = __pyx_t_7(__pyx_t_1);
-      if (unlikely(!__pyx_t_3)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_3);
-    }
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
-    __pyx_t_3 = 0;
-
-    /* "postag/tagging.pyx":39
- *     viterbi = {}
- *     for i in range(0, N):
- *         viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple             # <<<<<<<<<<<<<<
- * 
- *     # We do not tag the first two and last two words
- */
-    __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely(PyDict_SetItem(__pyx_v_viterbi, __pyx_v_i, __pyx_t_3) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-    /* "postag/tagging.pyx":38
- *     # Set up the data structure for viterbi search
- *     viterbi = {}
- *     for i in range(0, N):             # <<<<<<<<<<<<<<
- *         viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple
- * 
- */
-  }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "postag/tagging.pyx":43
- *     # We do not tag the first two and last two words
- *     # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words
- *     viterbi[0]['B_-2'] = (0.0, '')             # <<<<<<<<<<<<<<
- *     viterbi[1]['B_-1'] = (0.0, 'B_-2')
- *     # find the value of best_tag for each word i in the input
+  /* "postag/tagging.pyx":39
+ *     labels.insert(0, '_B_-1')
+ *     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
+ *     labels.append('_B_+1')             # <<<<<<<<<<<<<<
+ *     labels.append('_B_+2') # last two 'words' are B_+1 B_+2
+ *     pos_feat = pos_fgen.Pos_feat_gen(labels)
  */
-  __pyx_t_1 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_int_0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-  __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_kp_s_B__2, __pyx_tuple__6) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_5 = __Pyx_PyObject_Append(__pyx_v_labels, __pyx_kp_s_B__1_2); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "postag/tagging.pyx":44
- *     # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words
- *     viterbi[0]['B_-2'] = (0.0, '')
- *     viterbi[1]['B_-1'] = (0.0, 'B_-2')             # <<<<<<<<<<<<<<
- *     # find the value of best_tag for each word i in the input
- *     # feat_index = 0
+  /* "postag/tagging.pyx":40
+ *     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
+ *     labels.append('_B_+1')
+ *     labels.append('_B_+2') # last two 'words' are B_+1 B_+2             # <<<<<<<<<<<<<<
+ *     pos_feat = pos_fgen.Pos_feat_gen(labels)
+ *     n = len(labeled_list)
  */
-  __pyx_t_1 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_int_1); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-  __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_kp_s_B__1, __pyx_tuple__7) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_5 = __Pyx_PyObject_Append(__pyx_v_labels, __pyx_kp_s_B__2_2); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 40; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "postag/tagging.pyx":47
- *     # find the value of best_tag for each word i in the input
- *     # feat_index = 0
+  /* "postag/tagging.pyx":41
+ *     labels.append('_B_+1')
+ *     labels.append('_B_+2') # last two 'words' are B_+1 B_+2
  *     pos_feat = pos_fgen.Pos_feat_gen(labels)             # <<<<<<<<<<<<<<
- *     for i in range(2, N-2):
- *         word = labels[i]
+ *     n = len(labeled_list)
+ *     pi = {} #stores the prob
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_pos_fgen); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_pos_fgen); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Pos_feat_gen); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Pos_feat_gen); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -1493,50 +2362,99 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_labels); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_labels); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
   } else {
-    __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3); __Pyx_GIVEREF(__pyx_t_3); __pyx_t_3 = NULL;
     __Pyx_INCREF(__pyx_v_labels);
     PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_labels);
     __Pyx_GIVEREF(__pyx_v_labels);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_pos_feat = __pyx_t_1;
+  __Pyx_GIVEREF(__pyx_t_1);
+  __pyx_cur_scope->__pyx_v_pos_feat = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "postag/tagging.pyx":48
- *     # feat_index = 0
+  /* "postag/tagging.pyx":42
+ *     labels.append('_B_+2') # last two 'words' are B_+1 B_+2
  *     pos_feat = pos_fgen.Pos_feat_gen(labels)
- *     for i in range(2, N-2):             # <<<<<<<<<<<<<<
- *         word = labels[i]
- *         # if len(feats) == 0:
+ *     n = len(labeled_list)             # <<<<<<<<<<<<<<
+ *     pi = {} #stores the prob
+ *     bp = {} #backpointer
  */
-  __pyx_t_1 = PyNumber_Subtract(__pyx_v_N, __pyx_int_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = PyObject_Length(__pyx_v_labeled_list); if (unlikely(__pyx_t_6 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GIVEREF(__pyx_t_1);
+  __pyx_cur_scope->__pyx_v_n = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":43
+ *     pos_feat = pos_fgen.Pos_feat_gen(labels)
+ *     n = len(labeled_list)
+ *     pi = {} #stores the prob             # <<<<<<<<<<<<<<
+ *     bp = {} #backpointer
+ *     pi[(0,'B_-2','B_-1')] = 0;
+ */
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_1);
+  __pyx_cur_scope->__pyx_v_pi = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":44
+ *     n = len(labeled_list)
+ *     pi = {} #stores the prob
+ *     bp = {} #backpointer             # <<<<<<<<<<<<<<
+ *     pi[(0,'B_-2','B_-1')] = 0;
+ *     for k in range(1,n+1):
+ */
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_bp = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":45
+ *     pi = {} #stores the prob
+ *     bp = {} #backpointer
+ *     pi[(0,'B_-2','B_-1')] = 0;             # <<<<<<<<<<<<<<
+ *     for k in range(1,n+1):
+ *         if k == 1:
+ */
+  if (unlikely(PyDict_SetItem(__pyx_cur_scope->__pyx_v_pi, __pyx_tuple__5, __pyx_int_0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "postag/tagging.pyx":46
+ *     bp = {} #backpointer
+ *     pi[(0,'B_-2','B_-1')] = 0;
+ *     for k in range(1,n+1):             # <<<<<<<<<<<<<<
+ *         if k == 1:
+ *             # T is possible tags of second previous word in position k-2
+ */
+  __pyx_t_1 = PyNumber_Add(__pyx_cur_scope->__pyx_v_n, __pyx_int_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_INCREF(__pyx_int_2);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_int_2);
-  __Pyx_GIVEREF(__pyx_int_2);
+  __Pyx_INCREF(__pyx_int_1);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_int_1);
+  __Pyx_GIVEREF(__pyx_int_1);
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
     __pyx_t_4 = __pyx_t_1; __Pyx_INCREF(__pyx_t_4); __pyx_t_6 = 0;
     __pyx_t_7 = NULL;
   } else {
-    __pyx_t_6 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
@@ -1544,16 +2462,16 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
       if (likely(PyList_CheckExact(__pyx_t_4))) {
         if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #endif
       } else {
         if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #endif
       }
     } else {
@@ -1562,175 +2480,280 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         }
         break;
       }
       __Pyx_GOTREF(__pyx_t_1);
     }
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_1);
+    __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_k);
+    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_k, __pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "postag/tagging.pyx":49
- *     pos_feat = pos_fgen.Pos_feat_gen(labels)
- *     for i in range(2, N-2):
- *         word = labels[i]             # <<<<<<<<<<<<<<
- *         # if len(feats) == 0:
- *         #     print >>sys.stderr, " ".join(labels), " ".join(feat_list), "\n"
+    /* "postag/tagging.pyx":47
+ *     pi[(0,'B_-2','B_-1')] = 0;
+ *     for k in range(1,n+1):
+ *         if k == 1:             # <<<<<<<<<<<<<<
+ *             # T is possible tags of second previous word in position k-2
+ *             T = {'B_-2'}
  */
-    __pyx_t_1 = PyObject_GetItem(__pyx_v_labels, __pyx_v_i); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_XDECREF_SET(__pyx_v_word, __pyx_t_1);
-    __pyx_t_1 = 0;
+    __pyx_t_1 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_k, __pyx_int_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_8 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (__pyx_t_8) {
 
-    /* "postag/tagging.pyx":56
- *         #fields = labels[i].split()
- *         #(word, postag) = (fields[0], fields[1])
- *         found_tag = False             # <<<<<<<<<<<<<<
- *         for tag in tagset:
- *             #has_bigram_feat = False
+      /* "postag/tagging.pyx":49
+ *         if k == 1:
+ *             # T is possible tags of second previous word in position k-2
+ *             T = {'B_-2'}             # <<<<<<<<<<<<<<
+ *             # U is possible tags of first previous word in position k-1
+ *             U = {'B_-1'}
  */
-    __pyx_v_found_tag = 0;
-
-    /* "postag/tagging.pyx":57
- *         #(word, postag) = (fields[0], fields[1])
- *         found_tag = False
- *         for tag in tagset:             # <<<<<<<<<<<<<<
- *             #has_bigram_feat = False
- *             # weight = 0.0
- */
-    if (likely(PyList_CheckExact(__pyx_v_tagset)) || PyTuple_CheckExact(__pyx_v_tagset)) {
-      __pyx_t_1 = __pyx_v_tagset; __Pyx_INCREF(__pyx_t_1); __pyx_t_8 = 0;
-      __pyx_t_9 = NULL;
-    } else {
-      __pyx_t_8 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_tagset); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_1 = PySet_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_9 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      if (PySet_Add(__pyx_t_1, __pyx_kp_s_B__2_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_T);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_T, __pyx_t_1);
+      __Pyx_GIVEREF(__pyx_t_1);
+      __pyx_t_1 = 0;
+
+      /* "postag/tagging.pyx":51
+ *             T = {'B_-2'}
+ *             # U is possible tags of first previous word in position k-1
+ *             U = {'B_-1'}             # <<<<<<<<<<<<<<
+ *             # S is possible tags of the current word in position k
+ *             S = tagset
+ */
+      __pyx_t_1 = PySet_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_1);
+      if (PySet_Add(__pyx_t_1, __pyx_kp_s_B__1_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_U);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_U, __pyx_t_1);
+      __Pyx_GIVEREF(__pyx_t_1);
+      __pyx_t_1 = 0;
+
+      /* "postag/tagging.pyx":53
+ *             U = {'B_-1'}
+ *             # S is possible tags of the current word in position k
+ *             S = tagset             # <<<<<<<<<<<<<<
+ *         elif k == 2:
+ *             T = {'B_-1'}
+ */
+      __Pyx_INCREF(__pyx_v_tagset);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_S);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_S, __pyx_v_tagset);
+      __Pyx_GIVEREF(__pyx_v_tagset);
+      goto __pyx_L5;
+    }
+
+    /* "postag/tagging.pyx":54
+ *             # S is possible tags of the current word in position k
+ *             S = tagset
+ *         elif k == 2:             # <<<<<<<<<<<<<<
+ *             T = {'B_-1'}
+ *             U = tagset
+ */
+    __pyx_t_1 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_k, __pyx_int_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_8 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (__pyx_t_8) {
+
+      /* "postag/tagging.pyx":55
+ *             S = tagset
+ *         elif k == 2:
+ *             T = {'B_-1'}             # <<<<<<<<<<<<<<
+ *             U = tagset
+ *             S = tagset
+ */
+      __pyx_t_1 = PySet_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_1);
+      if (PySet_Add(__pyx_t_1, __pyx_kp_s_B__1_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_T);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_T, __pyx_t_1);
+      __Pyx_GIVEREF(__pyx_t_1);
+      __pyx_t_1 = 0;
+
+      /* "postag/tagging.pyx":56
+ *         elif k == 2:
+ *             T = {'B_-1'}
+ *             U = tagset             # <<<<<<<<<<<<<<
+ *             S = tagset
+ *         else:
+ */
+      __Pyx_INCREF(__pyx_v_tagset);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_U);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_U, __pyx_v_tagset);
+      __Pyx_GIVEREF(__pyx_v_tagset);
+
+      /* "postag/tagging.pyx":57
+ *             T = {'B_-1'}
+ *             U = tagset
+ *             S = tagset             # <<<<<<<<<<<<<<
+ *         else:
+ *             T = tagset
+ */
+      __Pyx_INCREF(__pyx_v_tagset);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_S);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_S, __pyx_v_tagset);
+      __Pyx_GIVEREF(__pyx_v_tagset);
+      goto __pyx_L5;
+    }
+    /*else*/ {
+
+      /* "postag/tagging.pyx":59
+ *             S = tagset
+ *         else:
+ *             T = tagset             # <<<<<<<<<<<<<<
+ *             U = tagset
+ *             S = tagset
+ */
+      __Pyx_INCREF(__pyx_v_tagset);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_T);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_T, __pyx_v_tagset);
+      __Pyx_GIVEREF(__pyx_v_tagset);
+
+      /* "postag/tagging.pyx":60
+ *         else:
+ *             T = tagset
+ *             U = tagset             # <<<<<<<<<<<<<<
+ *             S = tagset
+ * 
+ */
+      __Pyx_INCREF(__pyx_v_tagset);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_U);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_U, __pyx_v_tagset);
+      __Pyx_GIVEREF(__pyx_v_tagset);
+
+      /* "postag/tagging.pyx":61
+ *             T = tagset
+ *             U = tagset
+ *             S = tagset             # <<<<<<<<<<<<<<
+ * 
+ *         for u in U:
+ */
+      __Pyx_INCREF(__pyx_v_tagset);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_S);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_S, __pyx_v_tagset);
+      __Pyx_GIVEREF(__pyx_v_tagset);
+    }
+    __pyx_L5:;
+
+    /* "postag/tagging.pyx":63
+ *             S = tagset
+ * 
+ *         for u in U:             # <<<<<<<<<<<<<<
+ *             for s in S:
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))
+ */
+    if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_v_U)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_v_U)) {
+      __pyx_t_1 = __pyx_cur_scope->__pyx_v_U; __Pyx_INCREF(__pyx_t_1); __pyx_t_9 = 0;
+      __pyx_t_10 = NULL;
+    } else {
+      __pyx_t_9 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_v_U); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_10 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     for (;;) {
-      if (likely(!__pyx_t_9)) {
+      if (likely(!__pyx_t_10)) {
         if (likely(PyList_CheckExact(__pyx_t_1))) {
-          if (__pyx_t_8 >= PyList_GET_SIZE(__pyx_t_1)) break;
+          if (__pyx_t_9 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_8); __Pyx_INCREF(__pyx_t_2); __pyx_t_8++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_9); __Pyx_INCREF(__pyx_t_2); __pyx_t_9++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           #else
-          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           #endif
         } else {
-          if (__pyx_t_8 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+          if (__pyx_t_9 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_8); __Pyx_INCREF(__pyx_t_2); __pyx_t_8++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_9); __Pyx_INCREF(__pyx_t_2); __pyx_t_9++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           #else
-          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           #endif
         }
       } else {
-        __pyx_t_2 = __pyx_t_9(__pyx_t_1);
+        __pyx_t_2 = __pyx_t_10(__pyx_t_1);
         if (unlikely(!__pyx_t_2)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           }
           break;
         }
         __Pyx_GOTREF(__pyx_t_2);
       }
-      __Pyx_XDECREF_SET(__pyx_v_tag, __pyx_t_2);
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_u);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_u, __pyx_t_2);
+      __Pyx_GIVEREF(__pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "postag/tagging.pyx":66
- *             #         weight += feat_vec[feat, tag]
- *             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
- *             prev_list = []             # <<<<<<<<<<<<<<
- *             for prev_tag in viterbi[i-1]:
- *                 feats = []
+      /* "postag/tagging.pyx":64
+ * 
+ *         for u in U:
+ *             for s in S:             # <<<<<<<<<<<<<<
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))
+ * 
  */
-      __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_XDECREF_SET(__pyx_v_prev_list, ((PyObject*)__pyx_t_2));
-      __pyx_t_2 = 0;
-
-      /* "postag/tagging.pyx":67
- *             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
- *             prev_list = []
- *             for prev_tag in viterbi[i-1]:             # <<<<<<<<<<<<<<
- *                 feats = []
- *                 (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
- */
-      __pyx_t_2 = PyNumber_Subtract(__pyx_v_i, __pyx_int_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_t_2); if (unlikely(__pyx_t_3 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
-        __pyx_t_2 = __pyx_t_3; __Pyx_INCREF(__pyx_t_2); __pyx_t_10 = 0;
-        __pyx_t_11 = NULL;
+      if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_v_S)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_v_S)) {
+        __pyx_t_2 = __pyx_cur_scope->__pyx_v_S; __Pyx_INCREF(__pyx_t_2); __pyx_t_11 = 0;
+        __pyx_t_12 = NULL;
       } else {
-        __pyx_t_10 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_11 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_cur_scope->__pyx_v_S); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_11 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_12 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       }
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       for (;;) {
-        if (likely(!__pyx_t_11)) {
+        if (likely(!__pyx_t_12)) {
           if (likely(PyList_CheckExact(__pyx_t_2))) {
-            if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_2)) break;
+            if (__pyx_t_11 >= PyList_GET_SIZE(__pyx_t_2)) break;
             #if CYTHON_COMPILING_IN_CPYTHON
-            __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_3); __pyx_t_10++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_11); __Pyx_INCREF(__pyx_t_3); __pyx_t_11++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             #else
-            __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_11); __pyx_t_11++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             #endif
           } else {
-            if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
+            if (__pyx_t_11 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
             #if CYTHON_COMPILING_IN_CPYTHON
-            __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_3); __pyx_t_10++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_11); __Pyx_INCREF(__pyx_t_3); __pyx_t_11++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             #else
-            __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_11); __pyx_t_11++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             #endif
           }
         } else {
-          __pyx_t_3 = __pyx_t_11(__pyx_t_2);
+          __pyx_t_3 = __pyx_t_12(__pyx_t_2);
           if (unlikely(!__pyx_t_3)) {
             PyObject* exc_type = PyErr_Occurred();
             if (exc_type) {
               if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-              else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             }
             break;
           }
           __Pyx_GOTREF(__pyx_t_3);
         }
-        __Pyx_XDECREF_SET(__pyx_v_prev_tag, __pyx_t_3);
+        __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_s);
+        __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_s, __pyx_t_3);
+        __Pyx_GIVEREF(__pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "postag/tagging.pyx":68
- *             prev_list = []
- *             for prev_tag in viterbi[i-1]:
- *                 feats = []             # <<<<<<<<<<<<<<
- *                 (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
- *                 pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)
+        /* "postag/tagging.pyx":65
+ *         for u in U:
+ *             for s in S:
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))             # <<<<<<<<<<<<<<
+ * 
+ * # Store the tag sequence as an array
  */
-        __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_3 = __pyx_pf_6postag_7tagging_9perc_test_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_XDECREF_SET(__pyx_v_feats, ((PyObject*)__pyx_t_3));
+        __pyx_t_13 = PyTuple_New(1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __Pyx_GOTREF(__pyx_t_13);
+        PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_3);
+        __Pyx_GIVEREF(__pyx_t_3);
         __pyx_t_3 = 0;
-
-        /* "postag/tagging.pyx":69
- *             for prev_tag in viterbi[i-1]:
- *                 feats = []
- *                 (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]             # <<<<<<<<<<<<<<
- *                 pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)
- *                 weight = 0.0
- */
-        __pyx_t_3 = PyNumber_Subtract(__pyx_v_i, __pyx_int_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_max, __pyx_t_13, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_12 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_t_3); if (unlikely(__pyx_t_12 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-        __Pyx_GOTREF(__pyx_t_12);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyObject_GetItem(__pyx_t_12, __pyx_v_prev_tag); if (unlikely(__pyx_t_3 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
           PyObject* sequence = __pyx_t_3;
           #if CYTHON_COMPILING_IN_CPYTHON
@@ -1741,635 +2764,350 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           }
           #if CYTHON_COMPILING_IN_CPYTHON
           if (likely(PyTuple_CheckExact(sequence))) {
-            __pyx_t_12 = PyTuple_GET_ITEM(sequence, 0); 
-            __pyx_t_13 = PyTuple_GET_ITEM(sequence, 1); 
+            __pyx_t_13 = PyTuple_GET_ITEM(sequence, 0); 
+            __pyx_t_14 = PyTuple_GET_ITEM(sequence, 1); 
           } else {
-            __pyx_t_12 = PyList_GET_ITEM(sequence, 0); 
-            __pyx_t_13 = PyList_GET_ITEM(sequence, 1); 
+            __pyx_t_13 = PyList_GET_ITEM(sequence, 0); 
+            __pyx_t_14 = PyList_GET_ITEM(sequence, 1); 
           }
-          __Pyx_INCREF(__pyx_t_12);
           __Pyx_INCREF(__pyx_t_13);
+          __Pyx_INCREF(__pyx_t_14);
           #else
-          __pyx_t_12 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_13 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_13 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_13);
+          __pyx_t_14 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __Pyx_GOTREF(__pyx_t_14);
           #endif
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_14 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          __Pyx_GOTREF(__pyx_t_14);
+          __pyx_t_15 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __Pyx_GOTREF(__pyx_t_15);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-          __pyx_t_15 = Py_TYPE(__pyx_t_14)->tp_iternext;
-          index = 0; __pyx_t_12 = __pyx_t_15(__pyx_t_14); if (unlikely(!__pyx_t_12)) goto __pyx_L11_unpacking_failed;
-          __Pyx_GOTREF(__pyx_t_12);
-          index = 1; __pyx_t_13 = __pyx_t_15(__pyx_t_14); if (unlikely(!__pyx_t_13)) goto __pyx_L11_unpacking_failed;
+          __pyx_t_16 = Py_TYPE(__pyx_t_15)->tp_iternext;
+          index = 0; __pyx_t_13 = __pyx_t_16(__pyx_t_15); if (unlikely(!__pyx_t_13)) goto __pyx_L10_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_13);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_15(__pyx_t_14), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          __pyx_t_15 = NULL;
-          __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-          goto __pyx_L12_unpacking_done;
-          __pyx_L11_unpacking_failed:;
-          __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-          __pyx_t_15 = NULL;
+          index = 1; __pyx_t_14 = __pyx_t_16(__pyx_t_15); if (unlikely(!__pyx_t_14)) goto __pyx_L10_unpacking_failed;
+          __Pyx_GOTREF(__pyx_t_14);
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_16(__pyx_t_15), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_16 = NULL;
+          __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
+          goto __pyx_L11_unpacking_done;
+          __pyx_L10_unpacking_failed:;
+          __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
+          __pyx_t_16 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          __pyx_L12_unpacking_done:;
+          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_L11_unpacking_done:;
         }
-        __Pyx_XDECREF_SET(__pyx_v_prev_value, __pyx_t_12);
-        __pyx_t_12 = 0;
-        __Pyx_XDECREF_SET(__pyx_v_prev_backpointer, __pyx_t_13);
-        __pyx_t_13 = 0;
-
-        /* "postag/tagging.pyx":70
- *                 feats = []
- *                 (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
- *                 pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)             # <<<<<<<<<<<<<<
- *                 weight = 0.0
- *                 # sum up the weights for all features except the bigram features
- */
-        __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_pos_feat, __pyx_n_s_get_pos_feature); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_13);
-        __pyx_t_12 = NULL;
-        __pyx_t_16 = 0;
-        if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_13))) {
-          __pyx_t_12 = PyMethod_GET_SELF(__pyx_t_13);
-          if (likely(__pyx_t_12)) {
-            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_13);
-            __Pyx_INCREF(__pyx_t_12);
-            __Pyx_INCREF(function);
-            __Pyx_DECREF_SET(__pyx_t_13, function);
-            __pyx_t_16 = 1;
-          }
-        }
-        __pyx_t_14 = PyTuple_New(4+__pyx_t_16); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_14);
-        if (__pyx_t_12) {
-          PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
-        }
-        __Pyx_INCREF(__pyx_v_feats);
-        PyTuple_SET_ITEM(__pyx_t_14, 0+__pyx_t_16, __pyx_v_feats);
-        __Pyx_GIVEREF(__pyx_v_feats);
-        __Pyx_INCREF(__pyx_v_i);
-        PyTuple_SET_ITEM(__pyx_t_14, 1+__pyx_t_16, __pyx_v_i);
-        __Pyx_GIVEREF(__pyx_v_i);
-        __Pyx_INCREF(__pyx_v_prev_tag);
-        PyTuple_SET_ITEM(__pyx_t_14, 2+__pyx_t_16, __pyx_v_prev_tag);
-        __Pyx_GIVEREF(__pyx_v_prev_tag);
-        __Pyx_INCREF(__pyx_v_prev_backpointer);
-        PyTuple_SET_ITEM(__pyx_t_14, 3+__pyx_t_16, __pyx_v_prev_backpointer);
-        __Pyx_GIVEREF(__pyx_v_prev_backpointer);
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_14, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_15 = PyTuple_New(3); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __Pyx_GOTREF(__pyx_t_15);
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_k);
+        PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_cur_scope->__pyx_v_k);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_k);
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_u);
+        PyTuple_SET_ITEM(__pyx_t_15, 1, __pyx_cur_scope->__pyx_v_u);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_u);
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_s);
+        PyTuple_SET_ITEM(__pyx_t_15, 2, __pyx_cur_scope->__pyx_v_s);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_s);
+        if (unlikely(PyDict_SetItem(__pyx_cur_scope->__pyx_v_pi, __pyx_t_15, __pyx_t_13) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
+        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+        __pyx_t_15 = PyTuple_New(3); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __Pyx_GOTREF(__pyx_t_15);
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_k);
+        PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_cur_scope->__pyx_v_k);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_k);
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_u);
+        PyTuple_SET_ITEM(__pyx_t_15, 1, __pyx_cur_scope->__pyx_v_u);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_u);
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_s);
+        PyTuple_SET_ITEM(__pyx_t_15, 2, __pyx_cur_scope->__pyx_v_s);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_s);
+        if (unlikely(PyDict_SetItem(__pyx_v_bp, __pyx_t_15, __pyx_t_14) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
         __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-        /* "postag/tagging.pyx":71
- *                 (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
- *                 pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)
- *                 weight = 0.0             # <<<<<<<<<<<<<<
- *                 # sum up the weights for all features except the bigram features
- *                 for feat in feats:
- */
-        __Pyx_INCREF(__pyx_float_0_0);
-        __Pyx_XDECREF_SET(__pyx_v_weight, __pyx_float_0_0);
-
-        /* "postag/tagging.pyx":73
- *                 weight = 0.0
- *                 # sum up the weights for all features except the bigram features
- *                 for feat in feats:             # <<<<<<<<<<<<<<
- *                 #if feat == 'B': has_bigram_feat = True
- *                     if (feat, tag) in feat_vec:
- */
-        __pyx_t_3 = __pyx_v_feats; __Pyx_INCREF(__pyx_t_3); __pyx_t_16 = 0;
-        for (;;) {
-          if (__pyx_t_16 >= PyList_GET_SIZE(__pyx_t_3)) break;
-          #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_13 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_16); __Pyx_INCREF(__pyx_t_13); __pyx_t_16++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          #else
-          __pyx_t_13 = PySequence_ITEM(__pyx_t_3, __pyx_t_16); __pyx_t_16++; if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          #endif
-          __Pyx_XDECREF_SET(__pyx_v_feat, __pyx_t_13);
-          __pyx_t_13 = 0;
-
-          /* "postag/tagging.pyx":75
- *                 for feat in feats:
- *                 #if feat == 'B': has_bigram_feat = True
- *                     if (feat, tag) in feat_vec:             # <<<<<<<<<<<<<<
- *                         weight += feat_vec[feat, tag]
- *             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
- */
-          __pyx_t_13 = PyTuple_New(2); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          __Pyx_GOTREF(__pyx_t_13);
-          __Pyx_INCREF(__pyx_v_feat);
-          PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_v_feat);
-          __Pyx_GIVEREF(__pyx_v_feat);
-          __Pyx_INCREF(__pyx_v_tag);
-          PyTuple_SET_ITEM(__pyx_t_13, 1, __pyx_v_tag);
-          __Pyx_GIVEREF(__pyx_v_tag);
-          __pyx_t_17 = (__Pyx_PySequence_Contains(__pyx_t_13, __pyx_v_feat_vec, Py_EQ)); if (unlikely(__pyx_t_17 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-          __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-          __pyx_t_18 = (__pyx_t_17 != 0);
-          if (__pyx_t_18) {
-
-            /* "postag/tagging.pyx":76
- *                 #if feat == 'B': has_bigram_feat = True
- *                     if (feat, tag) in feat_vec:
- *                         weight += feat_vec[feat, tag]             # <<<<<<<<<<<<<<
- *             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
- *                 prev_tag_weight = weight
- */
-            __pyx_t_13 = PyTuple_New(2); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-            __Pyx_GOTREF(__pyx_t_13);
-            __Pyx_INCREF(__pyx_v_feat);
-            PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_v_feat);
-            __Pyx_GIVEREF(__pyx_v_feat);
-            __Pyx_INCREF(__pyx_v_tag);
-            PyTuple_SET_ITEM(__pyx_t_13, 1, __pyx_v_tag);
-            __Pyx_GIVEREF(__pyx_v_tag);
-            __pyx_t_14 = PyObject_GetItem(__pyx_v_feat_vec, __pyx_t_13); if (unlikely(__pyx_t_14 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-            __Pyx_GOTREF(__pyx_t_14);
-            __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-            __pyx_t_13 = PyNumber_InPlaceAdd(__pyx_v_weight, __pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-            __Pyx_GOTREF(__pyx_t_13);
-            __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-            __Pyx_DECREF_SET(__pyx_v_weight, __pyx_t_13);
-            __pyx_t_13 = 0;
-            goto __pyx_L15;
-          }
-          __pyx_L15:;
-
-          /* "postag/tagging.pyx":73
- *                 weight = 0.0
- *                 # sum up the weights for all features except the bigram features
- *                 for feat in feats:             # <<<<<<<<<<<<<<
- *                 #if feat == 'B': has_bigram_feat = True
- *                     if (feat, tag) in feat_vec:
- */
-        }
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-        /* "postag/tagging.pyx":78
- *                         weight += feat_vec[feat, tag]
- *             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
- *                 prev_tag_weight = weight             # <<<<<<<<<<<<<<
- *                 # if has_bigram_feat:
- *                 #     prev_tag_feat = "B:" + prev_tag
- */
-        __Pyx_INCREF(__pyx_v_weight);
-        __Pyx_XDECREF_SET(__pyx_v_prev_tag_weight, __pyx_v_weight);
-
-        /* "postag/tagging.pyx":83
- *                 #     if (prev_tag_feat, tag) in feat_vec:
- *                 #         prev_tag_weight += feat_vec[prev_tag_feat, tag]
- *                 prev_list.append( (prev_tag_weight + prev_value, prev_tag) )             # <<<<<<<<<<<<<<
- *             (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
- *             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
- */
-        __pyx_t_3 = PyNumber_Add(__pyx_v_prev_tag_weight, __pyx_v_prev_value); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_13 = PyTuple_New(2); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_13);
-        PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_3);
-        __Pyx_GIVEREF(__pyx_t_3);
-        __Pyx_INCREF(__pyx_v_prev_tag);
-        PyTuple_SET_ITEM(__pyx_t_13, 1, __pyx_v_prev_tag);
-        __Pyx_GIVEREF(__pyx_v_prev_tag);
-        __pyx_t_3 = 0;
-        __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_prev_list, __pyx_t_13); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-
-        /* "postag/tagging.pyx":67
- *             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
- *             prev_list = []
- *             for prev_tag in viterbi[i-1]:             # <<<<<<<<<<<<<<
- *                 feats = []
- *                 (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
+        /* "postag/tagging.pyx":64
+ * 
+ *         for u in U:
+ *             for s in S:             # <<<<<<<<<<<<<<
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))
+ * 
  */
       }
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "postag/tagging.pyx":84
- *                 #         prev_tag_weight += feat_vec[prev_tag_feat, tag]
- *                 prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
- *             (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]             # <<<<<<<<<<<<<<
- *             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
- *             if best_weight != 0.0:
- */
-      __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_INCREF(__pyx_v_prev_list);
-      PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_prev_list);
-      __Pyx_GIVEREF(__pyx_v_prev_list);
-      __pyx_t_13 = PyDict_New(); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_13);
-      __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_operator); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_itemgetter); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_14);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-      if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_key, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_reverse, Py_True) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_sorted, __pyx_t_2, __pyx_t_13); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      __pyx_t_13 = __Pyx_GetItemInt(__pyx_t_3, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_13 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-      __Pyx_GOTREF(__pyx_t_13);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if ((likely(PyTuple_CheckExact(__pyx_t_13))) || (PyList_CheckExact(__pyx_t_13))) {
-        PyObject* sequence = __pyx_t_13;
-        #if CYTHON_COMPILING_IN_CPYTHON
-        Py_ssize_t size = Py_SIZE(sequence);
-        #else
-        Py_ssize_t size = PySequence_Size(sequence);
-        #endif
-        if (unlikely(size != 2)) {
-          if (size > 2) __Pyx_RaiseTooManyValuesError(2);
-          else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        }
-        #if CYTHON_COMPILING_IN_CPYTHON
-        if (likely(PyTuple_CheckExact(sequence))) {
-          __pyx_t_3 = PyTuple_GET_ITEM(sequence, 0); 
-          __pyx_t_2 = PyTuple_GET_ITEM(sequence, 1); 
-        } else {
-          __pyx_t_3 = PyList_GET_ITEM(sequence, 0); 
-          __pyx_t_2 = PyList_GET_ITEM(sequence, 1); 
-        }
-        __Pyx_INCREF(__pyx_t_3);
-        __Pyx_INCREF(__pyx_t_2);
-        #else
-        __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_2);
-        #endif
-        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      } else {
-        Py_ssize_t index = -1;
-        __pyx_t_14 = PyObject_GetIter(__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_14);
-        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __pyx_t_15 = Py_TYPE(__pyx_t_14)->tp_iternext;
-        index = 0; __pyx_t_3 = __pyx_t_15(__pyx_t_14); if (unlikely(!__pyx_t_3)) goto __pyx_L16_unpacking_failed;
-        __Pyx_GOTREF(__pyx_t_3);
-        index = 1; __pyx_t_2 = __pyx_t_15(__pyx_t_14); if (unlikely(!__pyx_t_2)) goto __pyx_L16_unpacking_failed;
-        __Pyx_GOTREF(__pyx_t_2);
-        if (__Pyx_IternextUnpackEndCheck(__pyx_t_15(__pyx_t_14), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __pyx_t_15 = NULL;
-        __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-        goto __pyx_L17_unpacking_done;
-        __pyx_L16_unpacking_failed:;
-        __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-        __pyx_t_15 = NULL;
-        if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-        {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __pyx_L17_unpacking_done:;
-      }
-      __Pyx_XDECREF_SET(__pyx_v_best_weight, __pyx_t_3);
-      __pyx_t_3 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_backpointer, __pyx_t_2);
-      __pyx_t_2 = 0;
-
-      /* "postag/tagging.pyx":86
- *             (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
- *             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
- *             if best_weight != 0.0:             # <<<<<<<<<<<<<<
- *                 viterbi[i][tag] = (best_weight, backpointer)
- *                 found_tag = True
- */
-      __pyx_t_13 = PyObject_RichCompare(__pyx_v_best_weight, __pyx_float_0_0, Py_NE); __Pyx_XGOTREF(__pyx_t_13); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_13); if (unlikely(__pyx_t_18 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      if (__pyx_t_18) {
-
-        /* "postag/tagging.pyx":87
- *             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
- *             if best_weight != 0.0:
- *                 viterbi[i][tag] = (best_weight, backpointer)             # <<<<<<<<<<<<<<
- *                 found_tag = True
- *         if found_tag is False:
- */
-        __pyx_t_13 = PyTuple_New(2); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_13);
-        __Pyx_INCREF(__pyx_v_best_weight);
-        PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_v_best_weight);
-        __Pyx_GIVEREF(__pyx_v_best_weight);
-        __Pyx_INCREF(__pyx_v_backpointer);
-        PyTuple_SET_ITEM(__pyx_t_13, 1, __pyx_v_backpointer);
-        __Pyx_GIVEREF(__pyx_v_backpointer);
-        __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_v_i); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-        __Pyx_GOTREF(__pyx_t_2);
-        if (unlikely(PyObject_SetItem(__pyx_t_2, __pyx_v_tag, __pyx_t_13) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-
-        /* "postag/tagging.pyx":88
- *             if best_weight != 0.0:
- *                 viterbi[i][tag] = (best_weight, backpointer)
- *                 found_tag = True             # <<<<<<<<<<<<<<
- *         if found_tag is False:
- *             viterbi[i][default_tag] = (0.0, default_tag)
- */
-        __pyx_v_found_tag = 1;
-        goto __pyx_L18;
-      }
-      __pyx_L18:;
-
-      /* "postag/tagging.pyx":57
- *         #(word, postag) = (fields[0], fields[1])
- *         found_tag = False
- *         for tag in tagset:             # <<<<<<<<<<<<<<
- *             #has_bigram_feat = False
- *             # weight = 0.0
+      /* "postag/tagging.pyx":63
+ *             S = tagset
+ * 
+ *         for u in U:             # <<<<<<<<<<<<<<
+ *             for s in S:
+ *                 pi[(k, u, s)], bp[(k, u, s)] = max(((pi[(k-1, t, u)] + get_weight(t,u,s,pos_feat,k,feat_vec), t) for t in T))
  */
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "postag/tagging.pyx":89
- *                 viterbi[i][tag] = (best_weight, backpointer)
- *                 found_tag = True
- *         if found_tag is False:             # <<<<<<<<<<<<<<
- *             viterbi[i][default_tag] = (0.0, default_tag)
- * 
- */
-    __pyx_t_18 = ((__pyx_v_found_tag == 0) != 0);
-    if (__pyx_t_18) {
-
-      /* "postag/tagging.pyx":90
- *                 found_tag = True
- *         if found_tag is False:
- *             viterbi[i][default_tag] = (0.0, default_tag)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_INCREF(__pyx_float_0_0);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_float_0_0);
-      __Pyx_GIVEREF(__pyx_float_0_0);
-      __Pyx_INCREF(__pyx_v_default_tag);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_default_tag);
-      __Pyx_GIVEREF(__pyx_v_default_tag);
-      __pyx_t_13 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_v_i); if (unlikely(__pyx_t_13 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-      __Pyx_GOTREF(__pyx_t_13);
-      if (unlikely(PyObject_SetItem(__pyx_t_13, __pyx_v_default_tag, __pyx_t_1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      goto __pyx_L19;
-    }
-    __pyx_L19:;
-
-    /* "postag/tagging.pyx":48
- *     # feat_index = 0
- *     pos_feat = pos_fgen.Pos_feat_gen(labels)
- *     for i in range(2, N-2):             # <<<<<<<<<<<<<<
- *         word = labels[i]
- *         # if len(feats) == 0:
+    /* "postag/tagging.pyx":46
+ *     bp = {} #backpointer
+ *     pi[(0,'B_-2','B_-1')] = 0;
+ *     for k in range(1,n+1):             # <<<<<<<<<<<<<<
+ *         if k == 1:
+ *             # T is possible tags of second previous word in position k-2
  */
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "postag/tagging.pyx":94
+  /* "postag/tagging.pyx":68
  * 
- *     # recover the best sequence using backpointers
- *     maxvalue = get_maxvalue(viterbi[N-3])             # <<<<<<<<<<<<<<
- *     best_tag = maxvalue[0]
- *     for i in range(N-3, 1, -1):
+ * # Store the tag sequence as an array
+ *     tag = ['']*(n+1)             # <<<<<<<<<<<<<<
+ * 
+ *         # Calculate the tag sequence by following the back pointers
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_maxvalue); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyNumber_Add(__pyx_cur_scope->__pyx_v_n, __pyx_int_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_13 = PyNumber_Subtract(__pyx_v_N, __pyx_int_3); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_t_13); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_13 = NULL;
-  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_13 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_13)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_13);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
+  __Pyx_INCREF(__pyx_kp_s__6);
+  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_kp_s__6);
+  __Pyx_GIVEREF(__pyx_kp_s__6);
+  { PyObject* __pyx_temp = PyNumber_InPlaceMultiply(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_temp)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_temp);
+    __Pyx_DECREF(__pyx_t_1);
+    __pyx_t_1 = __pyx_temp;
+  }
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_tag = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "postag/tagging.pyx":71
+ * 
+ *         # Calculate the tag sequence by following the back pointers
+ *     prob, tag[n-1], tag[n] = max((max(((pi[(n, u, s)], u, s) for s in S)) for u in U))             # <<<<<<<<<<<<<<
+ *     #max((max(((pi[(n, u, s)] + get_weight(u,s,'STOP',pos_feat,n+1,feat_vec), u, s) for s in S)) for u in U))
+ *     for k in range(n-2, 0, -1):
+ */
+  __pyx_t_1 = __pyx_pf_6postag_7tagging_9perc_test_3genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_max, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
+    PyObject* sequence = __pyx_t_1;
+    #if CYTHON_COMPILING_IN_CPYTHON
+    Py_ssize_t size = Py_SIZE(sequence);
+    #else
+    Py_ssize_t size = PySequence_Size(sequence);
+    #endif
+    if (unlikely(size != 3)) {
+      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
+      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
-  }
-  if (!__pyx_t_13) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    #if CYTHON_COMPILING_IN_CPYTHON
+    if (likely(PyTuple_CheckExact(sequence))) {
+      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 0); 
+      __pyx_t_2 = PyTuple_GET_ITEM(sequence, 1); 
+      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 2); 
+    } else {
+      __pyx_t_4 = PyList_GET_ITEM(sequence, 0); 
+      __pyx_t_2 = PyList_GET_ITEM(sequence, 1); 
+      __pyx_t_3 = PyList_GET_ITEM(sequence, 2); 
+    }
+    __Pyx_INCREF(__pyx_t_4);
+    __Pyx_INCREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_t_3);
+    #else
+    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-  } else {
-    __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
-    PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_2);
-    __pyx_t_2 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    #endif
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  } else {
+    Py_ssize_t index = -1;
+    __pyx_t_14 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_14);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_16 = Py_TYPE(__pyx_t_14)->tp_iternext;
+    index = 0; __pyx_t_4 = __pyx_t_16(__pyx_t_14); if (unlikely(!__pyx_t_4)) goto __pyx_L12_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    index = 1; __pyx_t_2 = __pyx_t_16(__pyx_t_14); if (unlikely(!__pyx_t_2)) goto __pyx_L12_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_2);
+    index = 2; __pyx_t_3 = __pyx_t_16(__pyx_t_14); if (unlikely(!__pyx_t_3)) goto __pyx_L12_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_3);
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_16(__pyx_t_14), 3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_16 = NULL;
+    __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+    goto __pyx_L13_unpacking_done;
+    __pyx_L12_unpacking_failed:;
+    __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+    __pyx_t_16 = NULL;
+    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_L13_unpacking_done:;
   }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_maxvalue = __pyx_t_4;
+  __pyx_v_prob = __pyx_t_4;
   __pyx_t_4 = 0;
+  __pyx_t_14 = PyNumber_Subtract(__pyx_cur_scope->__pyx_v_n, __pyx_int_1); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_14);
+  if (unlikely(PyObject_SetItem(__pyx_v_tag, __pyx_t_14, __pyx_t_2) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(PyObject_SetItem(__pyx_v_tag, __pyx_cur_scope->__pyx_v_n, __pyx_t_3) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "postag/tagging.pyx":95
- *     # recover the best sequence using backpointers
- *     maxvalue = get_maxvalue(viterbi[N-3])
- *     best_tag = maxvalue[0]             # <<<<<<<<<<<<<<
- *     for i in range(N-3, 1, -1):
- *         output.insert(0,best_tag)
+  /* "postag/tagging.pyx":73
+ *     prob, tag[n-1], tag[n] = max((max(((pi[(n, u, s)], u, s) for s in S)) for u in U))
+ *     #max((max(((pi[(n, u, s)] + get_weight(u,s,'STOP',pos_feat,n+1,feat_vec), u, s) for s in S)) for u in U))
+ *     for k in range(n-2, 0, -1):             # <<<<<<<<<<<<<<
+ *         tag[k] = bp[(k+2, tag[k+1], tag[k+2])]
+ *     tag = tag[1:]
  */
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_maxvalue, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_v_best_tag = __pyx_t_4;
-  __pyx_t_4 = 0;
-
-  /* "postag/tagging.pyx":96
- *     maxvalue = get_maxvalue(viterbi[N-3])
- *     best_tag = maxvalue[0]
- *     for i in range(N-3, 1, -1):             # <<<<<<<<<<<<<<
- *         output.insert(0,best_tag)
- *         (value, backpointer) = viterbi[i][best_tag]
- */
-  __pyx_t_4 = PyNumber_Subtract(__pyx_v_N, __pyx_int_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyNumber_Subtract(__pyx_cur_scope->__pyx_v_n, __pyx_int_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4);
-  __Pyx_GIVEREF(__pyx_t_4);
-  __Pyx_INCREF(__pyx_int_1);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_int_1);
-  __Pyx_GIVEREF(__pyx_int_1);
+  __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_int_0);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_0);
+  __Pyx_GIVEREF(__pyx_int_0);
   __Pyx_INCREF(__pyx_int_neg_1);
-  PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_int_neg_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_int_neg_1);
   __Pyx_GIVEREF(__pyx_int_neg_1);
-  __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (likely(PyList_CheckExact(__pyx_t_4)) || PyTuple_CheckExact(__pyx_t_4)) {
-    __pyx_t_1 = __pyx_t_4; __Pyx_INCREF(__pyx_t_1); __pyx_t_6 = 0;
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
+    __pyx_t_3 = __pyx_t_1; __Pyx_INCREF(__pyx_t_3); __pyx_t_6 = 0;
     __pyx_t_7 = NULL;
   } else {
-    __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_7 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
     if (likely(!__pyx_t_7)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_1)) break;
+      if (likely(PyList_CheckExact(__pyx_t_3))) {
+        if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_4); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #endif
       } else {
-        if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_4); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #endif
       }
     } else {
-      __pyx_t_4 = __pyx_t_7(__pyx_t_1);
-      if (unlikely(!__pyx_t_4)) {
+      __pyx_t_1 = __pyx_t_7(__pyx_t_3);
+      if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_GOTREF(__pyx_t_1);
     }
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_4);
-    __pyx_t_4 = 0;
+    __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_k);
+    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_k, __pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_1);
+    __pyx_t_1 = 0;
 
-    /* "postag/tagging.pyx":97
- *     best_tag = maxvalue[0]
- *     for i in range(N-3, 1, -1):
- *         output.insert(0,best_tag)             # <<<<<<<<<<<<<<
- *         (value, backpointer) = viterbi[i][best_tag]
- *         best_tag = backpointer
- */
-    __pyx_t_5 = PyList_Insert(__pyx_v_output, 0, __pyx_v_best_tag); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-
-    /* "postag/tagging.pyx":98
- *     for i in range(N-3, 1, -1):
- *         output.insert(0,best_tag)
- *         (value, backpointer) = viterbi[i][best_tag]             # <<<<<<<<<<<<<<
- *         best_tag = backpointer
+    /* "postag/tagging.pyx":74
+ *     #max((max(((pi[(n, u, s)] + get_weight(u,s,'STOP',pos_feat,n+1,feat_vec), u, s) for s in S)) for u in U))
+ *     for k in range(n-2, 0, -1):
+ *         tag[k] = bp[(k+2, tag[k+1], tag[k+2])]             # <<<<<<<<<<<<<<
+ *     tag = tag[1:]
  * 
  */
-    __pyx_t_4 = __Pyx_PyDict_GetItem(__pyx_v_viterbi, __pyx_v_i); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __pyx_t_1 = PyNumber_Add(__pyx_cur_scope->__pyx_v_k, __pyx_int_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = PyNumber_Add(__pyx_cur_scope->__pyx_v_k, __pyx_int_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_4 = PyObject_GetItem(__pyx_v_tag, __pyx_t_2); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PyObject_GetItem(__pyx_t_4, __pyx_v_best_tag); if (unlikely(__pyx_t_3 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
-      PyObject* sequence = __pyx_t_3;
-      #if CYTHON_COMPILING_IN_CPYTHON
-      Py_ssize_t size = Py_SIZE(sequence);
-      #else
-      Py_ssize_t size = PySequence_Size(sequence);
-      #endif
-      if (unlikely(size != 2)) {
-        if (size > 2) __Pyx_RaiseTooManyValuesError(2);
-        else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      }
-      #if CYTHON_COMPILING_IN_CPYTHON
-      if (likely(PyTuple_CheckExact(sequence))) {
-        __pyx_t_4 = PyTuple_GET_ITEM(sequence, 0); 
-        __pyx_t_2 = PyTuple_GET_ITEM(sequence, 1); 
-      } else {
-        __pyx_t_4 = PyList_GET_ITEM(sequence, 0); 
-        __pyx_t_2 = PyList_GET_ITEM(sequence, 1); 
-      }
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_2);
-      #else
-      __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_2);
-      #endif
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    } else {
-      Py_ssize_t index = -1;
-      __pyx_t_13 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_13);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_15 = Py_TYPE(__pyx_t_13)->tp_iternext;
-      index = 0; __pyx_t_4 = __pyx_t_15(__pyx_t_13); if (unlikely(!__pyx_t_4)) goto __pyx_L22_unpacking_failed;
-      __Pyx_GOTREF(__pyx_t_4);
-      index = 1; __pyx_t_2 = __pyx_t_15(__pyx_t_13); if (unlikely(!__pyx_t_2)) goto __pyx_L22_unpacking_failed;
-      __Pyx_GOTREF(__pyx_t_2);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_15(__pyx_t_13), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_t_15 = NULL;
-      __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      goto __pyx_L23_unpacking_done;
-      __pyx_L22_unpacking_failed:;
-      __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      __pyx_t_15 = NULL;
-      if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_L23_unpacking_done:;
-    }
-    __Pyx_XDECREF_SET(__pyx_v_value, __pyx_t_4);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = PyNumber_Add(__pyx_cur_scope->__pyx_v_k, __pyx_int_2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_14 = PyObject_GetItem(__pyx_v_tag, __pyx_t_2); if (unlikely(__pyx_t_14 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_14);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_4);
+    PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_t_14);
+    __Pyx_GIVEREF(__pyx_t_14);
+    __pyx_t_1 = 0;
     __pyx_t_4 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_backpointer, __pyx_t_2);
-    __pyx_t_2 = 0;
+    __pyx_t_14 = 0;
+    __pyx_t_14 = __Pyx_PyDict_GetItem(__pyx_v_bp, __pyx_t_2); if (unlikely(__pyx_t_14 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_14);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(PyObject_SetItem(__pyx_v_tag, __pyx_cur_scope->__pyx_v_k, __pyx_t_14) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "postag/tagging.pyx":99
- *         output.insert(0,best_tag)
- *         (value, backpointer) = viterbi[i][best_tag]
- *         best_tag = backpointer             # <<<<<<<<<<<<<<
- * 
- *     return output
- */
-    __Pyx_INCREF(__pyx_v_backpointer);
-    __Pyx_DECREF_SET(__pyx_v_best_tag, __pyx_v_backpointer);
-
-    /* "postag/tagging.pyx":96
- *     maxvalue = get_maxvalue(viterbi[N-3])
- *     best_tag = maxvalue[0]
- *     for i in range(N-3, 1, -1):             # <<<<<<<<<<<<<<
- *         output.insert(0,best_tag)
- *         (value, backpointer) = viterbi[i][best_tag]
+    /* "postag/tagging.pyx":73
+ *     prob, tag[n-1], tag[n] = max((max(((pi[(n, u, s)], u, s) for s in S)) for u in U))
+ *     #max((max(((pi[(n, u, s)] + get_weight(u,s,'STOP',pos_feat,n+1,feat_vec), u, s) for s in S)) for u in U))
+ *     for k in range(n-2, 0, -1):             # <<<<<<<<<<<<<<
+ *         tag[k] = bp[(k+2, tag[k+1], tag[k+2])]
+ *     tag = tag[1:]
  */
   }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "postag/tagging.pyx":101
- *         best_tag = backpointer
+  /* "postag/tagging.pyx":75
+ *     for k in range(n-2, 0, -1):
+ *         tag[k] = bp[(k+2, tag[k+1], tag[k+2])]
+ *     tag = tag[1:]             # <<<<<<<<<<<<<<
  * 
- *     return output             # <<<<<<<<<<<<<<
+ *         # Return the probability and tag sequence
+ */
+  __pyx_t_3 = __Pyx_PyList_GetSlice(__pyx_v_tag, 1, PY_SSIZE_T_MAX); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF_SET(__pyx_v_tag, ((PyObject*)__pyx_t_3));
+  __pyx_t_3 = 0;
+
+  /* "postag/tagging.pyx":78
+ * 
+ *         # Return the probability and tag sequence
+ *     return tag             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_output);
-  __pyx_r = __pyx_v_output;
+  __Pyx_INCREF(__pyx_v_tag);
+  __pyx_r = __pyx_v_tag;
   goto __pyx_L0;
 
-  /* "postag/tagging.pyx":24
- *     return maxvalue
+  /* "postag/tagging.pyx":33
+ *     return weight
  * 
  * def perc_test(feat_vec, labeled_list, tagset, default_tag):             # <<<<<<<<<<<<<<
  *     output = []
@@ -2382,37 +3120,546 @@ static PyObject *__pyx_pf_6postag_7tagging_2perc_test(CYTHON_UNUSED PyObject *__
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_12);
   __Pyx_XDECREF(__pyx_t_13);
   __Pyx_XDECREF(__pyx_t_14);
+  __Pyx_XDECREF(__pyx_t_15);
   __Pyx_AddTraceback("postag.tagging.perc_test", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_output);
   __Pyx_XDECREF(__pyx_v_labels);
-  __Pyx_XDECREF(__pyx_v_N);
-  __Pyx_XDECREF(__pyx_v_viterbi);
-  __Pyx_XDECREF(__pyx_v_i);
-  __Pyx_XDECREF(__pyx_v_pos_feat);
-  __Pyx_XDECREF(__pyx_v_word);
+  __Pyx_XDECREF(__pyx_v_bp);
   __Pyx_XDECREF(__pyx_v_tag);
-  __Pyx_XDECREF(__pyx_v_prev_list);
-  __Pyx_XDECREF(__pyx_v_prev_tag);
-  __Pyx_XDECREF(__pyx_v_feats);
-  __Pyx_XDECREF(__pyx_v_prev_value);
-  __Pyx_XDECREF(__pyx_v_prev_backpointer);
-  __Pyx_XDECREF(__pyx_v_weight);
-  __Pyx_XDECREF(__pyx_v_feat);
-  __Pyx_XDECREF(__pyx_v_prev_tag_weight);
-  __Pyx_XDECREF(__pyx_v_best_weight);
-  __Pyx_XDECREF(__pyx_v_backpointer);
-  __Pyx_XDECREF(__pyx_v_maxvalue);
-  __Pyx_XDECREF(__pyx_v_best_tag);
-  __Pyx_XDECREF(__pyx_v_value);
+  __Pyx_XDECREF(__pyx_v_prob);
+  __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
+
+static struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *__pyx_freelist_6postag_7tagging___pyx_scope_struct__perc_test[8];
+static int __pyx_freecount_6postag_7tagging___pyx_scope_struct__perc_test = 0;
+
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct__perc_test(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_6postag_7tagging___pyx_scope_struct__perc_test > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test)))) {
+    o = (PyObject*)__pyx_freelist_6postag_7tagging___pyx_scope_struct__perc_test[--__pyx_freecount_6postag_7tagging___pyx_scope_struct__perc_test];
+    memset(o, 0, sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct__perc_test(PyObject *o) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_v_S);
+  Py_CLEAR(p->__pyx_v_T);
+  Py_CLEAR(p->__pyx_v_U);
+  Py_CLEAR(p->__pyx_v_feat_vec);
+  Py_CLEAR(p->__pyx_v_k);
+  Py_CLEAR(p->__pyx_v_n);
+  Py_CLEAR(p->__pyx_v_pi);
+  Py_CLEAR(p->__pyx_v_pos_feat);
+  Py_CLEAR(p->__pyx_v_s);
+  Py_CLEAR(p->__pyx_v_u);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_6postag_7tagging___pyx_scope_struct__perc_test < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test)))) {
+    __pyx_freelist_6postag_7tagging___pyx_scope_struct__perc_test[__pyx_freecount_6postag_7tagging___pyx_scope_struct__perc_test++] = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct__perc_test(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)o;
+  if (p->__pyx_v_S) {
+    e = (*v)(p->__pyx_v_S, a); if (e) return e;
+  }
+  if (p->__pyx_v_T) {
+    e = (*v)(p->__pyx_v_T, a); if (e) return e;
+  }
+  if (p->__pyx_v_U) {
+    e = (*v)(p->__pyx_v_U, a); if (e) return e;
+  }
+  if (p->__pyx_v_feat_vec) {
+    e = (*v)(p->__pyx_v_feat_vec, a); if (e) return e;
+  }
+  if (p->__pyx_v_k) {
+    e = (*v)(p->__pyx_v_k, a); if (e) return e;
+  }
+  if (p->__pyx_v_n) {
+    e = (*v)(p->__pyx_v_n, a); if (e) return e;
+  }
+  if (p->__pyx_v_pi) {
+    e = (*v)(p->__pyx_v_pi, a); if (e) return e;
+  }
+  if (p->__pyx_v_pos_feat) {
+    e = (*v)(p->__pyx_v_pos_feat, a); if (e) return e;
+  }
+  if (p->__pyx_v_s) {
+    e = (*v)(p->__pyx_v_s, a); if (e) return e;
+  }
+  if (p->__pyx_v_u) {
+    e = (*v)(p->__pyx_v_u, a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_6postag_7tagging___pyx_scope_struct__perc_test(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)o;
+  tmp = ((PyObject*)p->__pyx_v_S);
+  p->__pyx_v_S = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_T);
+  p->__pyx_v_T = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_U);
+  p->__pyx_v_U = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_feat_vec);
+  p->__pyx_v_feat_vec = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_k);
+  p->__pyx_v_k = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_n);
+  p->__pyx_v_n = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_pi);
+  p->__pyx_v_pi = ((PyObject*)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_pos_feat);
+  p->__pyx_v_pos_feat = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_s);
+  p->__pyx_v_s = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_u);
+  p->__pyx_v_u = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_6postag_7tagging___pyx_scope_struct__perc_test = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "postag.tagging.__pyx_scope_struct__perc_test", /*tp_name*/
+  sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct__perc_test, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #else
+  0, /*reserved*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct__perc_test, /*tp_traverse*/
+  __pyx_tp_clear_6postag_7tagging___pyx_scope_struct__perc_test, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_6postag_7tagging___pyx_scope_struct__perc_test, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
+
+static struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *__pyx_freelist_6postag_7tagging___pyx_scope_struct_1_genexpr[8];
+static int __pyx_freecount_6postag_7tagging___pyx_scope_struct_1_genexpr = 0;
+
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct_1_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_6postag_7tagging___pyx_scope_struct_1_genexpr > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr)))) {
+    o = (PyObject*)__pyx_freelist_6postag_7tagging___pyx_scope_struct_1_genexpr[--__pyx_freecount_6postag_7tagging___pyx_scope_struct_1_genexpr];
+    memset(o, 0, sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct_1_genexpr(PyObject *o) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_outer_scope);
+  Py_CLEAR(p->__pyx_v_t);
+  Py_CLEAR(p->__pyx_t_0);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_6postag_7tagging___pyx_scope_struct_1_genexpr < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr)))) {
+    __pyx_freelist_6postag_7tagging___pyx_scope_struct_1_genexpr[__pyx_freecount_6postag_7tagging___pyx_scope_struct_1_genexpr++] = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct_1_genexpr(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *)o;
+  if (p->__pyx_outer_scope) {
+    e = (*v)(((PyObject*)p->__pyx_outer_scope), a); if (e) return e;
+  }
+  if (p->__pyx_v_t) {
+    e = (*v)(p->__pyx_v_t, a); if (e) return e;
+  }
+  if (p->__pyx_t_0) {
+    e = (*v)(p->__pyx_t_0, a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_6postag_7tagging___pyx_scope_struct_1_genexpr(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr *)o;
+  tmp = ((PyObject*)p->__pyx_outer_scope);
+  p->__pyx_outer_scope = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_t);
+  p->__pyx_v_t = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_t_0);
+  p->__pyx_t_0 = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_6postag_7tagging___pyx_scope_struct_1_genexpr = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "postag.tagging.__pyx_scope_struct_1_genexpr", /*tp_name*/
+  sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_1_genexpr), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct_1_genexpr, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #else
+  0, /*reserved*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct_1_genexpr, /*tp_traverse*/
+  __pyx_tp_clear_6postag_7tagging___pyx_scope_struct_1_genexpr, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_6postag_7tagging___pyx_scope_struct_1_genexpr, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
+
+static struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *__pyx_freelist_6postag_7tagging___pyx_scope_struct_2_genexpr[8];
+static int __pyx_freecount_6postag_7tagging___pyx_scope_struct_2_genexpr = 0;
+
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct_2_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_6postag_7tagging___pyx_scope_struct_2_genexpr > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr)))) {
+    o = (PyObject*)__pyx_freelist_6postag_7tagging___pyx_scope_struct_2_genexpr[--__pyx_freecount_6postag_7tagging___pyx_scope_struct_2_genexpr];
+    memset(o, 0, sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct_2_genexpr(PyObject *o) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_outer_scope);
+  Py_CLEAR(p->__pyx_v_genexpr);
+  Py_CLEAR(p->__pyx_v_u);
+  Py_CLEAR(p->__pyx_t_0);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_6postag_7tagging___pyx_scope_struct_2_genexpr < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr)))) {
+    __pyx_freelist_6postag_7tagging___pyx_scope_struct_2_genexpr[__pyx_freecount_6postag_7tagging___pyx_scope_struct_2_genexpr++] = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct_2_genexpr(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)o;
+  if (p->__pyx_outer_scope) {
+    e = (*v)(((PyObject*)p->__pyx_outer_scope), a); if (e) return e;
+  }
+  if (p->__pyx_v_genexpr) {
+    e = (*v)(p->__pyx_v_genexpr, a); if (e) return e;
+  }
+  if (p->__pyx_v_u) {
+    e = (*v)(p->__pyx_v_u, a); if (e) return e;
+  }
+  if (p->__pyx_t_0) {
+    e = (*v)(p->__pyx_t_0, a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_6postag_7tagging___pyx_scope_struct_2_genexpr(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)o;
+  tmp = ((PyObject*)p->__pyx_outer_scope);
+  p->__pyx_outer_scope = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct__perc_test *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_genexpr);
+  p->__pyx_v_genexpr = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_u);
+  p->__pyx_v_u = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_t_0);
+  p->__pyx_t_0 = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_6postag_7tagging___pyx_scope_struct_2_genexpr = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "postag.tagging.__pyx_scope_struct_2_genexpr", /*tp_name*/
+  sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct_2_genexpr, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #else
+  0, /*reserved*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct_2_genexpr, /*tp_traverse*/
+  __pyx_tp_clear_6postag_7tagging___pyx_scope_struct_2_genexpr, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_6postag_7tagging___pyx_scope_struct_2_genexpr, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
+
+static struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *__pyx_freelist_6postag_7tagging___pyx_scope_struct_3_genexpr[8];
+static int __pyx_freecount_6postag_7tagging___pyx_scope_struct_3_genexpr = 0;
+
+static PyObject *__pyx_tp_new_6postag_7tagging___pyx_scope_struct_3_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_6postag_7tagging___pyx_scope_struct_3_genexpr > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr)))) {
+    o = (PyObject*)__pyx_freelist_6postag_7tagging___pyx_scope_struct_3_genexpr[--__pyx_freecount_6postag_7tagging___pyx_scope_struct_3_genexpr];
+    memset(o, 0, sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct_3_genexpr(PyObject *o) {
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_outer_scope);
+  Py_CLEAR(p->__pyx_v_s);
+  Py_CLEAR(p->__pyx_t_0);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_6postag_7tagging___pyx_scope_struct_3_genexpr < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr)))) {
+    __pyx_freelist_6postag_7tagging___pyx_scope_struct_3_genexpr[__pyx_freecount_6postag_7tagging___pyx_scope_struct_3_genexpr++] = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct_3_genexpr(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *)o;
+  if (p->__pyx_outer_scope) {
+    e = (*v)(((PyObject*)p->__pyx_outer_scope), a); if (e) return e;
+  }
+  if (p->__pyx_v_s) {
+    e = (*v)(p->__pyx_v_s, a); if (e) return e;
+  }
+  if (p->__pyx_t_0) {
+    e = (*v)(p->__pyx_t_0, a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_6postag_7tagging___pyx_scope_struct_3_genexpr(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *p = (struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr *)o;
+  tmp = ((PyObject*)p->__pyx_outer_scope);
+  p->__pyx_outer_scope = ((struct __pyx_obj_6postag_7tagging___pyx_scope_struct_2_genexpr *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_s);
+  p->__pyx_v_s = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_t_0);
+  p->__pyx_t_0 = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_6postag_7tagging___pyx_scope_struct_3_genexpr = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "postag.tagging.__pyx_scope_struct_3_genexpr", /*tp_name*/
+  sizeof(struct __pyx_obj_6postag_7tagging___pyx_scope_struct_3_genexpr), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_6postag_7tagging___pyx_scope_struct_3_genexpr, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #else
+  0, /*reserved*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_6postag_7tagging___pyx_scope_struct_3_genexpr, /*tp_traverse*/
+  __pyx_tp_clear_6postag_7tagging___pyx_scope_struct_3_genexpr, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_6postag_7tagging___pyx_scope_struct_3_genexpr, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
 
 static PyMethodDef __pyx_methods[] = {
   {0, 0, 0, 0}
@@ -2439,18 +3686,22 @@ static struct PyModuleDef __pyx_moduledef = {
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_B__1, __pyx_k_B__1, sizeof(__pyx_k_B__1), 0, 0, 1, 0},
   {&__pyx_kp_s_B__1_2, __pyx_k_B__1_2, sizeof(__pyx_k_B__1_2), 0, 0, 1, 0},
+  {&__pyx_kp_s_B__1_3, __pyx_k_B__1_3, sizeof(__pyx_k_B__1_3), 0, 0, 1, 0},
   {&__pyx_kp_s_B__2, __pyx_k_B__2, sizeof(__pyx_k_B__2), 0, 0, 1, 0},
   {&__pyx_kp_s_B__2_2, __pyx_k_B__2_2, sizeof(__pyx_k_B__2_2), 0, 0, 1, 0},
-  {&__pyx_n_s_N, __pyx_k_N, sizeof(__pyx_k_N), 0, 0, 1, 1},
+  {&__pyx_kp_s_B__2_3, __pyx_k_B__2_3, sizeof(__pyx_k_B__2_3), 0, 0, 1, 0},
   {&__pyx_n_s_Pos_feat_gen, __pyx_k_Pos_feat_gen, sizeof(__pyx_k_Pos_feat_gen), 0, 0, 1, 1},
+  {&__pyx_n_s_S, __pyx_k_S, sizeof(__pyx_k_S), 0, 0, 1, 1},
+  {&__pyx_n_s_T, __pyx_k_T, sizeof(__pyx_k_T), 0, 0, 1, 1},
+  {&__pyx_n_s_U, __pyx_k_U, sizeof(__pyx_k_U), 0, 0, 1, 1},
   {&__pyx_kp_s_Users_vivian_glm_parser_src_pos, __pyx_k_Users_vivian_glm_parser_src_pos, sizeof(__pyx_k_Users_vivian_glm_parser_src_pos), 0, 0, 1, 0},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
-  {&__pyx_kp_s__5, __pyx_k__5, sizeof(__pyx_k__5), 0, 0, 1, 0},
+  {&__pyx_kp_s__6, __pyx_k__6, sizeof(__pyx_k__6), 0, 0, 1, 0},
   {&__pyx_n_s_abspath, __pyx_k_abspath, sizeof(__pyx_k_abspath), 0, 0, 1, 1},
   {&__pyx_n_s_append, __pyx_k_append, sizeof(__pyx_k_append), 0, 0, 1, 1},
-  {&__pyx_n_s_backpointer, __pyx_k_backpointer, sizeof(__pyx_k_backpointer), 0, 0, 1, 1},
-  {&__pyx_n_s_best_tag, __pyx_k_best_tag, sizeof(__pyx_k_best_tag), 0, 0, 1, 1},
-  {&__pyx_n_s_best_weight, __pyx_k_best_weight, sizeof(__pyx_k_best_weight), 0, 0, 1, 1},
+  {&__pyx_n_s_args, __pyx_k_args, sizeof(__pyx_k_args), 0, 0, 1, 1},
+  {&__pyx_n_s_bp, __pyx_k_bp, sizeof(__pyx_k_bp), 0, 0, 1, 1},
+  {&__pyx_n_s_close, __pyx_k_close, sizeof(__pyx_k_close), 0, 0, 1, 1},
   {&__pyx_n_s_copy, __pyx_k_copy, sizeof(__pyx_k_copy), 0, 0, 1, 1},
   {&__pyx_n_s_currentdir, __pyx_k_currentdir, sizeof(__pyx_k_currentdir), 0, 0, 1, 1},
   {&__pyx_n_s_currentframe, __pyx_k_currentframe, sizeof(__pyx_k_currentframe), 0, 0, 1, 1},
@@ -2461,23 +3712,24 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_feat_vec, __pyx_k_feat_vec, sizeof(__pyx_k_feat_vec), 0, 0, 1, 1},
   {&__pyx_n_s_feats, __pyx_k_feats, sizeof(__pyx_k_feats), 0, 0, 1, 1},
   {&__pyx_n_s_feature, __pyx_k_feature, sizeof(__pyx_k_feature), 0, 0, 1, 1},
-  {&__pyx_n_s_found_tag, __pyx_k_found_tag, sizeof(__pyx_k_found_tag), 0, 0, 1, 1},
+  {&__pyx_n_s_genexpr, __pyx_k_genexpr, sizeof(__pyx_k_genexpr), 0, 0, 1, 1},
   {&__pyx_n_s_get_maxvalue, __pyx_k_get_maxvalue, sizeof(__pyx_k_get_maxvalue), 0, 0, 1, 1},
   {&__pyx_n_s_get_pos_feature, __pyx_k_get_pos_feature, sizeof(__pyx_k_get_pos_feature), 0, 0, 1, 1},
+  {&__pyx_n_s_get_weight, __pyx_k_get_weight, sizeof(__pyx_k_get_weight), 0, 0, 1, 1},
   {&__pyx_n_s_getfile, __pyx_k_getfile, sizeof(__pyx_k_getfile), 0, 0, 1, 1},
   {&__pyx_n_s_gzip, __pyx_k_gzip, sizeof(__pyx_k_gzip), 0, 0, 1, 1},
-  {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_insert, __pyx_k_insert, sizeof(__pyx_k_insert), 0, 0, 1, 1},
   {&__pyx_n_s_inspect, __pyx_k_inspect, sizeof(__pyx_k_inspect), 0, 0, 1, 1},
-  {&__pyx_n_s_itemgetter, __pyx_k_itemgetter, sizeof(__pyx_k_itemgetter), 0, 0, 1, 1},
-  {&__pyx_n_s_key, __pyx_k_key, sizeof(__pyx_k_key), 0, 0, 1, 1},
+  {&__pyx_n_s_k, __pyx_k_k, sizeof(__pyx_k_k), 0, 0, 1, 1},
   {&__pyx_n_s_keys, __pyx_k_keys, sizeof(__pyx_k_keys), 0, 0, 1, 1},
   {&__pyx_n_s_labeled_list, __pyx_k_labeled_list, sizeof(__pyx_k_labeled_list), 0, 0, 1, 1},
   {&__pyx_n_s_labels, __pyx_k_labels, sizeof(__pyx_k_labels), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
+  {&__pyx_n_s_max, __pyx_k_max, sizeof(__pyx_k_max), 0, 0, 1, 1},
   {&__pyx_kp_s_max_value_tag_for_this_word_is_N, __pyx_k_max_value_tag_for_this_word_is_N, sizeof(__pyx_k_max_value_tag_for_this_word_is_N), 0, 0, 1, 0},
   {&__pyx_n_s_maxvalue, __pyx_k_maxvalue, sizeof(__pyx_k_maxvalue), 0, 0, 1, 1},
+  {&__pyx_n_s_n, __pyx_k_n, sizeof(__pyx_k_n), 0, 0, 1, 1},
   {&__pyx_n_s_operator, __pyx_k_operator, sizeof(__pyx_k_operator), 0, 0, 1, 1},
   {&__pyx_n_s_optparse, __pyx_k_optparse, sizeof(__pyx_k_optparse), 0, 0, 1, 1},
   {&__pyx_n_s_os, __pyx_k_os, sizeof(__pyx_k_os), 0, 0, 1, 1},
@@ -2485,32 +3737,32 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_parentdir, __pyx_k_parentdir, sizeof(__pyx_k_parentdir), 0, 0, 1, 1},
   {&__pyx_n_s_path, __pyx_k_path, sizeof(__pyx_k_path), 0, 0, 1, 1},
   {&__pyx_n_s_perc_test, __pyx_k_perc_test, sizeof(__pyx_k_perc_test), 0, 0, 1, 1},
+  {&__pyx_n_s_perc_test_locals_genexpr, __pyx_k_perc_test_locals_genexpr, sizeof(__pyx_k_perc_test_locals_genexpr), 0, 0, 1, 1},
+  {&__pyx_n_s_perc_test_locals_genexpr_locals, __pyx_k_perc_test_locals_genexpr_locals, sizeof(__pyx_k_perc_test_locals_genexpr_locals), 0, 0, 1, 1},
+  {&__pyx_n_s_pi, __pyx_k_pi, sizeof(__pyx_k_pi), 0, 0, 1, 1},
   {&__pyx_n_s_pos_feat, __pyx_k_pos_feat, sizeof(__pyx_k_pos_feat), 0, 0, 1, 1},
   {&__pyx_n_s_pos_fgen, __pyx_k_pos_fgen, sizeof(__pyx_k_pos_fgen), 0, 0, 1, 1},
   {&__pyx_n_s_postag_tagging, __pyx_k_postag_tagging, sizeof(__pyx_k_postag_tagging), 0, 0, 1, 1},
-  {&__pyx_n_s_prev_backpointer, __pyx_k_prev_backpointer, sizeof(__pyx_k_prev_backpointer), 0, 0, 1, 1},
-  {&__pyx_n_s_prev_list, __pyx_k_prev_list, sizeof(__pyx_k_prev_list), 0, 0, 1, 1},
-  {&__pyx_n_s_prev_tag, __pyx_k_prev_tag, sizeof(__pyx_k_prev_tag), 0, 0, 1, 1},
-  {&__pyx_n_s_prev_tag_weight, __pyx_k_prev_tag_weight, sizeof(__pyx_k_prev_tag_weight), 0, 0, 1, 1},
-  {&__pyx_n_s_prev_value, __pyx_k_prev_value, sizeof(__pyx_k_prev_value), 0, 0, 1, 1},
+  {&__pyx_n_s_prob, __pyx_k_prob, sizeof(__pyx_k_prob), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
-  {&__pyx_n_s_reverse, __pyx_k_reverse, sizeof(__pyx_k_reverse), 0, 0, 1, 1},
-  {&__pyx_n_s_sorted, __pyx_k_sorted, sizeof(__pyx_k_sorted), 0, 0, 1, 1},
+  {&__pyx_n_s_s, __pyx_k_s, sizeof(__pyx_k_s), 0, 0, 1, 1},
+  {&__pyx_n_s_send, __pyx_k_send, sizeof(__pyx_k_send), 0, 0, 1, 1},
   {&__pyx_n_s_sys, __pyx_k_sys, sizeof(__pyx_k_sys), 0, 0, 1, 1},
+  {&__pyx_n_s_t, __pyx_k_t, sizeof(__pyx_k_t), 0, 0, 1, 1},
   {&__pyx_n_s_tag, __pyx_k_tag, sizeof(__pyx_k_tag), 0, 0, 1, 1},
   {&__pyx_n_s_tagset, __pyx_k_tagset, sizeof(__pyx_k_tagset), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
+  {&__pyx_n_s_throw, __pyx_k_throw, sizeof(__pyx_k_throw), 0, 0, 1, 1},
+  {&__pyx_n_s_u, __pyx_k_u, sizeof(__pyx_k_u), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
-  {&__pyx_n_s_viterbi, __pyx_k_viterbi, sizeof(__pyx_k_viterbi), 0, 0, 1, 1},
   {&__pyx_n_s_viterbi_dict, __pyx_k_viterbi_dict, sizeof(__pyx_k_viterbi_dict), 0, 0, 1, 1},
   {&__pyx_n_s_weight, __pyx_k_weight, sizeof(__pyx_k_weight), 0, 0, 1, 1},
-  {&__pyx_n_s_word, __pyx_k_word, sizeof(__pyx_k_word), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_sorted = __Pyx_GetBuiltinName(__pyx_n_s_sorted); if (!__pyx_builtin_sorted) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_max = __Pyx_GetBuiltinName(__pyx_n_s_max); if (!__pyx_builtin_max) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -2542,60 +3794,38 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "postag/tagging.pyx":28
+  /* "postag/tagging.pyx":37
  *     labels = copy.deepcopy(labeled_list)
  *     # add in the start and end buffers for the context
- *     labels.insert(0, 'B_-1')             # <<<<<<<<<<<<<<
- *     labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1
- *     labels.append('B_+1')
+ *     labels.insert(0, '_B_-1')             # <<<<<<<<<<<<<<
+ *     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
+ *     labels.append('_B_+1')
  */
-  __pyx_tuple__3 = PyTuple_Pack(2, __pyx_int_0, __pyx_kp_s_B__1); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__3 = PyTuple_Pack(2, __pyx_int_0, __pyx_kp_s_B__1); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 37; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "postag/tagging.pyx":29
+  /* "postag/tagging.pyx":38
  *     # add in the start and end buffers for the context
- *     labels.insert(0, 'B_-1')
- *     labels.insert(0, 'B_-2') # first two 'words' are B_-2 B_-1             # <<<<<<<<<<<<<<
- *     labels.append('B_+1')
- *     labels.append('B_+2') # last two 'words' are B_+1 B_+2
+ *     labels.insert(0, '_B_-1')
+ *     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1             # <<<<<<<<<<<<<<
+ *     labels.append('_B_+1')
+ *     labels.append('_B_+2') # last two 'words' are B_+1 B_+2
  */
-  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_int_0, __pyx_kp_s_B__2); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_int_0, __pyx_kp_s_B__2); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
-  /* "postag/tagging.pyx":43
- *     # We do not tag the first two and last two words
- *     # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words
- *     viterbi[0]['B_-2'] = (0.0, '')             # <<<<<<<<<<<<<<
- *     viterbi[1]['B_-1'] = (0.0, 'B_-2')
- *     # find the value of best_tag for each word i in the input
+  /* "postag/tagging.pyx":45
+ *     pi = {} #stores the prob
+ *     bp = {} #backpointer
+ *     pi[(0,'B_-2','B_-1')] = 0;             # <<<<<<<<<<<<<<
+ *     for k in range(1,n+1):
+ *         if k == 1:
  */
-  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_float_0_0, __pyx_kp_s__5); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
-
-  /* "postag/tagging.pyx":44
- *     # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words
- *     viterbi[0]['B_-2'] = (0.0, '')
- *     viterbi[1]['B_-1'] = (0.0, 'B_-2')             # <<<<<<<<<<<<<<
- *     # find the value of best_tag for each word i in the input
- *     # feat_index = 0
- */
-  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_float_0_0, __pyx_kp_s_B__2); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
-
-  /* "postag/tagging.pyx":84
- *                 #         prev_tag_weight += feat_vec[prev_tag_feat, tag]
- *                 prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
- *             (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]             # <<<<<<<<<<<<<<
- *             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
- *             if best_weight != 0.0:
- */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_int_0); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_tuple__5 = PyTuple_Pack(3, __pyx_int_0, __pyx_kp_s_B__2_3, __pyx_kp_s_B__1_3); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__5);
+  __Pyx_GIVEREF(__pyx_tuple__5);
 
   /* "postag/tagging.pyx":10
  * from feature import pos_fgen
@@ -2604,22 +3834,34 @@ static int __Pyx_InitCachedConstants(void) {
  *     maxvalue = (None, None) # maxvalue has tuple (tag, value)
  *     for tag in viterbi_dict.keys():
  */
-  __pyx_tuple__9 = PyTuple_Pack(4, __pyx_n_s_viterbi_dict, __pyx_n_s_maxvalue, __pyx_n_s_tag, __pyx_n_s_value); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
-  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(1, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_vivian_glm_parser_src_pos, __pyx_n_s_get_maxvalue, 10, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__7 = PyTuple_Pack(4, __pyx_n_s_viterbi_dict, __pyx_n_s_maxvalue, __pyx_n_s_tag, __pyx_n_s_value); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_vivian_glm_parser_src_pos, __pyx_n_s_get_maxvalue, 10, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "postag/tagging.pyx":24
  *     return maxvalue
+ * 
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):             # <<<<<<<<<<<<<<
+ *     weight = 0.0
+ *     feats = []
+ */
+  __pyx_tuple__9 = PyTuple_Pack(9, __pyx_n_s_t, __pyx_n_s_u, __pyx_n_s_s, __pyx_n_s_pos_feat, __pyx_n_s_k, __pyx_n_s_feat_vec, __pyx_n_s_weight, __pyx_n_s_feats, __pyx_n_s_feat); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(6, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_vivian_glm_parser_src_pos, __pyx_n_s_get_weight, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "postag/tagging.pyx":33
+ *     return weight
  * 
  * def perc_test(feat_vec, labeled_list, tagset, default_tag):             # <<<<<<<<<<<<<<
  *     output = []
  *     labels = copy.deepcopy(labeled_list)
  */
-  __pyx_tuple__11 = PyTuple_Pack(26, __pyx_n_s_feat_vec, __pyx_n_s_labeled_list, __pyx_n_s_tagset, __pyx_n_s_default_tag, __pyx_n_s_output, __pyx_n_s_labels, __pyx_n_s_N, __pyx_n_s_viterbi, __pyx_n_s_i, __pyx_n_s_pos_feat, __pyx_n_s_word, __pyx_n_s_found_tag, __pyx_n_s_tag, __pyx_n_s_prev_list, __pyx_n_s_prev_tag, __pyx_n_s_feats, __pyx_n_s_prev_value, __pyx_n_s_prev_backpointer, __pyx_n_s_weight, __pyx_n_s_feat, __pyx_n_s_prev_tag_weight, __pyx_n_s_best_weight, __pyx_n_s_backpointer, __pyx_n_s_maxvalue, __pyx_n_s_best_tag, __pyx_n_s_value); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__11 = PyTuple_Pack(21, __pyx_n_s_feat_vec, __pyx_n_s_labeled_list, __pyx_n_s_tagset, __pyx_n_s_default_tag, __pyx_n_s_output, __pyx_n_s_labels, __pyx_n_s_pos_feat, __pyx_n_s_n, __pyx_n_s_pi, __pyx_n_s_bp, __pyx_n_s_k, __pyx_n_s_T, __pyx_n_s_U, __pyx_n_s_S, __pyx_n_s_u, __pyx_n_s_s, __pyx_n_s_tag, __pyx_n_s_prob, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_genexpr); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
-  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(4, 0, 26, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_vivian_glm_parser_src_pos, __pyx_n_s_perc_test, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(4, 0, 21, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_vivian_glm_parser_src_pos, __pyx_n_s_perc_test, 33, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -2633,7 +3875,6 @@ static int __Pyx_InitGlobals(void) {
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_2 = PyInt_FromLong(2); if (unlikely(!__pyx_int_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_int_3 = PyInt_FromLong(3); if (unlikely(!__pyx_int_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;
@@ -2729,6 +3970,18 @@ PyMODINIT_FUNC PyInit_tagging(void)
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
+  if (PyType_Ready(&__pyx_type_6postag_7tagging___pyx_scope_struct__perc_test) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_6postag_7tagging___pyx_scope_struct__perc_test.tp_print = 0;
+  __pyx_ptype_6postag_7tagging___pyx_scope_struct__perc_test = &__pyx_type_6postag_7tagging___pyx_scope_struct__perc_test;
+  if (PyType_Ready(&__pyx_type_6postag_7tagging___pyx_scope_struct_1_genexpr) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_6postag_7tagging___pyx_scope_struct_1_genexpr.tp_print = 0;
+  __pyx_ptype_6postag_7tagging___pyx_scope_struct_1_genexpr = &__pyx_type_6postag_7tagging___pyx_scope_struct_1_genexpr;
+  if (PyType_Ready(&__pyx_type_6postag_7tagging___pyx_scope_struct_2_genexpr) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_6postag_7tagging___pyx_scope_struct_2_genexpr.tp_print = 0;
+  __pyx_ptype_6postag_7tagging___pyx_scope_struct_2_genexpr = &__pyx_type_6postag_7tagging___pyx_scope_struct_2_genexpr;
+  if (PyType_Ready(&__pyx_type_6postag_7tagging___pyx_scope_struct_3_genexpr) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_6postag_7tagging___pyx_scope_struct_3_genexpr.tp_print = 0;
+  __pyx_ptype_6postag_7tagging___pyx_scope_struct_3_genexpr = &__pyx_type_6postag_7tagging___pyx_scope_struct_3_genexpr;
   /*--- Type import code ---*/
   /*--- Variable import code ---*/
   /*--- Function import code ---*/
@@ -3045,13 +4298,25 @@ PyMODINIT_FUNC PyInit_tagging(void)
   /* "postag/tagging.pyx":24
  *     return maxvalue
  * 
+ * def get_weight(t,u,s,pos_feat,k,feat_vec):             # <<<<<<<<<<<<<<
+ *     weight = 0.0
+ *     feats = []
+ */
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6postag_7tagging_3get_weight, NULL, __pyx_n_s_postag_tagging); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_weight, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "postag/tagging.pyx":33
+ *     return weight
+ * 
  * def perc_test(feat_vec, labeled_list, tagset, default_tag):             # <<<<<<<<<<<<<<
  *     output = []
  *     labels = copy.deepcopy(labeled_list)
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6postag_7tagging_3perc_test, NULL, __pyx_n_s_postag_tagging); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6postag_7tagging_5perc_test, NULL, __pyx_n_s_postag_tagging); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_perc_test, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_perc_test, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "postag/tagging.pyx":1
@@ -3612,6 +4877,10 @@ bad:
     return -1;
 }
 
+static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname) {
+    PyErr_Format(PyExc_NameError, "free variable '%s' referenced before assignment in enclosing scope", varname);
+}
+
 static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name) {
     PyObject *result;
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -3727,6 +4996,64 @@ static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
     }
     return 0;
 }
+
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE void __Pyx_crop_slice(Py_ssize_t* _start, Py_ssize_t* _stop, Py_ssize_t* _length) {
+    Py_ssize_t start = *_start, stop = *_stop, length = *_length;
+    if (start < 0) {
+        start += length;
+        if (start < 0)
+            start = 0;
+    }
+    if (stop < 0)
+        stop += length;
+    else if (stop > length)
+        stop = length;
+    *_length = stop - start;
+    *_start = start;
+    *_stop = stop;
+}
+static CYTHON_INLINE void __Pyx_copy_object_array(PyObject** CYTHON_RESTRICT src, PyObject** CYTHON_RESTRICT dest, Py_ssize_t length) {
+    PyObject *v;
+    Py_ssize_t i;
+    for (i = 0; i < length; i++) {
+        v = dest[i] = src[i];
+        Py_INCREF(v);
+    }
+}
+static CYTHON_INLINE PyObject* __Pyx_PyList_GetSlice(
+            PyObject* src, Py_ssize_t start, Py_ssize_t stop) {
+    PyObject* dest;
+    Py_ssize_t length = PyList_GET_SIZE(src);
+    __Pyx_crop_slice(&start, &stop, &length);
+    if (unlikely(length <= 0))
+        return PyList_New(0);
+    dest = PyList_New(length);
+    if (unlikely(!dest))
+        return NULL;
+    __Pyx_copy_object_array(
+        ((PyListObject*)src)->ob_item + start,
+        ((PyListObject*)dest)->ob_item,
+        length);
+    return dest;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyTuple_GetSlice(
+            PyObject* src, Py_ssize_t start, Py_ssize_t stop) {
+    PyObject* dest;
+    Py_ssize_t length = PyTuple_GET_SIZE(src);
+    __Pyx_crop_slice(&start, &stop, &length);
+    if (unlikely(length <= 0))
+        return PyTuple_New(0);
+    dest = PyTuple_New(length);
+    if (unlikely(!dest))
+        return NULL;
+    __Pyx_copy_object_array(
+        ((PyTupleObject*)src)->ob_item + start,
+        ((PyTupleObject*)dest)->ob_item,
+        length);
+    return dest;
+}
+#endif
 
 static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name) {
     PyObject* value = __Pyx_PyObject_GetAttrStr(module, name);
@@ -4208,6 +5535,608 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to int");
     return (int) -1;
+}
+
+static PyTypeObject* __Pyx_FetchCommonType(PyTypeObject* type) {
+    PyObject* fake_module;
+    PyTypeObject* cached_type = NULL;
+    fake_module = PyImport_AddModule((char*) "_cython_" CYTHON_ABI);
+    if (!fake_module) return NULL;
+    Py_INCREF(fake_module);
+    cached_type = (PyTypeObject*) PyObject_GetAttrString(fake_module, type->tp_name);
+    if (cached_type) {
+        if (!PyType_Check((PyObject*)cached_type)) {
+            PyErr_Format(PyExc_TypeError,
+                "Shared Cython type %.200s is not a type object",
+                type->tp_name);
+            goto bad;
+        }
+        if (cached_type->tp_basicsize != type->tp_basicsize) {
+            PyErr_Format(PyExc_TypeError,
+                "Shared Cython type %.200s has the wrong size, try recompiling",
+                type->tp_name);
+            goto bad;
+        }
+    } else {
+        if (!PyErr_ExceptionMatches(PyExc_AttributeError)) goto bad;
+        PyErr_Clear();
+        if (PyType_Ready(type) < 0) goto bad;
+        if (PyObject_SetAttrString(fake_module, type->tp_name, (PyObject*) type) < 0)
+            goto bad;
+        Py_INCREF(type);
+        cached_type = type;
+    }
+done:
+    Py_DECREF(fake_module);
+    return cached_type;
+bad:
+    Py_XDECREF(cached_type);
+    cached_type = NULL;
+    goto done;
+}
+
+static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+#if CYTHON_COMPILING_IN_CPYTHON
+    PyThreadState *tstate = PyThreadState_GET();
+    tmp_type = tstate->exc_type;
+    tmp_value = tstate->exc_value;
+    tmp_tb = tstate->exc_traceback;
+    tstate->exc_type = *type;
+    tstate->exc_value = *value;
+    tstate->exc_traceback = *tb;
+#else
+    PyErr_GetExcInfo(&tmp_type, &tmp_value, &tmp_tb);
+    PyErr_SetExcInfo(*type, *value, *tb);
+#endif
+    *type = tmp_type;
+    *value = tmp_value;
+    *tb = tmp_tb;
+}
+
+static PyObject *__Pyx_Generator_Next(PyObject *self);
+static PyObject *__Pyx_Generator_Send(PyObject *self, PyObject *value);
+static PyObject *__Pyx_Generator_Close(PyObject *self);
+static PyObject *__Pyx_Generator_Throw(PyObject *gen, PyObject *args);
+static PyTypeObject *__pyx_GeneratorType = 0;
+#define __Pyx_Generator_CheckExact(obj) (Py_TYPE(obj) == __pyx_GeneratorType)
+#define __Pyx_Generator_Undelegate(gen) Py_CLEAR((gen)->yieldfrom)
+#if 1 || PY_VERSION_HEX < 0x030300B0
+static int __Pyx_PyGen_FetchStopIterationValue(PyObject **pvalue) {
+    PyObject *et, *ev, *tb;
+    PyObject *value = NULL;
+    __Pyx_ErrFetch(&et, &ev, &tb);
+    if (!et) {
+        Py_XDECREF(tb);
+        Py_XDECREF(ev);
+        Py_INCREF(Py_None);
+        *pvalue = Py_None;
+        return 0;
+    }
+    if (unlikely(et != PyExc_StopIteration) &&
+            unlikely(!PyErr_GivenExceptionMatches(et, PyExc_StopIteration))) {
+        __Pyx_ErrRestore(et, ev, tb);
+        return -1;
+    }
+    if (likely(et == PyExc_StopIteration)) {
+        if (likely(!ev) || !PyObject_IsInstance(ev, PyExc_StopIteration)) {
+            if (!ev) {
+                Py_INCREF(Py_None);
+                ev = Py_None;
+            }
+            Py_XDECREF(tb);
+            Py_DECREF(et);
+            *pvalue = ev;
+            return 0;
+        }
+    }
+    PyErr_NormalizeException(&et, &ev, &tb);
+    if (unlikely(!PyObject_IsInstance(ev, PyExc_StopIteration))) {
+        __Pyx_ErrRestore(et, ev, tb);
+        return -1;
+    }
+    Py_XDECREF(tb);
+    Py_DECREF(et);
+#if PY_VERSION_HEX >= 0x030300A0
+    value = ((PyStopIterationObject *)ev)->value;
+    Py_INCREF(value);
+    Py_DECREF(ev);
+#else
+    {
+        PyObject* args = PyObject_GetAttr(ev, __pyx_n_s_args);
+        Py_DECREF(ev);
+        if (likely(args)) {
+            value = PyObject_GetItem(args, 0);
+            Py_DECREF(args);
+        }
+        if (unlikely(!value)) {
+            __Pyx_ErrRestore(NULL, NULL, NULL);
+            Py_INCREF(Py_None);
+            value = Py_None;
+        }
+    }
+#endif
+    *pvalue = value;
+    return 0;
+}
+#endif
+static CYTHON_INLINE
+void __Pyx_Generator_ExceptionClear(__pyx_GeneratorObject *self) {
+    PyObject *exc_type = self->exc_type;
+    PyObject *exc_value = self->exc_value;
+    PyObject *exc_traceback = self->exc_traceback;
+    self->exc_type = NULL;
+    self->exc_value = NULL;
+    self->exc_traceback = NULL;
+    Py_XDECREF(exc_type);
+    Py_XDECREF(exc_value);
+    Py_XDECREF(exc_traceback);
+}
+static CYTHON_INLINE
+int __Pyx_Generator_CheckRunning(__pyx_GeneratorObject *gen) {
+    if (unlikely(gen->is_running)) {
+        PyErr_SetString(PyExc_ValueError,
+                        "generator already executing");
+        return 1;
+    }
+    return 0;
+}
+static CYTHON_INLINE
+PyObject *__Pyx_Generator_SendEx(__pyx_GeneratorObject *self, PyObject *value) {
+    PyObject *retval;
+    assert(!self->is_running);
+    if (unlikely(self->resume_label == 0)) {
+        if (unlikely(value && value != Py_None)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "can't send non-None value to a "
+                            "just-started generator");
+            return NULL;
+        }
+    }
+    if (unlikely(self->resume_label == -1)) {
+        PyErr_SetNone(PyExc_StopIteration);
+        return NULL;
+    }
+    if (value) {
+#if CYTHON_COMPILING_IN_PYPY
+#else
+        if (self->exc_traceback) {
+            PyThreadState *tstate = PyThreadState_GET();
+            PyTracebackObject *tb = (PyTracebackObject *) self->exc_traceback;
+            PyFrameObject *f = tb->tb_frame;
+            Py_XINCREF(tstate->frame);
+            assert(f->f_back == NULL);
+            f->f_back = tstate->frame;
+        }
+#endif
+        __Pyx_ExceptionSwap(&self->exc_type, &self->exc_value,
+                            &self->exc_traceback);
+    } else {
+        __Pyx_Generator_ExceptionClear(self);
+    }
+    self->is_running = 1;
+    retval = self->body((PyObject *) self, value);
+    self->is_running = 0;
+    if (retval) {
+        __Pyx_ExceptionSwap(&self->exc_type, &self->exc_value,
+                            &self->exc_traceback);
+#if CYTHON_COMPILING_IN_PYPY
+#else
+        if (self->exc_traceback) {
+            PyTracebackObject *tb = (PyTracebackObject *) self->exc_traceback;
+            PyFrameObject *f = tb->tb_frame;
+            Py_CLEAR(f->f_back);
+        }
+#endif
+    } else {
+        __Pyx_Generator_ExceptionClear(self);
+    }
+    return retval;
+}
+static CYTHON_INLINE
+PyObject *__Pyx_Generator_FinishDelegation(__pyx_GeneratorObject *gen) {
+    PyObject *ret;
+    PyObject *val = NULL;
+    __Pyx_Generator_Undelegate(gen);
+    __Pyx_PyGen_FetchStopIterationValue(&val);
+    ret = __Pyx_Generator_SendEx(gen, val);
+    Py_XDECREF(val);
+    return ret;
+}
+static PyObject *__Pyx_Generator_Next(PyObject *self) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject*) self;
+    PyObject *yf = gen->yieldfrom;
+    if (unlikely(__Pyx_Generator_CheckRunning(gen)))
+        return NULL;
+    if (yf) {
+        PyObject *ret;
+        gen->is_running = 1;
+        ret = Py_TYPE(yf)->tp_iternext(yf);
+        gen->is_running = 0;
+        if (likely(ret)) {
+            return ret;
+        }
+        return __Pyx_Generator_FinishDelegation(gen);
+    }
+    return __Pyx_Generator_SendEx(gen, Py_None);
+}
+static PyObject *__Pyx_Generator_Send(PyObject *self, PyObject *value) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject*) self;
+    PyObject *yf = gen->yieldfrom;
+    if (unlikely(__Pyx_Generator_CheckRunning(gen)))
+        return NULL;
+    if (yf) {
+        PyObject *ret;
+        gen->is_running = 1;
+        if (__Pyx_Generator_CheckExact(yf)) {
+            ret = __Pyx_Generator_Send(yf, value);
+        } else {
+            if (value == Py_None)
+                ret = PyIter_Next(yf);
+            else
+                ret = __Pyx_PyObject_CallMethod1(yf, __pyx_n_s_send, value);
+        }
+        gen->is_running = 0;
+        if (likely(ret)) {
+            return ret;
+        }
+        return __Pyx_Generator_FinishDelegation(gen);
+    }
+    return __Pyx_Generator_SendEx(gen, value);
+}
+static int __Pyx_Generator_CloseIter(__pyx_GeneratorObject *gen, PyObject *yf) {
+    PyObject *retval = NULL;
+    int err = 0;
+    if (__Pyx_Generator_CheckExact(yf)) {
+        retval = __Pyx_Generator_Close(yf);
+        if (!retval)
+            return -1;
+    } else {
+        PyObject *meth;
+        gen->is_running = 1;
+        meth = PyObject_GetAttr(yf, __pyx_n_s_close);
+        if (unlikely(!meth)) {
+            if (!PyErr_ExceptionMatches(PyExc_AttributeError)) {
+                PyErr_WriteUnraisable(yf);
+            }
+            PyErr_Clear();
+        } else {
+            retval = PyObject_CallFunction(meth, NULL);
+            Py_DECREF(meth);
+            if (!retval)
+                err = -1;
+        }
+        gen->is_running = 0;
+    }
+    Py_XDECREF(retval);
+    return err;
+}
+static PyObject *__Pyx_Generator_Close(PyObject *self) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject *) self;
+    PyObject *retval, *raised_exception;
+    PyObject *yf = gen->yieldfrom;
+    int err = 0;
+    if (unlikely(__Pyx_Generator_CheckRunning(gen)))
+        return NULL;
+    if (yf) {
+        Py_INCREF(yf);
+        err = __Pyx_Generator_CloseIter(gen, yf);
+        __Pyx_Generator_Undelegate(gen);
+        Py_DECREF(yf);
+    }
+    if (err == 0)
+        PyErr_SetNone(PyExc_GeneratorExit);
+    retval = __Pyx_Generator_SendEx(gen, NULL);
+    if (retval) {
+        Py_DECREF(retval);
+        PyErr_SetString(PyExc_RuntimeError,
+                        "generator ignored GeneratorExit");
+        return NULL;
+    }
+    raised_exception = PyErr_Occurred();
+    if (!raised_exception
+        || raised_exception == PyExc_StopIteration
+        || raised_exception == PyExc_GeneratorExit
+        || PyErr_GivenExceptionMatches(raised_exception, PyExc_GeneratorExit)
+        || PyErr_GivenExceptionMatches(raised_exception, PyExc_StopIteration))
+    {
+        if (raised_exception) PyErr_Clear();
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+    return NULL;
+}
+static PyObject *__Pyx_Generator_Throw(PyObject *self, PyObject *args) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject *) self;
+    PyObject *typ;
+    PyObject *tb = NULL;
+    PyObject *val = NULL;
+    PyObject *yf = gen->yieldfrom;
+    if (!PyArg_UnpackTuple(args, (char *)"throw", 1, 3, &typ, &val, &tb))
+        return NULL;
+    if (unlikely(__Pyx_Generator_CheckRunning(gen)))
+        return NULL;
+    if (yf) {
+        PyObject *ret;
+        Py_INCREF(yf);
+        if (PyErr_GivenExceptionMatches(typ, PyExc_GeneratorExit)) {
+            int err = __Pyx_Generator_CloseIter(gen, yf);
+            Py_DECREF(yf);
+            __Pyx_Generator_Undelegate(gen);
+            if (err < 0)
+                return __Pyx_Generator_SendEx(gen, NULL);
+            goto throw_here;
+        }
+        gen->is_running = 1;
+        if (__Pyx_Generator_CheckExact(yf)) {
+            ret = __Pyx_Generator_Throw(yf, args);
+        } else {
+            PyObject *meth = PyObject_GetAttr(yf, __pyx_n_s_throw);
+            if (unlikely(!meth)) {
+                Py_DECREF(yf);
+                if (!PyErr_ExceptionMatches(PyExc_AttributeError)) {
+                    gen->is_running = 0;
+                    return NULL;
+                }
+                PyErr_Clear();
+                __Pyx_Generator_Undelegate(gen);
+                gen->is_running = 0;
+                goto throw_here;
+            }
+            ret = PyObject_CallObject(meth, args);
+            Py_DECREF(meth);
+        }
+        gen->is_running = 0;
+        Py_DECREF(yf);
+        if (!ret) {
+            ret = __Pyx_Generator_FinishDelegation(gen);
+        }
+        return ret;
+    }
+throw_here:
+    __Pyx_Raise(typ, val, tb, NULL);
+    return __Pyx_Generator_SendEx(gen, NULL);
+}
+static int __Pyx_Generator_traverse(PyObject *self, visitproc visit, void *arg) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject *) self;
+    Py_VISIT(gen->closure);
+    Py_VISIT(gen->classobj);
+    Py_VISIT(gen->yieldfrom);
+    Py_VISIT(gen->exc_type);
+    Py_VISIT(gen->exc_value);
+    Py_VISIT(gen->exc_traceback);
+    return 0;
+}
+static int __Pyx_Generator_clear(PyObject *self) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject *) self;
+    Py_CLEAR(gen->closure);
+    Py_CLEAR(gen->classobj);
+    Py_CLEAR(gen->yieldfrom);
+    Py_CLEAR(gen->exc_type);
+    Py_CLEAR(gen->exc_value);
+    Py_CLEAR(gen->exc_traceback);
+    Py_CLEAR(gen->gi_name);
+    Py_CLEAR(gen->gi_qualname);
+    return 0;
+}
+static void __Pyx_Generator_dealloc(PyObject *self) {
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject *) self;
+    PyObject_GC_UnTrack(gen);
+    if (gen->gi_weakreflist != NULL)
+        PyObject_ClearWeakRefs(self);
+    if (gen->resume_label > 0) {
+        PyObject_GC_Track(self);
+#if PY_VERSION_HEX >= 0x030400a1
+        if (PyObject_CallFinalizerFromDealloc(self))
+#else
+        Py_TYPE(gen)->tp_del(self);
+        if (self->ob_refcnt > 0)
+#endif
+        {
+            return;
+        }
+        PyObject_GC_UnTrack(self);
+    }
+    __Pyx_Generator_clear(self);
+    PyObject_GC_Del(gen);
+}
+static void __Pyx_Generator_del(PyObject *self) {
+    PyObject *res;
+    PyObject *error_type, *error_value, *error_traceback;
+    __pyx_GeneratorObject *gen = (__pyx_GeneratorObject *) self;
+    if (gen->resume_label <= 0)
+        return ;
+#if PY_VERSION_HEX < 0x030400a1
+    assert(self->ob_refcnt == 0);
+    self->ob_refcnt = 1;
+#endif
+    __Pyx_ErrFetch(&error_type, &error_value, &error_traceback);
+    res = __Pyx_Generator_Close(self);
+    if (res == NULL)
+        PyErr_WriteUnraisable(self);
+    else
+        Py_DECREF(res);
+    __Pyx_ErrRestore(error_type, error_value, error_traceback);
+#if PY_VERSION_HEX < 0x030400a1
+    assert(self->ob_refcnt > 0);
+    if (--self->ob_refcnt == 0) {
+        return;
+    }
+    {
+        Py_ssize_t refcnt = self->ob_refcnt;
+        _Py_NewReference(self);
+        self->ob_refcnt = refcnt;
+    }
+#if CYTHON_COMPILING_IN_CPYTHON
+    assert(PyType_IS_GC(self->ob_type) &&
+           _Py_AS_GC(self)->gc.gc_refs != _PyGC_REFS_UNTRACKED);
+    _Py_DEC_REFTOTAL;
+#endif
+#ifdef COUNT_ALLOCS
+    --Py_TYPE(self)->tp_frees;
+    --Py_TYPE(self)->tp_allocs;
+#endif
+#endif
+}
+static PyObject *
+__Pyx_Generator_get_name(__pyx_GeneratorObject *self)
+{
+    Py_INCREF(self->gi_name);
+    return self->gi_name;
+}
+static int
+__Pyx_Generator_set_name(__pyx_GeneratorObject *self, PyObject *value)
+{
+    PyObject *tmp;
+#if PY_MAJOR_VERSION >= 3
+    if (unlikely(value == NULL || !PyUnicode_Check(value))) {
+#else
+    if (unlikely(value == NULL || !PyString_Check(value))) {
+#endif
+        PyErr_SetString(PyExc_TypeError,
+                        "__name__ must be set to a string object");
+        return -1;
+    }
+    tmp = self->gi_name;
+    Py_INCREF(value);
+    self->gi_name = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_Generator_get_qualname(__pyx_GeneratorObject *self)
+{
+    Py_INCREF(self->gi_qualname);
+    return self->gi_qualname;
+}
+static int
+__Pyx_Generator_set_qualname(__pyx_GeneratorObject *self, PyObject *value)
+{
+    PyObject *tmp;
+#if PY_MAJOR_VERSION >= 3
+    if (unlikely(value == NULL || !PyUnicode_Check(value))) {
+#else
+    if (unlikely(value == NULL || !PyString_Check(value))) {
+#endif
+        PyErr_SetString(PyExc_TypeError,
+                        "__qualname__ must be set to a string object");
+        return -1;
+    }
+    tmp = self->gi_qualname;
+    Py_INCREF(value);
+    self->gi_qualname = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyGetSetDef __pyx_Generator_getsets[] = {
+    {(char *) "__name__", (getter)__Pyx_Generator_get_name, (setter)__Pyx_Generator_set_name,
+     (char*) PyDoc_STR("name of the generator"), 0},
+    {(char *) "__qualname__", (getter)__Pyx_Generator_get_qualname, (setter)__Pyx_Generator_set_qualname,
+     (char*) PyDoc_STR("qualified name of the generator"), 0},
+    {0, 0, 0, 0, 0}
+};
+static PyMemberDef __pyx_Generator_memberlist[] = {
+    {(char *) "gi_running", T_BOOL, offsetof(__pyx_GeneratorObject, is_running), READONLY, NULL},
+    {0, 0, 0, 0, 0}
+};
+static PyMethodDef __pyx_Generator_methods[] = {
+    {"send", (PyCFunction) __Pyx_Generator_Send, METH_O, 0},
+    {"throw", (PyCFunction) __Pyx_Generator_Throw, METH_VARARGS, 0},
+    {"close", (PyCFunction) __Pyx_Generator_Close, METH_NOARGS, 0},
+    {0, 0, 0, 0}
+};
+static PyTypeObject __pyx_GeneratorType_type = {
+    PyVarObject_HEAD_INIT(0, 0)
+    "generator",
+    sizeof(__pyx_GeneratorObject),
+    0,
+    (destructor) __Pyx_Generator_dealloc,
+    0,
+    0,
+    0,
+#if PY_MAJOR_VERSION < 3
+    0,
+#else
+    0,
+#endif
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_HAVE_FINALIZE,
+    0,
+    (traverseproc) __Pyx_Generator_traverse,
+    0,
+    0,
+    offsetof(__pyx_GeneratorObject, gi_weakreflist),
+    0,
+    (iternextfunc) __Pyx_Generator_Next,
+    __pyx_Generator_methods,
+    __pyx_Generator_memberlist,
+    __pyx_Generator_getsets,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+#if PY_VERSION_HEX >= 0x030400a1
+    0,
+#else
+    __Pyx_Generator_del,
+#endif
+    0,
+#if PY_VERSION_HEX >= 0x030400a1
+    __Pyx_Generator_del,
+#endif
+};
+static __pyx_GeneratorObject *__Pyx_Generator_New(__pyx_generator_body_t body,
+                                                  PyObject *closure, PyObject *name, PyObject *qualname) {
+    __pyx_GeneratorObject *gen =
+        PyObject_GC_New(__pyx_GeneratorObject, &__pyx_GeneratorType_type);
+    if (gen == NULL)
+        return NULL;
+    gen->body = body;
+    gen->closure = closure;
+    Py_XINCREF(closure);
+    gen->is_running = 0;
+    gen->resume_label = 0;
+    gen->classobj = NULL;
+    gen->yieldfrom = NULL;
+    gen->exc_type = NULL;
+    gen->exc_value = NULL;
+    gen->exc_traceback = NULL;
+    gen->gi_weakreflist = NULL;
+    Py_XINCREF(qualname);
+    gen->gi_qualname = qualname;
+    Py_XINCREF(name);
+    gen->gi_name = name;
+    PyObject_GC_Track(gen);
+    return gen;
+}
+static int __pyx_Generator_init(void) {
+    __pyx_GeneratorType_type.tp_getattro = PyObject_GenericGetAttr;
+    __pyx_GeneratorType_type.tp_iter = PyObject_SelfIter;
+    __pyx_GeneratorType = __Pyx_FetchCommonType(&__pyx_GeneratorType_type);
+    if (__pyx_GeneratorType == NULL) {
+        return -1;
+    }
+    return 0;
 }
 
 static int __Pyx_check_binary_version(void) {

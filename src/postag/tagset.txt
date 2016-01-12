@@ -1,3 +1,11 @@
+#
+$
+''
+,
+-LRB-
+-RRB-
+.
+:
 CC
 CD
 DT
@@ -10,9 +18,9 @@ JJS
 LS
 MD
 NN
-NNS
 NNP
 NNPS
+NNS
 PDT
 POS
 PRP
@@ -34,12 +42,4 @@ WDT
 WP
 WP$
 WRB
-.
-,
-:
 ``
--LRB-
--RRB-
-''
-$
-#

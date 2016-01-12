@@ -45,6 +45,9 @@ def avg_perc_train(train_data, tagset, epochs):
                 
                 num_mistakes += 1
                 labels = copy.deepcopy(word_list)
+                #pos_list_copy = copy.deepcopy(pos_list)
+                #output.append('STOP')
+                #pos_list_copy.append('STOP')
                 labels.insert(0,'_B-1')
                 labels.insert(0, '_B-2') # first two 'words' are B_-2 B_-1
                 labels.append("_B+1")
@@ -109,7 +112,7 @@ if __name__ == '__main__':
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
 
     print "loading data..."
-    dp = data_pool.DataPool([(2,5)], data_path,fgen)
+    dp = data_pool.DataPool([(2)], data_path,fgen)
     sentence_count = 0
     while dp.has_next_data():
     #for i in range(100):
