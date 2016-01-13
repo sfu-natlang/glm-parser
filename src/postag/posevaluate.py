@@ -7,6 +7,7 @@ from data import data_pool
 from weight import weight_vector
 import tagging,perctrain
 from collections import defaultdict
+import csv
 
 def sent_evaluate(result_list, gold_list):
     result_size = len(result_list)
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     tagset = perctrain.read_tagset(tagset_path)
     feat_vec = weight_vector.WeightVector()
     feat_vec.load_posfv(fv_path)
-    matrix = [[0 for x in range(45)] for x in range(45)] 
+    matrix = [[0 for x in range(46)] for x in range(45)] 
     dic = defaultdict(int)
     i = 0
     for t in tagset:
@@ -41,15 +42,15 @@ if __name__ == "__main__":
         i+=1
 
     print "Evaluating..."
-    dp = data_pool.DataPool([(0)], data_path,fgen)
-    #dp = data_pool.DataPool([(2,3)], data_path,fgen)
-    n=0
+    #dp = data_pool.DataPool([(0)], data_path,fgen)
+    dp = data_pool.DataPool([(22,24)], data_path,fgen)
+
     while dp.has_next_data():
         data = dp.get_next_data()
         del data.word_list[0]
         del data.pos_list[0]
         test_data.append((data.word_list,data.pos_list))
-        n+=1
+
 
     correct_num = gold_set_size = 0
     for (word_list, pos_list) in test_data:
@@ -61,11 +62,16 @@ if __name__ == "__main__":
             out_index = dic[output[i]]
             '''if(gold_index==0):
                 print pos_list[i]'''
-            matrix[gold_index][out_index] += 1
+            matrix[gold_index][out_index+1] += 1
     acc = float(correct_num) /gold_set_size
     print "whole accraccy: ", acc
-    for i in range(45):
-        print i, " : "
-        for j in range(45):
-            print matrix[i][j]," ",
-        print
+
+    with open("output.csv", "wb") as f:
+        writer = csv.writer(f)
+        row = [[' ' for x in range(46)] for x in range(1)]
+        for i in range(len(tagset)):
+            row[0][i+1] = tagset[i]
+        for i in range(45):
+            matrix[i][0] = tagset[i]
+        writer.writerows(row)
+        writer.writerows(matrix)

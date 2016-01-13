@@ -112,7 +112,8 @@ if __name__ == '__main__':
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
 
     print "loading data..."
-    dp = data_pool.DataPool([(2)], data_path,fgen)
+    #dp = data_pool.DataPool([(2,5)], data_path,fgen)
+    dp = data_pool.DataPool([(0,18)], data_path,fgen)
     sentence_count = 0
     while dp.has_next_data():
     #for i in range(100):
