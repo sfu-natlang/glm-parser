@@ -19,6 +19,7 @@ class Pos_feat_gen():
 		fv.append((1,self.wl[i-1]))
 		fv.append((2,self.wl[i-2]))
 		fv.append((3,self.wl[i+1]))
+		#if(i<len(self.wl)-2):
 		fv.append((4,self.wl[i+2]))
 		fv.append((5,self.wl[i][:1]))
 		fv.append((6,self.wl[i][:2]))
@@ -36,6 +37,5 @@ class Pos_feat_gen():
 			fv.append((16,"hasHyphen"))
 		if(self.contains_upper(self.wl[i])):
 			fv.append((17,"hasUpperCase"))
-
 
     
