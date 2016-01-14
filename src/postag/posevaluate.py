@@ -29,6 +29,8 @@ if __name__ == "__main__":
     tagset_path = sys.argv[1]
     data_path = sys.argv[2]
     fv_path = sys.argv[3]
+    start = int(sys.argv[4])
+    end = int(sys.argv[5])
     test_data = []
     fgen = english_1st_fgen.FirstOrderFeatureGenerator
     tagset = perctrain.read_tagset(tagset_path)
@@ -43,7 +45,7 @@ if __name__ == "__main__":
 
     print "Evaluating..."
     #dp = data_pool.DataPool([(0)], data_path,fgen)
-    dp = data_pool.DataPool([(22,24)], data_path,fgen)
+    dp = data_pool.DataPool([(start,end)], data_path,fgen)
 
     while dp.has_next_data():
         data = dp.get_next_data()

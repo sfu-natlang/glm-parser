@@ -106,6 +106,8 @@ if __name__ == '__main__':
     tagfile = sys.argv[1]
     data_path = sys.argv[2]
     numepochs = int(sys.argv[3])
+    start = int(sys.argv[4])
+    end = int(sys.argv[5])
     tagset = read_tagset(tagfile)
     train_data = []
     #TODO: change the interface of datapool, no need to use fgen here!
@@ -113,7 +115,7 @@ if __name__ == '__main__':
 
     print "loading data..."
     #dp = data_pool.DataPool([(2,5)], data_path,fgen)
-    dp = data_pool.DataPool([(0,18)], data_path,fgen)
+    dp = data_pool.DataPool([(start,end)], data_path,fgen)
     sentence_count = 0
     while dp.has_next_data():
     #for i in range(100):
