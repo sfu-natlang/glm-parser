@@ -4,6 +4,8 @@
 *.egg-info
 src/build/
 src/hvector/build/
+src/postag/*.db
+src/postag/*.log
 Cython-0.20.2/*
 *.spine
 result/*
