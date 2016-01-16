@@ -85,19 +85,28 @@ def avg_perc_train(train_data, tagset, epochs):
                                 avg_vec[upd_feat, upd_tag] = weight_vec[upd_feat, upd_tag]
                             last_iter[upd_feat, upd_tag] = num_updates
             trian_sent+=1
-            print "training sentence:", trian_sent
-        print >>sys.stderr, "number of mistakes:", num_mistakes, " iteration:", round
-    for (feat, tag) in weight_vec:
-        if (feat, tag) in last_iter:
-            avg_vec[feat, tag] += (num_updates - last_iter[feat, tag]) * weight_vec[feat, tag]
-        else:
-            avg_vec[feat, tag] = weight_vec[feat, tag]
-        weight_vec[feat, tag] = avg_vec[feat, tag] / num_updates
-    return weight_vec
-
+            #print "training sentence:", trian_sent
+        print >>sys.stderr, "number of mistakes:", num_mistakes, " iteration:", round+1
+        dump_vector("fv",round,weight_vec,last_iter,avg_vec, num_updates)
+'''
 def dump_vector(filename, i, fv):
     w_vector = weight_vector.WeightVector()
     w_vector.data_dict.iadd(fv)
+    w_vector.dump(filename + "_Iter_%d.db"%i)
+'''
+def dump_vector(filename, i, weight_vec, last_iter, avg_vec, num_updates):
+    fv = copy.deepcopy(weight_vec)
+    av = copy.deepcopy(avg_vec)
+    for (feat, tag) in fv:
+        if (feat, tag) in last_iter:
+            av[feat, tag] += (num_updates - last_iter[feat, tag]) * fv[feat, tag]
+        else:
+            av[feat, tag] = fv[feat, tag]
+        fv[feat, tag] = av[feat, tag] / num_updates
+
+    w_vector = weight_vector.WeightVector()
+    w_vector.data_dict.iadd(fv)
+    i=i+1
     w_vector.dump(filename + "_Iter_%d.db"%i)
 
 if __name__ == '__main__':
@@ -124,14 +133,15 @@ if __name__ == '__main__':
         del data.word_list[0]
         del data.pos_list[0]
         train_data.append((data.word_list,data.pos_list))
+
     print("Sentence Number: %d" % sentence_count)
     
     print "perceptron training..."
     start = time.time()
-    feat_vec = avg_perc_train(train_data, tagset, numepochs)
+    avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
     #dump the model on disk
-    dump_vector("fv",numepochs,feat_vec)
+    #dump_vector("fv",numepochs,feat_vec)
     
 
 
