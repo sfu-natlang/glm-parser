@@ -87,8 +87,15 @@ def avg_perc_train(train_data, tagset, epochs):
             trian_sent+=1
             #print "training sentence:", trian_sent
         print >>sys.stderr, "number of mistakes:", num_mistakes, " iteration:", round+1
-        dump_vector("fv",round,weight_vec,last_iter,avg_vec, num_updates)
-'''
+        #dump_vector("fv",round,weight_vec,last_iter,avg_vec, num_updates)
+    for (feat, tag) in weight_vec:
+        if (feat, tag) in last_iter:
+            avg_vec[feat, tag] += (num_updates - last_iter[feat, tag]) * weight_vec[feat, tag]
+        else:
+            avg_vec[feat, tag] = weight_vec[feat, tag]
+        weight_vec[feat, tag] = avg_vec[feat, tag] / num_updates
+    return weight_vec
+
 def dump_vector(filename, i, fv):
     w_vector = weight_vector.WeightVector()
     w_vector.data_dict.iadd(fv)
@@ -108,7 +115,7 @@ def dump_vector(filename, i, weight_vec, last_iter, avg_vec, num_updates):
     w_vector.data_dict.iadd(fv)
     i=i+1
     w_vector.dump(filename + "_Iter_%d.db"%i)
-
+'''
 if __name__ == '__main__':
     # each element in the feat_vec dictionary is:
     # key=feature_id value=weight
@@ -138,10 +145,10 @@ if __name__ == '__main__':
     
     print "perceptron training..."
     start = time.time()
-    avg_perc_train(train_data, tagset, numepochs)
+    feat_vec=avg_perc_train(train_data, tagset, numepochs)
     print time.time()-start
     #dump the model on disk
-    #dump_vector("fv",numepochs,feat_vec)
+    dump_vector("fv",numepochs,feat_vec)
     
 
 
