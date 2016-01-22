@@ -8,18 +8,27 @@ import copy, operator, optparse
 from feature import pos_fgen
 
 def get_maxvalue(viterbi_dict):
-    maxvalue = (None, None) # maxvalue has tuple (tag, value)
-    for tag in viterbi_dict.keys():
-        value = viterbi_dict[tag] # value is (score, backpointer)
+    maxvalue = ((None,None), None) # maxvalue has tuple (tag, value)
+    for (tag,prev) in viterbi_dict.keys():
+        value = viterbi_dict[(tag,prev)] # value is (score, backpointer)
         if maxvalue[1] is None:
-            maxvalue = (tag, value[0])
+            maxvalue = ((tag,prev), value[0])
         elif maxvalue[1] < value[0]:
-            maxvalue = (tag, value[0])
+            maxvalue = ((tag,prev), value[0])
         else:
             pass # no change to maxvalue
     if maxvalue[1] is None:
         raise ValueError("max value tag for this word is None")
     return maxvalue
+
+def get_weight(t,u,s,pos_feat,k,feat_vec):
+    weight = 0.0
+    feats = []
+    pos_feat.get_pos_feature(feats,k+1,t,u)
+    for feat in feats:
+        if (feat, s) in feat_vec:
+            weight += feat_vec[feat, s]
+    return weight
 
 def perc_test(feat_vec, labeled_list, tagset, default_tag):
     output = []
@@ -27,8 +36,8 @@ def perc_test(feat_vec, labeled_list, tagset, default_tag):
     # add in the start and end buffers for the context
     labels.insert(0, '_B_-1')
     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
-    labels.append('B_+1')
-    labels.append('B_+2') # last two 'words' are B_+1 B_+2
+    labels.append('_B_+1')
+    labels.append('_B_+2') # last two 'words' are B_+1 B_+2
 
     # size of the viterbi data structure
     N = len(labels)
@@ -40,8 +49,8 @@ def perc_test(feat_vec, labeled_list, tagset, default_tag):
 
     # We do not tag the first two and last two words
     # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words 
-    viterbi[0]['B_-2'] = (0.0, '')
-    viterbi[1]['B_-1'] = (0.0, 'B_-2')
+    viterbi[0][('B_-2','')] = (0.0, '','')
+    viterbi[1][('B_-1','B_-2')] = (0.0, 'B_-2','')
     # find the value of best_tag for each word i in the input
     # feat_index = 0
     pos_feat = pos_fgen.Pos_feat_gen(labels)
@@ -64,10 +73,11 @@ def perc_test(feat_vec, labeled_list, tagset, default_tag):
             #         weight += feat_vec[feat, tag]
             #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
             prev_list = []
-            for prev_tag in viterbi[i-1]:
+            for (prev_tag_1, prev_tag_2) in viterbi[i-1]:
                 feats = []
-                (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
-                pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)
+                #(prev_value, prev_backpointer_a, prev_backpointer_b) = viterbi[i-1][(prev_tag_1, prev_tag_2)]
+                prev_value = viterbi[i-1][(prev_tag_1, prev_tag_2)][0]
+                pos_feat.get_pos_feature(feats,i,prev_tag_1,prev_tag_2)
                 weight = 0.0
                 # sum up the weights for all features except the bigram features
                 for feat in feats:
@@ -80,23 +90,27 @@ def perc_test(feat_vec, labeled_list, tagset, default_tag):
                 #     prev_tag_feat = "B:" + prev_tag
                 #     if (prev_tag_feat, tag) in feat_vec:
                 #         prev_tag_weight += feat_vec[prev_tag_feat, tag]
-                prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
-            (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
+                prev_list.append( (prev_tag_weight + prev_value, prev_tag_1, prev_tag_2) )
+            (best_weight, backpointer_a, backpointer_b) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
             #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
             if best_weight != 0.0:
-                viterbi[i][tag] = (best_weight, backpointer)
+                viterbi[i][(tag,backpointer_a)] = (best_weight, backpointer_a, backpointer_b)
                 found_tag = True
         if found_tag is False:
-            viterbi[i][default_tag] = (0.0, default_tag)
+            viterbi[i][(default_tag,default_tag)] = (0.0, default_tag,default_tag)
 
-
-    # recover the best sequence using backpointers
+                # recover the best sequence using backpointers
     maxvalue = get_maxvalue(viterbi[N-3])
-    best_tag = maxvalue[0]
+    best_tag, prev = maxvalue[0]
     for i in range(N-3, 1, -1):
         output.insert(0,best_tag)
-        (value, backpointer) = viterbi[i][best_tag]
-        best_tag = backpointer
+        (value, prev, prev2) = viterbi[i][(best_tag,prev)]
+        best_tag = prev
+        prev = prev2
 
     return output
+
+
+
+
 

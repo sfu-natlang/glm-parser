@@ -21,9 +21,9 @@ def sent_evaluate(result_list, gold_list):
     return correct_num, gold_size
 
 def result_evaluate(unlabeled_correct_num,unlabeled_gold_set_size,correct_num, gold_set_size):
-    unlabeled_correct_num += correct_num
-    unlabeled_gold_set_size += gold_set_size
-    return unlabeled_correct_num, unlabeled_gold_set_size
+    correct_num += correct_num
+    gold_set_size += gold_set_size
+    return correct_num, gold_set_size
     
 if __name__ == "__main__":
     tagset_path = sys.argv[1]
@@ -57,13 +57,11 @@ if __name__ == "__main__":
     correct_num = gold_set_size = 0
     for (word_list, pos_list) in test_data:
         output = tagging.perc_test(feat_vec.data_dict,word_list,tagset,tagset[0])
-        cnum, gnum = sent_evaluate(output,pos_list)
-        correct_num, gold_set_size = result_evaluate(correct_num,gold_set_size,cnum,gnum)
+        c_num, g_num = sent_evaluate(output,pos_list)
+        correct_num, gold_set_size = result_evaluate(correct_num,gold_set_size,c_num,g_num)
         for i in range(len(output)):
             gold_index = dic[pos_list[i]]
             out_index = dic[output[i]]
-            '''if(gold_index==0):
-                print pos_list[i]'''
             matrix[gold_index][out_index+1] += 1
     acc = float(correct_num) /gold_set_size
     print "whole accraccy: ", acc

@@ -45,55 +45,44 @@ def avg_perc_train(train_data, tagset, epochs):
                 
                 num_mistakes += 1
                 labels = copy.deepcopy(word_list)
-                #pos_list_copy = copy.deepcopy(pos_list)
-                #output.append('STOP')
-                #pos_list_copy.append('STOP')
+                out_cp = copy.deepcopy(output)
+                pos_cp = copy.deepcopy(pos_list)
                 labels.insert(0,'_B-1')
                 labels.insert(0, '_B-2') # first two 'words' are B_-2 B_-1
                 labels.append("_B+1")
                 labels.append("_B+2")
-                #pos_list.insert(0,'B_-1')
-                #pos_list.insert(0,'B_-2')
+                out_cp.insert(0,'B_-1')
+                out_cp.insert(0,'B_-2')
+                pos_cp.insert(0,'B_-1')
+                pos_cp.insert(0,'B_-2')
                 pos_feat = pos_fgen.Pos_feat_gen(labels)
-                pre1 = 'B_-1'
-                pre2 = 'B_-2'
-                g_pre1 = "B_-1"
-                g_pre2 = "B_-2"
-                #gold_out_fv = []
-                #pos_feat.get_pos_feature(gold_out_fv,pos_list)
-                for i in range(2,len(labels)-2):
-                    true_out_fv = []
-                    gold_out_fv = []
-                    pos_feat.get_pos_feature(true_out_fv,i,pre1,pre2)
-                    pos_feat.get_pos_feature(gold_out_fv,i,g_pre1,g_pre2)
-                    pre2 = pre1
-                    pre1 = output[i-2]
-                    g_pre2 = g_pre1
-                    g_pre1 = pos_list[i-2]
-                    feat_vec_update = defaultdict(int)
-                    for j in range(len(true_out_fv)):
-                        true_out_feat = true_out_fv[j]
-                        gold_out_feat = gold_out_fv[j]
-                        feat_vec_update[true_out_feat,output[i-2]] += -1
-                        feat_vec_update[gold_out_feat,pos_list[i-2]] += 1
-                    for (upd_feat, upd_tag) in feat_vec_update:
-                        if feat_vec_update[upd_feat, upd_tag] != 0:
-                            weight_vec[upd_feat, upd_tag] += feat_vec_update[upd_feat,upd_tag]
-                            if (upd_feat, upd_tag) in last_iter:
-                                avg_vec[upd_feat, upd_tag] += (num_updates - last_iter[upd_feat, upd_tag]) * weight_vec[upd_feat, upd_tag]
-                            else:
-                                avg_vec[upd_feat, upd_tag] = weight_vec[upd_feat, upd_tag]
-                            last_iter[upd_feat, upd_tag] = num_updates
+                gold_out_fv = defaultdict(int)
+                pos_feat.get_sent_feature(gold_out_fv,pos_cp)
+                cur_out_fv = defaultdict(int)
+                pos_feat.get_sent_feature(cur_out_fv,out_cp)
+                feat_vec_update = defaultdict(int)
+                for feature in gold_out_fv:
+                    feat_vec_update[feature]+=gold_out_fv[feature]
+                for feature in cur_out_fv:
+                    feat_vec_update[feature]-=cur_out_fv[feature]
+                for upd_feat in feat_vec_update:
+                    if feat_vec_update[upd_feat] != 0:
+                        weight_vec[upd_feat] += feat_vec_update[upd_feat]
+                        if (upd_feat) in last_iter:
+                            avg_vec[upd_feat] += (num_updates - last_iter[upd_feat]) * weight_vec[upd_feat]
+                        else:
+                            avg_vec[upd_feat] = weight_vec[upd_feat]
+                        last_iter[upd_feat] = num_updates
             trian_sent+=1
             #print "training sentence:", trian_sent
         print >>sys.stderr, "number of mistakes:", num_mistakes, " iteration:", round+1
         #dump_vector("fv",round,weight_vec,last_iter,avg_vec, num_updates)
-    for (feat, tag) in weight_vec:
-        if (feat, tag) in last_iter:
-            avg_vec[feat, tag] += (num_updates - last_iter[feat, tag]) * weight_vec[feat, tag]
+    for feat in weight_vec:
+        if feat in last_iter:
+            avg_vec[feat] += (num_updates - last_iter[feat]) * weight_vec[feat]
         else:
-            avg_vec[feat, tag] = weight_vec[feat, tag]
-        weight_vec[feat, tag] = avg_vec[feat, tag] / num_updates
+            avg_vec[feat] = weight_vec[feat]
+        weight_vec[feat] = avg_vec[feat] / num_updates
     return weight_vec
 
 def dump_vector(filename, i, fv):

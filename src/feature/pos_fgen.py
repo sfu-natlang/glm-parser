@@ -14,6 +14,7 @@ class Pos_feat_gen():
 		return any(char=="-" for char in s)
 	def contains_upper(self,s):
 		return any(char.isupper() for char in s)
+	'''
 	def get_pos_feature(self,fv, i, pretag_1, pretag_2):
 	    fv.append((0,self.wl[i]))
 	    fv.append((1,self.wl[i-1]))
@@ -38,37 +39,30 @@ class Pos_feat_gen():
 	        fv.append((17,"hasUpperCase"))
 	'''
 	def get_sent_pos_feature(self, fv, poslist):
-		nwl = copy.deepcopy(self.wl)
-		npl = copy.deepcopy(poslist)
-		nwl[0] = "_B-1"
-		nwl.insert(0,"_B-2")
-		nwl.append("_B+1")
-		nwl.append("_B+2")
-		npl[0] = "_B-1"
-		npl.insert(0,"_B-2")
-		for i in range(2, len(nwl)-2):
-		    fv.append((0,nwl[i]))
-		    fv.append((1,nwl[i-1]))
-		    fv.append((2,nwl[i-2]))
-		    fv.append((3,nwl[i+1]))
-		    fv.append((4,nwl[i+2]))
-		    fv.append((5,nwl[i][:1]))
-		    fv.append((6,nwl[i][:2]))
-		    fv.append((7,nwl[i][:3]))
-		    fv.append((8,nwl[i][:4]))
-		    fv.append((9,nwl[i][-1:]))
-		    fv.append((10,nwl[i][-2:]))
-		    fv.append((11,nwl[i][-3:]))
-		    fv.append((12,nwl[i][-4:]))
-		    #fv.append((13,npl[i-1]))
-		    #fv.append((14,npl[i-1],npl[i-2]))
-		    if(self.contains_digits(nwl[i])):
-		        fv.append((15,"hasNumber"))
-		    if(self.contains_hyphen(nwl[i])):
-		        fv.append((16,"hasHyphen"))
-		    if(self.contains_upper(nwl[i])):
-		        fv.append((17,"hasUpperCase"))
-	'''
+		for i in range(2, len(poslist)):
+			word = self.wl[i]
+			tag = poslist[i]
+		    fv[(0,word)]+=1
+		    fv[(1,self.wl[i-1]),tag]+=1
+		    fv[(2,self.wl[i-2]),tag]+=1
+		    fv[(3,self.wl[i+1]),tag]+=1
+		    fv[(4,self.wl[i+2]),tag]+=1
+		    fv[(5,word[:1]),tag]+=1
+		    fv[(6,word[:2]),tag]+=1
+		    fv[(7,word[:3]),tag]+=1
+		    fv[(8,word[:4]),tag]+=1
+		    fv[(9,word[-1:]),tag]+=1
+		    fv[(10,word[-2:]),tag]+=1
+		    fv[(11,word[-3:]),tag]+=1
+		    fv[(12,word[-4:]),tag]+=1
+		    fv[(13,poslist[i-1],tag)]+=1
+		    fv[(14,poslist[i-1],poslist[i-2]),tag]+=1
+		    if(self.contains_digits(word)):
+		        fv[(15,"hasNumber"),tag]+=1
+		    if(self.contains_hyphen(word)):
+		        fv[(16,"hasHyphen"),tag]+=1
+		    if(self.contains_upper(word)):
+		        fv[(17,"hasUpperCase"),tag]+=1
 
 
     
