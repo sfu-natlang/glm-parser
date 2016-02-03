@@ -63,6 +63,9 @@ class GlmParser():
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
     
+    def parallel_train(self, data_path, train_section=[], max_iter=-1, d_filename=None): 
+        self.learner.parallel_learn(self.compute_argmax, data_path, train_section, max_iter, d_filename, fgen=self.fgen, parser=self.parser)
+
     def evaluate(self, training_time,  test_section=[]):
         if not test_section == []:
             test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen)
@@ -237,7 +240,7 @@ if __name__ == "__main__":
     l_filename = None
     d_filename = None
     dump_freq = 1
-
+    parallel_flag = False;
     # Default learner
     #learner = AveragePerceptronLearner
     learner = get_class_from_module('sequential_learn', 'learn', 'average_perceptron',
@@ -291,7 +294,12 @@ if __name__ == "__main__":
                 else:
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt == "--learner":
-                learner = get_class_from_module('sequential_learn', 'learn', value)
+                if value == 'spark_perceptron':
+                    parallel_flag = True
+                    learner = get_class_from_module('parallel_learn', 'learn', value)
+                else:
+                    learner = get_class_from_module('sequential_learn', 'learn', value)
+
                 print("Using learner: %s (%s)" % (learner.__name__, value))
             elif opt == "--fgen":
                 fgen = get_class_from_module('get_local_vector', 'feature', value)
@@ -319,12 +327,16 @@ if __name__ == "__main__":
                         parser=parser)
 
         training_time = None
+        
         if train_end >= train_begin >= 0:
             start_time = time.clock()
-            gp.sequential_train([(train_begin, train_end)], max_iter, d_filename, dump_freq)
+            if parallel_flag==True:
+                gp.parallel_train(test_data_path,[(train_begin, train_end)], max_iter, d_filename)
+            else:
+                gp.sequential_train([(train_begin, train_end)], max_iter, d_filename, dump_freq)
             end_time = time.clock()
             training_time = end_time - start_time
-
+            print "Total Trainning Time: ", training_time
         if not testsection == []:
             gp.evaluate(training_time, testsection)
 
