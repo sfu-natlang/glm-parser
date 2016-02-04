@@ -73,11 +73,11 @@ class ParallelPerceptronLearner():
         sc = SparkContext(appName="iterParameterMixing")
         train_section = sc.parallelize(train_section)
         def avg_perc_train(train_section,parser,fv,data_path, fgen):
-            print train_section
             data_pool = DataPool(train_section, data_path, fgen)
             w_vector = WeightVector()
             for key in fv.keys():
                 w_vector.data_dict[key]=fv[key]
+            #print data_pool.get_sent_num
             while data_pool.has_next_data():
                 sentence = data_pool.get_next_data()
                 gold_global_vector = sentence.gold_global_vector
@@ -87,10 +87,10 @@ class ParallelPerceptronLearner():
                 #current_global_vector = f_argmax(data_instance)
                 w_vector.data_dict.iadd(gold_global_vector.feature_dict)
                 w_vector.data_dict.iaddc(current_global_vector.feature_dict, -1)
-                vector_list = []
-                for key in w_vector.data_dict.keys():
-                    vector_list.append((str(key),w_vector.data_dict[key]))
-        
+            vector_list = []
+            for key in w_vector.data_dict.keys():
+                vector_list.append((str(key),w_vector.data_dict[key]))
+            
             return vector_list
 
         fv = {}
@@ -99,7 +99,7 @@ class ParallelPerceptronLearner():
         for round in range(max_iter):
 
             feat_vec_list = train_section.mapPartitions(lambda t: avg_perc_train(t,parser,fv,data_path,fgen))
-            feat_vec_list = feat_vec_list.reduce(lambda a, b: a + b)
+            #feat_vec_list = feat_vec_list.reduce(lambda a, b: a + b)
             feat_vec_list = feat_vec_list.combineByKey((lambda x: (x,1)),
                              (lambda x, y: (x[0] + y, x[1] + 1)),
                              (lambda x, y: (x[0] + y[0], x[1] + y[1]))).collect()

@@ -329,12 +329,12 @@ if __name__ == "__main__":
         training_time = None
         
         if train_end >= train_begin >= 0:
-            start_time = time.clock()
+            start_time = time.time()
             if parallel_flag==True:
                 gp.parallel_train(test_data_path,[(train_begin, train_end)], max_iter, d_filename)
             else:
                 gp.sequential_train([(train_begin, train_end)], max_iter, d_filename, dump_freq)
-            end_time = time.clock()
+            end_time = time.time()
             training_time = end_time - start_time
             print "Total Trainning Time: ", training_time
         if not testsection == []:
