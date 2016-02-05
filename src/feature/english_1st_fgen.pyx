@@ -18,7 +18,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     First order feature generator for english
     """
 
-    def __init__(self, sent):
+    def __init__(self):
         """
         Delegate initializer to its parent class
 
@@ -27,7 +27,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         initializer goes to the base class. And secondly, if we want to customize
         the initializer this stub saves some typing.
         """
-        feature_generator_base.FeatureGeneratorBase.__init__(self, sent)
+        feature_generator_base.FeatureGeneratorBase.__init__(self)
+        self.care_list.append("FORM")
+        self.care_list.append("POSTAG")
+
         return
 
     def get_unigram_feature(self, head_index, dep_index, direction, dist):
@@ -60,10 +63,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :paramn dep_index: The index of the dependency node
         :type dep_index: integer
         """
-        xi_word = self.word_list[head_index]
-        xi_pos = self.pos_list[head_index]
-        xj_word = self.word_list[dep_index]
-        xj_pos = self.pos_list[dep_index]
+        xi_word = self.FORM[head_index]
+        xi_pos = self.POSTAG[head_index]
+        xj_word = self.FORM[dep_index]
+        xj_pos = self.POSTAG[dep_index]
 
         local_fv = []
 
@@ -125,10 +128,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         """
         local_fv = []
 
-        xi_word = self.word_list[head_index]
-        xi_pos = self.pos_list[head_index]
-        xj_word = self.word_list[dep_index]
-        xj_pos = self.pos_list[dep_index]
+        xi_word = self.FORM[head_index]
+        xi_pos = self.POSTAG[head_index]
+        xj_word = self.FORM[dep_index]
+        xj_pos = self.POSTAG[dep_index]
         # Prepare keys
         local_fv.append( (1,0,xi_word,xi_pos,xj_word,xj_pos) )
         local_fv.append( (1,1,xi_pos,xj_word,xj_pos) )

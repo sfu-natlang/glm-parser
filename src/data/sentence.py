@@ -113,7 +113,12 @@ class Sentence():
         # Each sentence instance has a exclusive fgen instance
         # we could store some data inside fgen instance, such as cache
         # THIS MUST BE PUT AFTER set_edge_list()
-        self.f_gen = fgen(self)
+        self.f_gen = fgen()
+        rsc_list = []
+        for field_name in self.f_gen.care_list:
+            rsc_list.append(self.fetch_column(field_name);
+
+        self.f_gen.init_resources(rsc_list)
 
         # Pre-compute the set of gold features
         self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)

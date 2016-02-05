@@ -34,8 +34,8 @@ class FeatureGeneratorBase:
 
     +===========================================================================================+
     | self.key_gen_func : Key generation callback (default str)                                 |
-    | self.word_list : Word list                                                                |
-    | self.pos_list : POS list                                                                  |
+    | self.FORM : Word list                                                                |
+    | self.POSTAG : POS list                                                                  |
     | self.compute_five_gram()                                                                  |
     | self.add_dir_and_dist() : Add direction and distance                                      |
     +===========================================================================================+
@@ -46,7 +46,7 @@ class FeatureGeneratorBase:
 
     #cdef list five_gram_word_list
 
-    def __init__(self, sent):
+    def __init__(self):
         """
         Initialize the feature generator with a sentence object. Also pre-compute and
         cache some desired data (e.g. five-gram)
@@ -65,8 +65,15 @@ class FeatureGeneratorBase:
         :param sent: Sentence instance
         :type sent: class Sentence instance
         """
-        self.word_list = sent.get_word_list()
-        self.pos_list = sent.get_pos_list()
+
+        self.care_list = [];
+        return
+
+
+    def init_resources(self, rsc_list):
+        for index, field in enumerate(self.care_list):
+            setattr(self, field, rsc_list[index])
+
         # Pre-compute and cache five-gram for this sentence
         self.compute_five_gram()
 
@@ -136,7 +143,7 @@ class FeatureGeneratorBase:
         # the list, therefore we could judge the length of the word against
         # 5 by reading the corresponding position in five_gram_word_list
         # instead of calculating it each time.
-        for word in self.word_list:
+        for word in self.FORM:
             if len(word) > 5:
                 self.five_gram_word_list.append(word[0:5])
             else:
