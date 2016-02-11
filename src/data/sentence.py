@@ -79,7 +79,7 @@ class Sentence():
     |                        set_current_global_vector()                    |
     +=======================================================================+
     """
-    def __init__(self, column_list, field_name_list):
+    def __init__(self, column_list=[], field_name_list=[], fgen=None):
 	"""
 	Initialize a dependency tree.
 	
@@ -91,6 +91,8 @@ class Sentence():
 	"""
 	self.column_list = column_list
 	self.field_name_list = field_name_list
+
+	'''
 	self.cache_key_func = hash
 	
 	word_list = self.fetch_column("word_list")
@@ -114,6 +116,7 @@ class Sentence():
         self.current_global_vector = None
 
         self.set_second_order_cache()
+	'''
 	return
 
     #Old init

@@ -129,28 +129,18 @@ class DataPool():
 
     def get_data_list(self, file_path, fgen, config_path):
         """
-        Form the DependencyTree list from the specified file. The file format
-        is defined below:
-
-        ----------------------------------------------
-        [previous sentence]
-        [empty line]
-        {word} {pos} {parent_index} {edge_property}
-        ...
-        ...
-        [empty line]
-        [next sentence]
-        ----------------------------------------------
-
-        * Sentences are separated by an empty line
-        * Each entry in the sentence has an implicit index
+        Form the DependencyTree list from the specified file.
 
         :param file_path: the path to the data file
         :type file_path: str
+
+	:param config_path: the path to the config file
+        :type config_path: str
         
         :return: a list of DependencyTree in the specified file
         :rtype: list(Sentence)
         """
+
 	fconfig = open(config_path)
 	field_name_list = []
 	
@@ -165,15 +155,12 @@ class DataPool():
         word_list = []
         pos_list = []
         edge_set = {}
-        current_index = 0
 	'''
+        current_index = 0
 	column_list = {}
 
 	for field in field_name_list:
-	    if field == "HEAD" or field == "parent_index":
-	        column_list[field] = {}
-	    else:
- 	        column_list[field] = []		
+	    column_list[field] = []
 
 	length = len(field_name_list)
 
@@ -184,11 +171,13 @@ class DataPool():
                 entity = line.split()
 
 		for i in range(length):
+		    '''
 		    if field_name_list[i] == "HEAD" or field_name_list == "parent_index":
-			# Incomplete
-                        column_list[field_name_list[i]][(int(entity[2]), current_index)] = entity[3]
+			# Construct edge set here?
 		    else:
 		        column_list[field_name_list[i]].append(entity[i])
+		    '''
+		    column_list[field_name_list[i]].append(entity[i])
 			
 		'''
                 if len(entity) != 4:
@@ -206,13 +195,23 @@ class DataPool():
                 # Prevent any non-mature (i.e. trivial) sentence structure
                 if word_list != []:
                     # Add "ROOT" for word and pos here
+		    '''
                     sent = Sentence(word_list, pos_list, edge_set, fgen)
+		    '''
+		    sent = Sentence(column_list, field_name_list, fgen)
                     data_list.append(sent)
 
+		'''
                 word_list = []
                 pos_list = []
                 edge_set = {}
+		'''
+
                 current_index = 0
+	        column_list = {}
+
+		for field in field_name_list:
+	    	    column_list[field] = []
 
         # DO NOT FORGET THIS!!!!!!!!!!!!
         f.close()
