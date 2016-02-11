@@ -1,0 +1,4 @@
+word
+pos
+parent_index
+edge_property

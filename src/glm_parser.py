@@ -26,7 +26,8 @@ class GlmParser():
                  l_filename=None, max_iter=1,
                  learner=None,
                  fgen=None,
-                 parser=None):
+                 parser=None
+		 config="penn2malt.txt"):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -39,8 +40,8 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a feature generator")
         
-        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen)
-        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen)
+        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen, config)
+        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen, config)
         
         self.parser = parser()
 
@@ -54,7 +55,7 @@ class GlmParser():
        
     def sequential_train(self, train_section=[], max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_section == []:
-            train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen)
+            train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen, config)
         else:
             train_data_pool = self.train_data_pool
             
@@ -65,7 +66,7 @@ class GlmParser():
     
     def evaluate(self, training_time,  test_section=[]):
         if not test_section == []:
-            test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen)
+            test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen, config)
         else:
             test_data_pool = self.test_data_pool
 
