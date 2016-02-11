@@ -155,8 +155,10 @@ class DataPool():
         word_list = []
         pos_list = []
         edge_set = {}
-	'''
         current_index = 0
+	'''
+	data_list = []
+
 	column_list = {}
 
 	for field in field_name_list:
@@ -167,7 +169,7 @@ class DataPool():
         for line in f:
             line = line[:-1]
             if line != '':
-                current_index += 1
+                #current_index += 1
                 entity = line.split()
 
 		for i in range(length):
@@ -193,7 +195,7 @@ class DataPool():
 		
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
-                if word_list != []:
+                if column_list[field_name_list[0]] != []:
                     # Add "ROOT" for word and pos here
 		    '''
                     sent = Sentence(word_list, pos_list, edge_set, fgen)
@@ -207,7 +209,7 @@ class DataPool():
                 edge_set = {}
 		'''
 
-                current_index = 0
+                #current_index = 0
 	        column_list = {}
 
 		for field in field_name_list:
@@ -439,7 +441,7 @@ class DataSet():
         word_list = ['__ROOT__']
         pos_list = ['ROOT']
         edge_set = {}
-        current_index = 0
+        #current_index = 0
 
         for line in f:
             line = line[:-1]
