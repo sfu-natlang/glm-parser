@@ -28,7 +28,7 @@ class DataPool():
     during init).
     """
     def __init__(self, section_set=[], data_path="./penn-wsj-deps/",
-                 fgen=None):
+                 fgen=None, config_path=None):
         """
         Initialize the Data set
         
@@ -40,10 +40,13 @@ class DataPool():
         :param data_path: the relative or absolute path to the 'penn-wsj-deps' folder
         (including "penn-wsj-deps")
         :type data_path: str
-        
+	
+	:param config_path: the config file that describes the file format for the type of data
+	:type config_path: str        
         """  
         self.data_path = data_path
         self.set_section_list(section_set)
+	self.config_path = config_path
         
         self.reset_all()
         self.load(fgen)
@@ -119,12 +122,12 @@ class DataPool():
             for file_name in os.listdir(data_path_with_section):
                 file_path = data_path_with_section + file_name
                 # Append newly read section data to data_list
-                self.data_list = self.data_list + self.get_data_list(file_path, fgen)
+                self.data_list = self.data_list + self.get_data_list(file_path, fgen, config_path)
 
         return
 
 
-    def get_data_list(self, file_path, fgen):
+    def get_data_list(self, file_path, fgen, config_path):
         """
         Form the DependencyTree list from the specified file. The file format
         is defined below:
@@ -132,7 +135,7 @@ class DataPool():
         ----------------------------------------------
         [previous sentence]
         [empty line]
-        {word} {pos} {parent index} {edge_property}
+        {word} {pos} {parent_index} {edge_property}
         ...
         ...
         [empty line]
@@ -148,19 +151,46 @@ class DataPool():
         :return: a list of DependencyTree in the specified file
         :rtype: list(Sentence)
         """
-        f = open(file_path)
+	fconfig = open(config_path)
+	field_name_list = []
+	
+	for line in fconfig:
+	    field_name_list.append(line.strip())
 
+	fconfig.close()	
+
+        f = open(file_path)
+	'''
         data_list = []
         word_list = []
         pos_list = []
         edge_set = {}
         current_index = 0
+	'''
+	column_list = {}
+
+	for field in field_name_list:
+	    if field == "HEAD" or field == "parent_index":
+	        column_list[field] = {}
+	    else:
+ 	        column_list[field] = []		
+
+	length = len(field_name_list)
 
         for line in f:
             line = line[:-1]
             if line != '':
                 current_index += 1
                 entity = line.split()
+
+		for i in range(length):
+		    if field_name_list[i] == "HEAD" or field_name_list == "parent_index":
+			# Incomplete
+                        column_list[field_name_list[i]][(int(entity[2]), current_index)] = entity[3]
+		    else:
+		        column_list[field_name_list[i]].append(entity[i])
+			
+		'''
                 if len(entity) != 4:
                     logging.error("Invalid data format - Length not equal to 4")
                 else:
@@ -169,6 +199,9 @@ class DataPool():
                     word_list.append(entity[0])
                     pos_list.append(entity[1])
                     edge_set[(int(entity[2]), current_index)] = entity[3]
+
+		'''
+		
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
                 if word_list != []:
@@ -185,7 +218,6 @@ class DataPool():
         f.close()
 
         return data_list
-
     
     def set_section_list(self, section_set):
         """

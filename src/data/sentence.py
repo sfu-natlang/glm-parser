@@ -79,29 +79,45 @@ class Sentence():
     |                        set_current_global_vector()                    |
     +=======================================================================+
     """
-    
-    def __init__(self, word_list, pos_list=None, edge_set=None, fgen=None):
-        """
-        Initialize a dependency tree. If you provide a sentence then the
-        initializer could store it as tree nodes. If no initlization parameter
-        is provided then it just construct an empty tree.
+    def __init__(self, column_list, field_name_list):
+	"""
+	Initialize a dependency tree.
+	
+	:param column_list: A dict of data columns.
+	:type column_list: dict(list)
 
-        Edge set is a dict object, but it is also pre-computed into a list
-        of edges and cached inside the instance. The objective is to avoid
-        computing edges each time they are needed. Similarily the total
-        number of edges is cached, though it is just a notational convenience
+	:param field_name_list: A list of the data columns
+	:type field_name_list: list(str)
+	"""
+	self.column_list = column_list
+	self.field_name_list = field_name_list
+	self.cache_key_func = hash
+	
+	word_list = self.fetch_column("word_list")
+	pos_list = self.fetch_column("pos_list")
+	edge_list = self.edge_set("edge_list")
 
-        :param word_list: A list of words. We assume ROOT has been added
-        :type word_list: list(str)
-        :param pos_list: A list of POS tag. We assume ROOT has been added
-        :type pos_list: list(str)
-        :param edge_set: A dictionary object, whose keys are all edges
-                        (first element being the head and second element being the dep)
-                        and values are edge property
-        :type edge_set: dict[(int, int)] -> str
-        :param fgen: Feature generator class
-        :type fgen: Feature Generator class object
-        """
+        self.set_word_list(word_list)
+        self.set_pos_list(pos_list)
+        # This will store the dict, dict.keys() and len(dict.keys())
+        # into the instance
+        self.set_edge_list(edge_set)
+
+        # Each sentence instance has a exclusive fgen instance
+        # we could store some data inside fgen instance, such as cache
+        # THIS MUST BE PUT AFTER set_edge_list()
+        self.f_gen = fgen(self)
+
+        # Pre-compute the set of gold features
+        self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+        # During initialization is has not been known yet. We will fill this later
+        self.current_global_vector = None
+
+        self.set_second_order_cache()
+	return
+
+    #Old init
+    def init(self, word_list, pos_list=None, edge_set=None, fgen=None):
         # Used to compute cache key from (h, d, o, type) tuple
         self.cache_key_func = hash
         self.set_word_list(word_list)
@@ -122,6 +138,15 @@ class Sentence():
 
         self.set_second_order_cache()
         return
+
+    def fetch_column(self, field_name):
+	"""
+	Return the column given the field name.
+	
+	:param field_name: Name of the field you want to fetch.
+	:type field_name: str
+	"""
+	return self.column_list[field_name]	
 
     def set_current_global_vector(self, edge_list):
         """
