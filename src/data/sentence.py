@@ -8,7 +8,7 @@
 #
 
 import copy
-from feature.feature_vector import FeatureVector
+#from feature.feature_vector import FeatureVector
 
 """
 Some basic comcepts are depicted here:
@@ -118,6 +118,12 @@ class Sentence():
         self.set_second_order_cache()
 	'''
 	return
+
+    def return_column_list(self):
+	return self.column_list
+
+    def return_field_name_list(self):
+	return self.field_name_list
 
     #Old init
     def init(self, word_list, pos_list=None, edge_set=None, fgen=None):

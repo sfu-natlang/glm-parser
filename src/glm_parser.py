@@ -27,7 +27,7 @@ class GlmParser():
                  learner=None,
                  fgen=None,
                  parser=None
-		 config="penn2malt.txt"):
+		 config="config/penn2malt.txt"):
 
         self.max_iter = max_iter
         self.data_path = data_path
