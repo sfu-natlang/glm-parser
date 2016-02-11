@@ -8,7 +8,7 @@
 #
 
 import copy
-#from feature.feature_vector import FeatureVector
+from feature.feature_vector import FeatureVector
 
 """
 Some basic comcepts are depicted here:
@@ -91,13 +91,13 @@ class Sentence():
 	"""
 	self.column_list = column_list
 	self.field_name_list = field_name_list
+	self.construct_edge_set()
 
-	'''
 	self.cache_key_func = hash
 	
-	word_list = self.fetch_column("word_list")
-	pos_list = self.fetch_column("pos_list")
-	edge_list = self.edge_set("edge_list")
+	word_list = self.fetch_column("FORM")
+	pos_list = self.fetch_column("POSTAG")
+	edge_list = self.fetch_column("edge_set")
 
         self.set_word_list(word_list)
         self.set_pos_list(pos_list)
@@ -116,37 +116,41 @@ class Sentence():
         self.current_global_vector = None
 
         self.set_second_order_cache()
-	'''
 	return
 
+    def construct_edge_set(self):
+	"""
+	Construct the edge set for the given sentence.
+	Appends the edge set in self.column_list, appends edge_set column name
+	in self.field_name_list, and returns edge_set dict
+	"""
+	deprel_key = None
+	head_key = None
+	
+	for field in self.field_name_list:
+	    if field[len(field)-1] == "0":
+	        deprel_key = field
+	    elif field[len(field)-1] == "1":
+		head_key = field
+	
+	self.field_name_list.append("edge_set")
+	self.column_list["edge_set"] = {}
+
+	length = len(self.column_list[head_key])
+
+	for i in range(length):
+	    head = self.column_list[head_key][i]
+	    deprel = self.column_list[deprel_key][i]
+	    node_key = (int(head), i)
+	    self.column_list["edge_set"][key] = deprel
+
+	return self.column_list["edge_set"]
+	   		
     def return_column_list(self):
 	return self.column_list
 
     def return_field_name_list(self):
 	return self.field_name_list
-
-    #Old init
-    def init(self, word_list, pos_list=None, edge_set=None, fgen=None):
-        # Used to compute cache key from (h, d, o, type) tuple
-        self.cache_key_func = hash
-        self.set_word_list(word_list)
-        self.set_pos_list(pos_list)
-        # This will store the dict, dict.keys() and len(dict.keys())
-        # into the instance
-        self.set_edge_list(edge_set)
-
-        # Each sentence instance has a exclusive fgen instance
-        # we could store some data inside fgen instance, such as cache
-        # THIS MUST BE PUT AFTER set_edge_list()
-        self.f_gen = fgen(self)
-
-        # Pre-compute the set of gold features
-        self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
-        # During initialization is has not been known yet. We will fill this later
-        self.current_global_vector = None
-
-        self.set_second_order_cache()
-        return
 
     def fetch_column(self, field_name):
 	"""
