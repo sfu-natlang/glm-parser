@@ -1,4 +1,4 @@
-word
-pos
-parent_index
-edge_property
+FORM
+POSTAG
+HEAD0
+DEPREL1
