@@ -150,13 +150,6 @@ class DataPool():
 	fconfig.close()	
 
         f = open(file_path)
-	'''
-        data_list = []
-        word_list = []
-        pos_list = []
-        edge_set = {}
-        current_index = 0
-	'''
 	data_list = []
 
 	column_list = {}
@@ -169,47 +162,18 @@ class DataPool():
         for line in f:
             line = line[:-1]
             if line != '':
-                #current_index += 1
                 entity = line.split()
 
 		for i in range(length):
-		    '''
-		    if field_name_list[i] == "HEAD" or field_name_list == "parent_index":
-			# Construct edge set here?
-		    else:
-		        column_list[field_name_list[i]].append(entity[i])
-		    '''
 		    column_list[field_name_list[i]].append(entity[i])
 			
-		'''
-                if len(entity) != 4:
-                    logging.error("Invalid data format - Length not equal to 4")
-                else:
-                    # We do not add the 'ROOT' for word and pos
-                    # They are added in class Sentence
-                    word_list.append(entity[0])
-                    pos_list.append(entity[1])
-                    edge_set[(int(entity[2]), current_index)] = entity[3]
-
-		'''
-		
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
                 if column_list[field_name_list[0]] != []:
                     # Add "ROOT" for word and pos here
-		    '''
-                    sent = Sentence(word_list, pos_list, edge_set, fgen)
-		    '''
 		    sent = Sentence(column_list, field_name_list, fgen)
                     data_list.append(sent)
 
-		'''
-                word_list = []
-                pos_list = []
-                edge_set = {}
-		'''
-
-                #current_index = 0
 	        column_list = {}
 
 		for field in field_name_list:
