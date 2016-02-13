@@ -10,6 +10,7 @@ on test data should always be in the [README file](../README.md).
 
 The code for this project is organized into the following main directories:
 
+* `config`: contains the config files for different data formats
 * `src`: contains all the source code.
 * `scripts`: all the scripts for running experiments including scripts to submit jobs to the RCG cluster.
 * `logs`: keep all your experiment logs in here organized by date with the following information. The goal is to be able to checkout that version of the code and run the same experiment and get the same results recorded in the `glm_parser.log` file.
@@ -21,6 +22,14 @@ The code for this project is organized into the following main directories:
 ![Project Structure](project_struct.png)
 
 The contents of `src` are organized as follows:
+
+### `config`
+This folder contains the configuration files for different file formats.
+Currently, we have configuration files for Penn2Malt and CoNLL-X formats.
+You can use alternative data formats by creating a config file.
+Each line in the config file corresonds to a column in the data file.
+If you wish the GLM parser to create a dependency tree for each sentence,
+append a "0" to the end of the "HEAD" line and a "1" to the dependency relation line.
 
 ### `data`
 

@@ -28,7 +28,7 @@ class DataPool():
     during init).
     """
     def __init__(self, section_set=[], data_path="./penn-wsj-deps/",
-                 fgen=None):
+                 fgen=None, config_path=None):
         """
         Initialize the Data set
         
@@ -40,10 +40,13 @@ class DataPool():
         :param data_path: the relative or absolute path to the 'penn-wsj-deps' folder
         (including "penn-wsj-deps")
         :type data_path: str
-        
+	
+	:param config_path: the config file that describes the file format for the type of data
+	:type config_path: str        
         """  
         self.data_path = data_path
         self.set_section_list(section_set)
+	self.config_path = config_path
         
         self.reset_all()
         self.load(fgen)
@@ -119,73 +122,67 @@ class DataPool():
             for file_name in os.listdir(data_path_with_section):
                 file_path = data_path_with_section + file_name
                 # Append newly read section data to data_list
-                self.data_list = self.data_list + self.get_data_list(file_path, fgen)
+                self.data_list = self.data_list + self.get_data_list(file_path, fgen, config_path)
 
         return
 
 
-    def get_data_list(self, file_path, fgen):
+    def get_data_list(self, file_path, fgen, config_path):
         """
-        Form the DependencyTree list from the specified file. The file format
-        is defined below:
-
-        ----------------------------------------------
-        [previous sentence]
-        [empty line]
-        {word} {pos} {parent index} {edge_property}
-        ...
-        ...
-        [empty line]
-        [next sentence]
-        ----------------------------------------------
-
-        * Sentences are separated by an empty line
-        * Each entry in the sentence has an implicit index
+        Form the DependencyTree list from the specified file.
 
         :param file_path: the path to the data file
         :type file_path: str
+
+	:param config_path: the path to the config file
+        :type config_path: str
         
         :return: a list of DependencyTree in the specified file
         :rtype: list(Sentence)
         """
-        f = open(file_path)
 
-        data_list = []
-        word_list = []
-        pos_list = []
-        edge_set = {}
-        current_index = 0
+	fconfig = open(config_path)
+	field_name_list = []
+	
+	for line in fconfig:
+	    field_name_list.append(line.strip())
+
+	fconfig.close()	
+
+        f = open(file_path)
+	data_list = []
+
+	column_list = {}
+
+	for field in field_name_list:
+	    column_list[field] = []
+
+	length = len(field_name_list)
 
         for line in f:
             line = line[:-1]
             if line != '':
-                current_index += 1
                 entity = line.split()
-                if len(entity) != 4:
-                    logging.error("Invalid data format - Length not equal to 4")
-                else:
-                    # We do not add the 'ROOT' for word and pos
-                    # They are added in class Sentence
-                    word_list.append(entity[0])
-                    pos_list.append(entity[1])
-                    edge_set[(int(entity[2]), current_index)] = entity[3]
+
+		for i in range(length):
+		    column_list[field_name_list[i]].append(entity[i])
+			
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
-                if word_list != []:
+                if column_list[field_name_list[0]] != []:
                     # Add "ROOT" for word and pos here
-                    sent = Sentence(word_list, pos_list, edge_set, fgen)
+		    sent = Sentence(column_list, field_name_list, fgen)
                     data_list.append(sent)
 
-                word_list = []
-                pos_list = []
-                edge_set = {}
-                current_index = 0
+	        column_list = {}
+
+		for field in field_name_list:
+	    	    column_list[field] = []
 
         # DO NOT FORGET THIS!!!!!!!!!!!!
         f.close()
 
         return data_list
-
     
     def set_section_list(self, section_set):
         """
@@ -408,7 +405,7 @@ class DataSet():
         word_list = ['__ROOT__']
         pos_list = ['ROOT']
         edge_set = {}
-        current_index = 0
+        #current_index = 0
 
         for line in f:
             line = line[:-1]
