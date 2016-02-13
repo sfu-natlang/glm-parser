@@ -26,7 +26,7 @@ class GlmParser():
                  l_filename=None, max_iter=1,
                  learner=None,
                  fgen=None,
-                 parser=None
+                 parser=None,
 		 config="config/penn2malt.txt"):
 
         self.max_iter = max_iter
@@ -40,8 +40,8 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a feature generator")
         
-        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen, config)
-        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen, config)
+        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen, config_path=config)
+        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen, config_path=config)
         
         self.parser = parser()
 
@@ -55,7 +55,7 @@ class GlmParser():
        
     def sequential_train(self, train_section=[], max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_section == []:
-            train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen, config)
+            train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen, config_path=config)
         else:
             train_data_pool = self.train_data_pool
             
@@ -66,7 +66,7 @@ class GlmParser():
     
     def evaluate(self, training_time,  test_section=[]):
         if not test_section == []:
-            test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen, config)
+            test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen, config_path=config)
         else:
             test_data_pool = self.test_data_pool
 
@@ -248,13 +248,15 @@ if __name__ == "__main__":
                                  silent=True)
     parser = get_class_from_module('parse', 'parse', 'ceisner3',
                                    silent=True)
+    # Default config file: penn2malt
+    config = 'config/penn2malt.txt'
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
 
     try:
         opt_spec = "ahb:e:t:i:p:l:d:f:"
-        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=',
+        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'config=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
                          'log-feature-request']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
@@ -310,6 +312,8 @@ if __name__ == "__main__":
             elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
                 print("Enable feature request log")
+            elif opt == '--config':
+                config = value;
             else:
                 print "Invalid argument, try -h"
                 sys.exit(0)
@@ -317,7 +321,8 @@ if __name__ == "__main__":
         gp = glm_parser(data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
-                        parser=parser)
+                        parser=parser,
+                        config=config)
 
         training_time = None
         if train_end >= train_begin >= 0:

@@ -91,19 +91,16 @@ class Sentence():
 	"""
 	self.column_list = column_list
 	self.field_name_list = field_name_list
-	self.construct_edge_set()
 
 	self.cache_key_func = hash
 	
-	word_list = self.fetch_column("FORM")
-	pos_list = self.fetch_column("POSTAG")
-	edge_list = self.fetch_column("edge_set")
+	edge_list = self.construct_edge_set()
+        self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+        self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
 
-        self.set_word_list(word_list)
-        self.set_pos_list(pos_list)
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
-        self.set_edge_list(edge_set)
+        self.set_edge_list(edge_list)
 
         # Each sentence instance has a exclusive fgen instance
         # we could store some data inside fgen instance, such as cache
@@ -111,7 +108,7 @@ class Sentence():
         self.f_gen = fgen()
         rsc_list = []
         for field_name in self.f_gen.care_list:
-            rsc_list.append(self.fetch_column(field_name);
+            rsc_list.append(self.fetch_column(field_name))
 
         self.f_gen.init_resources(rsc_list)
 
@@ -134,20 +131,18 @@ class Sentence():
 	
 	for field in self.field_name_list:
 	    if field[len(field)-1] == "0":
-	        deprel_key = field
-	    elif field[len(field)-1] == "1":
 		head_key = field
-	
+	    elif field[len(field)-1] == "1":
+	        deprel_key = field
 	self.field_name_list.append("edge_set")
 	self.column_list["edge_set"] = {}
 
 	length = len(self.column_list[head_key])
-
 	for i in range(length):
 	    head = self.column_list[head_key][i]
 	    deprel = self.column_list[deprel_key][i]
-	    node_key = (int(head), i)
-	    self.column_list["edge_set"][key] = deprel
+	    node_key = (int(head), i + 1)
+	    self.column_list["edge_set"][node_key] = deprel
 
 	return self.column_list["edge_set"]
 	   		
@@ -338,7 +333,7 @@ class Sentence():
         :return: A list of words
         :rtype: list(str)
         """
-        return self.word_list
+        return self.fetch_column("FORM")
 
     def get_pos_list(self):
         """
@@ -348,7 +343,7 @@ class Sentence():
         :return: A list of POS tags
         :rtype: list(str)
         """
-        return self.pos_list
+        return self.fetch_column("POSTAG")
 
     def get_edge_list(self):
         """

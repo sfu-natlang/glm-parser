@@ -122,7 +122,7 @@ class DataPool():
             for file_name in os.listdir(data_path_with_section):
                 file_path = data_path_with_section + file_name
                 # Append newly read section data to data_list
-                self.data_list = self.data_list + self.get_data_list(file_path, fgen, config_path)
+                self.data_list = self.data_list + self.get_data_list(file_path, fgen, self.config_path)
 
         return
 

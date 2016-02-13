@@ -65,7 +65,7 @@ class AveragePerceptronLearner():
                     after_time = time.clock()
                     time_usage = after_time - before_time
                     argmax_time_total += time_usage
-                    print("Sentence length: %d" % (len(data_instance.word_list) - 1))
+                    print("Sentence length: %d" % (len(data_instance.get_word_list()) - 1))
                     print("Time usage: %f" % (time_usage, ))
                     logging.debug("Time usage %f" % (time_usage, ))
                 else:
