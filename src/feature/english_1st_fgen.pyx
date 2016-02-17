@@ -20,12 +20,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
     def __init__(self):
         """
-        Delegate initializer to its parent class
-
-        This stub is avoidable, but we choose to keep it here for two reasons. First,
-        for those not familiar with Python or OOP, this is a hint that the call to
-        initializer goes to the base class. And secondly, if we want to customize
-        the initializer this stub saves some typing.
+        Add the name of columns that fgen cares about into care_list
         """
         feature_generator_base.FeatureGeneratorBase.__init__(self)
         self.care_list.append("FORM")

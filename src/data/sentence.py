@@ -280,9 +280,9 @@ class Sentence():
 
         # Optimization: return a list to compute weight vector
         return second_order_fv
-        '''
+    '''
         
-    
+    '''
     def set_word_list(self,word_list):
         """
         :param word_list: A list of words. There is no __ROOT__
@@ -290,7 +290,9 @@ class Sentence():
         """
         self.word_list = ['__ROOT__'] + word_list
         return
+    '''
 
+    '''
     def set_pos_list(self,pos_list):
         """
         Set the POS array in bulk. All data in pos_list will be copied, so
@@ -301,6 +303,7 @@ class Sentence():
         """
         self.pos_list = ['ROOT'] + pos_list
         return
+    '''
 
     def set_edge_list(self,edge_list):
         """
