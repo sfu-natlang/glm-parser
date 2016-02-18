@@ -15,4 +15,4 @@ cd hvector
 python setup.py install --install-lib .
 
 cd ..
-pyspark glm_parser.py -i 10 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d '/cs/natlang-projects/glm-parser/new_results/Weight' --learner=average_perceptron --fgen=spark_perceptron --parser=ceisner
+pyspark glm_parser.py -i 10 -b 2 -e 21 -t 0,1,22,24 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ -d '/cs/natlang-projects/glm-parser/new_results/Weight' --learner=spark_perceptron --fgen=english_1st_fgen --parser=ceisner
