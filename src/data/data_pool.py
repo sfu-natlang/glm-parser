@@ -155,9 +155,10 @@ class DataPool():
 	column_list = {}
 
 	for field in field_name_list:
-	    column_list[field] = []
+	    if not(field.isdigit()):
+	        column_list[field] = []
 
-	length = len(field_name_list)
+	length = len(field_name_list) - 2
 
         for line in f:
             line = line[:-1]
@@ -165,11 +166,13 @@ class DataPool():
                 entity = line.split()
 
 		for i in range(length):
-		    column_list[field_name_list[i]].append(entity[i])
+		    if not(field_name_list[i].isdigit()):
+		         column_list[field_name_list[i]].append(entity[i])
 			
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
-                if column_list[field_name_list[0]] != []:
+                if not(field_name_list[0].isdigit()) and column_list[field_name_list[0]] != []:
+		    
                     # Add "ROOT" for word and pos here
 		    sent = Sentence(column_list, field_name_list, fgen)
                     data_list.append(sent)
@@ -177,7 +180,8 @@ class DataPool():
 	        column_list = {}
 
 		for field in field_name_list:
-	    	    column_list[field] = []
+		    if not (field.isdigit()):
+	    	        column_list[field] = []
 
         # DO NOT FORGET THIS!!!!!!!!!!!!
         f.close()

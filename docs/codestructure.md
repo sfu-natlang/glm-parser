@@ -29,7 +29,7 @@ Currently, we have configuration files for Penn2Malt and CoNLL-X formats.
 You can use alternative data formats by creating a config file.
 Each line in the config file corresonds to a column in the data file.
 If you wish the GLM parser to create a dependency tree for each sentence,
-append a "0" to the end of the "HEAD" line and a "1" to the dependency relation line.
+append at the end of the config file, in two new lines, the line numbers of the head and dependency relation field names in that order.
 
 ### `data`
 

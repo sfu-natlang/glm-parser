@@ -8,7 +8,7 @@
 #
 
 import copy
-from feature.feature_vector import FeatureVector
+#from feature.feature_vector import FeatureVector
 
 """
 Some basic comcepts are depicted here:
@@ -128,12 +128,10 @@ class Sentence():
 	"""
 	deprel_key = None
 	head_key = None
-	
-	for field in self.field_name_list:
-	    if field[len(field)-1] == "0":
-		head_key = field
-	    elif field[len(field)-1] == "1":
-	        deprel_key = field
+
+	deprel_key = self.field_name_list[int(self.field_name_list[-1])]
+	head_key = self.field_name_list[int(self.field_name_list[-2])]
+
 	self.field_name_list.append("edge_set")
 	self.column_list["edge_set"] = {}
 
@@ -143,7 +141,6 @@ class Sentence():
 	    deprel = self.column_list[deprel_key][i]
 	    node_key = (int(head), i + 1)
 	    self.column_list["edge_set"][node_key] = deprel
-
 	return self.column_list["edge_set"]
 	   		
     def return_column_list(self):
