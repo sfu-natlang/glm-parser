@@ -67,11 +67,13 @@ class ParallelPerceptronLearner():
         data_list = []
         sentence_count = 0
         if train_section == []:
-            train_section= [(0,22)]
+            train_section= [(0,21)]
         
         train_section = self.set_section_list(train_section)
-        sc = SparkContext(appName="iterParameterMixing")
-        train_section = sc.parallelize(train_section)
+        sc = SparkContext(appName="iterParameterMixing", master="local[10]")
+        train_section = sc.parallelize(train_section).cache()
+
+        # To Do: from perceptron to average perceptron
         def avg_perc_train(train_section,parser,fv,data_path, fgen):
             data_pool = DataPool(train_section, data_path, fgen)
             w_vector = WeightVector()
@@ -97,8 +99,8 @@ class ParallelPerceptronLearner():
         for key in self.w_vector.data_dict.keys():
             fv[str(key)]=w_vector.data_dict[key]
         for round in range(max_iter):
-
-            feat_vec_list = train_section.mapPartitions(lambda t: avg_perc_train(t,parser,fv,data_path,fgen))
+            weight_vector = sc.broadcast(fv)
+            feat_vec_list = train_section.mapPartitions(lambda t: avg_perc_train(t,parser,weight_vector.value,data_path,fgen))
             #feat_vec_list = feat_vec_list.reduce(lambda a, b: a + b)
             feat_vec_list = feat_vec_list.combineByKey((lambda x: (x,1)),
                              (lambda x, y: (x[0] + y, x[1] + 1)),
