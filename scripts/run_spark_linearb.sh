@@ -4,7 +4,7 @@ project_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )'/..'
 
 source $MODULESHOME/init/bash
 module load natlang
-module load NL/HADOOP/SPARK/1.0.0
+module load NL/HADOOP/SPARK/1.2.1
 module load LANG/PYTHON/2.7.6-SYSTEM
 export PYTHONPATH=$PYTHONPATH:/cs/natlang-projects/glm-parser/Cython-0.20.1
 
