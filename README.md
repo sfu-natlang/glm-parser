@@ -37,8 +37,7 @@ Here is a sample training run of the parser:
 In this example we are doing 5 iterations of training `-i 5` and training and testing on all files that match the given regular expressions, in this case section 2 and sections 23, 24 of the Penn WSJ data, respectively.
 `-a` turns on time accounting.
 `-d prefix` dumps the weight vector for each iteration as `prefix_Iter_i.db` for each iteration `i`.
-The data for training is in the directory after `-p`. It assumes the usual Penn Treebank directory structure.
-The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
+The data for training is in the directory after `-p`. The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
 `config` loads the config file for reading the data.
 
 The training progress and the result on the testing section is saved to `glm_parser.log`
