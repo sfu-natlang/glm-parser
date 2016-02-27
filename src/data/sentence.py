@@ -91,7 +91,7 @@ class Sentence():
 	"""
 	self.column_list = column_list
 	self.field_name_list = field_name_list
-
+	
 	self.cache_key_func = hash
 	
 	edge_list = self.construct_edge_set()
