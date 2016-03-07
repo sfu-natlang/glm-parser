@@ -61,17 +61,10 @@ class DataPool():
 
         Restores the instance to a state when no sentence has been read
         """
-        self.reset_index()
+        self.current_index = -1
         self.data_list = []
 
         return
-
-    def reset_index(self):
-        """
-        Reset the index variable to the very beginning of
-        sentence list
-        """
-        self.current_index = -1
 
     def has_next_data(self):
         """
