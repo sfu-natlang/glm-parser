@@ -39,8 +39,8 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a feature generator")
         
-        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen)
-        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen)
+        self.train_data_pool = DataPool(section_set=train_section, data_path=data_path, fgen=self.fgen)
+        self.test_data_pool = DataPool(section_set=test_section, data_path=data_path, fgen=self.fgen)
         
         self.parser = parser()
 
@@ -63,8 +63,9 @@ class GlmParser():
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
     
-    def parallel_train(self, data_path, train_section=[], max_iter=-1, d_filename=None): 
-        self.learner.parallel_learn(self.compute_argmax, data_path, train_section, max_iter, d_filename, fgen=self.fgen, parser=self.parser)
+    def parallel_train(self,output_dir=None, max_iter=-1, shards_number=1,format = None): 
+        self.learner.partition_data(self.data_path, shards_number, output_dir, format)
+        self.learner.parallel_learn(max_iter, output_dir, fgen=self.fgen, parser=self.parser)
 
     def evaluate(self, training_time,  test_section=[]):
         if not test_section == []:
@@ -231,7 +232,8 @@ MINOR_VERSION = 0
 
 if __name__ == "__main__":
     import getopt, sys
-    
+
+    shards_number = 4
     train_begin = -1
     train_end = -1
     testsection = []
@@ -241,6 +243,7 @@ if __name__ == "__main__":
     d_filename = None
     dump_freq = 1
     parallel_flag = False;
+    shards_dir = "./output/"
     # Default learner
     #learner = AveragePerceptronLearner
     learner = get_class_from_module('sequential_learn', 'learn', 'average_perceptron',
@@ -294,13 +297,16 @@ if __name__ == "__main__":
                 else:
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt == "--learner":
-                if value == 'spark_perceptron':
+                if value == 'spark_train':
                     parallel_flag = True
                     learner = get_class_from_module('parallel_learn', 'learn', value)
                 else:
                     learner = get_class_from_module('sequential_learn', 'learn', value)
-
                 print("Using learner: %s (%s)" % (learner.__name__, value))
+
+            elif opt == "--shards":
+                shards_number = value
+
             elif opt == "--fgen":
                 fgen = get_class_from_module('get_local_vector', 'feature', value)
                 print("Using feature generator: %s (%s)" % (fgen.__name__, value))
@@ -327,11 +333,12 @@ if __name__ == "__main__":
                         parser=parser)
 
         training_time = None
-        
+
         if train_end >= train_begin >= 0:
             start_time = time.time()
             if parallel_flag==True:
-                gp.parallel_train(test_data_path,[(train_begin, train_end)], max_iter, d_filename)
+                # TODO: add parameters to options instead of hardcoding
+                gp.parallel_train(shards_dir, max_iter, shards_number, "sec")
             else:
                 gp.sequential_train([(train_begin, train_end)], max_iter, d_filename, dump_freq)
             end_time = time.time()
