@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
+from hvector._mycollections import mydefaultdict
+from hvector.mydouble import mydouble
+from weight import weight_vector
+from data import data_pool
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
@@ -8,7 +12,7 @@ logging.basicConfig(filename='glm_parser.log',
 
 class PerceptronLearner():
 
-    def __init__(self, w_vector, max_iter=1):
+    def __init__(self, w_vector=None, max_iter=1):
         logging.debug("Initialize PerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
@@ -40,4 +44,26 @@ class PerceptronLearner():
         self.w_vector.data_dict.iadd(gold_global_vector.feature_dict)
         self.w_vector.data_dict.iaddc(current_global_vector.feature_dict, -1)
         return
+
+    def parallel_learn(self,textString,fv,fgen,parser):
+        dp = data_pool.DataPool(textString=textString[1],fgen=fgen)
+        w_vector = weight_vector.WeightVector()
+        for key in fv.keys():
+            w_vector.data_dict[key]=fv[key]
+        #print data_pool.get_sent_num
+        while dp.has_next_data():
+            sentence = dp.get_next_data()
+            gold_global_vector = sentence.gold_global_vector
+            current_edge_set = parser.parse(sentence, w_vector.get_vector_score)
+            sentence.set_current_global_vector(current_edge_set)
+            current_global_vector = sentence.current_global_vector
+            w_vector.data_dict.iadd(gold_global_vector.feature_dict)
+            w_vector.data_dict.iaddc(current_global_vector.feature_dict, -1)
+
+        vector_list = {}
+        num = 0
+        for key in w_vector.data_dict.keys():
+            vector_list[str(key)] = w_vector.data_dict[key]
+    
+        return vector_list.items()
        
