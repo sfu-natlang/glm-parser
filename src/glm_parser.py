@@ -33,7 +33,6 @@ class GlmParser():
         self.data_path = data_path
 
         self.w_vector = WeightVector(l_filename)
-
         if fgen is not None:
             # Do not instanciate this; used elsewhere
             self.fgen = fgen
