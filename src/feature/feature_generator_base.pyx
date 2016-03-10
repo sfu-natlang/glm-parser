@@ -34,8 +34,8 @@ class FeatureGeneratorBase:
 
     +===========================================================================================+
     | self.key_gen_func : Key generation callback (default str)                                 |
-    | self.word_list : Word list                                                                |
-    | self.pos_list : POS list                                                                  |
+    | self.FORM : Word list                                                                     |
+    | self.POSTAG : POS list                                                                    |
     | self.compute_five_gram()                                                                  |
     | self.add_dir_and_dist() : Add direction and distance                                      |
     +===========================================================================================+
@@ -46,27 +46,40 @@ class FeatureGeneratorBase:
 
     #cdef list five_gram_word_list
 
-    def __init__(self, sent):
+    def __init__(self):
         """
-        Initialize the feature generator with a sentence object. Also pre-compute and
-        cache some desired data (e.g. five-gram)
+        Initialize the feature generator.
 
-        This method stores word_list and pos_list inside the instance. Do NOT re-implement
-        this in children classes.
+        This method create an empty care_list. Please add the name of data columns that the fgen
+        cares about into the care_list. For example, ['FORM', 'POSTAG', 'HEAD']
 
         If children classes must include more functionality in the initializer, please define
         their own in respective children classes, and call super class __init__
+        """
+
+        self.care_list = [];
+        return
+
+
+    def init_resources(self, rsc_list):
+        """
+        Initialize the resources needed by a feature generator, and computes a five gram feature
+
+        This method create member lists, according to the care_list specified in __init__, for fgen.
+        The member lists take the names in care_list. For example, if there is "DEPREL" in care_list,
+        there would be a member list called self.DEPREL
 
         Feature vector are represented as key-weight (fixed to 1 for later use) pairs. The key
         value is derived from feature objects, which are tuples with strings and integers being
         their elements. Therefore, we need to specify a key generating function to derive
         the key value from tuples.
 
-        :param sent: Sentence instance
-        :type sent: class Sentence instance
+        :param rsc_list: several columns of data, e.g. FORM, HEAD, DEPREL, etc.
+        :type rsc_list: 2-d list
         """
-        self.word_list = sent.get_word_list()
-        self.pos_list = sent.get_pos_list()
+        for index, field in enumerate(self.care_list):
+            setattr(self, field, rsc_list[index])
+
         # Pre-compute and cache five-gram for this sentence
         self.compute_five_gram()
 
@@ -120,12 +133,12 @@ class FeatureGeneratorBase:
 
     def compute_five_gram(self):
         """
-        Computes a five gram feature based on the current word_list. The five
-        gram is a list having the same length as the word_list, and it will be
+        Computes a five gram feature based on the current word_list (FORM). The five
+        gram is a list having the same length as the word_list (FORM), and it will be
         used to construct five gram features.
 
         Each list entry at position i correponds to the word at the same position
-        in word_list, or None if the length of that word is already less than 5.
+        in word_list (FORM), or None if the length of that word is already less than 5.
         This makes it easier to judge whether the length of a word is more than
         five, making it unnecessary to compute the length each time.
         """
@@ -136,7 +149,7 @@ class FeatureGeneratorBase:
         # the list, therefore we could judge the length of the word against
         # 5 by reading the corresponding position in five_gram_word_list
         # instead of calculating it each time.
-        for word in self.word_list:
+        for word in self.FORM:
             if len(word) > 5:
                 self.five_gram_word_list.append(word[0:5])
             else:

@@ -22,11 +22,12 @@ import timeit
 import time
 
 class GlmParser():
-    def __init__(self, train_section=[], test_section=[], data_path="../../penn-wsj-deps/",
+    def __init__(self, train_regex="", test_regex="", data_path="../../penn-wsj-deps/",
                  l_filename=None, max_iter=1,
                  learner=None,
                  fgen=None,
-                 parser=None):
+                 parser=None,
+		 config="config/penn2malt.txt"):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -39,8 +40,9 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a feature generator")
         
-        self.train_data_pool = DataPool(train_section, data_path, fgen=self.fgen)
-        self.test_data_pool = DataPool(test_section, data_path, fgen=self.fgen)
+	
+        self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, config_path=config)
+        self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, config_path=config)
         
         self.parser = parser()
 
@@ -52,9 +54,9 @@ class GlmParser():
 
         self.evaluator = Evaluator()
        
-    def sequential_train(self, train_section=[], max_iter=-1, d_filename=None, dump_freq = 1):
-        if not train_section == []:
-            train_data_pool = DataPool(train_section, self.data_path, fgen=self.fgen)
+    def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
+        if not train_regex == '':
+            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, config_path=config)
         else:
             train_data_pool = self.train_data_pool
             
@@ -63,9 +65,9 @@ class GlmParser():
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
     
-    def evaluate(self, training_time,  test_section=[]):
-        if not test_section == []:
-            test_data_pool = DataPool(test_section, self.data_path, fgen=self.fgen)
+    def evaluate(self, training_time,  test_regex=''):
+        if not test_regex == '':
+            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, config_path=config)
         else:
             test_data_pool = self.test_data_pool
 
@@ -83,18 +85,7 @@ HELP_MSG =\
 
 options:
     -h:     Print this help message
-    
-    -b:     Begin section for training
-            (You need to specify both begin and end section)
 
-    -e:     End section for training
-            (You need to specify both begin and end section)
-
-    -t:     Test sections for evaluation
-            Use section id to specify them, separated with comma (,)
-            i.e.  "-t 1,2,3,4,55"
-            If not specified then no evaluation will be conducted
-    
     -p:     Path to data files (to the parent directory for all sections)
             default "./penn-wsj-deps/"
 
@@ -120,6 +111,17 @@ options:
     -a:     Turn on time accounting (output time usage for each sentence)
             If combined with --debug-run-number then before termination it also
             prints out average time usage
+
+    --train= 
+            Sections for training
+	    Input a regular expression to indicate which files to read e.g.
+	    "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
+
+    --test=
+            Sections for testing
+   	    Input a regular expression to indicate which files to test on e.g.
+	    "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
+
 
     --learner=
             Specify a learner for weight vector training
@@ -229,9 +231,8 @@ MINOR_VERSION = 0
 if __name__ == "__main__":
     import getopt, sys
     
-    train_begin = -1
-    train_end = -1
-    testsection = []
+    train_regex = ''
+    test_regex = ''
     max_iter = 1
     test_data_path = "../../penn-wsj-deps/"  #"./penn-wsj-deps/"
     l_filename = None
@@ -247,13 +248,16 @@ if __name__ == "__main__":
                                  silent=True)
     parser = get_class_from_module('parse', 'parse', 'ceisner3',
                                    silent=True)
+    # Default config file: penn2malt
+    config = 'config/penn2malt.txt'
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
 
     try:
-        opt_spec = "ahb:e:t:i:p:l:d:f:"
-        long_opt_spec = ['fgen=', 'learner=', 'parser=', 'debug-run-number=',
+        opt_spec = "aht:i:p:l:d:f:r:"
+        long_opt_spec = ['train=','test=','fgen=', 
+			 'learner=', 'parser=', 'config=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
                          'log-feature-request']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
@@ -264,12 +268,6 @@ if __name__ == "__main__":
                 print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
                 print(HELP_MSG)
                 sys.exit(0)
-            elif opt == "-b":
-                train_begin = int(value)
-            elif opt == "-e":
-                train_end = int(value)
-            elif opt == "-t":
-                testsection = [int(sec) for sec in value.split(',')]
             elif opt == "-p":
                 test_data_path = value
             elif opt == "-i":
@@ -283,6 +281,10 @@ if __name__ == "__main__":
                 debug.debug.time_accounting_flag = True
             elif opt == '-f':
                 dump_freq = int(value)
+	    elif opt == '--train':
+		train_regex = value
+	    elif opt == '--test':
+		test_regex = value
             elif opt == '--debug-run-number':
                 debug.debug.run_first_num = int(value)
                 if debug.debug.run_first_num <= 0:
@@ -309,24 +311,29 @@ if __name__ == "__main__":
             elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
                 print("Enable feature request log")
+            elif opt == '--config':
+                config = value;
             else:
                 print "Invalid argument, try -h"
                 sys.exit(0)
                 
-        gp = glm_parser(data_path=test_data_path, l_filename=l_filename,
+        gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
-                        parser=parser)
+                        parser=parser,
+                        config=config)
 
         training_time = None
-        if train_end >= train_begin >= 0:
+
+
+	if train_regex != '':
             start_time = time.clock()
-            gp.sequential_train([(train_begin, train_end)], max_iter, d_filename, dump_freq)
+            gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
             end_time = time.clock()
             training_time = end_time - start_time
 
-        if not testsection == []:
-            gp.evaluate(training_time, testsection)
+        if test_regex != '':
+            gp.evaluate(training_time, test_regex)
 
     except getopt.GetoptError, e:
         print("Invalid argument. \n")

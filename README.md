@@ -1,5 +1,4 @@
-glm-parser
-==========
+glm-parser ==========
 
 This project implements a parser for natural language that uses a general linear model over higher-order dependencies between words. It works on any language that is in the CoNLL format. 
 
@@ -29,14 +28,15 @@ Sample run
 
 Here is a sample training run of the parser:
 
-    python glm_parser.py -i 5 -b 2 -e 2 -t 0 -p ~/data/glm-parser-data/penn-wsj-deps/ -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
+    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train=wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab --test=wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.txt
 
-In this example we are doing 5 iterations of training `-i 5` and starting at section 02 for training `-b 2` and ending at section 02 `-e 2`. 
-We are testing on section 0 using `-t 0`. 
+In this example we are doing 5 iterations of training `-i 5` and training and testing on all files that match the given regular expressions, in this case section 2 and sections 23, 24 of the Penn WSJ data, respectively.
+`--train` and `--test` accepts a regular expression, indicating which files to train and test on. The program will crawl through the directory given with the `-p` argument to find all files that match the
+regular expression.
 `-a` turns on time accounting.
 `-d prefix` dumps the weight vector for each iteration as `prefix_Iter_i.db` for each iteration `i`.
-The data for training is in the directory after `-p`. It assumes the usual Penn Treebank directory structure.
-The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
+The data for training is in the directory after `-p`. The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
+`--config` loads the config file for reading the data.
 
 The training progress and the result on the testing section is saved to `glm_parser.log`
 
