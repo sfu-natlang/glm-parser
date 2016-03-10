@@ -27,7 +27,7 @@ class GlmParser():
                  learner=None,
                  fgen=None,
                  parser=None,
-		 config="config/penn2malt.txt"):
+         config="config/penn2malt.txt"):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -39,7 +39,7 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a feature generator")
         
-	
+    
         self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, config_path=config)
         self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, config_path=config)
         
@@ -64,6 +64,14 @@ class GlmParser():
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
     
+    def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None):
+        #partition the data for the spark trainer
+        output_dir = "./output/"
+        self.learner.partition_data(self.data_path, train_regex, shards_number, output_dir)
+        if max_iter == -1:
+            max_iter = self.max_iter
+        self.learner.parallel_learn(max_iter,output_dir, fgen=self.fgen, parser=self.parser, config_path=config)
+
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
             test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, config_path=config)
@@ -113,13 +121,13 @@ options:
 
     --train= 
             Sections for training
-	    Input a regular expression to indicate which files to read e.g.
-	    "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
+        Input a regular expression to indicate which files to read e.g.
+        "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
 
     --test=
             Sections for testing
-   	    Input a regular expression to indicate which files to test on e.g.
-	    "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
+        Input a regular expression to indicate which files to test on e.g.
+        "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
 
 
     --learner=
@@ -237,6 +245,8 @@ if __name__ == "__main__":
     l_filename = None
     d_filename = None
     dump_freq = 1
+    parallel_flag = False
+    shards_number = 4
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -256,7 +266,7 @@ if __name__ == "__main__":
     try:
         opt_spec = "aht:i:p:l:d:f:r:"
         long_opt_spec = ['train=','test=','fgen=', 
-			 'learner=', 'parser=', 'config=', 'debug-run-number=',
+             'learner=', 'parser=', 'config=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
                          'log-feature-request']
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
@@ -280,10 +290,10 @@ if __name__ == "__main__":
                 debug.debug.time_accounting_flag = True
             elif opt == '-f':
                 dump_freq = int(value)
-	    elif opt == '--train':
-		train_regex = value
-	    elif opt == '--test':
-		test_regex = value
+            elif opt == '--train':
+                train_regex = value
+            elif opt == '--test':
+                test_regex = value
             elif opt == '--debug-run-number':
                 debug.debug.run_first_num = int(value)
                 if debug.debug.run_first_num <= 0:
@@ -292,7 +302,11 @@ if __name__ == "__main__":
                 else:
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt == "--learner":
-                learner = get_class_from_module('sequential_learn', 'learn', value)
+                if value == "spark_train":
+                    parallel_flag = True
+                    learner = get_class_from_module('parallel_learn', 'learn', value)
+                else:
+                    learner = get_class_from_module('sequential_learn', 'learn', value)
                 print("Using learner: %s (%s)" % (learner.__name__, value))
             elif opt == "--fgen":
                 fgen = get_class_from_module('get_local_vector', 'feature', value)
@@ -325,13 +339,18 @@ if __name__ == "__main__":
         training_time = None
 
 
-	if train_regex != '':
+        if train_regex is not '':
             start_time = time.clock()
-            gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
+            if parallel_flag:
+                gp.parallel_train(train_regex,max_iter,shards_number)
+            else: 
+                gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
             end_time = time.clock()
             training_time = end_time - start_time
+            print "Total Training Time: ", training_time
 
-        if test_regex != '':
+        if test_regex is not '':
+            print "Evaluating..."
             gp.evaluate(training_time, test_regex)
 
     except getopt.GetoptError, e:

@@ -29,31 +29,60 @@ class DataPool():
     during init).
     """
     def __init__(self, section_regex='', data_path="./penn-wsj-deps/",
-                 fgen=None, config_path=None):
+                 fgen=None, config_path=None, textString=None, config_list=None):
         """
         Initialize the Data set
-        
+
         :param section_regex: the sections to be used. 
-	A regular expression that indicates which sections to be used e.g.
-	(0[0-9])|(1[0-9])|(2[0-1])/.*tab
+        A regular expression that indicates which sections to be used e.g.
+        (0[0-9])|(1[0-9])|(2[0-1])/.*tab
         :type section_regex: str 
-        
+
         :param data_path: the relative or absolute path to the 'penn-wsj-deps' folder
         (including "penn-wsj-deps")
         :type data_path: str
-	
-	:param config_path: the config file that describes the file format for the type of data
-	:type config_path: str        
-        """  
-        self.data_path = data_path
-	self.section_regex = section_regex
-	self.config_path = config_path
-	self.fgen = fgen
 
+        :param config_path: the config file that describes the file format for the type of data
+        :type config_path: str        
+        """  
+        self.fgen = fgen
         self.reset_all()
-        self.load()
+        if textString is None:
+            self.data_path = data_path
+            self.section_regex = section_regex
+            self.config_path = config_path
+            self.load()
+        else:
+            self.load_stringtext(textString,config_list)
+
 
         return
+
+    def load_stringtext(self,textString,config_list):
+        lines = textString.splitlines()
+        column_list = {}
+        for field in config_list:
+            if not(field.isdigit()):
+                column_list[field] = []
+                
+        length = len(config_list) - 2
+
+        for line in lines:
+            if line != '':
+                entity = line.split()
+                for i in range(length):
+                    if not(config_list[i].isdigit()):
+                        column_list[config_list[i]].append(entity[i])
+            else:
+                if not(config_list[0].isdigit()) and column_list[config_list[0]] != []:
+                    sent = Sentence(column_list, config_list, self.fgen)
+                    self.data_list.append(sent)
+
+                column_list = {}
+
+                for field in config_list:
+                    if not (field.isdigit()):
+                        column_list[field] = []
 
     def reset_all(self):
         """
@@ -118,16 +147,16 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-	section_pattern = re.compile(self.section_regex)
+        section_pattern = re.compile(self.section_regex)
 
-	rootDir = self.data_path 
+        rootDir = self.data_path 
 
-	for dirName, subdirList, fileList in os.walk(rootDir):
-	    logging.debug("Found directory: %s" % str(dirName))
-	    for file_name in fileList:
-		if section_pattern.match(str(file_name)) != None:
-		    file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
-		    self.data_list += self.get_data_list(file_path)
+        for dirName, subdirList, fileList in os.walk(rootDir):
+            logging.debug("Found directory: %s" % str(dirName))
+            for file_name in fileList:
+                if section_pattern.match(str(file_name)) != None:
+                    file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
+                    self.data_list += self.get_data_list(file_path)
 
         return
 
@@ -143,46 +172,46 @@ class DataPool():
         :rtype: list(Sentence)
         """
 
-	fconfig = open(self.config_path)
-	field_name_list = []
-	
-	for line in fconfig:
-	    field_name_list.append(line.strip())
+        fconfig = open(self.config_path)
+        field_name_list = []
+    
+        for line in fconfig:
+            field_name_list.append(line.strip())
 
-	fconfig.close()	
+        fconfig.close() 
 
         f = open(file_path)
-	data_list = []
+        data_list = []
 
-	column_list = {}
+        column_list = {}
 
-	for field in field_name_list:
-	    if not(field.isdigit()):
-	        column_list[field] = []
+        for field in field_name_list:
+            if not(field.isdigit()):
+                column_list[field] = []
 
-	length = len(field_name_list) - 2
+        length = len(field_name_list) - 2
 
         for line in f:
             line = line[:-1]
             if line != '':
                 entity = line.split()
-		for i in range(length):
-		    if not(field_name_list[i].isdigit()):
-		         column_list[field_name_list[i]].append(entity[i])
-			
+                for i in range(length):
+                    if not(field_name_list[i].isdigit()):
+                        column_list[field_name_list[i]].append(entity[i])
+            
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
                 if not(field_name_list[0].isdigit()) and column_list[field_name_list[0]] != []:
-		    
+            
                     # Add "ROOT" for word and pos here
-		    sent = Sentence(column_list, field_name_list, self.fgen)
+                    sent = Sentence(column_list, field_name_list, self.fgen)
                     data_list.append(sent)
 
-	        column_list = {}
+                column_list = {}
 
-		for field in field_name_list:
-		    if not (field.isdigit()):
-	    	        column_list[field] = []
+                for field in field_name_list:
+                    if not (field.isdigit()):
+                        column_list[field] = []
 
         f.close()
 
