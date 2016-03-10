@@ -30,7 +30,7 @@ Sample run
 
 Here is a sample training run of the parser:
 
-    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train=wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab --test=wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.txt
+    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.txt
 
 In this example we are doing 5 iterations of training `-i 5` and training and testing on all files that match the given regular expressions, in this case section 2 and sections 23, 24 of the Penn WSJ data, respectively.
 `--train` and `--test` accepts a regular expression, indicating which files to train and test on. The program will crawl through the directory given with the `-p` argument to find all files that match the
