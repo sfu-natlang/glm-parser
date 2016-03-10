@@ -39,7 +39,7 @@ class PosTagger():
 
     def eveluate(self, fv_path=None):
         tester = pos_evaluate.PosEvaluator(self.test_data)
-        if fv_file is not None:
+        if fv_path is not None:
             feat_vec = weight_vector.WeightVector()
             feat_vec.load_posfv(fv_path)
             self.w_vector = feat_vec.data_dict
