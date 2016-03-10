@@ -38,7 +38,7 @@ class PosTagger():
             perc.dump_vector("fv",max_iter,self.w_vector)
 
     def eveluate(self, fv_path=None):
-        tester = pos_evaluate.PosEvaluator(test_data)
+        tester = pos_evaluate.PosEvaluator(self.test_data)
         if fv_file is not None:
             feat_vec = weight_vector.WeightVector()
             feat_vec.load_posfv(fv_path)
