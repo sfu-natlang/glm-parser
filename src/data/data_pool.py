@@ -59,6 +59,7 @@ class DataPool():
         return
 
     def load_stringtext(self,textString,config_list):
+
         lines = textString.splitlines()
         column_list = {}
         for field in config_list:
@@ -72,7 +73,7 @@ class DataPool():
                 entity = line.split()
                 for i in range(length):
                     if not(config_list[i].isdigit()):
-                        column_list[config_list[i]].append(entity[i])
+                        column_list[config_list[i]].append(str(entity[i]))
             else:
                 if not(config_list[0].isdigit()) and column_list[config_list[0]] != []:
                     sent = Sentence(column_list, config_list, self.fgen)
