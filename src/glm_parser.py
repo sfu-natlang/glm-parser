@@ -67,10 +67,10 @@ class GlmParser():
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None):
         #partition the data for the spark trainer
         output_dir = "./output/"
-        self.learner.partition_data(self.data_path, train_regex, shards_number, output_dir)
+        self.learner.partition_data(self.data_path, train_regex, shards, output_dir)
         if max_iter == -1:
             max_iter = self.max_iter
-        self.learner.parallel_learn(max_iter,output_dir, fgen=self.fgen, parser=self.parser, config_path=config)
+        self.learner.parallel_learn(max_iter, output_dir, shards, fgen=self.fgen, parser=self.parser, config_path=config)
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     d_filename = None
     dump_freq = 1
     parallel_flag = False
-    shards_number = 4
+    shards_number = 1
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     glm_parser = GlmParser
 
     try:
-        opt_spec = "aht:i:p:l:d:f:r:"
+        opt_spec = "aht:i:p:l:d:f:r:s:"
         long_opt_spec = ['train=','test=','fgen=', 
              'learner=', 'parser=', 'config=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
@@ -277,6 +277,8 @@ if __name__ == "__main__":
                 print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
                 print(HELP_MSG)
                 sys.exit(0)
+            elif opt == "-s":
+                shards_number = int(value)
             elif opt == "-p":
                 test_data_path = value
             elif opt == "-i":
@@ -340,12 +342,12 @@ if __name__ == "__main__":
 
 
         if train_regex is not '':
-            start_time = time.clock()
+            start_time = time.time()
             if parallel_flag:
                 gp.parallel_train(train_regex,max_iter,shards_number)
             else: 
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
-            end_time = time.clock()
+            end_time = time.time()
             training_time = end_time - start_time
             print "Total Training Time: ", training_time
 
