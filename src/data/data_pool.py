@@ -48,15 +48,16 @@ class DataPool():
         self.fgen = fgen
         self.reset_all()
         if textString is None:
-            self.data_path = data_path
-            self.section_regex = section_regex
-            self.config_path = config_path
-            self.load()
+            if section_regex is not '':
+                self.data_path = data_path
+                self.section_regex = section_regex
+                self.config_path = config_path
+                self.load()
         else:
             self.load_stringtext(textString,config_list)
 
 
-        return
+        return 
 
     def load_stringtext(self,textString,config_list):
 

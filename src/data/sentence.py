@@ -119,7 +119,7 @@ class Sentence():
             # Pre-compute the set of gold features
             self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
             # During initialization is has not been known yet. We will fill this later
-            self.current_global_vector = None
+            # self.current_global_vector = None
 
             self.set_second_order_cache()
         return
@@ -174,10 +174,11 @@ class Sentence():
         :param edge_list: Return value from parser
         :return: None
         """
-        self.current_global_vector = self.get_global_vector(edge_list)
+        
+        #self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
         #~self.cache_feature_for_edge_list(edge_list)
 
-        return
+        return self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
 
     def set_second_order_cache(self):
         self.second_order_cache = {}
@@ -219,8 +220,8 @@ class Sentence():
         """
         global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
-        return self.convert_list_vector_to_dict(global_vector)
-        #return global_vector
+        #return self.convert_list_vector_to_dict(global_vector)
+        return global_vector
 
 
     def get_local_vector(self, 
