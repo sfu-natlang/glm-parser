@@ -57,7 +57,7 @@ class AveragePerceptronLearner():
                 sentence_count += 1
                 # Calculate yi' = argmax
                 data_instance = data_pool.get_next_data()
-                gold_global_vector = data_instance.gold_global_vector
+                gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
 
                 if debug.debug.time_accounting_flag is True:
                     before_time = time.clock()
