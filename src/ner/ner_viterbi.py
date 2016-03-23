@@ -74,12 +74,15 @@ class Viterbi():
                     # sum up the weights for all features except the bigram features
                     for feat in feats:
                         #print str((feat, tag))
-                        if (feat, tag) in feat_vec:
-                            weight += feat_vec[feat, tag]
+                        key = (feat,tag)
+                        strkey = str(key)
+                        if strkey in feat_vec:
+                            weight += feat_vec[strkey]
                     prev_tag_weight = weight
+                    
                     prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
                 (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
-                #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
+                
                 if best_weight != 0.0:
                     viterbi[i][tag] = (best_weight, backpointer)
                     found_tag = True
