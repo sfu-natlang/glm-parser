@@ -29,15 +29,12 @@ class Pos_feat_gen():
 		fv.append((4,self.wl[i+2].lower()))
 		fv.append((5,word[:1]))
 		fv.append((6,word[-1:]))
-		if len(word)>=2:
-			fv.append((7,word[:2]))
-			fv.append((8,word[-2:]))
-		if len(word)>=3:
-			fv.append((9,word[:3]))
-			fv.append((10,word[-3:]))
-		if len(word)>=4:
-			fv.append((11,word[:4]))
-			fv.append((12,word[-4:]))
+		fv.append((7,word[:2]))
+		fv.append((8,word[-2:]))
+		fv.append((9,word[:3]))
+		fv.append((10,word[-3:]))
+		fv.append((11,word[:4]))
+		fv.append((12,word[-4:]))
 		fv.append((13,pretag_1))
 		fv.append((14,pretag_2,pretag_1))
 		if self.contains_digits(word):
@@ -62,15 +59,12 @@ class Pos_feat_gen():
 			fv[(4,self.wl[i+2].lower()),tag]+=1
 			fv[(5,word[:1]),tag]+=1
 			fv[(6,word[-1:]),tag]+=1
-			if len(word)>=2:
-				fv[(7,word[:2]),tag]+=1
-				fv[(8,word[-2:]),tag]+=1
-			if len(word)>=3:
-				fv[(9,word[:3]),tag]+=1
-				fv[(10,word[-3:]),tag]+=1
-			if len(word)>=4:
-				fv[(11,word[:4]),tag]+=1
-				fv[(12,word[-4:]),tag]+=1
+			fv[(7,word[:2]),tag]+=1
+			fv[(8,word[-2:]),tag]+=1
+			fv[(9,word[:3]),tag]+=1
+			fv[(10,word[-3:]),tag]+=1
+			fv[(11,word[:4]),tag]+=1
+			fv[(12,word[-4:]),tag]+=1
 			fv[(13,poslist[i-1],tag)]+=1
 			fv[(14,poslist[i-2],poslist[i-1]),tag]+=1
 			if self.contains_digits(word):

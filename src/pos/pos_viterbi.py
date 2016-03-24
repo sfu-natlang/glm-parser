@@ -3,7 +3,6 @@ import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir) 
-import gzip # use compressed data files
 import copy, operator, optparse
 import pos_features
 from collections import defaultdict
@@ -30,15 +29,10 @@ class Viterbi():
     def perc_test(self, feat_vec, labeled_list, tagset, default_tag):
 
         output = []
-        labels = copy.deepcopy(labeled_list)
-        # add in the start and end buffers for the context
-        labels.insert(0, '_B_-1')
-        labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
-        labels.append('B_+1')
-        labels.append('B_+2') # last two 'words' are B_+1 B_+2
+
 
         # size of the viterbi data structure
-        N = len(labels)
+        N = len(labeled_list)
 
         # Set up the data structure for viterbi search
         viterbi = {}
@@ -51,9 +45,9 @@ class Viterbi():
         viterbi[1]['B_-1'] = (0.0, 'B_-2')
         # find the value of best_tag for each word i in the input
         # feat_index = 0
-        pos_feat = pos_features.Pos_feat_gen(labels)
+        pos_feat = pos_features.Pos_feat_gen(labeled_list)
         for i in range(2, N-2):
-            word = labels[i]
+            word = labeled_list[i]
             found_tag = False
             for tag in tagset:
                 prev_list = []
@@ -87,5 +81,7 @@ class Viterbi():
             (value, backpointer) = viterbi[i][best_tag]
             best_tag = backpointer
 
+        output.insert(0,'B_-1')
+        output.insert(0,'B_-2')
         return output
 

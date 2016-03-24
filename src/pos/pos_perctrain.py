@@ -44,17 +44,18 @@ class PosPerceptron():
             num_mistakes = 0
             trian_sent = 0
 
-            for (word_list, pos_list) in train_data:
+            for (word_list, pos_list, gold_out_fv) in train_data:
 
                 output = argmax.perc_test(weight_vec,word_list,self.tagset,self.default_tag)
                 num_updates += 1
 
                 if output != pos_list:
                     num_mistakes += 1
+                    '''
                     labels = copy.deepcopy(word_list)
                     out_cp = copy.deepcopy(output)
                     pos_cp = copy.deepcopy(pos_list)
-
+                    
                     labels.insert(0, '_B_-1')
                     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
                     labels.append('_B_+1')
@@ -65,13 +66,13 @@ class PosPerceptron():
 
                     pos_cp.insert(0,'B_-1')
                     pos_cp.insert(0,'B_-2')
+                    '''
+                    pos_feat = pos_features.Pos_feat_gen(word_list)
 
-                    pos_feat = pos_features.Pos_feat_gen(labels)
-
-                    gold_out_fv = defaultdict(int)
-                    pos_feat.get_sent_feature(gold_out_fv,pos_cp)
+                    #compute current features
                     cur_out_fv = defaultdict(int)
-                    pos_feat.get_sent_feature(cur_out_fv,out_cp)
+                    pos_feat.get_sent_feature(cur_out_fv,output)
+
                     feat_vec_update = defaultdict(int)
 
                     for feature in gold_out_fv:
