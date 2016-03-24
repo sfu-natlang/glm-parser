@@ -31,7 +31,7 @@ class PerceptronLearner():
 
             data_pool.reset_index()
             if d_filename is not None:
-                if t % dump_freq == 0 or t == max_iter - 1:
+                if i % dump_freq == 0 or i == max_iter - 1:
                     self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
 
 
