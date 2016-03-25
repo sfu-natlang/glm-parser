@@ -1,0 +1,45 @@
+This is the replication of the tests performed on master branch on 2014-06-08 using the latest of datapool_fgen_clean branch.
+
+Branch: datapool_fgen_clean
+command:
+
+	python glm_parser.py -i 10 -p ~/Daten/glm-parser-data/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' -d 23-03-2016 -a --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+
+Log:
+
+03/24/2016 11:26:29 AM DEBUG: Starting sequantial train...
+
+03/24/2016 11:26:29 AM DEBUG: Iteration: 0
+03/24/2016 11:26:29 AM DEBUG: Data size: 39867
+
+03/24/2016 01:46:45 PM DEBUG: Iteration: 1
+03/24/2016 01:46:45 PM DEBUG: Data size: 39867
+
+03/24/2016 02:48:44 PM DEBUG: Iteration: 2
+03/24/2016 02:48:44 PM DEBUG: Data size: 39867
+
+03/24/2016 03:51:49 PM DEBUG: Iteration: 3
+03/24/2016 03:51:49 PM DEBUG: Data size: 39867
+
+03/24/2016 04:55:04 PM DEBUG: Iteration: 4
+03/24/2016 04:55:04 PM DEBUG: Data size: 39867
+
+03/24/2016 05:58:37 PM DEBUG: Iteration: 5
+03/24/2016 05:58:37 PM DEBUG: Data size: 39867
+
+03/24/2016 07:02:27 PM DEBUG: Iteration: 6
+03/24/2016 07:02:27 PM DEBUG: Data size: 39867
+
+03/24/2016 08:06:28 PM DEBUG: Iteration: 7
+03/24/2016 08:06:28 PM DEBUG: Data size: 39867
+
+03/24/2016 09:13:00 PM DEBUG: Iteration: 8
+03/24/2016 09:13:00 PM DEBUG: Data size: 39867
+
+03/24/2016 10:23:36 PM DEBUG: Iteration: 9
+03/24/2016 10:23:36 PM DEBUG: Data size: 39867
+
+03/24/2016 11:44:53 PM INFO: Training time usage(seconds): 38834.574690
+03/24/2016 11:44:54 PM INFO: Feature count: 6968283
+03/24/2016 11:44:54 PM INFO: Unlabeled accuracy: 0.892178576987 (149042, 167054)
+03/24/2016 11:44:54 PM INFO: Unlabeled attachment accuracy: 0.896491086924 (156002, 174014)
