@@ -8,8 +8,6 @@ module load NL/LANG/PYTHON/Anaconda-2.3.0
 
 cd $project_path
 
-echo "python path"
-echo $PYTHONPATH
 echo "Compile Cython classes ..."
 python setup.py build_ext --inplace
 
