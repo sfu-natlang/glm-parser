@@ -16,7 +16,7 @@ logging.basicConfig(filename='glm_parser.log',
 
 class AveragePerceptronLearner():
 
-    def __init__(self, w_vector, max_iter=1):
+    def __init__(self, w_vector=None, max_iter=1):
         """
         :param w_vector: A global weight vector instance that stores
          the weight value (float)
@@ -27,10 +27,11 @@ class AveragePerceptronLearner():
         logging.debug("Initialize AveragePerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
-        
-        self.weight_sum_dict = mydefaultdict(mydouble)
-        self.last_change_dict = mydefaultdict(mydouble)
-        self.c = 1
+
+        if w_vector:
+            self.weight_sum_dict = mydefaultdict(mydouble)
+            self.last_change_dict = mydefaultdict(mydouble)
+            self.c = 1
         return
 
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
@@ -139,3 +140,68 @@ class AveragePerceptronLearner():
         self.avg_weight(d_vector, self.c-1)
         d_vector.dump(d_filename + "_Iter_%d.db"%i)
         d_vector.data_dict.clear()
+
+    def parallel_learn(self,dp,fv,parser):
+        #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,config_list=config)
+        w_vector = WeightVector()
+        for key in fv.keys():
+            w_vector.data_dict[key]=fv[key]
+
+        # sigma_s
+        weight_sum_dict = mydefaultdict(mydouble)
+        last_change_dict = mydefaultdict(mydouble)
+        c = 1
+        sentence_count = 1
+        argmax_time_total = 0.0
+
+        # for i = 1 ... m
+        while dp.has_next_data():
+            #print("Iteration: %d, Sentence %d" % (t, sentence_count))
+            sentence_count += 1
+            # Calculate yi' = argmax
+            data_instance = dp.get_next_data()
+            gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
+            current_edge_set = parser.parse(data_instance, w_vector.get_vector_score)
+            current_global_vector = data_instance.set_current_global_vector(current_edge_set)
+
+            delta_global_vector = gold_global_vector - current_global_vector
+            
+            # update every iteration (more convenient for dump)
+            if dp.has_next_data():
+                # i yi' != yi
+                if not current_global_vector == gold_global_vector:
+                    # for each element s in delta_global_vector
+                    for s in delta_global_vector.keys():
+                        weight_sum_dict[s] += w_vector[s] * (c - last_change_dict[s])
+                        last_change_dict[s] = c
+                    
+                    # update weight and weight sum
+                    w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                    weight_sum_dict.iadd(delta_global_vector.feature_dict)
+
+            else:
+                for s in last_change_dict.keys():
+                    weight_sum_dict[s] += w_vector[s] * (c - last_change_dict[s])
+                    last_change_dict[s] = c
+                    
+                if not current_global_vector == gold_global_vector:
+                    w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                    weight_sum_dict.iadd(delta_global_vector.feature_dict)
+
+            c += 1
+
+        # End while(data_pool.has_next_data())
+        
+        w_vector.data_dict.clear()
+
+        # average weight
+        if c > 0:
+            w_vector.data_dict.iaddc(weight_sum_dict, 1 / c)
+
+        dp.reset_index()
+
+        vector_list = {}
+        for key in w_vector.data_dict.keys():
+            vector_list[str(key)] = w_vector.data_dict[key]
+    
+        return vector_list.items()
