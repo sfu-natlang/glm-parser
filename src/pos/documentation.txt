@@ -1,6 +1,0 @@
-Documentation
-
-1. Train model using data section [2-5] and Test tagging using data section [0]:
-ex:
-python pos_tagger.py tagset.txt 1 /cs/natlang-projects/glm-parser/penn-wsj-deps/ "wsj_0[2-5][0-9][0-9].mrg.3.pa.gs.tab" "wsj_00[0-9][0-9].mrg.3.pa.gs.tab"
-

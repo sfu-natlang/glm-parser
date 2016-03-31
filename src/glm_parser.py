@@ -284,6 +284,7 @@ if __name__ == "__main__":
                 sys.exit(0)
             elif opt == "-s":
                 shards_number = int(value)
+                parallel_flag = True
             elif opt == "-p":
                 test_data_path = value
             elif opt == "-i":
