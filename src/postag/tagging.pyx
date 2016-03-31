@@ -6,29 +6,33 @@ sys.path.insert(0,parentdir)
 import gzip # use compressed data files
 import copy, operator, optparse
 from feature import pos_fgen
+from collections import defaultdict
 
 def get_maxvalue(viterbi_dict):
-    maxvalue = (None, None) # maxvalue has tuple (tag, value)
+    maxvalue = ((None,None), None) # maxvalue has tuple (tag, pre_tag, value)
     for tag in viterbi_dict.keys():
-        value = viterbi_dict[tag] # value is (score, backpointer)
-        if maxvalue[1] is None:
-            maxvalue = (tag, value[0])
-        elif maxvalue[1] < value[0]:
-            maxvalue = (tag, value[0])
-        else:
-            pass # no change to maxvalue
+        for pre_tag in viterbi_dict[tag]:
+            value = viterbi_dict[tag][pre_tag] # value is (score, backpointer)
+            if maxvalue[1] is None:
+                maxvalue = ((tag,pre_tag), value[0])
+            elif maxvalue[1] < value[0]:
+                maxvalue = ((tag,pre_tag), value[0])
+            else:
+                pass # no change to maxvalue
     if maxvalue[1] is None:
         raise ValueError("max value tag for this word is None")
     return maxvalue
+
 
 def perc_test(feat_vec, labeled_list, tagset, default_tag):
     output = []
     labels = copy.deepcopy(labeled_list)
     # add in the start and end buffers for the context
+    labels.insert(0,'_B_0')
     labels.insert(0, '_B_-1')
     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
-    labels.append('B_+1')
-    labels.append('B_+2') # last two 'words' are B_+1 B_+2
+    labels.append('_B_+1')
+    labels.append('_B_+2') # last two 'words' are B_+1 B_+2
 
     # size of the viterbi data structure
     N = len(labels)
@@ -36,67 +40,49 @@ def perc_test(feat_vec, labeled_list, tagset, default_tag):
     # Set up the data structure for viterbi search
     viterbi = {}
     for i in range(0, N):
-        viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple
+        viterbi[i] = defaultdict(lambda: {}) 
 
     # We do not tag the first two and last two words
     # since we added B_-2, B_-1, B_+1 and B_+2 as buffer words 
-    viterbi[0]['B_-2'] = (0.0, '')
-    viterbi[1]['B_-1'] = (0.0, 'B_-2')
+    viterbi[0]['B_-2'][''] = (0.0, '','')
+    viterbi[1]['B_-1']['B_-2'] = (0.0, 'B_-2','')
+    viterbi[2]['B_0']['B_-1'] = (0.0,'B_-1','B_-2')
     # find the value of best_tag for each word i in the input
     # feat_index = 0
     pos_feat = pos_fgen.Pos_feat_gen(labels)
-    for i in range(2, N-2):
+    for i in range(3, N-2):
         word = labels[i]
-        # if len(feats) == 0:
-        #     print >>sys.stderr, " ".join(labels), " ".join(feat_list), "\n"
-        #     raise ValueError("features do not align with input sentence")
-
-        #fields = labels[i].split()
-        #(word, postag) = (fields[0], fields[1])
         found_tag = False
         for tag in tagset:
-            #has_bigram_feat = False
-            # weight = 0.0
-            # # sum up the weights for all features except the bigram features
-            # for feat in feats:
-            #     #if feat == 'B': has_bigram_feat = True
-            #     if (feat, tag) in feat_vec:
-            #         weight += feat_vec[feat, tag]
-            #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
             prev_list = []
-            for prev_tag in viterbi[i-1]:
-                feats = []
-                (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
-                pos_feat.get_pos_feature(feats,i,prev_tag,prev_backpointer)
-                weight = 0.0
-                # sum up the weights for all features except the bigram features
-                for feat in feats:
-                #if feat == 'B': has_bigram_feat = True
-                    if (feat, tag) in feat_vec:
-                        weight += feat_vec[feat, tag]
-            #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
-                prev_tag_weight = weight
-                # if has_bigram_feat:
-                #     prev_tag_feat = "B:" + prev_tag
-                #     if (prev_tag_feat, tag) in feat_vec:
-                #         prev_tag_weight += feat_vec[prev_tag_feat, tag]
-                prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
-            (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
-            #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
+            for prev_tag_a in viterbi[i-1]:
+                for prev_tag_b in viterbi[i-1][prev_tag_a]:
+                    feats = []
+                    (prev_value, prev_tag_b,prev_tag_c) = viterbi[i-1][prev_tag_a][prev_tag_b]
+                    pos_feat.get_pos_feature(feats,i,prev_tag_a,prev_tag_b,prev_tag_c)
+                    weight = 0.0
+                    # sum up the weights for all features
+                    for feat in feats:
+                        if (feat, tag) in feat_vec:
+                            weight += feat_vec[feat, tag]
+                    prev_list.append((weight + prev_value, prev_tag_a, prev_tag_b) )
+            (best_weight, backpointer_a, backpointer_b) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
+            #print >>sys.stderr, "best_weight:", best_weight, "backpointer_a:", backpointer_a, " ",backpointer_b
             if best_weight != 0.0:
-                viterbi[i][tag] = (best_weight, backpointer)
+                viterbi[i][tag][backpointer_a] = (best_weight, backpointer_a, backpointer_b)
                 found_tag = True
         if found_tag is False:
-            viterbi[i][default_tag] = (0.0, default_tag)
+            viterbi[i][default_tag][default_tag] = (0.0, default_tag,default_tag)
 
 
     # recover the best sequence using backpointers
     maxvalue = get_maxvalue(viterbi[N-3])
-    best_tag = maxvalue[0]
-    for i in range(N-3, 1, -1):
+    best_tag,prev_tag_a = maxvalue[0]
+    for i in range(N-3, 2, -1):
         output.insert(0,best_tag)
-        (value, backpointer) = viterbi[i][best_tag]
-        best_tag = backpointer
+        (value, prev_tag_a, prev_tag_b) = viterbi[i][best_tag][prev_tag_a]
+        best_tag = prev_tag_a
+        prev_tag_a = prev_tag_b
 
     return output
 

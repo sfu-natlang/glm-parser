@@ -6,7 +6,10 @@
 # Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
 # (Please add on your name if you have authored this file)
 #
-
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
 import copy
 from feature.feature_vector import FeatureVector
 
@@ -79,49 +82,84 @@ class Sentence():
     |                        set_current_global_vector()                    |
     +=======================================================================+
     """
+    def __init__(self, column_list={}, field_name_list=[], fgen=None):
+        """
+        Initialize a dependency tree.
+
+        :param column_list: A dict of data columns.
+        :type column_list: dict(list)
+
+        :param field_name_list: A list of the data columns
+        :type field_name_list: list(str)
+        """
+        self.column_list = column_list
+        self.field_name_list = field_name_list
     
-    def __init__(self, word_list, pos_list=None, edge_set=None, fgen=None):
-        """
-        Initialize a dependency tree. If you provide a sentence then the
-        initializer could store it as tree nodes. If no initlization parameter
-        is provided then it just construct an empty tree.
-
-        Edge set is a dict object, but it is also pre-computed into a list
-        of edges and cached inside the instance. The objective is to avoid
-        computing edges each time they are needed. Similarily the total
-        number of edges is cached, though it is just a notational convenience
-
-        :param word_list: A list of words. We assume ROOT has been added
-        :type word_list: list(str)
-        :param pos_list: A list of POS tag. We assume ROOT has been added
-        :type pos_list: list(str)
-        :param edge_set: A dictionary object, whose keys are all edges
-                        (first element being the head and second element being the dep)
-                        and values are edge property
-        :type edge_set: dict[(int, int)] -> str
-        :param fgen: Feature generator class
-        :type fgen: Feature Generator class object
-        """
-        # Used to compute cache key from (h, d, o, type) tuple
         self.cache_key_func = hash
-        self.set_word_list(word_list)
-        self.set_pos_list(pos_list)
+    
+        edge_list = self.construct_edge_set()
+        self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+        self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
-        self.set_edge_list(edge_set)
+        self.set_edge_list(edge_list)
 
         # Each sentence instance has a exclusive fgen instance
         # we could store some data inside fgen instance, such as cache
         # THIS MUST BE PUT AFTER set_edge_list()
-        self.f_gen = fgen(self)
+        if fgen is not None:
+            self.f_gen = fgen()
+            rsc_list = []
+            for field_name in self.f_gen.care_list:
+                rsc_list.append(self.fetch_column(field_name))
 
-        # Pre-compute the set of gold features
-        self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
-        # During initialization is has not been known yet. We will fill this later
-        self.current_global_vector = None
+            self.f_gen.init_resources(rsc_list)
 
-        self.set_second_order_cache()
+            # Pre-compute the set of gold features
+            self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+            # During initialization is has not been known yet. We will fill this later
+            # self.current_global_vector = None
+
+            self.set_second_order_cache()
         return
+
+    def construct_edge_set(self):
+        """
+        Construct the edge set for the given sentence.
+        Appends the edge set in self.column_list, appends edge_set column name
+        in self.field_name_list, and returns edge_set dict
+        """
+        deprel_key = None
+        head_key = None
+
+        deprel_key = self.field_name_list[int(self.field_name_list[-1])]
+        head_key = self.field_name_list[int(self.field_name_list[-2])]
+
+        self.column_list["edge_set"] = {}
+
+        length = len(self.column_list[head_key])
+        for i in range(length):
+            head = self.column_list[head_key][i]
+            deprel = self.column_list[deprel_key][i]
+            node_key = (int(head), i + 1)
+            self.column_list["edge_set"][node_key] = deprel
+        return self.column_list["edge_set"]
+            
+    def return_column_list(self):
+        return self.column_list
+
+    def return_field_name_list(self):
+        return self.field_name_list
+
+    def fetch_column(self, field_name):
+        """
+        Return the column given the field name.
+        
+        :param field_name: Name of the field you want to fetch.
+        :type field_name: str
+        """
+        return self.column_list[field_name] 
 
     def set_current_global_vector(self, edge_list):
         """
@@ -136,10 +174,11 @@ class Sentence():
         :param edge_list: Return value from parser
         :return: None
         """
-        self.current_global_vector = self.get_global_vector(edge_list)
+        
+        #self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
         #~self.cache_feature_for_edge_list(edge_list)
 
-        return
+        return self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
 
     def set_second_order_cache(self):
         self.second_order_cache = {}
@@ -181,8 +220,8 @@ class Sentence():
         """
         global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
-        return self.convert_list_vector_to_dict(global_vector)
-        #return global_vector
+        #return self.convert_list_vector_to_dict(global_vector)
+        return global_vector
 
 
     def get_local_vector(self, 
@@ -242,9 +281,9 @@ class Sentence():
 
         # Optimization: return a list to compute weight vector
         return second_order_fv
-        '''
+    '''
         
-    
+    '''
     def set_word_list(self,word_list):
         """
         :param word_list: A list of words. There is no __ROOT__
@@ -252,7 +291,9 @@ class Sentence():
         """
         self.word_list = ['__ROOT__'] + word_list
         return
+    '''
 
+    '''
     def set_pos_list(self,pos_list):
         """
         Set the POS array in bulk. All data in pos_list will be copied, so
@@ -263,6 +304,7 @@ class Sentence():
         """
         self.pos_list = ['ROOT'] + pos_list
         return
+    '''
 
     def set_edge_list(self,edge_list):
         """
@@ -295,7 +337,7 @@ class Sentence():
         :return: A list of words
         :rtype: list(str)
         """
-        return self.word_list
+        return self.fetch_column("FORM")
 
     def get_pos_list(self):
         """
@@ -305,7 +347,7 @@ class Sentence():
         :return: A list of POS tags
         :rtype: list(str)
         """
-        return self.pos_list
+        return self.fetch_column("POSTAG")
 
     def get_edge_list(self):
         """
@@ -336,18 +378,33 @@ class Sentence():
 
 
 # Unit test
-
 def test():
-    word_list = ['__ROOT__', 'I', 'am', 'a', 'HAL9000', 'computer', '.']
-    pos_list = ['POS-ROOT', 'POS-I', 'POS-am', 'POS-a', 'POS-HAL9000', 'POS-computer',
-                'POS-.']
-    edge_set = {(0, 2): 'root-to-am', (0, 1): 'artificial-edge',
-                (2, 4): 'artificial-edge2',
-                (2, 3): 'ae3'}
+    lines = ['Rudolph   NNP 2   NMOD','Agnew    NNP 16  SUB','.  .   16  P', '']
+    config_list = ['FORM', 'POSTAG', 'HEAD', 'DEPREL', '2', '3']
+    column_list = {}
+    for field in config_list:
+        if not(field.isdigit()):
+            column_list[field] = []
+            
+    length = len(config_list) - 2
 
-    s = Sentence(word_list, pos_list, edge_set)
-    print(s.grandchild_list)
-    print(s.sibling_list)
+    for line in lines:
+        print line
+        if line != '':
+            entity = line.split()
+            for i in range(length):
+                if not(config_list[i].isdigit()):
+                    column_list[config_list[i]].append(entity[i])
+        else:
+            if not(config_list[0].isdigit()) and column_list[config_list[0]] != []:
+                sent = Sentence(column_list, config_list)
+                print sent.column_list['FORM']
+            column_list = {}
+            for field in config_list:
+                if not (field.isdigit()):
+                    column_list[field] = []
+
+
 
 if __name__ == '__main__':
     test()

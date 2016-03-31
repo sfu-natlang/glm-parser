@@ -9,7 +9,6 @@
 
 #import cPickle as pickle
 import sys
-import re
 
 from debug.debug import local_debug_flag
 
@@ -96,20 +95,8 @@ class WeightVector():
             line = line[:-1]
             line = line.split("    ")
             self.data_dict[line[0]] = float(line[1])
-        fp.close()
-        return
-
-    def load_posfv(self, filename):
-        fp = open(filename,"r")
-        for line in fp:
-            line = line.split("    ")
-            s = line[0]
-            feat = s[2:s.find(")")].split(', ')
-            tag = s[s.find(")")+4:-2]
-            if(len(feat)==2):
-                self.data_dict[(int(feat[0]),feat[1][1:-1]),tag] = float(line[1])
-            if(len(feat)==3):
-                self.data_dict[(int(feat[0]),feat[1][1:-1],feat[2][1:-1]),tag] = float(line[1])
+        #print self.data_dict
+        #self.data_dict = pickle.load(fp)
         fp.close()
         return
 

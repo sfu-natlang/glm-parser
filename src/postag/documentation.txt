@@ -11,3 +11,10 @@ python posevaluate.py tagset.txt /Users/vivian/data/penn-wsj-deps/ fv_Iter_1.db
 Overall Accuracy: 96%
 
 Linearb:
+
+~/spark-1.5.2/bin/spark-submit glm_parser.py -i 2 -b 1 -e 4 -t 0 -p /Users/vivian/data/shards/ --learner=spark_train --fgen=english_1st_fgen --parser=ceisner
+
+sequential:
+ glm_parser.py -i 2 -b 1 -e 4 -t 0 -p /Users/vivian/data/penn-wsj-deps/ --learner=spark_train --fgen=english_1st_fgen --parser=ceisner
+
+ python glm_parser.py -i 5 -p /Users/vivian/data/penn-wsj-deps/ --train=wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
