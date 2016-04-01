@@ -195,7 +195,7 @@ class DataPool():
 
         for line in f:
             line = line[:-1]
-            if line != '':
+            if line != '' and line[0] != '#':
                 entity = line.split()
                 for i in range(length):
                     if not(field_name_list[i].isdigit()):
