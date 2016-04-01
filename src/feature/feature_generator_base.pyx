@@ -69,6 +69,9 @@ class FeatureGeneratorBase:
         The member lists take the names in care_list. For example, if there is "DEPREL" in care_list,
         there would be a member list called self.DEPREL
 
+        The columns in rsc_list are specified by column names specified in care_list, and they are
+        in the same order as the column names in care_list
+
         Feature vector are represented as key-weight (fixed to 1 for later use) pairs. The key
         value is derived from feature objects, which are tuples with strings and integers being
         their elements. Therefore, we need to specify a key generating function to derive
