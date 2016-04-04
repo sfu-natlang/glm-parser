@@ -21,12 +21,12 @@ class PerceptronLearner():
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
             max_iter = self.max_iter
-            
+
         logging.debug("Starting sequantial train...")
         for i in range(max_iter):
             logging.debug("Iteration: %d" % i)
             logging.debug("Data size: %d" % len(data_pool.data_list))
- 
+
             while data_pool.has_next_data():
                 data_instance = data_pool.get_next_data()
                 #data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
@@ -37,7 +37,7 @@ class PerceptronLearner():
             data_pool.reset_index()
             
             if d_filename is not None:
-                if t % dump_freq == 0 or t == max_iter - 1:
+                if i % dump_freq == 0 or i == max_iter - 1:
                     self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
 
 
@@ -68,4 +68,4 @@ class PerceptronLearner():
             vector_list[str(key)] = w_vector.data_dict[key]
     
         return vector_list.items()
-       
+
