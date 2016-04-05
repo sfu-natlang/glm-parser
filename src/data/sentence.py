@@ -96,10 +96,20 @@ class Sentence():
         self.field_name_list = field_name_list
     
         self.cache_key_func = hash
-    
+
+        # add ROOT to FORM and POSTAG
         edge_list = self.construct_edge_set()
-        self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
-        self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+        if "FORM" in self.column_list.keys():
+            self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+        else:
+            print("'FORM' is needed in Sentence but it's not in config file")
+            exit()
+
+        if "POSTAG" in self.column_list.keys():
+            self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+        else:
+            print("'POSTAG' is needed in Sentence but it's not in config file")
+            exit()
 
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
@@ -159,7 +169,12 @@ class Sentence():
         :param field_name: Name of the field you want to fetch.
         :type field_name: str
         """
-        return self.column_list[field_name] 
+
+        if field_name in self.column_list.keys():
+            return self.column_list[field_name]
+        else
+            print("'" + field_name + "' is needed in Sentence but it's not in config file")
+            exit()
 
     def set_current_global_vector(self, edge_list):
         """

@@ -59,6 +59,14 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :type dep_index: integer
         """
 
+        if not hasattr(self, 'FORM'):
+            print("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            exit()
+
+        if not hasattr(self, 'POSTAG'):
+            print("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            exit()
+
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
         xj_word = self.FORM[dep_index]
@@ -123,6 +131,14 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :type dep_index: integer
         """
         local_fv = []
+
+        if not hasattr(self, 'FORM'):
+            print("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            exit()
+
+        if not hasattr(self, 'POSTAG'):
+            print("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            exit()
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
