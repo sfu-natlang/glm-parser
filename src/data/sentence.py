@@ -140,6 +140,7 @@ class Sentence():
         Appends the edge set in self.column_list, appends edge_set column name
         in self.field_name_list, and returns edge_set dict
         """
+
         deprel_key = None
         head_key = None
 
@@ -152,8 +153,9 @@ class Sentence():
         for i in range(length):
             head = self.column_list[head_key][i]
             deprel = self.column_list[deprel_key][i]
-            node_key = (int(head), i + 1)
-            self.column_list["edge_set"][node_key] = deprel
+	    if head.isdigit():
+                node_key = (int(head), i + 1)
+                self.column_list["edge_set"][node_key] = deprel
         return self.column_list["edge_set"]
             
     def return_column_list(self):
@@ -172,7 +174,7 @@ class Sentence():
 
         if field_name in self.column_list.keys():
             return self.column_list[field_name]
-        else
+        else:
             print("'" + field_name + "' is needed in Sentence but it's not in config file")
             exit()
 
