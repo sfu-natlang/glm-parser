@@ -29,7 +29,9 @@ class GlmParser():
                  learner=None,
                  fgen=None,
                  parser=None,
-         config="config/penn2malt.txt", spark=False):
+                 config="config/penn2malt.txt", 
+                 prep_path = "",
+                 spark=False):
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -42,8 +44,10 @@ class GlmParser():
             raise ValueError("You need to specify a feature generator")
         
     
-        self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, config_path=config)
-        self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, config_path=config)
+        self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, 
+                                        config_path=config, prep_path = prep_path)
+        self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, 
+                                       config_path=config, prep_path = prep_path)
         
         self.parser = parser()
 
@@ -61,7 +65,8 @@ class GlmParser():
        
     def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_regex == '':
-            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, config_path=config)
+            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, 
+                                       config_path=config, prep_path=prep_path)
         else:
             train_data_pool = self.train_data_pool
             
@@ -74,7 +79,7 @@ class GlmParser():
     def parallel_train(self, train_regex='', max_iter=-1, shard_num=1, d_filename=None, dump_freq=1, 
                        shards_dir=None, pl = None):
 
-        output_dir = "/data/output/"
+        output_dir = self.prep_path
         output_path = partition_data(self.data_path, train_regex, shard_num, output_dir)
 
         if max_iter == -1:
@@ -86,7 +91,8 @@ class GlmParser():
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
-            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, config_path=config)
+            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, 
+                                      config_path=config, prep_path=prep_path)
         else:
             test_data_pool = self.test_data_pool
 
@@ -174,6 +180,9 @@ options:
 
             default "ceisner3"; alternative "ceisner"
 
+    --prep-path=
+            Input the directory in which you would like to store prepared data files after partitioning
+
     --debug-run-number=[int]
             Only run the first [int] sentences. Usually combined with option -a to gather
             time usage information
@@ -191,6 +200,7 @@ options:
             analyzing feature usage and building feature caching utility.
             Upon exiting the main program will dump feature request information
             into a file "feature_request.log"
+
     
 """
 
@@ -261,6 +271,7 @@ if __name__ == "__main__":
     dump_freq = 1
     parallel_flag = False
     shards_number = 1
+    prep_path = ''
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -281,7 +292,7 @@ if __name__ == "__main__":
         opt_spec = "aht:i:p:l:d:f:r:s:"
         long_opt_spec = ['train=','test=','fgen=', 
              'learner=', 'parser=', 'config=', 'debug-run-number=',
-                         'force-feature-order=', 'interactive',
+                         'force-feature-order=', "prep-path=",'interactive',
                          'log-feature-request',"spark"]
         opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
         for opt, value in opts:
@@ -320,6 +331,8 @@ if __name__ == "__main__":
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt =="--spark":
                 parallel_flag = True
+            elif opt == "--prep-path":
+                prep_path = value
             elif opt == "--learner":
                 if parallel_flag:
                     learner = get_class_from_module('parallel_learn', 'learn', value)
@@ -353,6 +366,7 @@ if __name__ == "__main__":
                         fgen=fgen,
                         parser=parser,
                         config=config,
+                        prep_path=prep_path,
                         spark = parallel_flag)
 
         training_time = None

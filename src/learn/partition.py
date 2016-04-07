@@ -77,4 +77,7 @@ def partition_data(input_dir, regex, shard_num, output_dir="data/prep/"):
 
         fout.close()
 
+        sent_num = count_sent(output_path, '.')
+        print "Number of training sentences: %d" % (sent_num)
+
     return output_path 

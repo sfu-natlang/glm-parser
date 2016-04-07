@@ -31,7 +31,7 @@ class DataPool():
     during init).
     """
     def __init__(self, section_regex='', data_path="./penn-wsj-deps/",
-                 fgen=None, config_path=None, textString=None, config_list=None):
+                 fgen=None, config_path=None, textString=None, config_list=None, prep_path='data/prep/'):
         """
         Initialize the Data set
 
@@ -49,15 +49,14 @@ class DataPool():
         """  
         self.fgen = fgen
         self.reset_all()
-        if textString is None:
-            if section_regex is not '':
-                self.data_path = data_path
-                self.section_regex = section_regex
-                self.config_path = config_path
-                self.load()
-        else:
-            self.load_stringtext(textString,config_list)
+        self.data_path = data_path
+        self.section_regex = section_regex
+        self.config_path = config_path
+        self.prep_path = prep_path
+        self.load()
 
+        if textString is not None:
+            self.load_stringtext(textString,config_list)
 
         return 
 
@@ -151,7 +150,7 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        output_path = partition_data(self.data_path, self.section_regex, 1)
+        output_path = partition_data(self.data_path, self.section_regex, 1, self.prep_path)
 	for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
                 file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
