@@ -151,7 +151,7 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        output_path = partition_data(self.data_path, self.section_regex, 1,)
+        output_path = partition_data(self.data_path, self.section_regex, 1)
 	for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
                 file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
