@@ -5,6 +5,8 @@ from sentence import Sentence
 import logging
 import re
 
+from learn.partition import partition_data
+
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s: %(message)s',
@@ -149,16 +151,11 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        section_pattern = re.compile(self.section_regex)
-
-        rootDir = self.data_path 
-
-        for dirName, subdirList, fileList in os.walk(rootDir):
-            logging.debug("Found directory: %s" % str(dirName))
+        output_path = partition_data(self.data_path, self.section_regex, 1,)
+	for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
-                if section_pattern.match(str(file_name)) != None:
-                    file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
-                    self.data_list += self.get_data_list(file_path)
+                file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
+                self.data_list += self.get_data_list(file_path)
 
         return
 

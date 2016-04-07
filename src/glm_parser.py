@@ -15,6 +15,8 @@ from evaluate.evaluator import *
 
 from weight.weight_vector import *
 
+from learn.partition import partition_data 
+
 import debug.debug
 import debug.interact
 
@@ -66,16 +68,21 @@ class GlmParser():
         if max_iter == -1:
             max_iter = self.max_iter
             
-        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
+        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, 
+                                      dump_freq)
     
-    def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None):
-        #partition the data for the spark trainer
-        output_dir = "./output/"
-        parallel_learner = pl(self.w_vector,max_iter)
-        parallel_learner.partition_data(self.data_path, train_regex, shards, output_dir)
+    def parallel_train(self, train_regex='', max_iter=-1, shard_num=1, d_filename=None, dump_freq=1, 
+                       shards_dir=None, pl = None):
+
+        output_dir = "/data/output/"
+        output_path = partition_data(self.data_path, train_regex, shard_num, output_dir)
+
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, output_dir, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner)
+
+        parallel_learner = pl(self.w_vector,max_iter)
+        parallel_learner.parallel_learn(max_iter, output_path, shard_num, fgen=self.fgen, 
+                                        parser=self.parser, config_path=config, learner = self.learner)
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
@@ -123,6 +130,8 @@ options:
     -a:     Turn on time accounting (output time usage for each sentence)
             If combined with --debug-run-number then before termination it also
             prints out average time usage
+
+    -s:     Train using parallelization
 
     --train= 
             Sections for training
