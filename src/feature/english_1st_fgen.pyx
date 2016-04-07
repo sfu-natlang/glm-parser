@@ -11,6 +11,7 @@
 import feature_vector
 import feature_generator_base
 import debug.debug
+import sys
 
 
 class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
@@ -60,13 +61,14 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         """
 
         if not hasattr(self, 'FORM'):
-            print("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
-            exit()
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
         if not hasattr(self, 'POSTAG'):
-            print("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
-            exit()
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
+        print("==================================================")
+        print(head_index)
+        print(self.FORM)
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
         xj_word = self.FORM[dep_index]
@@ -133,12 +135,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         local_fv = []
 
         if not hasattr(self, 'FORM'):
-            print("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
-            exit()
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
         if not hasattr(self, 'POSTAG'):
-            print("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
-            exit()
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]

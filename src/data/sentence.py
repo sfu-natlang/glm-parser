@@ -102,14 +102,12 @@ class Sentence():
         if "FORM" in self.column_list.keys():
             self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
         else:
-            print("'FORM' is needed in Sentence but it's not in config file")
-            exit()
+            sys.exit("'FORM' is needed in Sentence but it's not in config file")
 
         if "POSTAG" in self.column_list.keys():
             self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
         else:
-            print("'POSTAG' is needed in Sentence but it's not in config file")
-            exit()
+            sys.exit("'POSTAG' is needed in Sentence but it's not in config file")
 
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
@@ -175,8 +173,7 @@ class Sentence():
         if field_name in self.column_list.keys():
             return self.column_list[field_name]
         else:
-            print("'" + field_name + "' is needed in Sentence but it's not in config file")
-            exit()
+            sys.exit("'" + field_name + "' is needed in Sentence but it's not in config file")
 
     def set_current_global_vector(self, edge_list):
         """
