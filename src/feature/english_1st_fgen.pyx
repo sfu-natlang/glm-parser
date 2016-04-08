@@ -66,9 +66,6 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         if not hasattr(self, 'POSTAG'):
             sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
-        print("==================================================")
-        print(head_index)
-        print(self.FORM)
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
         xj_word = self.FORM[dep_index]
