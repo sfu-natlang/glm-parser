@@ -192,8 +192,6 @@ class DataPool():
             if config_line[0] == "comment_sign:":
                 comment_sign = config_line[1]
 
-        print(field_name_list)
-
         fconfig.close() 
 
         f = open(file_path)
@@ -219,7 +217,6 @@ class DataPool():
                 if not(field_name_list[0].isdigit()) and column_list[field_name_list[0]] != []:
 
                     # Add "ROOT" for word and pos here
-                    print(column_list)
                     sent = Sentence(column_list, field_name_list, self.fgen)
                     data_list.append(sent)
 
