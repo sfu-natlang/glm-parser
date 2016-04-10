@@ -139,18 +139,17 @@ class Sentence():
         in self.field_name_list, and returns edge_set dict
         """
 
-        deprel_key = None
-        head_key = None
-
-        deprel_key = self.field_name_list[int(self.field_name_list[-1])]
-        head_key = self.field_name_list[int(self.field_name_list[-2])]
+        if not "HEAD" in self.column_list.keys():
+            sys.exit("'HEAD' is needed in Sentence but it's not in config file")
+        if not "DEPREL" in self.column_list.keys():
+            sys.exit("'DEPREL' is needed in Sentence but it's not in config file")
 
         self.column_list["edge_set"] = {}
 
-        length = len(self.column_list[head_key])
+        length = len(self.column_list["HEAD"])
         for i in range(length):
-            head = self.column_list[head_key][i]
-            deprel = self.column_list[deprel_key][i]
+            head = self.column_list["HEAD"][i]
+            deprel = self.column_list["DEPREL"][i]
 	    if head.isdigit():
                 node_key = (int(head), i + 1)
                 self.column_list["edge_set"][node_key] = deprel
