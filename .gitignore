@@ -17,4 +17,5 @@ src/parse/ceisner3.cpp
 src/*.db
 src/postag/*.db
 src/postag/*.log
+chunker/*.model
 
