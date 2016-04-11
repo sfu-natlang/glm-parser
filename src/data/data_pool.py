@@ -4,7 +4,8 @@ import os, re
 from sentence import Sentence
 import logging
 import re
-#import pydoop.hdfs as hdfs
+from learn.partition import partition_data
+
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
@@ -30,7 +31,8 @@ class DataPool():
     during init).
     """
     def __init__(self, section_regex='', data_path="./penn-wsj-deps/",
-                 fgen=None, config_path=None, textString=None, config_list=None):
+                 fgen=None, config_path=None, textString=None, config_list=None, prep_path='data/prep/'):
+
         """
         Initialize the Data set
 
@@ -48,17 +50,15 @@ class DataPool():
         """  
         self.fgen = fgen
         self.reset_all()
-        if textString is None:
-            if section_regex is not '':
-                self.data_path = data_path
-                self.section_regex = section_regex
-                self.config_path = config_path
-                self.load()
-        else:
+        self.data_path = data_path
+        self.section_regex = section_regex
+        self.config_path = config_path
+        self.prep_path = prep_path
+        self.load()
+
+        if textString is not None:
             self.load_stringtext(textString,config_list)
 
-        print "dp contains:"
-        print self.get_sent_num()
         return 
 
     def load_stringtext(self,textString,config_list):
@@ -151,17 +151,12 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        section_pattern = re.compile(self.section_regex)
-
-        rootDir = self.data_path 
-        #print os.listdir(rootDir)
-        #print hdfs.list_directory("penn-wsj-deps")
-        for dirName, subdirList, fileList in os.walk(rootDir):
-            logging.debug("Found directory: %s" % str(dirName))
+        output_path = partition_data(self.data_path, self.section_regex, 1, self.prep_path)
+	for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
-                if section_pattern.match(str(file_name)) != None:
-                    file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
-                    self.data_list += self.get_data_list(file_path)
+                file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
+                self.data_list += self.get_data_list(file_path)
+
 
         return
 

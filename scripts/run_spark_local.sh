@@ -6,9 +6,15 @@ project_path=$(python get_path.py)
 
 source $MODULESHOME/init/bash
 module load natlang
+<<<<<<< HEAD
 module load NL/LANG/PYTHON/Anaconda-2.4.0
 module load bigdata
 module load spark/1.5.1
+=======
+module load NL/LANG/PYTHON/Anaconda-2.3.0
+#load spark 1.2.1, no need on the hadoop cluster
+module load NL/HADOOP/SPARK/1.2.1
+>>>>>>> spark_train
 
 cd $project_path
 

@@ -40,3 +40,8 @@ The rest of the arguments load the actual filenames in `learn` and `feature` and
 
 The training progress and the result on the testing section is saved to `glm_parser.log`
 
+Spark run
+---------
+
+    spark-submit glm_parser.py -i 2 -b 1 -e 4 -t 0 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ --learner=spark_perceptron --fgen=english_1st_fgen --parser=ceisner
+

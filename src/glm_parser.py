@@ -16,6 +16,8 @@ from evaluate.evaluator import *
 
 from weight.weight_vector import *
 
+from learn.partition import partition_data 
+
 import debug.debug
 import debug.interact
 
@@ -30,7 +32,10 @@ class GlmParser():
                  learner=None,
                  fgen=None,
                  parser=None,
-         config="config/penn2malt.txt",spark=False):
+                 config="config/penn2malt.txt", 
+                 prep_path = "",
+                 spark=False):
+
 
         self.max_iter = max_iter
         self.data_path = data_path
@@ -42,9 +47,12 @@ class GlmParser():
             raise ValueError("You need to specify a feature generator")
         
     
-        self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, config_path=config)
-        self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, config_path=config)
-        #print self.train_data_pool.get_sent_num() 
+        self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, 
+                                        config_path=config, prep_path = prep_path)
+        self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, 
+                                       config_path=config, prep_path = prep_path)
+        
+
         self.parser = parser()
 
         if learner is not None:
@@ -61,27 +69,33 @@ class GlmParser():
        
     def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_regex == '':
-            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, config_path=config)
-        else:
+            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, 
+                                       config_path=config, prep_path=prep_path)
             train_data_pool = self.train_data_pool
             
         if max_iter == -1:
             max_iter = self.max_iter
             
-        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
+        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, 
+                                      dump_freq)
     
+
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
-        output_dir = "./output/"
+        output_dir = self.prep_path
+        output_path = partition_data(self.data_path, train_regex, shard_num, output_dir)
+ 
         parallel_learner = pl(self.w_vector,max_iter)
-        parallel_learner.partition_data(self.data_path, train_regex, shards, output_dir,hadoop)
+        #parallel_learner.partition_data(self.data_path, train_regex, shards, output_dir,hadoop)
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, output_dir, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context)
-    
+        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context)
+
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
-            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, config_path=config)
+            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, 
+                                      config_path=config, prep_path=prep_path)
+
         else:
             test_data_pool = self.test_data_pool
 
@@ -127,6 +141,9 @@ options:
             If combined with --debug-run-number then before termination it also
             prints out average time usage
 
+    -s:     Train using parallelization
+
+
     --train= 
             Sections for training
         Input a regular expression to indicate which files to read e.g.
@@ -168,6 +185,9 @@ options:
 
             default "ceisner3"; alternative "ceisner"
 
+    --prep-path=
+            Input the directory in which you would like to store prepared data files after partitioning
+
     --debug-run-number=[int]
             Only run the first [int] sentences. Usually combined with option -a to gather
             time usage information
@@ -185,6 +205,7 @@ options:
             analyzing feature usage and building feature caching utility.
             Upon exiting the main program will dump feature request information
             into a file "feature_request.log"
+
     
 """
 
@@ -256,6 +277,8 @@ if __name__ == "__main__":
     parallel_flag = False
     shards_number = 1
     h_flag=False
+    prep_path = ''
+
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -267,7 +290,8 @@ if __name__ == "__main__":
     parser = get_class_from_module('parse', 'parse', 'ceisner3',
                                    silent=True)
     # Default config file: penn2malt
-    config = '/cs/natlang-user/vivian/glm-parser/src/config/penn2malt.config'
+    config = 'config/penn2malt.txt'
+
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
@@ -286,8 +310,10 @@ if __name__ == "__main__":
                 print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
                 print(HELP_MSG)
                 sys.exit(0)
+
             elif opt =="-c":
                 h_flag = True
+
             elif opt == "-s":
                 shards_number = int(value)
                 parallel_flag = True
@@ -317,6 +343,10 @@ if __name__ == "__main__":
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt =="--spark":
                 parallel_flag = True
+
+            elif opt == "--prep-path":
+                prep_path = value
+
             elif opt == "--learner":
                 if parallel_flag:
                     learner = get_class_from_module('parallel_learn', 'learn', value)
@@ -344,15 +374,16 @@ if __name__ == "__main__":
             else:
                 #print "Invalid argument, try -h"
                 sys.exit(0)
-        #print "the current working directory:"
-        #print os.getcwd()  
         gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
                         parser=parser,
-                        config=config,spark=parallel_flag)
+                        spark=parallel_flag
+                        config=config,
+                        prep_path=prep_path)
 
         training_time = None
+
 
         #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
         #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)

@@ -148,8 +148,7 @@ class AveragePerceptronLearner():
             w_vector.data_dict[key]=fv[key][0]
             weight_sum_dict.data_dict[key]=fv[key][1]
 
-        while dp.has_next_data():
-       
+        while dp.has_next_data(): 
             data_instance = dp.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
             current_edge_set = parser.parse(data_instance, w_vector.get_vector_score)
@@ -160,11 +159,9 @@ class AveragePerceptronLearner():
             if not current_global_vector == gold_global_vector: 
                 w_vector.data_dict.iadd(delta_global_vector.feature_dict)
             weight_sum_dict.data_dict.iadd(w_vector.data_dict)
-
         dp.reset_index()
 
         vector_list = {}
         for key in w_vector.data_dict.keys():
             vector_list[str(key)] = (w_vector.data_dict[key],weight_sum_dict[key])
-
         return vector_list.items()
