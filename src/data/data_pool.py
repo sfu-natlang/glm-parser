@@ -4,6 +4,7 @@ import os, re
 from sentence import Sentence
 import logging
 import re
+#import pydoop.hdfs as hdfs
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
@@ -56,7 +57,8 @@ class DataPool():
         else:
             self.load_stringtext(textString,config_list)
 
-
+        print "dp contains:"
+        print self.get_sent_num()
         return 
 
     def load_stringtext(self,textString,config_list):
@@ -152,7 +154,8 @@ class DataPool():
         section_pattern = re.compile(self.section_regex)
 
         rootDir = self.data_path 
-
+        #print os.listdir(rootDir)
+        #print hdfs.list_directory("penn-wsj-deps")
         for dirName, subdirList, fileList in os.walk(rootDir):
             logging.debug("Found directory: %s" % str(dirName))
             for file_name in fileList:

@@ -8,6 +8,7 @@
 # Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
 # (Please add on your name if you have authored this file)
 #
+from feature import feature_vector
 
 from data.data_pool import *
 
@@ -20,18 +21,19 @@ import debug.interact
 
 import timeit
 import time
+import os
 
+from pyspark import SparkContext
 class GlmParser():
     def __init__(self, train_regex="", test_regex="", data_path="../../penn-wsj-deps/",
                  l_filename=None, max_iter=1,
                  learner=None,
                  fgen=None,
                  parser=None,
-         config="config/penn2malt.txt", spark=False):
+         config="config/penn2malt.txt",spark=False):
 
         self.max_iter = max_iter
         self.data_path = data_path
-
         self.w_vector = WeightVector(l_filename)
         if fgen is not None:
             # Do not instanciate this; used elsewhere
@@ -42,7 +44,7 @@ class GlmParser():
     
         self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, config_path=config)
         self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, config_path=config)
-        
+        #print self.train_data_pool.get_sent_num() 
         self.parser = parser()
 
         if learner is not None:
@@ -68,15 +70,15 @@ class GlmParser():
             
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, dump_freq)
     
-    def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None):
+    def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
         output_dir = "./output/"
         parallel_learner = pl(self.w_vector,max_iter)
-        parallel_learner.partition_data(self.data_path, train_regex, shards, output_dir)
+        parallel_learner.partition_data(self.data_path, train_regex, shards, output_dir,hadoop)
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, output_dir, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner)
-
+        parallel_learner.parallel_learn(max_iter, output_dir, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context)
+    
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
             test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, config_path=config)
@@ -84,6 +86,7 @@ class GlmParser():
             test_data_pool = self.test_data_pool
 
         self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector, training_time)
+
         
     def compute_argmax(self, sentence):
         current_edge_set = self.parser.parse(sentence, self.w_vector.get_vector_score)
@@ -246,12 +249,13 @@ if __name__ == "__main__":
     train_regex = ''
     test_regex = ''
     max_iter = 1
-    test_data_path = "../../penn-wsj-deps/"  #"./penn-wsj-deps/"
+    test_data_path = '/cs/natlang-user/vivian/penn-wsj-deps/'  #"./penn-wsj-deps/"
     l_filename = None
     d_filename = None
     dump_freq = 1
     parallel_flag = False
     shards_number = 1
+    h_flag=False
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -263,13 +267,13 @@ if __name__ == "__main__":
     parser = get_class_from_module('parse', 'parse', 'ceisner3',
                                    silent=True)
     # Default config file: penn2malt
-    config = 'config/penn2malt.txt'
+    config = '/cs/natlang-user/vivian/glm-parser/src/config/penn2malt.config'
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
 
     try:
-        opt_spec = "aht:i:p:l:d:f:r:s:"
+        opt_spec = "aht:i:p:l:d:f:r:s:c:"
         long_opt_spec = ['train=','test=','fgen=', 
              'learner=', 'parser=', 'config=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
@@ -282,6 +286,8 @@ if __name__ == "__main__":
                 print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
                 print(HELP_MSG)
                 sys.exit(0)
+            elif opt =="-c":
+                h_flag = True
             elif opt == "-s":
                 shards_number = int(value)
                 parallel_flag = True
@@ -336,34 +342,40 @@ if __name__ == "__main__":
             elif opt == '--config':
                 config = value;
             else:
-                print "Invalid argument, try -h"
+                #print "Invalid argument, try -h"
                 sys.exit(0)
-              
+        #print "the current working directory:"
+        #print os.getcwd()  
         gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
                         parser=parser,
-                        config=config,
-                        spark = parallel_flag)
+                        config=config,spark=parallel_flag)
 
         training_time = None
 
-
+        #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
+        #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
+         
         if train_regex is not '':
             start_time = time.time()
             if parallel_flag:
+                sc = SparkContext()
                 parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train') 
-                gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
+                gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
             else: 
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
             end_time = time.time()
             training_time = end_time - start_time
             print "Total Training Time: ", training_time
-
+        
+            
+        
         if test_regex is not '':
             print "Evaluating..."
-            gp.evaluate(training_time, test_regex)
-
+            gp.evaluate(training_time)
+        if parallel_flag:
+            sc.stop()
     except getopt.GetoptError, e:
         print("Invalid argument. \n")
         print(HELP_MSG)
