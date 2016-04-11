@@ -7,7 +7,7 @@ import perceptron
 import debug.debug
 import sys,os,shutil,re
 from os.path import isfile, join, isdir
-from pyspark import SparkContext
+from pyspark import SparkContext,SparkConf
 
 
 logging.basicConfig(filename='glm_parser.log',
@@ -52,7 +52,8 @@ class ParallelPerceptronLearner():
         fconfig.close() 
 
         nodes_num = "local[%d]"%shards
-        sc = SparkContext(master=nodes_num)
+        conf = SparkConf().setMaster(nodes_num)
+        sc = SparkContext(conf=conf)
         train_files= sc.wholeTextFiles(dir_name).cache()
 
         fv = {}
