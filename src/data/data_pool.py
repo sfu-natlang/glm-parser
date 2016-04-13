@@ -174,9 +174,21 @@ class DataPool():
 
         fconfig = open(self.config_path)
         field_name_list = []
-    
+        comment_sign = ''
+
+        remaining_field_names = 0
         for line in fconfig:
-            field_name_list.append(line.strip())
+            config_line = line.strip().split()
+
+            if remaining_field_names > 0:
+                field_name_list.append(line.strip())
+                remaining_field_names -= 1
+
+            if config_line[0] == "field_names:":
+                remaining_field_names = int(config_line[1])
+
+            if config_line[0] == "comment_sign:":
+                comment_sign = config_line[1]
 
         fconfig.close() 
 
@@ -189,19 +201,19 @@ class DataPool():
             if not(field.isdigit()):
                 column_list[field] = []
 
-        length = len(field_name_list) - 2
-	
+        length = len(field_name_list)
+
         for entity in f:
             entity = entity[:-1].split()
-            if len(entity) == length and entity[0] != "#":
+            if len(entity) == length and entity[0] != comment_sign:
                 for i in range(length):
                     if not(field_name_list[i].isdigit()):
                         column_list[field_name_list[i]].append(entity[i])
-            
+
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
                 if not(field_name_list[0].isdigit()) and column_list[field_name_list[0]] != []:
-            
+
                     # Add "ROOT" for word and pos here
                     sent = Sentence(column_list, field_name_list, self.fgen)
                     data_list.append(sent)
