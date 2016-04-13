@@ -25,34 +25,37 @@ import timeit
 import time
 import os
 
-from pyspark import SparkContext
+
 class GlmParser():
-    def __init__(self, train_regex="", test_regex="", data_path="../../penn-wsj-deps/",
+    def __init__(self, train_regex="", test_regex="", data_path="penn-wsj-deps/",
                  l_filename=None, max_iter=1,
                  learner=None,
                  fgen=None,
                  parser=None,
-                 config="config/penn2malt.txt", 
-                 prep_path = "",
+                 config="config/penn2malt.config",  
+                 part_data="data/prep",
                  spark=False):
 
 
         self.max_iter = max_iter
         self.data_path = data_path
         self.w_vector = WeightVector(l_filename)
+        self.prep_path = part_data
         if fgen is not None:
             # Do not instanciate this; used elsewhere
             self.fgen = fgen
         else:
             raise ValueError("You need to specify a feature generator")
         
-    
-        self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, 
-                                        config_path=config, prep_path = prep_path)
-        self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, 
-                                       config_path=config, prep_path = prep_path)
+        # why load the data here???
+        if not spark:
+            self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, 
+                                        config_path=config)
+        if test_regex:
+            self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, 
+                                       config_path=config)
         
-
+        
         self.parser = parser()
 
         if learner is not None:
@@ -70,7 +73,8 @@ class GlmParser():
     def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_regex == '':
             train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, 
-                                       config_path=config, prep_path=prep_path)
+                                       config_path=config)
+        else:    
             train_data_pool = self.train_data_pool
             
         if max_iter == -1:
@@ -83,10 +87,9 @@ class GlmParser():
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
         output_dir = self.prep_path
-        output_path = partition_data(self.data_path, train_regex, shard_num, output_dir)
- 
+        output_path = partition_data(self.data_path, train_regex, shards, output_dir) 
+        
         parallel_learner = pl(self.w_vector,max_iter)
-        #parallel_learner.partition_data(self.data_path, train_regex, shards, output_dir,hadoop)
         if max_iter == -1:
             max_iter = self.max_iter
         parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context)
@@ -94,7 +97,7 @@ class GlmParser():
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
             test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, 
-                                      config_path=config, prep_path=prep_path)
+                                      config_path=config)
 
         else:
             test_data_pool = self.test_data_pool
@@ -277,7 +280,7 @@ if __name__ == "__main__":
     parallel_flag = False
     shards_number = 1
     h_flag=False
-    prep_path = ''
+    prep_path = 'data/prep/'
 
 
     # Default learner
@@ -290,7 +293,7 @@ if __name__ == "__main__":
     parser = get_class_from_module('parse', 'parse', 'ceisner3',
                                    silent=True)
     # Default config file: penn2malt
-    config = 'config/penn2malt.txt'
+    config = 'config/penn2malt.config'
 
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
@@ -378,9 +381,9 @@ if __name__ == "__main__":
                         learner=learner,
                         fgen=fgen,
                         parser=parser,
-                        spark=parallel_flag
+                        spark=parallel_flag,
                         config=config,
-                        prep_path=prep_path)
+                        part_data=prep_path)
 
         training_time = None
 
@@ -391,6 +394,7 @@ if __name__ == "__main__":
         if train_regex is not '':
             start_time = time.time()
             if parallel_flag:
+                from pyspark import SparkContext
                 sc = SparkContext()
                 parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train') 
                 gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
@@ -398,10 +402,7 @@ if __name__ == "__main__":
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
             end_time = time.time()
             training_time = end_time - start_time
-            print "Total Training Time: ", training_time
-        
-            
-        
+            print "Total Training Time: ", training_time 
         if test_regex is not '':
             print "Evaluating..."
             gp.evaluate(training_time)

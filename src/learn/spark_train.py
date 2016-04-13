@@ -74,51 +74,12 @@ class ParallelPerceptronLearner():
             feat_vec_list = feat_vec_list.combineByKey(lambda value: (value[0], value[1], 1),
                              lambda x, value: (x[0] + value[0], x[1] + value[1], x[2] + 1),
                              lambda x, y: (x[0] + y[0], x[1] + y[1], x[2]+y[2])).collect()
+            fv = {}
             for (feat, (a,b,c)) in feat_vec_list:
                 fv[feat] = (float(a)/float(c),b)
 
         self.w_vector.data_dict.clear()
         for feat in fv.keys():
             self.w_vector.data_dict[feat] = fv[feat][1]/c
-
-        nodes_num = "local[%d]"%shards
-        conf = SparkConf().setMaster(nodes_num)
-        sc = SparkContext(conf=conf)
-        train_files= sc.wholeTextFiles(dir_name).cache()
-
-        fv = {}
-        for key in self.w_vector.data_dict.keys():
-            fv[str(key)]=w_vector.data_dict[key]
-
-        dp = train_files.map(lambda t: create_dp(t,fgen=fgen,config=config_list)).cache()
-
-        for round in range(max_iter):
-            weight_vector = sc.broadcast(fv)
-            #mapper: computer the weight vector in each shard using avg_perc_train
-            feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,weight_vector.value,parser))
-            #reducer: combine the weight vectors from each shard
-            feat_vec_list = feat_vec_list.combineByKey(lambda value: (value, 1),
-                             lambda x, value: (x[0] + value, x[1] + 1),
-                             lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
-            for (feat, (a,b)) in feat_vec_list:
-                fv[feat] = float(a)/float(b)
-        self.w_vector.data_dict.clear()
-        self.w_vector.data_dict.iadd(fv)
-
-        sc.stop()
-        """
-        # delete the sharded files
-        for the_file in os.listdir(dir_name):
-            file_path = os.path.join(dir_name, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception, e:
-                print e
-        """
-
-        
-
-
 
     

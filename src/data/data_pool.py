@@ -50,15 +50,14 @@ class DataPool():
         """  
         self.fgen = fgen
         self.reset_all()
-        self.data_path = data_path
-        self.section_regex = section_regex
-        self.config_path = config_path
-        self.prep_path = prep_path
-        self.load()
-
         if textString is not None:
-            self.load_stringtext(textString,config_list)
-
+            self.load_stringtext(textString,config_list) 
+        else:
+            self.data_path = data_path
+            self.section_regex = section_regex
+            self.config_path = config_path
+            self.prep_path = prep_path
+            self.load()
         return 
 
     def load_stringtext(self,textString,config_list):
@@ -152,7 +151,8 @@ class DataPool():
         logging.debug("Loading data...")
 
         output_path = partition_data(self.data_path, self.section_regex, 1, self.prep_path)
-	for dirName, subdirList, fileList in os.walk(output_path):
+	
+        for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
                 file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
                 self.data_list += self.get_data_list(file_path)
