@@ -32,7 +32,7 @@ class ParallelPerceptronLearner():
     def parallel_learn(self, max_iter=-1, dir_name=None, shards=1, fgen=None,parser=None,config_path=None,learner=None,sc=None):
         '''
         This is the function which does distributed training using Spark
-        TODO: rewrite weight_vector to cache the golden feature as a rdd
+
         
         :param max_iter: iterations for training the weight vector
         :param dir_name: the output directory storing the sharded data
@@ -40,8 +40,8 @@ class ParallelPerceptronLearner():
         :param parser: parser for generating parse tree
         '''
 
-        def create_dp(textString,fgen,config):
-            dp = data_pool.DataPool(textString=textString[1],fgen=fgen,config_list=config)
+        def create_dp(textString,fgen,config,sign):
+            dp = data_pool.DataPool(textString=textString[1],fgen=fgen,config_list=config,comment_sign=sign)
             return dp
 
 
@@ -50,9 +50,20 @@ class ParallelPerceptronLearner():
 
         fconfig = open(config_path)
         config_list = []
-    
+        comment_sign = ''
+        remaining_field_names = 0
         for line in fconfig:
-            config_list.append(line.strip())
+            config_line = line.strip().split()
+            if remaining_field_names > 0:
+                config_list.append(line.strip()) 
+                remaining_field_names -= 1
+
+            if config_line[0] == "field_names:":
+                remaining_field_names = int(config_line[1])
+
+            if config_line[0] == "comment_sign:":
+                comment_sign = config_line[1]
+    
         fconfig.close() 
 
 
@@ -62,7 +73,7 @@ class ParallelPerceptronLearner():
 
         fv = {}
 
-        dp = train_files.map(lambda t: create_dp(t,fgen=fgen,config=config_list)).cache()
+        dp = train_files.map(lambda t: create_dp(t,fgen,config_list,comment_sign)).cache()
 
         total_sent = dp.map(get_sent_num).sum()
         c = total_sent*max_iter

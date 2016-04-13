@@ -31,7 +31,7 @@ class DataPool():
     during init).
     """
     def __init__(self, section_regex='', data_path="./penn-wsj-deps/",
-                 fgen=None, config_path=None, textString=None, config_list=None, prep_path='data/prep/'):
+                 fgen=None, config_path=None, textString=None, config_list=None, comment_sign='', prep_path='data/prep/'):
 
         """
         Initialize the Data set
@@ -51,7 +51,7 @@ class DataPool():
         self.fgen = fgen
         self.reset_all()
         if textString is not None:
-            self.load_stringtext(textString,config_list) 
+            self.load_stringtext(textString,config_list,comment_sign) 
         else:
             self.data_path = data_path
             self.section_regex = section_regex
@@ -60,19 +60,18 @@ class DataPool():
             self.load()
         return 
 
-    def load_stringtext(self,textString,config_list):
-
+    def load_stringtext(self,textString,config_list,comment_sign):
         lines = textString.splitlines()
         column_list = {}
         for field in config_list:
             if not(field.isdigit()):
                 column_list[field] = []
                 
-        length = len(config_list) - 2
+        length = len(config_list)
 
         for line in lines:
-            if line != '':
-                entity = line.split()
+            entity = line.split()
+            if len(entity) == length and entity[0] != comment_sign:
                 for i in range(length):
                     if not(config_list[i].isdigit()):
                         column_list[config_list[i]].append(str(entity[i]))
