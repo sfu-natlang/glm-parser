@@ -190,11 +190,10 @@ class DataPool():
                 column_list[field] = []
 
         length = len(field_name_list) - 2
-
-        for line in f:
-            line = line[:-1]
-            if line != '':
-                entity = line.split()
+	
+        for entity in f:
+            entity = entity[:-1].split()
+            if len(entity) == length and entity[0] != "#":
                 for i in range(length):
                     if not(field_name_list[i].isdigit()):
                         column_list[field_name_list[i]].append(entity[i])

@@ -1,4 +1,3 @@
-
 # GLM Parser Documentation
 
 ## Running the parser
@@ -24,12 +23,12 @@ The code for this project is organized into the following main directories:
 The contents of `src` are organized as follows:
 
 ### `config`
-This folder contains the configuration files for different file formats.
-Currently, we have configuration files for Penn2Malt and CoNLL-X formats.
+This folder contains the configuration files for different file formats, which specify the column names and the comment symbol of the data file.
+To specify the column names, you need to first write a line "field_names: n" where x is an integer, indicating how many columns are in the data file.
+The following n lines each specifies the name of the corresponding column.
+To specify the comment symble, You need to write a line "comment_sign: s" where s is a charater which indicates a comment line.
+Currently, we have configuration files for Penn2Malt, CoNLL2008, CoNLL-U and CoNLL-X formats.
 You can use alternative data formats by creating a config file.
-Each line in the config file corresonds to a column in the data file.
-If you wish the GLM parser to create a dependency tree for each sentence,
-append at the end of the config file, in two new lines, the line numbers of the head and dependency relation field names in that order.
 
 ### `data`
 

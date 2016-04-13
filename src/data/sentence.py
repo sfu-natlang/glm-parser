@@ -96,10 +96,18 @@ class Sentence():
         self.field_name_list = field_name_list
     
         self.cache_key_func = hash
-    
+
+        # add ROOT to FORM and POSTAG
         edge_list = self.construct_edge_set()
-        self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
-        self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+        if "FORM" in self.column_list.keys():
+            self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+        else:
+            sys.exit("'FORM' is needed in Sentence but it's not in config file")
+
+        if "POSTAG" in self.column_list.keys():
+            self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+        else:
+            sys.exit("'POSTAG' is needed in Sentence but it's not in config file")
 
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
@@ -130,6 +138,7 @@ class Sentence():
         Appends the edge set in self.column_list, appends edge_set column name
         in self.field_name_list, and returns edge_set dict
         """
+
         deprel_key = None
         head_key = None
 
@@ -142,8 +151,9 @@ class Sentence():
         for i in range(length):
             head = self.column_list[head_key][i]
             deprel = self.column_list[deprel_key][i]
-            node_key = (int(head), i + 1)
-            self.column_list["edge_set"][node_key] = deprel
+	    if head.isdigit():
+                node_key = (int(head), i + 1)
+                self.column_list["edge_set"][node_key] = deprel
         return self.column_list["edge_set"]
             
     def return_column_list(self):
@@ -159,7 +169,11 @@ class Sentence():
         :param field_name: Name of the field you want to fetch.
         :type field_name: str
         """
-        return self.column_list[field_name] 
+
+        if field_name in self.column_list.keys():
+            return self.column_list[field_name]
+        else:
+            sys.exit("'" + field_name + "' is needed in Sentence but it's not in config file")
 
     def set_current_global_vector(self, edge_list):
         """

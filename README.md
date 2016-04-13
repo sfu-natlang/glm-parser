@@ -1,7 +1,11 @@
 glm-parser
 ==========
+This project implements a parser for natural language that uses a general linear model over higher-order dependencies between words. Training the model is done using a (margin-aware) Perceptron algorithm. The dependencies between words are created using tree-adjoining grammar derivations where each word lexicalizes an elementary tree and a full sentence parse is the combination of these elementary trees. Search is done using the Eisner dependency parsing algorithm augmented with search over higher-order dependencies. The parser uses Penn Treebank style trees for training data.
 
-This project implements a parser for natural language that uses a general linear model over higher-order dependencies between words. It works on any language that is in the CoNLL format. 
+Part of the system replicates the following paper:
+
+Xavier Carreras, Michael Collins, and Terry Koo. TAG, Dynamic Programming and the Perceptron for Efficient, Feature-rich Parsing. In Proceedings of CONLL 2008. http://www.cs.columbia.edu/~mcollins/papers/conll.final.pdf
+
 
 Get started
 -----------
@@ -29,7 +33,11 @@ Sample run
 
 Here is a sample training run of the parser:
 
+<<<<<<< HEAD
     python glm_parser.py -i 5 -b 2 -e 2 -t 0 -p ~/data/glm-parser-data/penn-wsj-deps/ -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
+=======
+    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+>>>>>>> datapool_fgen_clean
 
 In this example we are doing 5 iterations of training `-i 5` and starting at section 02 for training `-b 2` and ending at section 02 `-e 2`. 
 We are testing on section 0 using `-t 0`. 

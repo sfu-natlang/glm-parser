@@ -68,4 +68,3 @@ class PerceptronLearner():
             vector_list[str(key)] = w_vector.data_dict[key]
     
         return vector_list.items()
-

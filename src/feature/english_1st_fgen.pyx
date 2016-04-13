@@ -11,6 +11,7 @@
 import feature_vector
 import feature_generator_base
 import debug.debug
+import sys
 
 
 class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
@@ -58,6 +59,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :paramn dep_index: The index of the dependency node
         :type dep_index: integer
         """
+
+        if not hasattr(self, 'FORM'):
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+
+        if not hasattr(self, 'POSTAG'):
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
@@ -123,6 +130,12 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :type dep_index: integer
         """
         local_fv = []
+
+        if not hasattr(self, 'FORM'):
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+
+        if not hasattr(self, 'POSTAG'):
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
