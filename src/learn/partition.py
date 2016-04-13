@@ -1,5 +1,5 @@
 import logging
-
+import sys
 import re
 import os.path
 import hashlib
@@ -47,7 +47,7 @@ def partition_data(input_dir, regex, shard_num, output_dir="data/prep/"):
     output_path = output_dir + folder + '/' 
 
     if not os.path.exists(output_path):
-	os.makedirs(output_path) 
+        os.makedirs(output_path) 
 
         fid = shard_num-1
 
@@ -58,7 +58,7 @@ def partition_data(input_dir, regex, shard_num, output_dir="data/prep/"):
 
         sent_num = count_sent(input_dir,regex) # count the total number of sentences
         n = sent_num/shard_num # number of sentences per shard
-
+    
         for file_path in file_list:
             fin = open(file_path, "r")
 
@@ -66,7 +66,7 @@ def partition_data(input_dir, regex, shard_num, output_dir="data/prep/"):
                 if count == n and fid is not 0:
                     fid -= 1
                     fout.close()
-                    output_file = output_path + fid 
+                    output_file = output_path + str(fid) 
                     fout = open(output_file,"w")
                     count = 0
 
@@ -76,8 +76,21 @@ def partition_data(input_dir, regex, shard_num, output_dir="data/prep/"):
                     count += 1
 
         fout.close()
+        #cmd = "hdfs dfs -put %s /user/xkou/"%output_path
+        #print cmd    
+        #os.system(cmd) 
+        #sent_num = count_sent(output_path, '.')
+        #print "Number of training sentences: %d" % (sent_num)
 
-        sent_num = count_sent(output_path, '.')
-        print "Number of training sentences: %d" % (sent_num)
+    return output_path
 
-    return output_path 
+if __name__ == "__main__":
+    input_dir = sys.argv[1]
+    regex = sys.argv[2]
+    shard_num = int(sys.argv[3])
+    print input_dir, regex, shard_num    
+    output_path = partition_data(input_dir, regex, shard_num, output_dir="../data/prep/")
+    
+    cmd = "hdfs dfs -put %s /user/xkou/data/prep/"%output_path
+    os.system(cmd)
+

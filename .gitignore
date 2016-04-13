@@ -18,4 +18,8 @@ src/*.db
 src/postag/*.db
 src/postag/*.log
 chunker/*.model
-
+src/dist
+src/*.egg-info
+src/build
+src/*.egg
+src/data/prep
