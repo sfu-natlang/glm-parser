@@ -1,11 +1,5 @@
 glm-parser
 ==========
-This project implements a parser for natural language that uses a general linear model over higher-order dependencies between words. Training the model is done using a (margin-aware) Perceptron algorithm. The dependencies between words are created using tree-adjoining grammar derivations where each word lexicalizes an elementary tree and a full sentence parse is the combination of these elementary trees. Search is done using the Eisner dependency parsing algorithm augmented with search over higher-order dependencies. The parser uses Penn Treebank style trees for training data.
-
-Part of the system replicates the following paper:
-
-Xavier Carreras, Michael Collins, and Terry Koo. TAG, Dynamic Programming and the Perceptron for Efficient, Feature-rich Parsing. In Proceedings of CONLL 2008. http://www.cs.columbia.edu/~mcollins/papers/conll.final.pdf
-
 
 Get started
 -----------
@@ -33,17 +27,18 @@ Sample run
 
 Here is a sample training run of the parser:
 
-<<<<<<< HEAD
-    python glm_parser.py -i 5 -b 2 -e 2 -t 0 -p ~/data/glm-parser-data/penn-wsj-deps/ -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
-=======
-    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
->>>>>>> datapool_fgen_clean
+Old:
 
-In this example we are doing 5 iterations of training `-i 5` and starting at section 02 for training `-b 2` and ending at section 02 `-e 2`. 
-We are testing on section 0 using `-t 0`. 
+    python glm_parser.py -i 5 -b 2 -e 2 -t 0 -p ~/data/glm-parser-data/penn-wsj-deps/ -d 05-11-2015 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
+
+New:
+
+    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d `date "+%d-%m-%y"` -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+
+In this example we are doing 5 iterations of training `-i 5` and using section 02 for training and testing on section 23 and section 24. 
 `-a` turns on time accounting.
 `-d prefix` dumps the weight vector for each iteration as `prefix_Iter_i.db` for each iteration `i`.
-The data for training is in the directory after `-p`. It assumes the usual Penn Treebank directory structure.
+The data for training is in the directory after `-p` and the data must be in the CoNLL format. The directory structure (if any) is the usual Penn Treebank directory structure. The config file parameter `--config` indicates the column structure of the CoNLL data.
 The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
 
 The training progress and the result on the testing section is saved to `glm_parser.log`
