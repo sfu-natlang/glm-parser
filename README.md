@@ -1,7 +1,7 @@
 glm-parser
 ==========
 
-Get started
+Installation
 -----------
 
 Install a version of Python 2.x that includes Cython such as the anaconda Python distribution (or install Python 2.x and then Cython).
@@ -48,3 +48,14 @@ Spark run
 
     spark-submit glm_parser.py -i 2 -b 1 -e 4 -t 0 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ --learner=spark_perceptron --fgen=english_1st_fgen --parser=ceisner
 
+Getting started on development
+----------------
+
+Read the file `getting-started.md` in the `docs` directory.
+
+Before merging your branch
+-----------------
+
+Things to do before merging your branch to previous branch or master:
+1. check the performance on penn-wsj-deps dataset on Linearb(or other school servers).
+1. check indentations using [tabnanny](https://pymotw.com/2/tabnanny)
