@@ -1,0 +1,52 @@
+This is the replication of the tests performed on master branch on 2014-06-08 using the latest of merged_datapool_spark branch.
+
+Branch: merged_datapool_spark
+command:
+
+	python glm_parser.py -i 10 -p ~/Daten/glm-parser-data/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' -d 13-04-2016 -a --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+
+Log:
+04/14/2016 10:02:45 AM DEBUG: Iteration: 0
+04/14/2016 10:02:45 AM DEBUG: Data size: 39867
+04/14/2016 11:02:24 AM DEBUG: Total Feature Num: 4597727 
+
+04/14/2016 11:02:32 AM DEBUG: Iteration: 1
+04/14/2016 11:02:32 AM DEBUG: Data size: 39867
+04/14/2016 12:01:51 PM DEBUG: Total Feature Num: 5587014
+
+04/14/2016 12:02:01 PM DEBUG: Iteration: 2
+04/14/2016 12:02:01 PM DEBUG: Data size: 39867
+04/14/2016 01:00:58 PM DEBUG: Total Feature Num: 6067017
+
+04/14/2016 01:01:09 PM DEBUG: Iteration: 3
+04/14/2016 01:01:09 PM DEBUG: Data size: 39867
+04/14/2016 02:00:14 PM DEBUG: Total Feature Num: 6349602
+
+04/14/2016 02:00:25 PM DEBUG: Iteration: 4
+04/14/2016 02:00:25 PM DEBUG: Data size: 39867
+04/14/2016 02:59:56 PM DEBUG: Total Feature Num: 6533346
+
+04/14/2016 03:00:08 PM DEBUG: Iteration: 5
+04/14/2016 03:00:08 PM DEBUG: Data size: 39867
+04/14/2016 03:59:26 PM DEBUG: Total Feature Num: 6676550
+
+04/14/2016 03:59:38 PM DEBUG: Iteration: 6
+04/14/2016 03:59:38 PM DEBUG: Data size: 39867
+04/14/2016 04:58:38 PM DEBUG: Total Feature Num: 6778735 
+
+04/14/2016 04:58:50 PM DEBUG: Iteration: 7
+04/14/2016 04:58:50 PM DEBUG: Data size: 39867
+04/14/2016 05:57:59 PM DEBUG: Total Feature Num: 6857644
+
+04/14/2016 05:58:12 PM DEBUG: Iteration: 8
+04/14/2016 05:58:12 PM DEBUG: Data size: 39867
+04/14/2016 06:57:22 PM DEBUG: Total Feature Num: 6924859
+
+04/14/2016 06:57:34 PM DEBUG: Iteration: 9
+04/14/2016 06:57:34 PM DEBUG: Data size: 39867
+04/14/2016 07:56:56 PM DEBUG: Total Feature Num: 6979760 
+
+04/14/2016 08:07:04 PM INFO: Training time usage(seconds): 35757.870796
+04/14/2016 08:07:04 PM INFO: Feature count: 6979760
+04/14/2016 08:07:04 PM INFO: Unlabeled accuracy: 0.893148323297 (149204, 167054)
+04/14/2016 08:07:04 PM INFO: Unlabeled attachment accuracy: 0.897422046502 (156164, 174014)
