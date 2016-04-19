@@ -220,7 +220,7 @@ cdef class EisnerParser:
     
     def parse(self, sent, arc_weight):	
 
-        self.n = len(sent.word_list)
+        self.n = len(sent.get_word_list())
         self.init_eisner_matrix()
 
         cdef int m, s, t, q

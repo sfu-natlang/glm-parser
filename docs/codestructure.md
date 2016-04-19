@@ -1,4 +1,3 @@
-
 # GLM Parser Documentation
 
 ## Running the parser
@@ -10,6 +9,7 @@ on test data should always be in the [README file](../README.md).
 
 The code for this project is organized into the following main directories:
 
+* `config`: contains the config files for different data formats
 * `src`: contains all the source code.
 * `scripts`: all the scripts for running experiments including scripts to submit jobs to the RCG cluster.
 * `logs`: keep all your experiment logs in here organized by date with the following information. The goal is to be able to checkout that version of the code and run the same experiment and get the same results recorded in the `glm_parser.log` file.
@@ -21,6 +21,14 @@ The code for this project is organized into the following main directories:
 ![Project Structure](project_struct.png)
 
 The contents of `src` are organized as follows:
+
+### `config`
+This folder contains the configuration files for different file formats, which specify the column names and the comment symbol of the data file.
+To specify the column names, you need to first write a line "field_names: n" where x is an integer, indicating how many columns are in the data file.
+The following n lines each specifies the name of the corresponding column.
+To specify the comment symble, You need to write a line "comment_sign: s" where s is a charater which indicates a comment line.
+Currently, we have configuration files for Penn2Malt, CoNLL2008, CoNLL-U and CoNLL-X formats.
+You can use alternative data formats by creating a config file.
 
 ### `data`
 

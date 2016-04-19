@@ -11,6 +11,7 @@
 import feature_vector
 import feature_generator_base
 import debug.debug
+import sys
 
 
 class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
@@ -18,16 +19,14 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     First order feature generator for english
     """
 
-    def __init__(self, sent):
+    def __init__(self):
         """
-        Delegate initializer to its parent class
+        Add the name of columns that fgen cares about into care_list
+        """
+        feature_generator_base.FeatureGeneratorBase.__init__(self)
+        self.care_list.append("FORM")
+        self.care_list.append("POSTAG")
 
-        This stub is avoidable, but we choose to keep it here for two reasons. First,
-        for those not familiar with Python or OOP, this is a hint that the call to
-        initializer goes to the base class. And secondly, if we want to customize
-        the initializer this stub saves some typing.
-        """
-        feature_generator_base.FeatureGeneratorBase.__init__(self, sent)
         return
 
     def get_unigram_feature(self, head_index, dep_index, direction, dist):
@@ -60,10 +59,17 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :paramn dep_index: The index of the dependency node
         :type dep_index: integer
         """
-        xi_word = self.word_list[head_index]
-        xi_pos = self.pos_list[head_index]
-        xj_word = self.word_list[dep_index]
-        xj_pos = self.pos_list[dep_index]
+
+        if not hasattr(self, 'FORM'):
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+
+        if not hasattr(self, 'POSTAG'):
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
+
+        xi_word = self.FORM[head_index]
+        xi_pos = self.POSTAG[head_index]
+        xj_word = self.FORM[dep_index]
+        xj_pos = self.POSTAG[dep_index]
 
         local_fv = []
 
@@ -125,10 +131,16 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         """
         local_fv = []
 
-        xi_word = self.word_list[head_index]
-        xi_pos = self.pos_list[head_index]
-        xj_word = self.word_list[dep_index]
-        xj_pos = self.pos_list[dep_index]
+        if not hasattr(self, 'FORM'):
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+
+        if not hasattr(self, 'POSTAG'):
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
+
+        xi_word = self.FORM[head_index]
+        xi_pos = self.POSTAG[head_index]
+        xj_word = self.FORM[dep_index]
+        xj_pos = self.POSTAG[dep_index]
         # Prepare keys
         local_fv.append( (1,0,xi_word,xi_pos,xj_word,xj_pos) )
         local_fv.append( (1,1,xi_pos,xj_word,xj_pos) )
@@ -187,14 +199,14 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             return []
 
         # Fetch the two pos tag for xi and xj
-        xi_pos = self.pos_list[head_index]
-        xj_pos = self.pos_list[dep_index]
+        xi_pos = self.POSTAG[head_index]
+        xj_pos = self.POSTAG[dep_index]
 
         local_fv = set()
 
         # Iterate through [start_index + 1,end_index - 1]
         for between_index in range(start_index + 1, end_index):
-            xb_pos = self.pos_list[between_index]
+            xb_pos = self.POSTAG[between_index]
             # Add all words between xi and xj into the feature
             local_fv.add( (2,0,xi_pos,xb_pos,xj_pos) )
 
@@ -231,32 +243,32 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         :type dep_node: integer
         """
         # This is used to detect out of bound case
-        len_pos_list = len(self.pos_list)
-        xi_pos = self.pos_list[head_index]
-        xj_pos = self.pos_list[dep_index]
+        len_pos_list = len(self.POSTAG)
+        xi_pos = self.POSTAG[head_index]
+        xj_pos = self.POSTAG[dep_index]
         # xi+1_pos
         if head_index + 1 == len_pos_list:
             xiplus_pos = None
         else:
-            xiplus_pos = self.pos_list[head_index + 1]
+            xiplus_pos = self.POSTAG[head_index + 1]
 
         # xi-1_pos
         if head_index == 0:
             ximinus_pos = None
         else:
-            ximinus_pos = self.pos_list[head_index - 1]
+            ximinus_pos = self.POSTAG[head_index - 1]
 
         # xj+1_pos
         if dep_index + 1 == len_pos_list:
             xjplus_pos = None
         else:
-            xjplus_pos = self.pos_list[dep_index + 1]
+            xjplus_pos = self.POSTAG[dep_index + 1]
 
         # xj-1_pos
         if dep_index == 0:
             xjminus_pos = None
         else:
-            xjminus_pos = self.pos_list[dep_index - 1]
+            xjminus_pos = self.POSTAG[dep_index - 1]
 
         local_fv = []
 

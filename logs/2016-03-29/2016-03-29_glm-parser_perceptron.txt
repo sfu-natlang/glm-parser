@@ -1,0 +1,52 @@
+This is the replication of the tests performed on master branch on 2014-06-08 using the latest of master branch.
+
+Branch: master
+
+command:
+	
+	python glm_parser.py -i 10 -b 2 -e 21 -t 0,1,22,24 -p ~/Daten/glm-parser-data/penn-wsj-deps/ -d 29-03-2016 -a --learner=perceptron --fgen=english_1st_fgen --parser=ceisner
+
+03/29/2016 11:49:33 PM DEBUG: Iteration: 0
+03/29/2016 11:49:33 PM DEBUG: Data size: 39832
+03/30/2016 12:54:36 AM DEBUG: Total Feature Num: 4597113 
+
+03/30/2016 12:54:54 AM DEBUG: Iteration: 1
+03/30/2016 12:54:54 AM DEBUG: Data size: 39832
+03/30/2016 02:04:09 AM DEBUG: Total Feature Num: 5585452 
+
+03/30/2016 02:04:39 AM DEBUG: Iteration: 2
+03/30/2016 02:04:39 AM DEBUG: Data size: 39832
+03/30/2016 03:14:20 AM DEBUG: Total Feature Num: 6063626 
+
+03/30/2016 03:15:01 AM DEBUG: Iteration: 3
+03/30/2016 03:15:01 AM DEBUG: Data size: 39832
+03/30/2016 04:25:28 AM DEBUG: Total Feature Num: 6350815 
+
+03/30/2016 04:26:20 AM DEBUG: Iteration: 4
+03/30/2016 04:26:20 AM DEBUG: Data size: 39832
+03/30/2016 05:37:56 AM DEBUG: Total Feature Num: 6537457
+
+03/30/2016 05:38:37 AM DEBUG: Iteration: 5
+03/30/2016 05:38:37 AM DEBUG: Data size: 39832
+03/30/2016 06:50:42 AM DEBUG: Total Feature Num: 6676205
+
+03/30/2016 06:51:14 AM DEBUG: Iteration: 6
+03/30/2016 06:51:14 AM DEBUG: Data size: 39832
+03/30/2016 08:03:36 AM DEBUG: Total Feature Num: 6779270
+
+03/30/2016 08:04:00 AM DEBUG: Iteration: 7
+03/30/2016 08:04:00 AM DEBUG: Data size: 39832
+03/30/2016 09:17:29 AM DEBUG: Total Feature Num: 6858202
+ 
+03/30/2016 09:17:52 AM DEBUG: Iteration: 8
+03/30/2016 09:17:52 AM DEBUG: Data size: 39832
+03/30/2016 10:30:21 AM DEBUG: Total Feature Num: 6925664
+
+03/30/2016 10:30:43 AM DEBUG: Iteration: 9
+03/30/2016 10:30:43 AM DEBUG: Data size: 39832
+03/30/2016 11:43:28 AM DEBUG: Total Feature Num: 6979851
+
+03/30/2016 11:55:47 AM INFO: Training time usage(seconds): 41808.820145
+03/30/2016 11:55:48 AM INFO: Feature count: 6979851
+03/30/2016 11:55:48 AM INFO: Unlabeled accuracy: 0.892525770110 (149100, 167054)
+03/30/2016 11:55:48 AM INFO: Unlabeled attachment accuracy: 0.896824393440 (156060, 174014)
