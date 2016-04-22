@@ -5,7 +5,7 @@ project_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )'/..'
 source $MODULESHOME/init/bash
 module load natlang
 module load bigdata
-module load spark/1.5.1
+module load spark/1.6.1
 module load NL/LANG/PYTHON/Anaconda-2.4.0 
 
 cd $project_path'/src'
