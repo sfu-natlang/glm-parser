@@ -29,7 +29,7 @@ class ParallelPerceptronLearner():
         logging.debug("Initialize ParallelPerceptronLearner ... ")
         self.w_vector = w_vector
         return
-    def parallel_learn(self, max_iter=-1, dir_name=None, shards=1, fgen=None,parser=None,config_path=None,learner=None,sc=None):
+    def parallel_learn(self, max_iter=-1, dir_name=None, shards=1, fgen=None,parser=None,config_path=None,learner=None,sc=None,d_filename=None):
         '''
         This is the function which does distributed training using Spark
 
@@ -66,31 +66,47 @@ class ParallelPerceptronLearner():
     
         fconfig.close() 
 
-
         #nodes_num = "local[%d]"%shards
         #sc = SparkContext(master=nodes_num)
-        train_files= sc.wholeTextFiles(dir_name).cache()
-
-        fv = {}
-
+        train_files= sc.wholeTextFiles(dir_name,minPartitions=10).cache()
         dp = train_files.map(lambda t: create_dp(t,fgen,config_list,comment_sign)).cache()
-
-        total_sent = dp.map(get_sent_num).sum()
-        c = total_sent*max_iter
-
-        for round in range(max_iter):
-            #mapper: computer the weight vector in each shard using avg_perc_train
-            feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,parser))
-            #reducer: combine the weight vectors from each shard
-            feat_vec_list = feat_vec_list.combineByKey(lambda value: (value[0], value[1], 1),
-                             lambda x, value: (x[0] + value[0], x[1] + value[1], x[2] + 1),
-                             lambda x, y: (x[0] + y[0], x[1] + y[1], x[2]+y[2])).collect()
+        if learner.__class__.__name__== "AveragePerceptronLearner":
             fv = {}
-            for (feat, (a,b,c)) in feat_vec_list:
-                fv[feat] = (float(a)/float(c),b)
+            total_sent = dp.map(get_sent_num).sum()
+            c = total_sent*max_iter
+            for round in range(max_iter):
+                #mapper: computer the weight vector in each shard using avg_perc_train
+                print "keys: %d"%len(fv.keys())
+                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,parser))
+                #reducer: combine the weight vectors from each shard
+                feat_vec_list = feat_vec_list.combineByKey(lambda value: (value[0], value[1], 1),
+                                 lambda x, value: (x[0] + value[0], x[1] + value[1], x[2] + 1),
+                                 lambda x, y: (x[0] + y[0], x[1] + y[1], x[2]+y[2])).collect()
+                fv = {}
+                for (feat, (a,b,c)) in feat_vec_list:
+                    fv[feat] = (float(a)/float(c),b)
 
-        self.w_vector.data_dict.clear()
-        for feat in fv.keys():
-            self.w_vector.data_dict[feat] = fv[feat][1]/c
-
-    
+            self.w_vector.data_dict.clear()
+            for feat in fv.keys():
+                self.w_vector.data_dict[feat] = fv[feat][1]/c
+        if learner.__class__.__name__== "PerceptronLearner":
+            fv = {}
+            for round in range(max_iter): 
+                print "round: %d"%round
+                #mapper: computer the weight vector in each shard using avg_perc_train
+                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,parser))
+                #reducer: combine the weight vectors from each shard
+                feat_vec_list = feat_vec_list.combineByKey(lambda value: (value, 1),
+                                 lambda x, value: (x[0] + value, x[1] + 1),
+                                 lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
+                #fv = feat_vec_list.map(lambda (label, (value_sum, count)): (label, value_sum / count)).collectAsMap()
+               
+                fv = {}
+                for (feat,(a,b)) in feat_vec_list:
+                    fv[feat] = float(a)/float(b)
+            self.w_vector.data_dict.clear()
+            self.w_vector.data_dict.iadd(fv)
+            #dump the weight vector
+            #d_filename: change the full path to hdfs file name 
+            if d_filename is not None:
+                self.w_vector.dump(d_filename + "_Iter_%d.db"%max_iter)

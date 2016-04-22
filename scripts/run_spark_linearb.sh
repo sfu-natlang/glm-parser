@@ -15,4 +15,5 @@ cd hvector
 python setup.py install --install-lib .
 
 cd ..
-spark-submit --master local[4] glm_parser.py -s 4 -i 1 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ --train='wsj_02[0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_00[0-9][0-9].mrg.3.pa.gs.tab' --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner
+spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 10 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' --learner=perceptron --fgen=english_1st_fgen --parser=ceisner
+

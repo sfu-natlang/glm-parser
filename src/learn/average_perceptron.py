@@ -144,6 +144,7 @@ class AveragePerceptronLearner():
     def parallel_learn(self,dp,fv,parser):
         w_vector = WeightVector()
         weight_sum_dict = WeightVector()
+        print "parallel_learn keys: %d"%len(fv.keys())
         for key in fv.keys():
             w_vector.data_dict[key]=fv[key][0]
             weight_sum_dict.data_dict[key]=fv[key][1]
@@ -155,13 +156,13 @@ class AveragePerceptronLearner():
             current_global_vector = data_instance.set_current_global_vector(current_edge_set)
 
             delta_global_vector = gold_global_vector - current_global_vector
-
+            weight_sum_dict.data_dict.iadd(w_vector.data_dict)
             if not current_global_vector == gold_global_vector: 
                 w_vector.data_dict.iadd(delta_global_vector.feature_dict)
-            weight_sum_dict.data_dict.iadd(w_vector.data_dict)
+                weight_sum_dict.data_dict.iadd(delta_global_vector.feature_dict)
         dp.reset_index()
 
         vector_list = {}
-        for key in w_vector.data_dict.keys():
+        for key in weight_sum_dict.data_dict.keys():
             vector_list[str(key)] = (w_vector.data_dict[key],weight_sum_dict[key])
         return vector_list.items()
