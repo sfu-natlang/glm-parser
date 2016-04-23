@@ -79,7 +79,6 @@ class GlmParser():
             
         if max_iter == -1:
             max_iter = self.max_iter
-            
         self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, 
                                       dump_freq)
     
@@ -92,7 +91,7 @@ class GlmParser():
         parallel_learner = pl(self.w_vector,max_iter)
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context)
+        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context,d_filename=d_filename)
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
@@ -273,14 +272,14 @@ if __name__ == "__main__":
     train_regex = ''
     test_regex = ''
     max_iter = 1
-    test_data_path = '/cs/natlang-user/vivian/penn-wsj-deps/'  #"./penn-wsj-deps/"
+    test_data_path = ''  #"./penn-wsj-deps/"
     l_filename = None
     d_filename = None
     dump_freq = 1
     parallel_flag = False
     shards_number = 1
     h_flag=False
-    prep_path = 'data/prep/'
+    prep_path = 'data/prep/' #to be changed
 
 
     # Default learner
@@ -394,10 +393,11 @@ if __name__ == "__main__":
         if train_regex is not '':
             start_time = time.time()
             if parallel_flag:
-                from pyspark import SparkContext
-                sc = SparkContext()
+                from pyspark import SparkContext,SparkConf
+                conf = SparkConf()
+                sc = SparkContext(conf=conf)
                 parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train') 
-                gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
+                gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
             else: 
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
             end_time = time.time()
