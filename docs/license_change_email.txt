@@ -1,0 +1,28 @@
+MIME-Version: 1.0
+Reply-To: anoop@sfu.ca
+Received: by 10.157.8.43 with HTTP; Thu, 14 Apr 2016 09:53:30 -0700 (PDT)
+X-Originating-IP: [199.60.10.59]
+Date: Thu, 14 Apr 2016 09:53:30 -0700
+Delivered-To: anoop.sarkar@natlang.net
+X-Gmail-Original-Message-ID: <CAJo7N99v69ppEJjt7kYJjAVChaBW=asrMi5a4fQ9W=g_zyYZ9Q@mail.gmail.com>
+Message-ID: <CAJo7N99v69ppEJjt7kYJjAVChaBW=asrMi5a4fQ9W=g_zyYZ9Q@mail.gmail.com>
+Subject: switching license for glm-parser
+From: Anoop Sarkar <anoop@sfu.ca>
+To: Ziqi Wang <zwa47@sfu.ca>, Yulan Huang <yulanh@sfu.ca>, Yan Sun <sunyans@sfu.ca>, 
+	Torres Jin <liweij@sfu.ca>, Yizhou Wang <yizhouw@sfu.ca>, Vivian Kou <xkou@sfu.ca>, 
+	Kingston Chen <jca303@sfu.ca>, Sean La <laseanl@sfu.ca>, Jetic Gu <jeticg@sfu.ca>
+Content-Type: multipart/alternative; boundary=001a113ce6a8ee2108053074bb2e
+
+--001a113ce6a8ee2108053074bb2e
+Content-Type: text/plain; charset=UTF-8
+
+I am planning to change the license for the glm-parser project from GPL to
+MIT. I think this will increase the chance of the project being used by
+academia and industry.
+
+More about the MIT license: https://en.wikipedia.org/wiki/MIT_License
+
+Let me know if you disagree with the change.
+
+Best,
+Anoop

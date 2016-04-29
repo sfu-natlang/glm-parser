@@ -57,5 +57,7 @@ Before merging your branch
 -----------------
 
 Things to do before merging your branch to previous branch or master:
-1. check the performance on penn-wsj-deps dataset on Linearb(or other school servers).
-1. check indentations using [tabnanny](https://pymotw.com/2/tabnanny)
+
+1. Check the performance on penn-wsj-deps dataset (use linearb or other school servers).
+1. Check indentations using [tabnanny](https://pymotw.com/2/tabnanny)
+
