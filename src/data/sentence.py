@@ -150,7 +150,7 @@ class Sentence():
         for i in range(length):
             head = self.column_list["HEAD"][i]
             deprel = self.column_list["DEPREL"][i]
-	    if head.isdigit():
+            if head.isdigit():
                 node_key = (int(head), i + 1)
                 self.column_list["edge_set"][node_key] = deprel
         return self.column_list["edge_set"]

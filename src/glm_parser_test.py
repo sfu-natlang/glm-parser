@@ -61,7 +61,7 @@ if __name__ == "__main__":
     test_count = 0
     pass_count = 0
     for filename in os.listdir('test'):
-    	if filename.endswith('.py') and filename.startswith('test_'):
+        if filename.endswith('.py') and filename.startswith('test_'):
             print "***********************************************"
             print "Test: %d" % (test_count)
 
