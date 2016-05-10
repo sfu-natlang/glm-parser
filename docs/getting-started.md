@@ -18,7 +18,7 @@ Read the slides from the following tutorial to learn about dependency parsing an
 
 Then read upto the chapter on Graph-based parsing in the following book:
 
-* [Dependency Parsing](https://books.google.ca/books?id=BYFgAQAAQBAJ). Sandra Kubler, Ryan McDonald and Joakim Nivre. Morgan & Claypool Publishers, 2009.
+* [Dependency Parsing](https://books.google.ca/books?id=BYFgAQAAQBAJ). Sandra Kubler, Ryan McDonald and Joakim Nivre. Morgan & Claypool Publishers, 2009. [SFU Library link](http://www.morganclaypool.com.proxy.lib.sfu.ca/doi/abs/10.2200/S00169ED1V01Y200901HLT002)
 
 A lot of useful information about first-order projective parsing is in Ryan McDonald's PhD thesis:
 
