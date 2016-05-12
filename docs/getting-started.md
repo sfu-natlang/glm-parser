@@ -2,7 +2,7 @@
 
 Currently training the model is done using the averaged perceptron algorithm. This is an online algorithm, which means that it updates the weight vector one example at a time. It does iterate through the entire data multiple times. Each pass through the data is called an epoch.
 
-The parser uses training, dev and test data in the CoNLL format for training and evaluation.
+The parser uses training, dev and test data in the [CoNLL format](http://ilk.uvt.nl/conll/#dataformat) for training and evaluation.
 
 Searching for the argmax tree when given a fixed weight vector is done using the Eisner dependency parsing algorithm. 
 
