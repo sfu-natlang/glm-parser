@@ -74,7 +74,7 @@ class DataPool():
             if len(entity) == length and entity[0] != comment_sign:
                 for i in range(length):
                     if not(config_list[i].isdigit()):
-                        column_list[config_list[i]].append(str(entity[i]))
+                        column_list[config_list[i]].append(str(entity[i].encode('utf-8')))
             else:
                 if not(config_list[0].isdigit()) and column_list[config_list[0]] != []:
                     sent = Sentence(column_list, config_list, self.fgen)

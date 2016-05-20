@@ -1,0 +1,8 @@
+Branch: master
+
+Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Japanese/data --train="japanese_verbmobil_train.conll" --test="japanese_verbmobil_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
+
+05/20/2016 10:27:22 AM INFO: Training time usage(seconds): 80.664286
+05/20/2016 10:27:22 AM INFO: Feature count: 877555
+05/20/2016 10:27:22 AM INFO: Unlabeled accuracy: 0.931185431623 (5318, 5711)
+05/20/2016 10:27:22 AM INFO: Unlabeled attachment accuracy: 0.938785046729 (6027, 6420)
