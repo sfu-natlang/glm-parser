@@ -1,0 +1,9 @@
+Branch: master
+
+Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Danish/data --train="danish_ddt_train.conll" --test="danish_ddt_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
+
+05/20/2016 11:11:32 AM INFO: Training time usage(seconds): 62.861501
+05/20/2016 11:11:32 AM INFO: Feature count: 1037968
+05/20/2016 11:11:32 AM INFO: Unlabeled accuracy: 0.852699931647 (4990, 5852)
+05/20/2016 11:11:32 AM INFO: Unlabeled attachment accuracy: 0.860382248137 (5312, 6174)
+
