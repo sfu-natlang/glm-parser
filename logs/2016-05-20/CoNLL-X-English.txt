@@ -12,8 +12,3 @@ Traceback (most recent call last):
   File "/ugrad/2/jca303/glm-parser/src/evaluate/evaluator.py", line 102, in get_acc_unlabeled_accuracy
     return self.unlabeled_correct_num / self.unlabeled_gold_set_size
 ZeroDivisionError: division by zero
-
-05/20/2016 02:08:29 PM INFO: Training time usage(seconds): 45.627373
-05/20/2016 02:08:29 PM INFO: Feature count: 828612
-05/20/2016 02:08:29 PM INFO: Unlabeled accuracy: 0.763482178349 (5762, 7547)
-05/20/2016 02:08:29 PM INFO: Unlabeled attachment accuracy: 0.781517747858 (6385, 8170)
