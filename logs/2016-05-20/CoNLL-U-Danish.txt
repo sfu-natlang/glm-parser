@@ -1,8 +1,9 @@
 Branch: master
 
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-U/UD_Danish --train="da_ud_train.conllu" --test="da-ud-test.conllu" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllu.config
+Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-U/UD_Danish --train="da-ud-train.conllu" --test="da-ud-test.conllu" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllu.config
+ 
 
-05/20/2016 02:38:29 PM INFO: Training time usage(seconds): 4.517722
-05/20/2016 02:38:29 PM INFO: Feature count: 0
-05/20/2016 02:38:29 PM INFO: Unlabeled accuracy: 0.116247450714 (684, 5884)
-05/20/2016 02:38:29 PM INFO: Unlabeled attachment accuracy: 0.162101192394 (1006, 6206)
+05/20/2016 03:11:03 PM INFO: Training time usage(seconds): 54.325777
+05/20/2016 03:11:03 PM INFO: Feature count: 1464496
+05/20/2016 03:11:03 PM INFO: Unlabeled accuracy: 0.777192386132 (4573, 5884)
+05/20/2016 03:11:03 PM INFO: Unlabeled attachment accuracy: 0.788752819852 (4895, 6206)
