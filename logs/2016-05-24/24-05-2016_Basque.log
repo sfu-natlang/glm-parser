@@ -1,0 +1,27 @@
+05/24/2016 07:44:03 PM DEBUG: Initialize AveragePerceptronLearner ... 
+05/24/2016 07:44:12 PM DEBUG: Starting sequential train ... 
+05/24/2016 07:44:12 PM DEBUG: Iteration: 0
+05/24/2016 07:44:12 PM DEBUG: Data size: 5396
+05/24/2016 07:47:24 PM DEBUG: Iteration: 1
+05/24/2016 07:47:24 PM DEBUG: Data size: 5396
+05/24/2016 07:47:25 PM DEBUG: Dumping Weight Vector to 24-05-2016_Basque_Iter_0.db 
+05/24/2016 07:47:25 PM DEBUG: Total Feature Num: 1183973 
+05/24/2016 07:50:32 PM DEBUG: Iteration: 2
+05/24/2016 07:50:32 PM DEBUG: Data size: 5396
+05/24/2016 07:50:33 PM DEBUG: Dumping Weight Vector to 24-05-2016_Basque_Iter_1.db 
+05/24/2016 07:50:33 PM DEBUG: Total Feature Num: 1521615 
+05/24/2016 07:53:37 PM DEBUG: Iteration: 3
+05/24/2016 07:53:37 PM DEBUG: Data size: 5396
+05/24/2016 07:53:39 PM DEBUG: Dumping Weight Vector to 24-05-2016_Basque_Iter_2.db 
+05/24/2016 07:53:39 PM DEBUG: Total Feature Num: 1719608 
+05/24/2016 07:56:44 PM DEBUG: Iteration: 4
+05/24/2016 07:56:44 PM DEBUG: Data size: 5396
+05/24/2016 07:56:45 PM DEBUG: Dumping Weight Vector to 24-05-2016_Basque_Iter_3.db 
+05/24/2016 07:56:45 PM DEBUG: Total Feature Num: 1851870 
+05/24/2016 07:59:51 PM DEBUG: Dumping Weight Vector to 24-05-2016_Basque_Iter_4.db 
+05/24/2016 07:59:51 PM DEBUG: Total Feature Num: 1943749 
+05/24/2016 07:59:52 PM DEBUG: Start evaluating ...
+05/24/2016 08:00:45 PM INFO: Training time usage(seconds): 948.510584
+05/24/2016 08:00:45 PM INFO: Feature count: 1943749
+05/24/2016 08:00:45 PM INFO: Unlabeled accuracy: 0.729876097481 (17790, 24374)
+05/24/2016 08:00:45 PM INFO: Unlabeled attachment accuracy: 0.748443052000 (19589, 26173)
