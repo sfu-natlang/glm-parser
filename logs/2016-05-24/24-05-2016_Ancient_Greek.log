@@ -1,0 +1,27 @@
+05/24/2016 11:22:10 AM DEBUG: Initialize AveragePerceptronLearner ... 
+05/24/2016 11:22:48 AM DEBUG: Starting sequential train ... 
+05/24/2016 11:22:48 AM DEBUG: Iteration: 0
+05/24/2016 11:22:48 AM DEBUG: Data size: 13185
+05/24/2016 11:38:06 AM DEBUG: Iteration: 1
+05/24/2016 11:38:06 AM DEBUG: Data size: 13185
+05/24/2016 11:38:10 AM DEBUG: Dumping Weight Vector to 24-05-2016_Ancient_Greek_Iter_0.db 
+05/24/2016 11:38:10 AM DEBUG: Total Feature Num: 3207175 
+05/24/2016 11:53:36 AM DEBUG: Iteration: 2
+05/24/2016 11:53:36 AM DEBUG: Data size: 13185
+05/24/2016 11:53:41 AM DEBUG: Dumping Weight Vector to 24-05-2016_Ancient_Greek_Iter_1.db 
+05/24/2016 11:53:41 AM DEBUG: Total Feature Num: 4226085 
+05/24/2016 12:09:13 PM DEBUG: Iteration: 3
+05/24/2016 12:09:13 PM DEBUG: Data size: 13185
+05/24/2016 12:09:17 PM DEBUG: Dumping Weight Vector to 24-05-2016_Ancient_Greek_Iter_2.db 
+05/24/2016 12:09:17 PM DEBUG: Total Feature Num: 4784500 
+05/24/2016 12:24:52 PM DEBUG: Iteration: 4
+05/24/2016 12:24:52 PM DEBUG: Data size: 13185
+05/24/2016 12:24:57 PM DEBUG: Dumping Weight Vector to 24-05-2016_Ancient_Greek_Iter_3.db 
+05/24/2016 12:24:57 PM DEBUG: Total Feature Num: 5134274 
+05/24/2016 12:40:39 PM DEBUG: Dumping Weight Vector to 24-05-2016_Ancient_Greek_Iter_4.db 
+05/24/2016 12:40:39 PM DEBUG: Total Feature Num: 5389024 
+05/24/2016 12:40:41 PM DEBUG: Start evaluating ...
+05/24/2016 12:43:51 PM INFO: Training time usage(seconds): 4710.519305
+05/24/2016 12:43:52 PM INFO: Feature count: 5389024
+05/24/2016 12:43:52 PM INFO: Unlabeled accuracy: 0.573323828759 (14477, 25251)
+05/24/2016 12:43:52 PM INFO: Unlabeled attachment accuracy: 0.588841398260 (15430, 26204)
