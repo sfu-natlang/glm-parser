@@ -17,28 +17,4 @@
 #
 
 import os
-from sys import exit
-
-cwd = os.getcwd()
-
-if '\\' in cwd:
-    # Windows
-    path_list = cwd.split('\\')
-    src_path = ''
-    for i in path_list[:-1]:
-        src_path += (i + '\\')
-    src_path += 'src\\'
-    print(src_path)
-    exit(0)
-elif '/' in cwd:
-    # UNIX or LINUX
-    path_list = cwd.split('/')
-    src_path = ''
-    for i in path_list[:-1]:
-        src_path += (i + '/')
-    src_path += 'src/'
-    print(src_path)
-    exit(0)
-else:
-    print(cwd)
-    exit(0)
+print(os.path.join(os.path.dirname(os.getcwd()), 'src') + os.sep)
