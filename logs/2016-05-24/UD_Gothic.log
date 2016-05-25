@@ -1,0 +1,5 @@
+05/25/2016 12:17:59 PM INFO: Training time usage(seconds): 605.451881
+05/25/2016 12:17:59 PM INFO: Feature count: 1129555
+05/25/2016 12:17:59 PM INFO: Unlabeled accuracy: 0.736913532377 (3801, 5158)
+05/25/2016 12:17:59 PM INFO: Unlabeled attachment accuracy: 0.759525075315 (4286, 5643)
+
