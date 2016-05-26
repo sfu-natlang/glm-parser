@@ -1,0 +1,35 @@
+This is the replication of the tests performed on master branch on 2014-06-08 using the latest of master branch.
+
+Branch: master
+command:
+
+	spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -i 5 -p ~/Daten/glm-parser-data/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' -d 25-05-2016 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+
+Log:
+05/25/2016 10:17:31 AM DEBUG: Initialize AveragePerceptronLearner ... 
+05/25/2016 10:19:07 AM DEBUG: Starting sequential train ... 
+05/25/2016 10:19:07 AM DEBUG: Iteration: 0
+05/25/2016 10:19:07 AM DEBUG: Data size: 39867
+05/25/2016 11:25:46 AM DEBUG: Iteration: 1
+05/25/2016 11:25:46 AM DEBUG: Data size: 39867
+05/25/2016 11:25:52 AM DEBUG: Dumping Weight Vector to 25-05-2016_Iter_0.db 
+05/25/2016 11:25:52 AM DEBUG: Total Feature Num: 4840307 
+05/25/2016 12:33:20 PM DEBUG: Iteration: 2
+05/25/2016 12:33:20 PM DEBUG: Data size: 39867
+05/25/2016 12:33:28 PM DEBUG: Dumping Weight Vector to 25-05-2016_Iter_1.db 
+05/25/2016 12:33:28 PM DEBUG: Total Feature Num: 5863523 
+05/25/2016 01:40:33 PM DEBUG: Iteration: 3
+05/25/2016 01:40:33 PM DEBUG: Data size: 39867
+05/25/2016 01:40:40 PM DEBUG: Dumping Weight Vector to 25-05-2016_Iter_2.db 
+05/25/2016 01:40:40 PM DEBUG: Total Feature Num: 6358779 
+05/25/2016 02:47:52 PM DEBUG: Iteration: 4
+05/25/2016 02:47:52 PM DEBUG: Data size: 39867
+05/25/2016 02:48:00 PM DEBUG: Dumping Weight Vector to 25-05-2016_Iter_3.db 
+05/25/2016 02:48:00 PM DEBUG: Total Feature Num: 6648961 
+05/25/2016 03:55:33 PM DEBUG: Dumping Weight Vector to 25-05-2016_Iter_4.db 
+05/25/2016 03:55:33 PM DEBUG: Total Feature Num: 6841617 
+05/25/2016 03:55:40 PM DEBUG: Start evaluating ...
+05/25/2016 04:06:09 PM INFO: Training time usage(seconds): 20288.138068
+05/25/2016 04:06:10 PM INFO: Feature count: 6841617
+05/25/2016 04:06:10 PM INFO: Unlabeled accuracy: 0.908394890275 (151751, 167054)
+05/25/2016 04:06:10 PM INFO: Unlabeled attachment accuracy: 0.912058799867 (158711, 174014)
