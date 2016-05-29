@@ -1,0 +1,17 @@
+Machine: linearb
+
+Branch: master
+
+Command:
+spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -i 5 -s 8 -p /ugrad/2/jeticg/Daten/glm-parser-data/universal-dependencies-1.2 --train="grc-ud-train.conllu" --test="grc-ud-test.conllu" -d 24-05-2016_Ancient_Greek -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/conllu.config
+
+Result:
+05/28/2016 10:26:05 AM DEBUG: Initialize AveragePerceptronLearner ...
+05/28/2016 10:26:12 AM DEBUG: JavaGateway.auto_convert is deprecated and will be removed in version 1.0. Use GatewayParameters instead.
+05/28/2016 10:26:12 AM DEBUG: JavaGateway.gateway_client is deprecated and will be removed in version 1.0. Use GatewayParameters instead.
+05/28/2016 10:26:15 AM DEBUG: Initialize ParallelPerceptronLearner ...
+05/28/2016 02:26:51 PM DEBUG: Start evaluating ...
+05/28/2016 02:29:39 PM INFO: Training time usage(seconds): 14446.247781
+05/28/2016 02:29:40 PM INFO: Feature count: 5773385
+05/28/2016 02:29:40 PM INFO: Unlabeled accuracy: 0.591342917112 (14932, 25251)
+05/28/2016 02:29:40 PM INFO: Unlabeled attachment accuracy: 0.606205159518 (15885, 26204)

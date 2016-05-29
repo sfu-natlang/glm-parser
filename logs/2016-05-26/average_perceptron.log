@@ -1,0 +1,15 @@
+Machine: linearb
+
+Branch: master
+
+Command:
+spark-submit --driver-library-path $LD_LIBRARY_PATH --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -i 5 -s 8 -p ~/Daten/glm-parser-data/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' -d 27-05-2016 -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+
+Result:
+05/27/2016 03:09:04 PM DEBUG: Initialize AveragePerceptronLearner ...
+05/27/2016 03:09:07 PM DEBUG: Initialize ParallelPerceptronLearner ...
+05/28/2016 01:46:27 AM DEBUG: Start evaluating ...
+05/28/2016 01:58:02 AM INFO: Training time usage(seconds): 38243.774359
+05/28/2016 01:58:02 AM INFO: Feature count: 8195037
+05/28/2016 01:58:02 AM INFO: Unlabeled accuracy: 0.886755180959 (148136, 167054)
+05/28/2016 01:58:02 AM INFO: Unlabeled attachment accuracy: 0.891284609284 (155096, 174014)
