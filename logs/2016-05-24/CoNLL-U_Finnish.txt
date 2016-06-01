@@ -1,0 +1,14 @@
+Machine: linearb
+
+Branch: master
+
+Command:
+spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 5 -p /cs/natlang-data/CoNLL/universal-dependencies-1.2 --train='fi-ud-train.conllu' --test='fi-ud-test.conllu' --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/conllu.config
+
+
+Result:
+05/25/2016 01:02:37 AM INFO: Training time usage(seconds): 9266.473853
+05/25/2016 01:02:37 AM INFO: Feature count: 4212786
+05/25/2016 01:02:37 AM INFO: Unlabeled accuracy: 0.696827133479 (6369, 9140)
+05/25/2016 01:02:37 AM INFO: Unlabeled attachment accuracy: 0.716898242746 (7017, 9788)
+
