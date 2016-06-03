@@ -97,6 +97,7 @@ for root, dirs, files in os.walk(args.src):
                 filled[9] = True
             if "unlabeled attachment accuracy" in line.lower():
                 leaveBlank(filled, 10)
+                splitLine = line.split(" ")
                 for index, obj in enumerate(splitLine):
                     if (obj.lower() == "accuracy:"):
                         fTable.write(splitLine[index + 1] + "|")
