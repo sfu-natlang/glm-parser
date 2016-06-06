@@ -149,7 +149,7 @@ class CubePruningParser():
         """
         #tt = 0;
         
-        n = len(sentence.word_list)
+        n = len(sentence.get_word_list())
         e = self.init_eisner_matrix(n)
         
         def english_1st_order_gen(arc_weight, sentence, heap, left, right, weight_offset = 0):
