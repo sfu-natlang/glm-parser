@@ -90,7 +90,9 @@ if __name__ == "__main__":
     shard_num = int(sys.argv[3])
     print input_dir, regex, shard_num    
     output_path = partition_data(input_dir, regex, shard_num, output_dir="../data/prep/")
-    
-    cmd = "hdfs dfs -put %s /user/xkou/data/prep/"%output_path
+    hdfs_path = "./data/prep/"
+    os.system("hdfs dfs -mkdir ./data") 
+    os.system("hdfs dfs -mkdir ./data/prep")
+    cmd = "hdfs dfs -put %s %s"%(output_path,hdfs_path)
     os.system(cmd)
 
