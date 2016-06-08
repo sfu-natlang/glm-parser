@@ -280,7 +280,7 @@ if __name__ == "__main__":
     shards_number = 1
     h_flag=False
     prep_path = 'data/prep/' #to be changed
-
+    interactValue = False
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -301,10 +301,43 @@ if __name__ == "__main__":
     try:
         opt_spec = "aht:i:p:l:d:f:r:s:c:"
         long_opt_spec = ['train=','test=','fgen=',
-             'learner=', 'parser=', 'format=', 'debug-run-number=',
+                         'learner=', 'parser=', 'format=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
                          'log-feature-request',"spark"]
-        opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
+
+        # load configuration from file
+        #   configuration files are stored under src/config/
+        #   configuration files: *.config
+        if os.path.isfile(sys.argv[1]) == True:
+            print("Reading configurations from file: %s" % (sys.argv[1]))
+            cf = ConfigParser.ConfigParser()
+            cf.read(sys.argv[1])
+
+            train_regex    = cf.get("data", "train")
+            test_regex     = cf.get("data", "test")
+            test_data_path = cf.get("data", "data_path")
+            prep_path      = cf.get("data", "prep_path")
+            data_format    = cf.get("data", "format")
+
+            h_flag                               = cf.get(       "option", "h_flag")
+            parallel_flag                        = cf.getboolean("option", "parallel_train")
+            shards_number                        = cf.getint(    "option", "shards")
+            max_iter                             = cf.getint(    "option", "iteration")
+            l_filename                           = cf.get(       "option", "l_filename")
+            d_filename                           = cf.get(       "option", "d_filename")
+            debug.debug.time_accounting_flag     = cf.getboolean("option", "timer")
+            dump_freq                            = cf.getint(    "option", "dump_frequency")
+            debug.debug.log_feature_request_flag = cf.getboolean("option", "log-feature-request")
+            interactValue                        = cf.getboolean("option", "interactive")
+
+            learnerValue   = cf.get(       "core", "learner")
+            fgenValue      = cf.get(       "core", "feature_generator")
+            parserValue    = cf.get(       "core", "parser")
+            opts, args = getopt.getopt(sys.argv[2:], opt_spec, long_opt_spec)
+        else:
+            opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
+
+        # load configuration from command line
         for opt, value in opts:
             if opt == "-h":
                 print("")
@@ -335,6 +368,10 @@ if __name__ == "__main__":
                 test_regex = value
             elif opt == '--debug-run-number':
                 debug.debug.run_first_num = int(value)
+                if debug.debug.run_first_num <= 0:
+                    raise ValueError("Illegal integer: %d" % (debug.debug.run_first_num, ))
+                else:
+                    print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt =="--spark":
                 parallel_flag = True
             elif opt == "--prep-path":
@@ -351,35 +388,6 @@ if __name__ == "__main__":
                 debug.debug.log_feature_request_flag = True
             elif opt == '--format':
                 data_format = value;
-            elif os.path.isfile(opt) == True:
-                # load configuration from file
-                #   configuration files are stored under src/config/
-                #   configuration files: *.config
-                cf = ConfigParser.ConfigParser()
-                cf.read(opt)
-
-                train_regex    = cf.get("data", "train")
-                test_regex     = cf.get("data", "test")
-                test_data_path = cf.get("data", "data_path")
-                prep_path      = cf.get("data", "prep_path")
-                data_format    = cf.get("data", "format")
-
-                h_flag         = cf.get(       "option", "h_flag")
-                parallel_flag  = cf.getboolean("option", "parallel_train")
-                shards_number  = cf.getint(    "option", "shards")
-                max_iter       = cf.getint(    "option", "iteration")
-                l_filename     = cf.get(       "option", "l_filename")
-                d_filename     = cf.get(       "option", "d_filename")
-                debug.debug.time_accounting_flag =
-                                 cf.getboolean("option", "timer")
-                dump_freq      = cf.getint(    "option", "dump_frequency")
-                log-feature-request =
-                                 cf.getboolean("option", "log-feature-request")
-                interactValue  = cf.getboolean("option", "interactive")
-
-                learnerValue   = cf.get(       "core", "learner")
-                fgenValue      = cf.get(       "core", "feature_generator")
-                parserValue    = cf.get(       "core", "parser")
             else:
                 #print "Invalid argument, try -h"
                 sys.exit(0)
@@ -387,12 +395,6 @@ if __name__ == "__main__":
         # process configurations
         if debug.debug.time_accounting_flag == True:
             print("Time accounting is ON")
-
-        if debug.debug.run_first_num <= 0:
-            raise ValueError("Illegal integer: %d" %
-                            (debug.debug.run_first_num, ))
-        else:
-            print("Debug run number = %d" % (debug.debug.run_first_num, ))
 
         if parallel_flag:
             learner = get_class_from_module('parallel_learn', 'learn', learnerValue)
@@ -417,7 +419,7 @@ if __name__ == "__main__":
         if debug.debug.log_feature_request_flag == True:
             print("Enable feature request log")
 
-
+        # Initialisation
         gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
@@ -427,7 +429,6 @@ if __name__ == "__main__":
                         part_data=prep_path)
 
         training_time = None
-
 
         #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
         #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
