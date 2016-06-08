@@ -23,8 +23,8 @@ import debug.interact
 
 import timeit
 import time
-import os
-
+import sys,os
+import ConfigParser
 
 class GlmParser():
     def __init__(self, train_regex="", test_regex="", data_path="penn-wsj-deps/",
@@ -312,10 +312,8 @@ if __name__ == "__main__":
                 print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
                 print(HELP_MSG)
                 sys.exit(0)
-
             elif opt =="-c":
                 h_flag = True
-
             elif opt == "-s":
                 shards_number = int(value)
                 parallel_flag = True
@@ -328,7 +326,6 @@ if __name__ == "__main__":
             elif opt == "-d":
                 d_filename = value
             elif opt == '-a':
-                print("Time accounting is ON")
                 debug.debug.time_accounting_flag = True
             elif opt == '-f':
                 dump_freq = int(value)
@@ -338,44 +335,89 @@ if __name__ == "__main__":
                 test_regex = value
             elif opt == '--debug-run-number':
                 debug.debug.run_first_num = int(value)
-                if debug.debug.run_first_num <= 0:
-                    raise ValueError("Illegal integer: %d" %
-                                     (debug.debug.run_first_num, ))
-                else:
-                    print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt =="--spark":
                 parallel_flag = True
-
             elif opt == "--prep-path":
                 prep_path = value
-
             elif opt == "--learner":
-                if parallel_flag:
-                    learner = get_class_from_module('parallel_learn', 'learn', value)
-                else:
-                    learner = get_class_from_module('sequential_learn', 'learn', value)
-                print("Using learner: %s (%s)" % (learner.__name__, value))
+                learnerValue = value
             elif opt == "--fgen":
-                fgen = get_class_from_module('get_local_vector', 'feature', value)
-                print("Using feature generator: %s (%s)" % (fgen.__name__, value))
+                fgenValue = value
             elif opt == "--parser":
-                parser = get_class_from_module('parse', 'parse', value)
-                print("Using parser: %s (%s)" % (parser.__name__, value))
+                parserValue = value
             elif opt == '--interactive':
-                glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
-                glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
-                glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
-                DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
-                learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
-                print("Enable interactive mode")
+                interactValue = True
             elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
-                print("Enable feature request log")
             elif opt == '--format':
                 data_format = value;
+            elif os.path.isfile(opt) == True:
+                # load configuration from file
+                #   configuration files are stored under src/config/
+                #   configuration files: *.config
+                cf = ConfigParser.ConfigParser()
+                cf.read(opt)
+
+                train_regex    = cf.get("data", "train")
+                test_regex     = cf.get("data", "test")
+                test_data_path = cf.get("data", "data_path")
+                prep_path      = cf.get("data", "prep_path")
+                data_format    = cf.get("data", "format")
+
+                h_flag         = cf.get(       "option", "h_flag")
+                parallel_flag  = cf.getboolean("option", "parallel_train")
+                shards_number  = cf.getint(    "option", "shards")
+                max_iter       = cf.getint(    "option", "iteration")
+                l_filename     = cf.get(       "option", "l_filename")
+                d_filename     = cf.get(       "option", "d_filename")
+                debug.debug.time_accounting_flag =
+                                 cf.getboolean("option", "timer")
+                dump_freq      = cf.getint(    "option", "dump_frequency")
+                log-feature-request =
+                                 cf.getboolean("option", "log-feature-request")
+                interactValue  = cf.getboolean("option", "interactive")
+
+                learnerValue   = cf.get(       "core", "learner")
+                fgenValue      = cf.get(       "core", "feature_generator")
+                parserValue    = cf.get(       "core", "parser")
             else:
                 #print "Invalid argument, try -h"
                 sys.exit(0)
+
+        # process configurations
+        if debug.debug.time_accounting_flag == True:
+            print("Time accounting is ON")
+
+        if debug.debug.run_first_num <= 0:
+            raise ValueError("Illegal integer: %d" %
+                            (debug.debug.run_first_num, ))
+        else:
+            print("Debug run number = %d" % (debug.debug.run_first_num, ))
+
+        if parallel_flag:
+            learner = get_class_from_module('parallel_learn', 'learn', learnerValue)
+        else:
+            learner = get_class_from_module('sequential_learn', 'learn', learnerValue)
+        print("Using learner: %s (%s)" % (learner.__name__, learnerValue))
+
+        fgen = get_class_from_module('get_local_vector', 'feature', fgenValue)
+        print("Using feature generator: %s (%s)" % (fgen.__name__, fgenValue))
+
+        parser = get_class_from_module('parse', 'parse', parserValue)
+        print("Using parser: %s (%s)" % (parser.__name__, parserValue))
+
+        if interactValue == True:
+            glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
+            glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
+            glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
+            DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
+            learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
+            print("Enable interactive mode")
+
+        if debug.debug.log_feature_request_flag == True:
+            print("Enable feature request log")
+
+
         gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
