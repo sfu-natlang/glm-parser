@@ -25,6 +25,7 @@ import timeit
 import time
 import sys,os
 import ConfigParser
+from ConfigParser import SafeConfigParser
 
 class GlmParser():
     def __init__(self, train_regex="", test_regex="", data_path="penn-wsj-deps/",
@@ -310,7 +311,7 @@ if __name__ == "__main__":
         #   configuration files: *.config
         if os.path.isfile(sys.argv[1]) == True:
             print("Reading configurations from file: %s" % (sys.argv[1]))
-            cf = ConfigParser.ConfigParser()
+            cf = SafeConfigParser(os.environ)
             cf.read(sys.argv[1])
 
             train_regex    = cf.get("data", "train")
