@@ -1,3 +1,11 @@
+Machine: Mac Pro 2012(Quad Core)
+
+Branch: configuration
+
+Command:
+python glm_parser.py -i 5 -p ~/Daten/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d `date "+%d-%m-%y"` -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --format=format/penn2malt.format
+
+Result:
 06/07/2016 10:10:09 PM DEBUG: Initialize AveragePerceptronLearner ... 
 06/07/2016 10:10:24 PM DEBUG: Starting sequential train ... 
 06/07/2016 10:10:24 PM DEBUG: Iteration: 0

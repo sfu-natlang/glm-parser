@@ -22,7 +22,7 @@ Or if you are on a RCG machine such as `linux.cs.sfu.ca` or `queen.rcg.sfu.ca` t
 
     sh scripts/setup_env.sh    
 
-Sample Sequential run
+Sequential run
 ----------
 
 Here is a sample training run of the parser:
@@ -39,6 +39,8 @@ The data for training is in the directory after `-p` and the data must be in the
 The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
 
 ####Using Config Files:
+
+
 
 Format:
 
@@ -60,6 +62,23 @@ Spark run
 ---------
 
     spark-submit glm_parser.py -i 2 -b 1 -e 4 -t 0 -p /cs/natlang-projects/glm-parser/penn-wsj-deps/ --learner=spark_perceptron --fgen=english_1st_fgen --parser=ceisner
+    
+Running Tests for SFU NatLang Lab
+----------------
+
+Please use configs to load the default setting for each language you are testing. After testing, use `scripts/proc_log.sh` to process the log file.
+
+When submitting the log file, you must follow our format:
+
+	Machine: MACHINE-NAME
+	\n
+	Branch: BRANCH-NAME
+	\n
+	Command:
+	COMMAND_OR_SCRIPT_YOU_USED
+	\n
+	Result:
+	COPY THE PROCESSED LOG CONTENTS HERE
 
 Getting started on development
 ----------------

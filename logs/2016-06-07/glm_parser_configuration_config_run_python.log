@@ -1,3 +1,11 @@
+Machine: Mac Pro 2012(Quad Core)
+
+Branch: configuration
+
+Command:
+python glm_parser.py config/default.config -p ~/Daten/glm-parser-data/penn-wsj-deps/
+
+Result:
 06/07/2016 11:14:53 PM DEBUG: Loading Weight Vector from None 
 06/07/2016 11:15:05 PM DEBUG: Loading Weight Vector from None 
 06/07/2016 11:18:35 PM DEBUG: Loading Weight Vector from  
