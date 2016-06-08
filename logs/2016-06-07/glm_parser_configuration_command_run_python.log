@@ -1,0 +1,27 @@
+06/07/2016 10:10:09 PM DEBUG: Initialize AveragePerceptronLearner ... 
+06/07/2016 10:10:24 PM DEBUG: Starting sequential train ... 
+06/07/2016 10:10:24 PM DEBUG: Iteration: 0
+06/07/2016 10:10:24 PM DEBUG: Data size: 5938
+06/07/2016 10:20:14 PM DEBUG: Iteration: 1
+06/07/2016 10:20:14 PM DEBUG: Data size: 5938
+06/07/2016 10:20:15 PM DEBUG: Dumping Weight Vector to 07-06-16_Iter_0.db 
+06/07/2016 10:20:15 PM DEBUG: Total Feature Num: 1409739 
+06/07/2016 10:30:04 PM DEBUG: Iteration: 2
+06/07/2016 10:30:04 PM DEBUG: Data size: 5938
+06/07/2016 10:30:06 PM DEBUG: Dumping Weight Vector to 07-06-16_Iter_1.db 
+06/07/2016 10:30:06 PM DEBUG: Total Feature Num: 1671336 
+06/07/2016 10:40:18 PM DEBUG: Iteration: 3
+06/07/2016 10:40:18 PM DEBUG: Data size: 5938
+06/07/2016 10:40:21 PM DEBUG: Dumping Weight Vector to 07-06-16_Iter_2.db 
+06/07/2016 10:40:21 PM DEBUG: Total Feature Num: 1777952 
+06/07/2016 10:51:16 PM DEBUG: Iteration: 4
+06/07/2016 10:51:16 PM DEBUG: Data size: 5938
+06/07/2016 10:51:17 PM DEBUG: Dumping Weight Vector to 07-06-16_Iter_3.db 
+06/07/2016 10:51:17 PM DEBUG: Total Feature Num: 1830901 
+06/07/2016 11:01:28 PM DEBUG: Dumping Weight Vector to 07-06-16_Iter_4.db 
+06/07/2016 11:01:28 PM DEBUG: Total Feature Num: 1864438 
+06/07/2016 11:01:29 PM DEBUG: Start evaluating ...
+06/07/2016 11:07:09 PM INFO: Training time usage(seconds): 3080.408062
+06/07/2016 11:07:09 PM INFO: Feature count: 1864438
+06/07/2016 11:07:09 PM INFO: Unlabeled accuracy: 0.873359616695 (78198, 89537)
+06/07/2016 11:07:09 PM INFO: Unlabeled attachment accuracy: 0.878466007138 (81960, 93299)
