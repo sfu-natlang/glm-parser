@@ -1,0 +1,54 @@
+06/07/2016 11:14:53 PM DEBUG: Loading Weight Vector from None 
+06/07/2016 11:15:05 PM DEBUG: Loading Weight Vector from None 
+06/07/2016 11:18:35 PM DEBUG: Loading Weight Vector from  
+06/07/2016 11:18:56 PM DEBUG: Loading Weight Vector from "None" 
+06/07/2016 11:19:11 PM DEBUG: Loading Weight Vector from '' 
+06/07/2016 11:19:34 PM DEBUG: Loading Weight Vector from 'None' 
+06/07/2016 11:19:43 PM DEBUG: Loading Weight Vector from  
+06/07/2016 11:25:13 PM DEBUG: Initialize AveragePerceptronLearner ... 
+06/07/2016 11:25:13 PM DEBUG: Starting sequential train ... 
+06/07/2016 11:25:13 PM DEBUG: Iteration: 0
+06/07/2016 11:25:13 PM DEBUG: Data size: 0
+06/07/2016 11:25:13 PM DEBUG: Iteration: 1
+06/07/2016 11:25:13 PM DEBUG: Data size: 0
+06/07/2016 11:25:13 PM DEBUG: Iteration: 2
+06/07/2016 11:25:13 PM DEBUG: Data size: 0
+06/07/2016 11:25:13 PM DEBUG: Iteration: 3
+06/07/2016 11:25:13 PM DEBUG: Data size: 0
+06/07/2016 11:25:13 PM DEBUG: Iteration: 4
+06/07/2016 11:25:13 PM DEBUG: Data size: 0
+06/07/2016 11:25:13 PM DEBUG: Start evaluating ...
+06/07/2016 11:25:13 PM INFO: Training time usage(seconds): 0.018623
+06/07/2016 11:25:13 PM INFO: Feature count: 0
+06/07/2016 11:25:45 PM DEBUG: Initialize AveragePerceptronLearner ... 
+06/07/2016 11:25:45 PM DEBUG: Starting sequential train ... 
+06/07/2016 11:25:45 PM DEBUG: Iteration: 0
+06/07/2016 11:25:45 PM DEBUG: Data size: 0
+06/07/2016 11:25:45 PM DEBUG: Iteration: 1
+06/07/2016 11:25:45 PM DEBUG: Data size: 0
+06/07/2016 11:25:45 PM DEBUG: Iteration: 2
+06/07/2016 11:25:45 PM DEBUG: Data size: 0
+06/07/2016 11:25:45 PM DEBUG: Iteration: 3
+06/07/2016 11:25:45 PM DEBUG: Data size: 0
+06/07/2016 11:25:45 PM DEBUG: Iteration: 4
+06/07/2016 11:25:45 PM DEBUG: Data size: 0
+06/07/2016 11:25:45 PM DEBUG: Start evaluating ...
+06/07/2016 11:25:45 PM INFO: Training time usage(seconds): 0.023685
+06/07/2016 11:25:45 PM INFO: Feature count: 0
+06/07/2016 11:27:34 PM DEBUG: Initialize AveragePerceptronLearner ... 
+06/07/2016 11:27:50 PM DEBUG: Starting sequential train ... 
+06/07/2016 11:27:50 PM DEBUG: Iteration: 0
+06/07/2016 11:27:50 PM DEBUG: Data size: 5938
+06/07/2016 11:38:10 PM DEBUG: Iteration: 1
+06/07/2016 11:38:10 PM DEBUG: Data size: 5938
+06/07/2016 11:48:25 PM DEBUG: Iteration: 2
+06/07/2016 11:48:25 PM DEBUG: Data size: 5938
+06/07/2016 11:58:30 PM DEBUG: Iteration: 3
+06/07/2016 11:58:30 PM DEBUG: Data size: 5938
+06/08/2016 12:08:37 AM DEBUG: Iteration: 4
+06/08/2016 12:08:37 AM DEBUG: Data size: 5938
+06/08/2016 12:18:33 AM DEBUG: Start evaluating ...
+06/08/2016 12:24:16 AM INFO: Training time usage(seconds): 3058.774145
+06/08/2016 12:24:16 AM INFO: Feature count: 1864438
+06/08/2016 12:24:16 AM INFO: Unlabeled accuracy: 0.873359616695 (78198, 89537)
+06/08/2016 12:24:16 AM INFO: Unlabeled attachment accuracy: 0.878466007138 (81960, 93299)

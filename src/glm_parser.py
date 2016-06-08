@@ -16,15 +16,15 @@ from evaluate.evaluator import *
 
 from weight.weight_vector import *
 
-from learn.partition import partition_data 
+from learn.partition import partition_data
 
 import debug.debug
 import debug.interact
 
 import timeit
 import time
-import os
-
+import sys,os
+import ConfigParser
 
 class GlmParser():
     def __init__(self, train_regex="", test_regex="", data_path="penn-wsj-deps/",
@@ -32,7 +32,7 @@ class GlmParser():
                  learner=None,
                  fgen=None,
                  parser=None,
-                 config="config/penn2malt.config",  
+                 data_format="format/penn2malt.format",
                  part_data="data/prep",
                  spark=False):
 
@@ -46,16 +46,16 @@ class GlmParser():
             self.fgen = fgen
         else:
             raise ValueError("You need to specify a feature generator")
-        
+
         # why load the data here???
         if not spark:
-            self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen, 
-                                        config_path=config)
+            self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen,
+                                        config_path=data_format)
         if test_regex:
-            self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen, 
-                                       config_path=config)
-        
-        
+            self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen,
+                                       config_path=data_format)
+
+
         self.parser = parser()
 
         if learner is not None:
@@ -69,41 +69,41 @@ class GlmParser():
 
 
         self.evaluator = Evaluator()
-       
+
     def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_regex == '':
-            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen, 
-                                       config_path=config)
-        else:    
+            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen,
+                                       config_path=data_format)
+        else:
             train_data_pool = self.train_data_pool
-            
+
         if max_iter == -1:
             max_iter = self.max_iter
-        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename, 
+        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename,
                                       dump_freq)
-    
+
 
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
         output_dir = self.prep_path
-        output_path = partition_data(self.data_path, train_regex, shards, output_dir) 
-        
+        output_path = partition_data(self.data_path, train_regex, shards, output_dir)
+
         parallel_learner = pl(self.w_vector,max_iter)
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=config, learner = self.learner,sc=spark_Context,d_filename=d_filename)
+        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename)
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
-            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen, 
-                                      config_path=config)
+            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen,
+                                      config_path=data_format)
 
         else:
             test_data_pool = self.test_data_pool
 
         self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector, training_time)
 
-        
+
     def compute_argmax(self, sentence):
         current_edge_set = self.parser.parse(sentence, self.w_vector.get_vector_score)
         #sentence.set_current_global_vector(current_edge_set)
@@ -122,7 +122,7 @@ options:
 
     -l:     Path to an existing weight vector dump file
             example: "./Weight.db"
-            
+
     -d:     Path for dumping weight vector. Please also specify a prefix
             of file names, which will be added with iteration count and
             ".db" suffix when dumping the file
@@ -146,7 +146,7 @@ options:
     -s:     Train using parallelization
 
 
-    --train= 
+    --train=
             Sections for training
         Input a regular expression to indicate which files to read e.g.
         "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
@@ -208,7 +208,7 @@ options:
             Upon exiting the main program will dump feature request information
             into a file "feature_request.log"
 
-    
+
 """
 
 def get_class_from_module(attr_name, module_path, module_name,
@@ -268,7 +268,7 @@ MINOR_VERSION = 0
 
 if __name__ == "__main__":
     import getopt, sys
-    
+
     train_regex = ''
     test_regex = ''
     max_iter = 1
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     shards_number = 1
     h_flag=False
     prep_path = 'data/prep/' #to be changed
-
+    interactValue = False
 
     # Default learner
     #learner = AveragePerceptronLearner
@@ -291,8 +291,8 @@ if __name__ == "__main__":
                                  silent=True)
     parser = get_class_from_module('parse', 'parse', 'ceisner3',
                                    silent=True)
-    # Default config file: penn2malt
-    config = 'config/penn2malt.config'
+    # Default data_format file: penn2malt
+    data_format = 'format/penn2malt.format'
 
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
@@ -300,11 +300,44 @@ if __name__ == "__main__":
 
     try:
         opt_spec = "aht:i:p:l:d:f:r:s:c:"
-        long_opt_spec = ['train=','test=','fgen=', 
-             'learner=', 'parser=', 'config=', 'debug-run-number=',
+        long_opt_spec = ['train=','test=','fgen=',
+                         'learner=', 'parser=', 'format=', 'debug-run-number=',
                          'force-feature-order=', 'interactive',
                          'log-feature-request',"spark"]
-        opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
+
+        # load configuration from file
+        #   configuration files are stored under src/config/
+        #   configuration files: *.config
+        if os.path.isfile(sys.argv[1]) == True:
+            print("Reading configurations from file: %s" % (sys.argv[1]))
+            cf = ConfigParser.ConfigParser()
+            cf.read(sys.argv[1])
+
+            train_regex    = cf.get("data", "train")
+            test_regex     = cf.get("data", "test")
+            test_data_path = cf.get("data", "data_path")
+            prep_path      = cf.get("data", "prep_path")
+            data_format    = cf.get("data", "format")
+
+            h_flag                               = cf.get(       "option", "h_flag")
+            parallel_flag                        = cf.getboolean("option", "parallel_train")
+            shards_number                        = cf.getint(    "option", "shards")
+            max_iter                             = cf.getint(    "option", "iteration")
+            l_filename                           = cf.get(       "option", "l_filename") if cf.get(       "option", "l_filename") != '' else None
+            d_filename                           = cf.get(       "option", "d_filename") if cf.get(       "option", "l_filename") != '' else None
+            debug.debug.time_accounting_flag     = cf.getboolean("option", "timer")
+            dump_freq                            = cf.getint(    "option", "dump_frequency")
+            debug.debug.log_feature_request_flag = cf.getboolean("option", "log-feature-request")
+            interactValue                        = cf.getboolean("option", "interactive")
+
+            learnerValue   = cf.get(       "core", "learner")
+            fgenValue      = cf.get(       "core", "feature_generator")
+            parserValue    = cf.get(       "core", "parser")
+            opts, args = getopt.getopt(sys.argv[2:], opt_spec, long_opt_spec)
+        else:
+            opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
+
+        # load configuration from command line
         for opt, value in opts:
             if opt == "-h":
                 print("")
@@ -312,10 +345,8 @@ if __name__ == "__main__":
                 print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
                 print(HELP_MSG)
                 sys.exit(0)
-
             elif opt =="-c":
                 h_flag = True
-
             elif opt == "-s":
                 shards_number = int(value)
                 parallel_flag = True
@@ -328,7 +359,6 @@ if __name__ == "__main__":
             elif opt == "-d":
                 d_filename = value
             elif opt == '-a':
-                print("Time accounting is ON")
                 debug.debug.time_accounting_flag = True
             elif opt == '-f':
                 dump_freq = int(value)
@@ -339,70 +369,83 @@ if __name__ == "__main__":
             elif opt == '--debug-run-number':
                 debug.debug.run_first_num = int(value)
                 if debug.debug.run_first_num <= 0:
-                    raise ValueError("Illegal integer: %d" %
-                                     (debug.debug.run_first_num, ))
+                    raise ValueError("Illegal integer: %d" % (debug.debug.run_first_num, ))
                 else:
                     print("Debug run number = %d" % (debug.debug.run_first_num, ))
             elif opt =="--spark":
                 parallel_flag = True
-
             elif opt == "--prep-path":
                 prep_path = value
-
             elif opt == "--learner":
-                if parallel_flag:
-                    learner = get_class_from_module('parallel_learn', 'learn', value)
-                else:
-                    learner = get_class_from_module('sequential_learn', 'learn', value)
-                print("Using learner: %s (%s)" % (learner.__name__, value))
+                learnerValue = value
             elif opt == "--fgen":
-                fgen = get_class_from_module('get_local_vector', 'feature', value)
-                print("Using feature generator: %s (%s)" % (fgen.__name__, value))
+                fgenValue = value
             elif opt == "--parser":
-                parser = get_class_from_module('parse', 'parse', value)
-                print("Using parser: %s (%s)" % (parser.__name__, value))
+                parserValue = value
             elif opt == '--interactive':
-                glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
-                glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
-                glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
-                DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
-                learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
-                print("Enable interactive mode")
+                interactValue = True
             elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
-                print("Enable feature request log")
-            elif opt == '--config':
-                config = value;
+            elif opt == '--format':
+                data_format = value;
             else:
                 #print "Invalid argument, try -h"
                 sys.exit(0)
+
+        # process configurations
+        if debug.debug.time_accounting_flag == True:
+            print("Time accounting is ON")
+
+        if parallel_flag:
+            learner = get_class_from_module('parallel_learn', 'learn', learnerValue)
+        else:
+            learner = get_class_from_module('sequential_learn', 'learn', learnerValue)
+        print("Using learner: %s (%s)" % (learner.__name__, learnerValue))
+
+        fgen = get_class_from_module('get_local_vector', 'feature', fgenValue)
+        print("Using feature generator: %s (%s)" % (fgen.__name__, fgenValue))
+
+        parser = get_class_from_module('parse', 'parse', parserValue)
+        print("Using parser: %s (%s)" % (parser.__name__, parserValue))
+
+        if interactValue == True:
+            glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
+            glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
+            glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
+            DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
+            learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
+            print("Enable interactive mode")
+
+        if debug.debug.log_feature_request_flag == True:
+            print("Enable feature request log")
+
+        # Initialisation
         gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
                         parser=parser,
                         spark=parallel_flag,
-                        config=config,
+                        data_format=data_format,
                         part_data=prep_path)
 
         training_time = None
 
-
         #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
         #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
-         
+
         if train_regex is not '':
             start_time = time.time()
             if parallel_flag:
                 from pyspark import SparkContext,SparkConf
                 conf = SparkConf()
                 sc = SparkContext(conf=conf)
-                parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train') 
+                parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train')
                 gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
-            else: 
+            else:
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
             end_time = time.time()
             training_time = end_time - start_time
-            print "Total Training Time: ", training_time 
+            print "Total Training Time: ", training_time
         if test_regex is not '':
             print "Evaluating..."
             gp.evaluate(training_time)
@@ -413,4 +456,3 @@ if __name__ == "__main__":
         print(HELP_MSG)
         # Make sure we know what's the error
         raise
-

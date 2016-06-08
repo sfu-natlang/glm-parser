@@ -10,14 +10,14 @@ from collections import defaultdict
 
 class PosTagger():
     def __init__(self, train_regex="", test_regex="", data_path="../../penn-wsj-deps/", tag_file="tagset.txt",
-                 max_iter=1,config="config/penn2malt.config"):
-        self.train_data = self.load_data(train_regex, data_path, config)
-        self.test_data = self.load_data(test_regex, data_path,config)
+                 max_iter=1,data_format="format/penn2malt.format"):
+        self.train_data = self.load_data(train_regex, data_path, data_format)
+        self.test_data = self.load_data(test_regex, data_path, data_format)
         self.max_iter = max_iter
         self.default_tag = "NN"
 
-    def load_data(self, regex, data_path, config):
-        dp = data_pool.DataPool(regex, data_path, config_path=config)
+    def load_data(self, regex, data_path, data_format):
+        dp = data_pool.DataPool(regex, data_path, config_path=data_format)
         data_list =[]
         sentence_count = 0
         while dp.has_next_data():
@@ -58,10 +58,10 @@ class PosTagger():
             feat_vec = weight_vector.WeightVector()
             feat_vec.load(fv_path)
             self.w_vector = feat_vec.data_dict
-            
+
         acc = tester.get_accuracy(self.w_vector)
 
-    
+
 if __name__ == '__main__':
 
     tag_file = sys.argv[1]
@@ -76,5 +76,5 @@ if __name__ == '__main__':
     end_time = time.time()
     training_time = end_time - start_time
     print "Total Training Time: ", training_time
-    
+
     tagger.eveluate()
