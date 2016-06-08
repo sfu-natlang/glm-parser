@@ -323,8 +323,8 @@ if __name__ == "__main__":
             parallel_flag                        = cf.getboolean("option", "parallel_train")
             shards_number                        = cf.getint(    "option", "shards")
             max_iter                             = cf.getint(    "option", "iteration")
-            l_filename                           = cf.get(       "option", "l_filename")
-            d_filename                           = cf.get(       "option", "d_filename")
+            l_filename                           = cf.get(       "option", "l_filename") if cf.get(       "option", "l_filename") != '' else None
+            d_filename                           = cf.get(       "option", "d_filename") if cf.get(       "option", "l_filename") != '' else None
             debug.debug.time_accounting_flag     = cf.getboolean("option", "timer")
             dump_freq                            = cf.getint(    "option", "dump_frequency")
             debug.debug.log_feature_request_flag = cf.getboolean("option", "log-feature-request")
