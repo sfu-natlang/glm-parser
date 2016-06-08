@@ -33,12 +33,12 @@ Old:
 
 New:
 
-    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d `date "+%d-%m-%y"` -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --config=config/penn2malt.config
+    python glm_parser.py -i 5 -p ~/data/glm-parser-data/penn-wsj-deps/ --train="wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_2[3-4][0-9][0-9].mrg.3.pa.gs.tab" -d `date "+%d-%m-%y"` -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --format=format/penn2malt.format
 
 In this example we are doing 5 iterations of training `-i 5` and using section 02 for training and testing on section 23 and section 24. 
 `-a` turns on time accounting.
 `-d prefix` dumps the weight vector for each iteration as `prefix_Iter_i.db` for each iteration `i`.
-The data for training is in the directory after `-p` and the data must be in the CoNLL format. The directory structure (if any) is the usual Penn Treebank directory structure. The config file parameter `--config` indicates the column structure of the CoNLL data.
+The data for training is in the directory after `-p` and the data must be in the CoNLL format. The directory structure (if any) is the usual Penn Treebank directory structure. The format file parameter `--format` indicates the column structure of the CoNLL data.
 The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
 
 The training progress and the result on the testing section is saved to `glm_parser.log`
