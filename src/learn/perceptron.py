@@ -2,7 +2,7 @@
 import logging
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
-from weight import weight_vector 
+from weight import weight_vector
 from data import data_pool
 
 logging.basicConfig(filename='glm_parser.log',
@@ -35,7 +35,7 @@ class PerceptronLearner():
                 self.update_weight(current_global_vector, gold_global_vector)
 
             data_pool.reset_index()
-            
+
             if d_filename is not None:
                 if i % dump_freq == 0 or i == max_iter - 1:
                     self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
@@ -48,7 +48,7 @@ class PerceptronLearner():
         return
 
     def parallel_learn(self,dp,fv,parser):
-        #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,config_list=config)
+        #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,format_list=format)
         w_vector = weight_vector.WeightVector()
         for key in fv.keys():
             w_vector.data_dict[key]=fv[key]
@@ -66,5 +66,5 @@ class PerceptronLearner():
         vector_list = {}
         for key in w_vector.data_dict.keys():
             vector_list[str(key)] = w_vector.data_dict[key]
-    
+
         return vector_list.items()
