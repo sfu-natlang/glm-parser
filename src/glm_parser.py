@@ -51,10 +51,10 @@ class GlmParser():
         # why load the data here???
         if not spark:
             self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen,
-                                        config_path=data_format)
+                                        format_path=data_format)
         if test_regex:
             self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen,
-                                       config_path=data_format)
+                                       format_path=data_format)
 
 
         self.parser = parser()
@@ -74,7 +74,7 @@ class GlmParser():
     def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_regex == '':
             train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen,
-                                       config_path=data_format)
+                                       format_path=data_format)
         else:
             train_data_pool = self.train_data_pool
 
@@ -92,12 +92,12 @@ class GlmParser():
         parallel_learner = pl(self.w_vector,max_iter)
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, config_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename)
+        parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename)
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
             test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen,
-                                      config_path=data_format)
+                                      format_path=data_format)
 
         else:
             test_data_pool = self.test_data_pool
@@ -307,8 +307,8 @@ if __name__ == "__main__":
                          'log-feature-request',"spark"]
 
         # load configuration from file
-        #   configuration files are stored under src/config/
-        #   configuration files: *.config
+        #   configuration files are stored under src/format/
+        #   configuration files: *.format
         if os.path.isfile(sys.argv[1]) == True:
             print("Reading configurations from file: %s" % (sys.argv[1]))
             cf = SafeConfigParser(os.environ)

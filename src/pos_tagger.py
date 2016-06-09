@@ -17,7 +17,7 @@ class PosTagger():
         self.default_tag = "NN"
 
     def load_data(self, regex, data_path, data_format):
-        dp = data_pool.DataPool(regex, data_path, config_path=data_format)
+        dp = data_pool.DataPool(regex, data_path, format_path=data_format)
         data_list =[]
         sentence_count = 0
         while dp.has_next_data():

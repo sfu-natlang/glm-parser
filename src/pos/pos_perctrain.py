@@ -7,7 +7,7 @@ import pos_features,pos_viterbi,pos_evaluate
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
+sys.path.insert(0,parentdir)
 from feature import english_1st_fgen
 from data import data_pool
 from weight import weight_vector
@@ -55,7 +55,7 @@ class PosPerceptron():
                     labels = copy.deepcopy(word_list)
                     out_cp = copy.deepcopy(output)
                     pos_cp = copy.deepcopy(pos_list)
-                    
+
                     labels.insert(0, '_B_-1')
                     labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
                     labels.append('_B_+1')
@@ -89,7 +89,7 @@ class PosPerceptron():
                                 avg_vec[upd_feat] = weight_vec[upd_feat]
                             last_iter[upd_feat] = num_updates
                 trian_sent+=1
-            
+
             print "number of mistakes:", num_mistakes, " iteration:", round+1
             #dump_vector("fv",round,weight_vec,last_iter,avg_vec, num_updates)
         for feat in weight_vec:
@@ -127,14 +127,14 @@ if __name__ == '__main__':
     max_iter = int(sys.argv[2])
     data_path = sys.argv[3]
     regex = sys.argv[4]
-    config = sys.argv[5]
+    formatValue = sys.argv[5]
 
     perc = PosPerceptron(max_iter=max_iter, default_tag="NN", tag_file="tagset.txt")
 
     print "loading data..."
 
     train_data = []
-    dp = data_pool.DataPool(regex, data_path, config_path=config)
+    dp = data_pool.DataPool(regex, data_path, format_path=formatValue)
 
     # building the training data
     sentence_count = 0
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         train_data.append((word_list,pos_list))
 
     print "Sentence Number: %d" % sentence_count
-    
+
     print "perceptron training..."
     start = time.time()
     feat_vec=perc.avg_perc_train(train_data)
@@ -161,10 +161,3 @@ if __name__ == '__main__':
     test_data = train_data[:2]
     tester = pos_evaluate.PosEvaluator(test_data)
     tester.get_accuracy(feat_vec)
-
-
-
-
-
-
-

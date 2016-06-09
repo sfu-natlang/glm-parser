@@ -31,58 +31,58 @@ class DataPool():
     during init).
     """
     def __init__(self, section_regex='', data_path="./penn-wsj-deps/",
-                 fgen=None, config_path=None, textString=None, config_list=None, comment_sign='', prep_path='data/prep/'):
+                 fgen=None, format_path=None, textString=None, format_list=None, comment_sign='', prep_path='data/prep/'):
 
         """
         Initialize the Data set
 
-        :param section_regex: the sections to be used. 
+        :param section_regex: the sections to be used.
         A regular expression that indicates which sections to be used e.g.
         (0[0-9])|(1[0-9])|(2[0-1])/.*tab
-        :type section_regex: str 
+        :type section_regex: str
 
         :param data_path: the relative or absolute path to the 'penn-wsj-deps' folder
         (including "penn-wsj-deps")
         :type data_path: str
 
-        :param config_path: the config file that describes the file format for the type of data
-        :type config_path: str        
-        """  
+        :param format_path: the file that describes the file format for the type of data
+        :type format_path: str
+        """
         self.fgen = fgen
         self.reset_all()
         if textString is not None:
-            self.load_stringtext(textString,config_list,comment_sign) 
+            self.load_stringtext(textString,format_list,comment_sign)
         else:
             self.data_path = data_path
             self.section_regex = section_regex
-            self.config_path = config_path
+            self.format_path = format_path
             self.prep_path = prep_path
             self.load()
-        return 
+        return
 
-    def load_stringtext(self,textString,config_list,comment_sign):
+    def load_stringtext(self,textString,format_list,comment_sign):
         lines = textString.splitlines()
         column_list = {}
-        for field in config_list:
+        for field in format_list:
             if not(field.isdigit()):
                 column_list[field] = []
-                
-        length = len(config_list)
+
+        length = len(format_list)
 
         for line in lines:
             entity = line.split()
             if len(entity) == length and entity[0] != comment_sign:
                 for i in range(length):
-                    if not(config_list[i].isdigit()):
-                        column_list[config_list[i]].append(str(entity[i].encode('utf-8')))
+                    if not(format_list[i].isdigit()):
+                        column_list[format_list[i]].append(str(entity[i].encode('utf-8')))
             else:
-                if not(config_list[0].isdigit()) and column_list[config_list[0]] != []:
-                    sent = Sentence(column_list, config_list, self.fgen)
+                if not(format_list[0].isdigit()) and column_list[format_list[0]] != []:
+                    sent = Sentence(column_list, format_list, self.fgen)
                     self.data_list.append(sent)
 
                 column_list = {}
 
-                for field in config_list:
+                for field in format_list:
                     if not (field.isdigit()):
                         column_list[field] = []
 
@@ -118,7 +118,7 @@ class DataPool():
             return True
         else:
             return False
-        
+
     def get_next_data(self):
         """
         Return the next sentence object, which is previously read
@@ -150,10 +150,10 @@ class DataPool():
         logging.debug("Loading data...")
 
         output_path = partition_data(self.data_path, self.section_regex, 1, self.prep_path)
-	
+
         for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
-                file_path = "%s/%s" % ( str(dirName), str(file_name) ) 
+                file_path = "%s/%s" % ( str(dirName), str(file_name) )
                 self.data_list += self.get_data_list(file_path)
 
 
@@ -171,25 +171,25 @@ class DataPool():
         :rtype: list(Sentence)
         """
 
-        fconfig = open(self.config_path)
+        fformat = open(self.format_path)
         field_name_list = []
         comment_sign = ''
 
         remaining_field_names = 0
-        for line in fconfig:
-            config_line = line.strip().split()
+        for line in fformat:
+            format_line = line.strip().split()
 
             if remaining_field_names > 0:
                 field_name_list.append(line.strip())
                 remaining_field_names -= 1
 
-            if config_line[0] == "field_names:":
-                remaining_field_names = int(config_line[1])
+            if format_line[0] == "field_names:":
+                remaining_field_names = int(format_line[1])
 
-            if config_line[0] == "comment_sign:":
-                comment_sign = config_line[1]
+            if format_line[0] == "comment_sign:":
+                comment_sign = format_line[1]
 
-        fconfig.close() 
+        fformat.close()
 
         f = open(file_path)
         data_list = []
@@ -226,7 +226,6 @@ class DataPool():
         f.close()
 
         return data_list
-    
+
     def get_sent_num(self):
         return len(self.data_list)
-
