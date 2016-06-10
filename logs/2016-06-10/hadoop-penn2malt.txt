@@ -1,0 +1,12 @@
+Machine: hadoop
+
+Branch: master
+
+Command:
+spark-submit --master yarn-cluster --num-executors 8 --driver-memory 10g --executor-memory 10g --py-files module.egg glm_parser.py -i 1 -s 16 -p /cs/natlang-user/kingston/data/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --format=/cs/natlang-user/kingston/glm-parser/src/format/penn2malt.format
+
+Result:
+06/09/2016 11:49:06 AM INFO: Training time usage(seconds): 6244.809115
+06/09/2016 11:49:06 AM INFO: Feature count: 2464270
+06/09/2016 11:49:06 AM INFO: Unlabeled accuracy: 0.874115267947 (5187, 5934)
+06/09/2016 11:49:06 AM INFO: Unlabeled attachment accuracy: 0.882027795325 (5585, 6332)
