@@ -3,7 +3,7 @@ from __future__ import division
 import time,copy,logging
 import os,sys,inspect
 from collections import defaultdict
-import pos_features,pos_viterbi,pos_evaluate
+import pos_features,pos_viterbi
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -119,7 +119,7 @@ class PosPerceptron():
         w_vector.data_dict.iadd(fv)
         i=i+1
         w_vector.dump(filename + "_Iter_%d.db"%i)
-
+"""
 if __name__ == '__main__':
     # each element in the feat_vec dictionary is:
     # key=feature_id value=weight
@@ -161,3 +161,4 @@ if __name__ == '__main__':
     test_data = train_data[:2]
     tester = pos_evaluate.PosEvaluator(test_data)
     tester.get_accuracy(feat_vec)
+"""
