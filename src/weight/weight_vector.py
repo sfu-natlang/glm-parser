@@ -7,18 +7,8 @@
 # (Please add on your name if you have authored this file)
 #
 
-#import cPickle as pickle
-import sys
-
-from debug.debug import local_debug_flag
-
-if local_debug_flag is False:
-    from hvector._mycollections import mydefaultdict
-    from hvector.mydouble import mydouble
-else:
-    print("Local debug is on. Use dict() and float()")
-    mydefaultdict = dict
-    mydouble = float
+from hvector._mycollections import mydefaultdict
+from hvector.mydouble import mydouble
 
 import logging
 
@@ -33,7 +23,7 @@ class WeightVector():
     store the features.
 
     Callables inside the class:
-              
+
     dump()  - Dump the content of the data object into memory. When we are using
               memory dict it will call Pickle to do that. When we are using
 
@@ -41,11 +31,11 @@ class WeightVector():
               memory dict it will call Pickle to do the load. And when we are
               using shelves it has no effect, since shelves itself is persistent
               object.
-    
+
     keys()  - Return a list of keys in the dictionary.
 
     has_key() - Check whether a given key is in the dictionary.
-    
+
     Please notice that there is no open() method as in other similar classes.
     Users must provide a file name as well as an operating mode to support
     both persistent and non-persistent (or semi-persistent) operations.
@@ -60,14 +50,14 @@ class WeightVector():
         a file name here in order to establish the connection to the database.
         :type filename: str
         """
-        
+
         # change to hvector
         #self.data_dict = {}
         self.data_dict = mydefaultdict(mydouble)
-        
+
         if not filename == None:
             self.load(filename)
-            
+
         return
 
     #def get_sub_vector(self, key_list):
@@ -76,7 +66,7 @@ class WeightVector():
     #    for k in key_list:
     #        sub_vector[k] = self.data_dict[k]
     #    return sub_vector
-        
+
     def get_vector_score(self, fv):
         score = self.data_dict.evaluate(fv)
         return score
@@ -109,11 +99,11 @@ class WeightVector():
 
     def has_key(self,index):
         return self.data_dict.has_key(index)
-    
+
     def pop(self,key):
         self.data_dict.pop(key)
         return
-    
+
     def keys(self):
         """
         Return a list of dictionary keys. This operation is not as expensive
