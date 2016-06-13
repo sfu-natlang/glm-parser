@@ -126,6 +126,7 @@ if __name__ == '__main__':
             test_regex     = cf.get("data", "test")
             test_data_path = cf.get("data", "data_path")
             data_format    = cf.get("data", "format")
+			tag_file       = cf.get("data", "tag_file")
 
             max_iter                             = cf.getint(    "option", "iteration")
 
