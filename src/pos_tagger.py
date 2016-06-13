@@ -84,7 +84,7 @@ options:
             Sections for testing
         Input a regular expression to indicate which files to test on e.g.
         "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
-	
+
 	--tag_target=
 			Specifying tagging target file
 """
@@ -100,8 +100,9 @@ if __name__ == '__main__':
     test_regex = ''
     max_iter = 1
     test_data_path = ''  #"./penn-wsj-deps/"
+    tag_file = 'tagset.txt'
     data_format = 'format/penn2malt.format'
-    tag_file = '~/tagset.txt'
+
 
     #tag_file = sys.argv[1]
     #max_iter = int(sys.argv[2])
@@ -126,7 +127,7 @@ if __name__ == '__main__':
             test_regex     = cf.get("data", "test")
             test_data_path = cf.get("data", "data_path")
             data_format    = cf.get("data", "format")
-			tag_file       = cf.get("data", "tag_file")
+            tag_file       = cf.get("data", "tag_file")
 
             max_iter                             = cf.getint(    "option", "iteration")
 
