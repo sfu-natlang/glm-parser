@@ -4,6 +4,7 @@ from libcpp.queue cimport queue
 from libcpp.list cimport list
 from libcpp cimport bool
 from libc.stdlib cimport malloc, calloc, free
+from ...pos_tagger import PosTagger
 
 cdef struct EisnerNode:
     float score
@@ -218,7 +219,9 @@ cdef class EisnerParser:
                     node_queue.push(node_right)
         return
     
-    def parse(self, sent, arc_weight):	
+    def parse(self, sent, arc_weight, tagger=None):
+        if (tagger != None):
+            sent.set_pos_list(tagger.getTangs(sent.get_word_list()[1:]))
 
         self.n = len(sent.get_word_list())
         self.init_eisner_matrix()

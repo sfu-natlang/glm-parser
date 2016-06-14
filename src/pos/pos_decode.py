@@ -44,4 +44,7 @@ class Decoder():
         acc = float(correct_num) /gold_set_size
         print "whole accraccy: ", acc
         return acc
-    
+
+    def getTags(self, word_list, w_vec):
+        argmax = pos_viterbi.Viterbi()
+        return argmax.perc_test(w_vec, word_list, self.tagset, "NN")

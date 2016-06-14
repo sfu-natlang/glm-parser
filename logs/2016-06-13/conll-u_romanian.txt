@@ -1,0 +1,12 @@
+Machine: local ubuntu 14.04
+
+Branch: pos_parser_merge_step_1
+
+command:
+python glm_parser.py config/Kingston.config -p ~/data/CoNLL-U/UD_Romanian
+
+Result:
+06/13/2016 06:47:12 PM INFO: Training time usage(seconds): 204.194071
+06/13/2016 06:47:12 PM INFO: Feature count: 215439
+06/13/2016 06:47:12 PM INFO: Unlabeled accuracy: 0.751758087201 (1069, 1422)
+06/13/2016 06:47:12 PM INFO: Unlabeled attachment accuracy: 0.764352469960 (1145, 1498)

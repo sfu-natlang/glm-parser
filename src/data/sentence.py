@@ -306,7 +306,6 @@ class Sentence():
         return
     '''
 
-    '''
     def set_pos_list(self,pos_list):
         """
         Set the POS array in bulk. All data in pos_list will be copied, so
@@ -317,7 +316,6 @@ class Sentence():
         """
         self.pos_list = ['ROOT'] + pos_list
         return
-    '''
 
     def set_edge_list(self,edge_list):
         """

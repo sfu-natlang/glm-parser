@@ -18,6 +18,8 @@ from weight.weight_vector import *
 
 from learn.partition import partition_data
 
+from pos_tagger import PosTagger
+
 import debug.debug
 import debug.interact
 
@@ -33,6 +35,7 @@ class GlmParser():
                  learner=None,
                  fgen=None,
                  parser=None,
+                 tagger=None,
                  data_format="format/penn2malt.format",
                  part_data="data/prep",
                  spark=False):
@@ -58,6 +61,7 @@ class GlmParser():
 
 
         self.parser = parser()
+        self.tagger = PosTagger(train_regex=train_regex, test_regex=test_regex, data_path=data_path, max_iter=max_iter, data_format=data_format)
 
         if learner is not None:
             if spark:
@@ -94,6 +98,9 @@ class GlmParser():
             max_iter = self.max_iter
         parallel_learner.parallel_learn(max_iter, output_path, shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename)
 
+    def tagger_train(self):
+        self.tagger.perc_train()
+
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':
             test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen,
@@ -102,7 +109,7 @@ class GlmParser():
         else:
             test_data_pool = self.test_data_pool
 
-        self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector, training_time)
+        self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector, training_time, self.tagger)
 
 
     def compute_argmax(self, sentence):
@@ -421,10 +428,11 @@ if __name__ == "__main__":
             print("Enable feature request log")
 
         # Initialisation
-        gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
+        gp = glm_parser(train_regex=train_regex, test_regex=test_regex, data_path=test_data_path, l_filename=l_filename,
                         learner=learner,
                         fgen=fgen,
                         parser=parser,
+                        tagger=PosTagger,
                         spark=parallel_flag,
                         data_format=data_format,
                         part_data=prep_path)
@@ -444,6 +452,8 @@ if __name__ == "__main__":
                 gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
             else:
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
+                gp.tagger_train()
+
             end_time = time.time()
             training_time = end_time - start_time
             print "Total Training Time: ", training_time

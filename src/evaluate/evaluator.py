@@ -1,4 +1,5 @@
 from __future__ import division
+from pos_tagger import PosTagger
 import logging
 
 logging.basicConfig(filename='glm_parser.log',
@@ -40,7 +41,7 @@ class Evaluator():
         
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, w_vector, training_time):
+    def evaluate(self, data_pool, parser, w_vector, training_time, tagger=None):
         logging.debug("Start evaluating ...")
         while data_pool.has_next_data():  
             sent = data_pool.get_next_data()
@@ -54,7 +55,7 @@ class Evaluator():
             
             sent_len = len(sent.get_word_list())
             test_edge_set = \
-               parser.parse(sent, w_vector.get_vector_score)
+               parser.parse(sent, w_vector.get_vector_score, tagger)
              
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
         if training_time is not None:

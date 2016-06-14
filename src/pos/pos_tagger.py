@@ -16,7 +16,6 @@ class PosTagger():
                  max_iter=1,data_format="format/penn2malt.format"):
         self.train_data = self.load_data(train_regex, data_path, data_format)
         self.test_data = self.load_data(test_regex, data_path, data_format)
-        self.tag_file = tag_file
         self.max_iter = max_iter
         self.default_tag = "NN"
 
@@ -67,7 +66,7 @@ class PosTagger():
 
 
     def getTangs(self, word_list):
-        tagger = pos_decode.Decoder(tag_file=self.tag_file)
+        tagger = pos_decode.Decoder(tag_file=tag_file)
         return tagger.getTags(word_list, self.w_vector)
 
 HELP_MSG =\
