@@ -3,7 +3,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen
 # (Please add on your name if you have authored this file)
 #
 import os,sys,inspect
@@ -314,7 +314,11 @@ class Sentence():
         :param pos_list: A list that holds POS tags for all words in word_list
         :type pos_list: list(str)
         """
-        self.pos_list = ['ROOT'] + pos_list
+        if "POSTAG" in self.column_list.keys():
+            self.column_list["POSTAG"] = ["ROOT"] + pos_list
+        else:
+            sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
+        self.f_gen.reTag(self.column_list["POSTAG"])
         return
 
     def set_edge_list(self,edge_list):

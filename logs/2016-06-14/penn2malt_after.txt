@@ -1,0 +1,12 @@
+Machine: local ubuntu 14.04
+
+Branch: pos-parser-merge-step-1
+
+Command: 
+python glm_parser.py config/Kingston.config -p ~/data/penn-wsj-deps
+
+Result:
+06/14/2016 03:52:36 AM INFO: Training time usage(seconds): 1004.255022
+06/14/2016 03:52:36 AM INFO: Feature count: 695786
+06/14/2016 03:52:36 AM INFO: Unlabeled accuracy: 0.777593593249 (36120, 46451)
+06/14/2016 03:52:36 AM INFO: Unlabeled attachment accuracy: 0.786426031589 (38041, 48372)

@@ -47,4 +47,9 @@ class Decoder():
 
     def getTags(self, word_list, w_vec):
         argmax = pos_viterbi.Viterbi()
-        return argmax.perc_test(w_vec, word_list, self.tagset, "NN")
+        pos_list = argmax.perc_test(w_vec, word_list, self.tagset, "NN")
+        print "--------------------------------------------------------"
+        print "word_list: %d; pos_list: %d" % (len(word_list), len(pos_list[2:]))
+        print word_list
+        print pos_list
+        return pos_list[2:]
