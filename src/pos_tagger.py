@@ -60,7 +60,7 @@ class PosTagger():
         if fv_path is not None:
             feat_vec = weight_vector.WeightVector()
             feat_vec.load(fv_path)
-            self.w_vector = feat_vec.data_dict
+            self.w_vector = feat_vec
 
         acc = tester.get_accuracy(self.w_vector)
 HELP_MSG =\

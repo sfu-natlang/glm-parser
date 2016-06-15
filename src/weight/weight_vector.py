@@ -17,7 +17,8 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class WeightVector():
+
+class WeightVector(mydefaultdict):
     """
     A dictitionary-like object. Used to facilitate class FeatureSet to
     store the features.
@@ -50,28 +51,15 @@ class WeightVector():
         a file name here in order to establish the connection to the database.
         :type filename: str
         """
+        super(WeightVector, self).__init__(mydouble)
 
-        # change to hvector
-        #self.data_dict = {}
-        self.data_dict = mydefaultdict(mydouble)
-
-        if not filename == None:
+        if filename is not None:
             self.load(filename)
 
-        return
-
-    #def get_sub_vector(self, key_list):
-        # TODO figure out a more efficient way
-    #    sub_vector = mydefaultdict(mydouble)
-    #    for k in key_list:
-    #        sub_vector[k] = self.data_dict[k]
-    #    return sub_vector
-
     def get_vector_score(self, fv):
-        score = self.data_dict.evaluate(fv)
-        return score
+        return self.evaluate(fv)
 
-    def load(self,filename):
+    def load(self, filename):
         """
         Load the dumped memory dictionary Pickle file into memory. Essentially
         you can do this with a shelve object, however it does not have effect,
@@ -80,52 +68,23 @@ class WeightVector():
         Parameter is the same as constructor (__init__).
         """
         logging.debug("Loading Weight Vector from %s " % filename)
-        fp = open(filename,"r")
-        for line in fp:
-            line = line[:-1]
-            line = line.split("    ")
-            self.data_dict[line[0]] = float(line[1])
-        #print self.data_dict
-        #self.data_dict = pickle.load(fp)
-        fp.close()
-        return
+        with open(filename) as f:
+            for line in f:
+                line = line[:-1].split("    ")
+                self[line[0]] = float(line[1])
 
-    def __getitem__(self,index):
-        return self.data_dict[index]
-
-    def __setitem__(self,index,value):
-        self.data_dict[index] = value
-        return
-
-    def has_key(self,index):
-        return self.data_dict.has_key(index)
-
-    def pop(self,key):
-        self.data_dict.pop(key)
-        return
-
-    def keys(self):
-        """
-        Return a list of dictionary keys. This operation is not as expensive
-        as the shelve keys() method, so we separate them.
-        """
-        return self.data_dict.keys()
-
-    def dump(self,filename):
+    def dump(self, filename):
         """
         Called when memory dictionary is used. Dump the content of the dict
         into a disk file using Pickle
         """
-        if filename == None:
+        if filename is None:
             print "Skipping dump ..."
             return
 
         logging.debug("Dumping Weight Vector to %s " % filename)
-        logging.debug("Total Feature Num: %d " % len(self.data_dict))
-        fp = open(filename,"w")
-        for key in self.data_dict.keys():
-            fp.write(str(key) + "    " + str(self.data_dict[key]) + "\n")
-        #pickle.dump(self.data_dict,fp,-1)
-        fp.close()
-        return
+        logging.debug("Total Feature Num: %d " % len(self))
 
+        with open(filename, "w") as f:
+            for k, v in self.iteritems():
+                f.write(str(k) + "    " + str(v) + "\n")

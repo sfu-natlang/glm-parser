@@ -102,7 +102,7 @@ class PosPerceptron():
 
     def dump_vector(self, filename, i, fv):
         w_vector = weight_vector.WeightVector()
-        w_vector.data_dict.iadd(fv)
+        w_vector.iadd(fv)
         w_vector.dump(filename + "_Iter_%d.db"%i)
 
     def dump_vector_per_iter(self, filename, i, weight_vec, last_iter, avg_vec, num_updates):
@@ -116,7 +116,7 @@ class PosPerceptron():
             fv[feat] = av[feat] / num_updates
 
         w_vector = weight_vector.WeightVector()
-        w_vector.data_dict.iadd(fv)
+        w_vector.iadd(fv)
         i=i+1
         w_vector.dump(filename + "_Iter_%d.db"%i)
 """
