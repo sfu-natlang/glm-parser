@@ -281,18 +281,11 @@ if __name__ == "__main__":
     shards_number = 1
     h_flag=False
     prep_path = 'data/prep/' #to be changed
-    interactValue = False
 
-    # Default learner
-    #learner = AveragePerceptronLearner
-    learner = get_class_from_module('sequential_learn', 'learn', 'average_perceptron',
-                                    silent=True)
-    # Default feature generator (2dnd, english)
-    fgen = get_class_from_module('get_local_vector', 'feature', 'english_2nd_fgen',
-                                 silent=True)
-    parser = get_class_from_module('parse', 'parse', 'ceisner3',
-                                   silent=True)
-    # Default data_format file: penn2malt
+    interactValue = False
+    learnerValue  = 'average_perceptron'
+    fgenValue     = 'english_1st_fgen'
+    parserValue   = 'ceisner'
     data_format = 'format/penn2malt.format'
 
     # parser = parse.ceisner3.EisnerParser
