@@ -187,31 +187,32 @@ if __name__ == "__main__":
     learnerValue  = 'average_perceptron'
     fgenValue     = 'english_1st_fgen'
     parserValue   = 'ceisner'
-    data_format = 'format/penn2malt.format'
+    data_format   = 'format/penn2malt.format'
 
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
-    arg_parser = argparse.ArgumentParser(description='Global Linear Model (GLM) Parser');
+    arg_parser = argparse.ArgumentParser(description="""Global Linear Model (GLM) Parser
+        Version %d.%d""" % (MAJOR_VERSION, MINOR_VERSION))
     arg_parser.add_argument('config', metavar='CONFIG_FILE',
-        help="""specify the config file will load all the setting from the config file.
-        This is to avoid massive command line inputs and standarisation. Please consider using
-        config files instead of manually typing all the options.
+        help="""specify the config file. This will load all the setting from the config file,
+        in order to avoid massive command line inputs. Please consider using config files
+        instead of manually typing all the options.
 
-        Addtional options by command line will override the settings in the config file.
+        Additional options by command line will override the settings in the config file.
 
         Officially provided config files are located in src/config/
         """)
     arg_parser.add_argument('--train', metavar='TRAIN_REGEX',
-        help="""sepecify the data for training with regular expression
+        help="""specify the data for training with regular expression
         """)
     arg_parser.add_argument('--test', metavar='TEST_REGEX',
-        help="""sepecify the data for testing with regular expression
+        help="""specify the data for testing with regular expression
         """)
     arg_parser.add_argument('--fgen',
         help="""specify feature generation facility by a python file name (mandatory).
         The file will be searched under /feature directory, and the class
-        object that has a get_local_vector() interface will be recognized
+        object that has a get_local_vector() interface will be recognised
         as the feature generator and put into use automatically.
 
         If multiple eligible objects exist, an error will be reported.
@@ -229,7 +230,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('--parser',
         help="""specify the parser using parser module name (i.e. .py file name without suffix).
         The recognition rule is the same as --fgen switch. A valid parser object
-        must possess "parse" attribute in order to be recognized as a parser
+        must possess "parse" attribute in order to be recognised as a parser
         implementation.
 
         Some parser might not work correctly with the infrastructure, which keeps
@@ -282,10 +283,10 @@ if __name__ == "__main__":
         "./weight_dump_Iter_2.db"...
         """)
     arg_parser.add_argument('--frequency', '-f', type=int,
-        help="""Frequency of dumping weight vector. The weight vecotr of last
+        help="""Frequency of dumping weight vector. The weight vector of last
         iteration will always be dumped
         example: "-i 6 -f 2"
-        weight vector will be dumpled at iteration 0, 2, 4, 5.
+        weight vector will be dumped at iteration 0, 2, 4, 5.
         """)
     arg_parser.add_argument('--iteration', '-i', metavar='ITERATIONS', type=int,
         help="""Number of iterations
