@@ -24,6 +24,7 @@ import debug.interact
 import timeit
 import time
 import sys,os
+import argparse
 import ConfigParser
 from ConfigParser import SafeConfigParser
 
@@ -112,106 +113,6 @@ class GlmParser():
         current_global_vector = sentence.set_current_global_vector(current_edge_set)
         return current_global_vector
 
-HELP_MSG =\
-"""
-
-options:
-    -h:     Print this help message
-
-    -p:     Path to data files (to the parent directory for all sections)
-            default "./penn-wsj-deps/"
-
-    -l:     Path to an existing weight vector dump file
-            example: "./Weight.db"
-
-    -d:     Path for dumping weight vector. Please also specify a prefix
-            of file names, which will be added with iteration count and
-            ".db" suffix when dumping the file
-
-            example: "./weight_dump", and the resulting files could be:
-            "./weight_dump_Iter_1.db",
-            "./weight_dump_Iter_2.db"...
-
-    -f:     Frequency of dumping weight vector. The weight vecotr of last
-            iteration will always be dumped
-            example: "-i 6 -f 2"
-            weight vector will be dumpled at iteration 0, 2, 4, 5.
-
-    -i:     Number of iterations
-            default 1
-
-    -a:     Turn on time accounting (output time usage for each sentence)
-            If combined with --debug-run-number then before termination it also
-            prints out average time usage
-
-    -s:     Train using parallelization
-
-
-    --train=
-            Sections for training
-        Input a regular expression to indicate which files to read e.g.
-        "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
-
-    --test=
-            Sections for testing
-        Input a regular expression to indicate which files to test on e.g.
-        "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
-
-
-    --learner=
-            Specify a learner for weight vector training
-
-            default "average_perceptron"; alternative "perceptron"
-
-    --fgen=
-            Specify feature generation facility by a python file name (mandatory).
-            The file will be searched under /feature directory, and the class
-            object that has a get_local_vector() interface will be recognized
-            as the feature generator and put into use automatically.
-
-            If multiple eligible objects exist, an error will be reported.
-
-            For developers: please make sure there is only one such class object
-            under fgen source files. Even import statement may introduce other
-            modules that is eligible to be an fgen. Be careful.
-
-            default "english_2nd_fgen"; alternative "english_1st_fgen"
-
-    --parser=
-            Specify the parser using parser module name (i.e. .py file name without suffix).
-            The recognition rule is the same as --fgen switch. A valid parser object
-            must possess "parse" attribute in order to be recognized as a parser
-            implementation.
-
-            Some parser might not work correctly with the infrastructure, which keeps
-            changing all the time. If this happens please file an issue on github page
-
-            default "ceisner3"; alternative "ceisner"
-
-    --prep-path=
-            Input the directory in which you would like to store prepared data files after partitioning
-
-    --debug-run-number=[int]
-            Only run the first [int] sentences. Usually combined with option -a to gather
-            time usage information
-            If combined with -a, then time usage information is available, and it will print
-            out average time usage after each iteration
-            *** Caution: Overrides -t (no evaluation will be conducted), and partially
-            overrides -b -e (Only run specified number of sentences) -i (Run forever)
-
-    --interactive
-            Use interactive version of glm-parser, in which you have access to some
-            critical points ("breakpoints") in the procedure
-
-    --log-feature-request
-            Log each feature request based on feature type. This is helpful for
-            analyzing feature usage and building feature caching utility.
-            Upon exiting the main program will dump feature request information
-            into a file "feature_request.log"
-
-
-"""
-
 def get_class_from_module(attr_name, module_path, module_name,
                           silent=False):
     """
@@ -291,162 +192,235 @@ if __name__ == "__main__":
     # parser = parse.ceisner3.EisnerParser
     # Main driver is glm_parser instance defined in this file
     glm_parser = GlmParser
+    arg_parser = argparse.ArgumentParser(description='Global Linear Model (GLM) Parser');
+    arg_parser.add_argument('config', metavar='CONFIG_FILE',
+        help="""specify the config file will load all the setting from the config file.
+        This is to avoid massive command line inputs and standarisation. Please consider using
+        config files instead of manually typing all the options.
 
-    try:
-        opt_spec = "aht:i:p:l:d:f:r:s:c:"
-        long_opt_spec = ['train=','test=','fgen=',
-                         'learner=', 'parser=', 'format=', 'debug-run-number=',
-                         'force-feature-order=', 'interactive',
-                         'log-feature-request',"spark"]
+        Addtional options by command line will override the settings in the config file.
 
-        # load configuration from file
-        #   configuration files are stored under src/format/
-        #   configuration files: *.format
-        if os.path.isfile(sys.argv[1]) == True and os.path.splitext(sys.argv[1])[1][1:] == 'config':
-            print("Reading configurations from file: %s" % (sys.argv[1]))
-            cf = SafeConfigParser(os.environ)
-            cf.read(sys.argv[1])
+        Officially provided config files are located in src/config/
+        """)
+    arg_parser.add_argument('--train', metavar='TRAIN_REGEX',
+        help="""sepecify the data for training with regular expression
+        """)
+    arg_parser.add_argument('--test', metavar='TEST_REGEX',
+        help="""sepecify the data for testing with regular expression
+        """)
+    arg_parser.add_argument('--fgen',
+        help="""specify feature generation facility by a python file name (mandatory).
+        The file will be searched under /feature directory, and the class
+        object that has a get_local_vector() interface will be recognized
+        as the feature generator and put into use automatically.
 
-            train_regex    = cf.get("data", "train")
-            test_regex     = cf.get("data", "test")
-            test_data_path = cf.get("data", "data_path")
-            prep_path      = cf.get("data", "prep_path")
-            data_format    = cf.get("data", "format")
+        If multiple eligible objects exist, an error will be reported.
 
-            h_flag                               = cf.get(       "option", "h_flag")
-            parallel_flag                        = cf.getboolean("option", "parallel_train")
-            shards_number                        = cf.getint(    "option", "shards")
-            max_iter                             = cf.getint(    "option", "iteration")
-            l_filename                           = cf.get(       "option", "l_filename") if cf.get(       "option", "l_filename") != '' else None
-            d_filename                           = cf.get(       "option", "d_filename") if cf.get(       "option", "l_filename") != '' else None
-            debug.debug.time_accounting_flag     = cf.getboolean("option", "timer")
-            dump_freq                            = cf.getint(    "option", "dump_frequency")
-            debug.debug.log_feature_request_flag = cf.getboolean("option", "log-feature-request")
-            interactValue                        = cf.getboolean("option", "interactive")
+        For developers: please make sure there is only one such class object
+        under fgen source files. Even import statement may introduce other
+        modules that is eligible to be an fgen. Be careful.
 
-            learnerValue   = cf.get(       "core", "learner")
-            fgenValue      = cf.get(       "core", "feature_generator")
-            parserValue    = cf.get(       "core", "parser")
-            opts, args = getopt.getopt(sys.argv[2:], opt_spec, long_opt_spec)
+        default "english_1nd_fgen"; alternative "english_2nd_fgen"
+        """)
+    arg_parser.add_argument('--learner',
+        help="""specify a learner for weight vector training
+        default "average_perceptron"; alternative "perceptron"
+        """)
+    arg_parser.add_argument('--parser',
+        help="""specify the parser using parser module name (i.e. .py file name without suffix).
+        The recognition rule is the same as --fgen switch. A valid parser object
+        must possess "parse" attribute in order to be recognized as a parser
+        implementation.
+
+        Some parser might not work correctly with the infrastructure, which keeps
+        changing all the time. If this happens please file an issue on github page
+
+        default "ceisner"; alternative "ceisner3"
+        """)
+    arg_parser.add_argument('--format', metavar='DATA_FORMAT',
+        help="""specify the format file for the training and testing files.
+        Officially supported format files are located in src/format/
+        """)
+    arg_parser.add_argument('--debug-run-number', metavar='N', type=int,
+        help="""run the first [int] sentences only. Usually combined with option -a to gather
+        time usage information
+        If combined with -a, then time usage information is available, and it will print
+        out average time usage after each iteration
+        *** Caution: Overrides -t (no evaluation will be conducted), and partially
+        overrides -b -e (Only run specified number of sentences) -i (Run forever)
+        """)
+    arg_parser.add_argument('--interactive', action='store_true',
+        help="""use interactive version of glm-parser, in which you have access to some
+        critical points ("breakpoints") in the procedure
+        """)
+    arg_parser.add_argument('--log-feature-request', action='store_true',
+        help="""log each feature request based on feature type. This is helpful for
+        analysing feature usage and building feature caching utility.
+        Upon exiting the main program will dump feature request information
+        into a file named "feature_request.log"
+        """)
+    arg_parser.add_argument('--spark', '-s', metavar='SHARDS_NUM', type=int,
+        help='train using parallelisation')
+    arg_parser.add_argument('--prep-path',
+        help="""specify the directory in which you would like to store prepared data files after partitioning
+        """)
+    arg_parser.add_argument('--path', '-p', metavar='DATA_PATH',
+        help="""Path to data files (to the parent directory for all sections)
+        default "./penn-wsj-deps/"
+        """)
+    arg_parser.add_argument('-l', metavar='L_FILENAME',
+        help="""Path to an existing weight vector dump file
+        example: "./Weight.db"
+        """)
+    arg_parser.add_argument('-d', metavar='D_FILENAME',
+        help="""Path for dumping weight vector. Please also specify a prefix
+        of file names, which will be added with iteration count and
+        ".db" suffix when dumping the file
+
+        example: "./weight_dump", and the resulting files could be:
+        "./weight_dump_Iter_1.db",
+        "./weight_dump_Iter_2.db"...
+        """)
+    arg_parser.add_argument('--frequency', '-f', type=int,
+        help="""Frequency of dumping weight vector. The weight vecotr of last
+        iteration will always be dumped
+        example: "-i 6 -f 2"
+        weight vector will be dumpled at iteration 0, 2, 4, 5.
+        """)
+    arg_parser.add_argument('--iteration', '-i', metavar='ITERATIONS', type=int,
+        help="""Number of iterations
+        default 1
+        """)
+    arg_parser.add_argument('--timer', '-a', action='store_true',
+        help="""turn on the timer (output time usage for each sentence)
+        If combined with --debug-run-number then before termination it also
+        prints out average time usage
+        """)
+    arg_parser.add_argument('--hadoop', '-c', action='store_true')
+    args=arg_parser.parse_args()
+    if args.config:
+        print("Reading configurations from file: %s" % (args.config))
+        cf = SafeConfigParser(os.environ)
+        cf.read(args.config)
+
+        train_regex    = cf.get("data", "train")
+        test_regex     = cf.get("data", "test")
+        test_data_path = cf.get("data", "data_path")
+        prep_path      = cf.get("data", "prep_path")
+        data_format    = cf.get("data", "format")
+
+        h_flag                               = cf.get(       "option", "h_flag")
+        parallel_flag                        = cf.getboolean("option", "parallel_train")
+        shards_number                        = cf.getint(    "option", "shards")
+        max_iter                             = cf.getint(    "option", "iteration")
+        l_filename                           = cf.get(       "option", "l_filename") if cf.get(       "option", "l_filename") != '' else None
+        d_filename                           = cf.get(       "option", "d_filename") if cf.get(       "option", "l_filename") != '' else None
+        debug.debug.time_accounting_flag     = cf.getboolean("option", "timer")
+        dump_freq                            = cf.getint(    "option", "dump_frequency")
+        debug.debug.log_feature_request_flag = cf.getboolean("option", "log-feature-request")
+        interactValue                        = cf.getboolean("option", "interactive")
+
+        learnerValue   = cf.get(       "core", "learner")
+        fgenValue      = cf.get(       "core", "feature_generator")
+        parserValue    = cf.get(       "core", "parser")
+    if args.hadoop:
+        h_flag = True
+    if args.spark:
+        shards_number = int(args.spark)
+        parallel_flag = True
+    if args.path:
+        test_data_path = args.path
+    if args.iteration:
+        max_iter = int(args.iteration)
+    if args.l:
+        l_filename = args.l
+    if args.d:
+        d_filename = args.d
+    if args.timer:
+        debug.debug.time_accounting_flag = True
+    if args.frequency:
+        dump_freq = int(args.frequency)
+    if args.train:
+        train_regex = args.train
+    if args.test:
+        test_regex = args.test
+    if args.debug_run_number:
+        debug.debug.run_first_num = int(args.debug-run-number)
+        if debug.debug.run_first_num <= 0:
+            raise ValueError("Illegal integer: %d" % (debug.debug.run_first_num, ))
         else:
-            opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
+            print("Debug run number = %d" % (debug.debug.run_first_num, ))
+    if args.prep_path:
+        prep_path = args.prep_path
+    if args.learner:
+        learnerValue = args.learner
+    if args.fgen:
+        fgenValue = args.fgen
+    if args.parser:
+        parserValue = args.parser
+    if args.interactive:
+        interactValue = True
+    if args.log_feature_request:
+        debug.debug.log_feature_request_flag = True
+    if args.format:
+        data_format = args.format;
 
-        # load configuration from command line
-        for opt, value in opts:
-            if opt == "-h":
-                print("")
-                print("Global Linear Model (GLM) Parser")
-                print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
-                print(HELP_MSG)
-                sys.exit(0)
-            elif opt =="-c":
-                h_flag = True
-            elif opt == "-s":
-                shards_number = int(value)
-                parallel_flag = True
-            elif opt == "-p":
-                test_data_path = value
-            elif opt == "-i":
-                max_iter = int(value)
-            elif opt == "-l":
-                l_filename = value
-            elif opt == "-d":
-                d_filename = value
-            elif opt == '-a':
-                debug.debug.time_accounting_flag = True
-            elif opt == '-f':
-                dump_freq = int(value)
-            elif opt == '--train':
-                train_regex = value
-            elif opt == '--test':
-                test_regex = value
-            elif opt == '--debug-run-number':
-                debug.debug.run_first_num = int(value)
-                if debug.debug.run_first_num <= 0:
-                    raise ValueError("Illegal integer: %d" % (debug.debug.run_first_num, ))
-                else:
-                    print("Debug run number = %d" % (debug.debug.run_first_num, ))
-            elif opt =="--spark":
-                parallel_flag = True
-            elif opt == "--prep-path":
-                prep_path = value
-            elif opt == "--learner":
-                learnerValue = value
-            elif opt == "--fgen":
-                fgenValue = value
-            elif opt == "--parser":
-                parserValue = value
-            elif opt == '--interactive':
-                interactValue = True
-            elif opt == '--log-feature-request':
-                debug.debug.log_feature_request_flag = True
-            elif opt == '--format':
-                data_format = value;
-            else:
-                #print "Invalid argument, try -h"
-                sys.exit(0)
+    # process options
+    if debug.debug.time_accounting_flag == True:
+        print("Time accounting is ON")
 
-        # process configurations
-        if debug.debug.time_accounting_flag == True:
-            print("Time accounting is ON")
+    if parallel_flag:
+        learner = get_class_from_module('parallel_learn', 'learn', learnerValue)
+    else:
+        learner = get_class_from_module('sequential_learn', 'learn', learnerValue)
+    print("Using learner: %s (%s)" % (learner.__name__, learnerValue))
 
+    fgen = get_class_from_module('get_local_vector', 'feature', fgenValue)
+    print("Using feature generator: %s (%s)" % (fgen.__name__, fgenValue))
+
+    parser = get_class_from_module('parse', 'parse', parserValue)
+    print("Using parser: %s (%s)" % (parser.__name__, parserValue))
+
+    if interactValue == True:
+        glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
+        glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
+        glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
+        DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
+        learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
+        print("Enable interactive mode")
+
+    if debug.debug.log_feature_request_flag == True:
+        print("Enable feature request log")
+
+    # Initialisation
+    gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
+                    learner=learner,
+                    fgen=fgen,
+                    parser=parser,
+                    spark=parallel_flag,
+                    data_format=data_format,
+                    part_data=prep_path)
+
+    training_time = None
+
+    #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
+    #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
+
+    if train_regex is not '':
+        start_time = time.time()
         if parallel_flag:
-            learner = get_class_from_module('parallel_learn', 'learn', learnerValue)
+            from pyspark import SparkContext,SparkConf
+            conf = SparkConf()
+            sc = SparkContext(conf=conf)
+            parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train')
+            gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
         else:
-            learner = get_class_from_module('sequential_learn', 'learn', learnerValue)
-        print("Using learner: %s (%s)" % (learner.__name__, learnerValue))
-
-        fgen = get_class_from_module('get_local_vector', 'feature', fgenValue)
-        print("Using feature generator: %s (%s)" % (fgen.__name__, fgenValue))
-
-        parser = get_class_from_module('parse', 'parse', parserValue)
-        print("Using parser: %s (%s)" % (parser.__name__, parserValue))
-
-        if interactValue == True:
-            glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
-            glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
-            glm_parser.compute_argmax = debug.interact.glm_parser_compute_argmax_wrapper
-            DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
-            learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
-            print("Enable interactive mode")
-
-        if debug.debug.log_feature_request_flag == True:
-            print("Enable feature request log")
-
-        # Initialisation
-        gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
-                        learner=learner,
-                        fgen=fgen,
-                        parser=parser,
-                        spark=parallel_flag,
-                        data_format=data_format,
-                        part_data=prep_path)
-
-        training_time = None
-
-        #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
-        #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
-
-        if train_regex is not '':
-            start_time = time.time()
-            if parallel_flag:
-                from pyspark import SparkContext,SparkConf
-                conf = SparkConf()
-                sc = SparkContext(conf=conf)
-                parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train')
-                gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
-            else:
-                gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
-            end_time = time.time()
-            training_time = end_time - start_time
-            print "Total Training Time: ", training_time
-        if test_regex is not '':
-            print "Evaluating..."
-            gp.evaluate(training_time)
-        if parallel_flag:
-            sc.stop()
-    except getopt.GetoptError, e:
-        print("Invalid argument. \n")
-        print(HELP_MSG)
-        # Make sure we know what's the error
-        raise
+            gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
+        end_time = time.time()
+        training_time = end_time - start_time
+        print "Total Training Time: ", training_time
+    if test_regex is not '':
+        print "Evaluating..."
+        gp.evaluate(training_time)
+    if parallel_flag:
+        sc.stop()
