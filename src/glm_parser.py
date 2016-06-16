@@ -326,6 +326,7 @@ if __name__ == "__main__":
             test_data_path = cf.get("data", "data_path")
             prep_path      = cf.get("data", "prep_path")
             data_format    = cf.get("data", "format")
+            tagger_w_vector= cf.get("data", "tagger_w_vector")
 
             h_flag                               = cf.get(       "option", "h_flag")
             parallel_flag                        = cf.getboolean("option", "parallel_train")
@@ -394,8 +395,10 @@ if __name__ == "__main__":
                 interactValue = True
             elif opt == '--log-feature-request':
                 debug.debug.log_feature_request_flag = True
+            elif opt == '--tagger_w_vector':
+                tagger_w_vector = value
             elif opt == '--format':
-                data_format = value;
+                data_format = value
             else:
                 #print "Invalid argument, try -h"
                 sys.exit(0)
@@ -452,7 +455,8 @@ if __name__ == "__main__":
                 gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
             else:
                 gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
-                gp.tagger_train()
+                gp.tagger.load_w_vec(tagger_w_vector)
+                #gp.tagger_train()
 
             end_time = time.time()
             training_time = end_time - start_time

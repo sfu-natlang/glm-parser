@@ -56,15 +56,14 @@ class PosTagger():
         if dump_data:
             perc.dump_vector("fv", self.max_iter, self.w_vector)
 
-    def eveluate(self, fv_path=None):
+    def load_w_vec(self, fv_path=None):
+        feat_vec = weight_vector.WeightVector()
+        feat_vec.load(fv_path)
+        self.w_vector = feat_vec.data_dict
+
+    def eveluate(self):
         tester = pos_decode.Decoder(self.test_data)
-        if fv_path is not None:
-            feat_vec = weight_vector.WeightVector()
-            feat_vec.load(fv_path)
-            self.w_vector = feat_vec.data_dict
-
         acc = tester.get_accuracy(self.w_vector)
-
 
     def getTangs(self, word_list):
         tagger = pos_decode.Decoder(tag_file=self.tag_file)
