@@ -302,7 +302,7 @@ if __name__ == "__main__":
         # load configuration from file
         #   configuration files are stored under src/format/
         #   configuration files: *.format
-        if os.path.isfile(sys.argv[1]) == True:
+        if os.path.isfile(sys.argv[1]) == True and os.path.splitext(sys.argv[1])[1][1:] == 'config':
             print("Reading configurations from file: %s" % (sys.argv[1]))
             cf = SafeConfigParser(os.environ)
             cf.read(sys.argv[1])
