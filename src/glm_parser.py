@@ -5,7 +5,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen
 # (Please add on your name if you have authored this file)
 #
 from feature import feature_vector
@@ -45,6 +45,8 @@ class GlmParser():
         self.data_path = data_path
         self.w_vector = WeightVector(l_filename)
         self.prep_path = part_data
+        self.pos_dict = {}
+
         if fgen is not None:
             # Do not instanciate this; used elsewhere
             self.fgen = fgen
@@ -75,12 +77,29 @@ class GlmParser():
 
         self.evaluator = Evaluator()
 
+    def init_pos_dict(self, data_pool):
+        self.pos_dict = {}
+        while data_pool.has_next_data():
+            sent = data_pool.get_next_data()
+            word_list = sent.get_word_list()
+            pos_list = sent.get_pos_list()
+
+            for index, word in enumerate(word_list):
+                if not word in self.pos_dict:
+                    self.pos_dict[word] = [pos_list[index]]
+                else:
+                    if not pos_list[index] in self.pos_dict[word]:
+                        self.pos_dict[word] += [pos_list[index]]
+        data_pool.reset_index()
+
     def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
         if not train_regex == '':
             train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen,
                                        format_path=data_format)
         else:
             train_data_pool = self.train_data_pool
+
+        #self.init_pos_dict(train_data_pool)
 
         if max_iter == -1:
             max_iter = self.max_iter
