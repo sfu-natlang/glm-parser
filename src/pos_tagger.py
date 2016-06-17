@@ -8,6 +8,7 @@ import timeit
 import time
 import ConfigParser
 
+import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
