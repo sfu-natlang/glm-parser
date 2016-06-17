@@ -253,7 +253,7 @@ def average_perceptron_learner_sequential_learn_wrapper(self, f_argmax, data_poo
                         self.last_change_dict[s] = self.c
 
                     # update weight and weight sum
-                    self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                    self.w_vector.iadd(delta_global_vector.feature_dict)
                     self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
             else:
@@ -262,7 +262,7 @@ def average_perceptron_learner_sequential_learn_wrapper(self, f_argmax, data_poo
                     self.last_change_dict[s] = self.c
 
                 if not current_global_vector == gold_global_vector:
-                    self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                    self.w_vector.iadd(delta_global_vector.feature_dict)
                     self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
             self.c += 1
@@ -288,7 +288,7 @@ def average_perceptron_learner_sequential_learn_wrapper(self, f_argmax, data_poo
             p_fork.start()
             # self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
 
-    self.w_vector.data_dict.clear()
+    self.w_vector.clear()
 
     self.avg_weight(self.w_vector, self.c - 1)
 

@@ -1,20 +1,17 @@
 from __future__ import division
 import logging
 import multiprocessing
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
-from weight.weight_vector import *
-# Time accounting and control
+from weight.weight_vector import WeightVector
+
 import debug.debug
 import time
-import sys
 
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class AveragePerceptronLearner():
+class AveragePerceptronLearner(object):
 
     def __init__(self, w_vector=None, max_iter=1):
         """
@@ -28,9 +25,9 @@ class AveragePerceptronLearner():
         self.w_vector = w_vector
         self.max_iter = max_iter
 
-        if w_vector:
-            self.weight_sum_dict = mydefaultdict(mydouble)
-            self.last_change_dict = mydefaultdict(mydouble)
+        if w_vector is not None:
+            self.weight_sum_dict = WeightVector()
+            self.last_change_dict = WeightVector()
             self.c = 1
         return
 
@@ -83,18 +80,18 @@ class AveragePerceptronLearner():
                         for s in delta_global_vector.keys():
                             self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
                             self.last_change_dict[s] = self.c
-                        
+
                         # update weight and weight sum
-                        self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                        self.w_vector.iadd(delta_global_vector.feature_dict)
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
                 else:
                     for s in self.last_change_dict.keys():
                         self.weight_sum_dict[s] += self.w_vector[s] * (self.c - self.last_change_dict[s])
                         self.last_change_dict[s] = self.c
-                        
+
                     if not current_global_vector == gold_global_vector:
-                        self.w_vector.data_dict.iadd(delta_global_vector.feature_dict)
+                        self.w_vector.iadd(delta_global_vector.feature_dict)
                         self.weight_sum_dict.iadd(delta_global_vector.feature_dict)
 
                 self.c += 1
@@ -124,8 +121,8 @@ class AveragePerceptronLearner():
                 
                     p_fork.start()
                     #self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
-        
-        self.w_vector.data_dict.clear()
+
+        self.w_vector.clear()
 
         self.avg_weight(self.w_vector, self.c - 1)
 
@@ -133,21 +130,21 @@ class AveragePerceptronLearner():
 
     def avg_weight(self, w_vector, count):
         if count > 0:
-            w_vector.data_dict.iaddc(self.weight_sum_dict, 1 / count)
-        
+            w_vector.iaddc(self.weight_sum_dict, 1 / count)
+
     def dump_vector(self, d_filename, i):
         d_vector = WeightVector()
         self.avg_weight(d_vector, self.c-1)
         d_vector.dump(d_filename + "_Iter_%d.db"%i)
-        d_vector.data_dict.clear()
+        d_vector.clear()
 
     def parallel_learn(self,dp,fv,parser):
         w_vector = WeightVector()
         weight_sum_dict = WeightVector()
         print "parallel_learn keys: %d"%len(fv.keys())
         for key in fv.keys():
-            w_vector.data_dict[key]=fv[key][0]
-            weight_sum_dict.data_dict[key]=fv[key][1]
+            w_vector[key]=fv[key][0]
+            weight_sum_dict[key]=fv[key][1]
 
         while dp.has_next_data(): 
             data_instance = dp.get_next_data()
@@ -156,13 +153,13 @@ class AveragePerceptronLearner():
             current_global_vector = data_instance.set_current_global_vector(current_edge_set)
 
             delta_global_vector = gold_global_vector - current_global_vector
-            weight_sum_dict.data_dict.iadd(w_vector.data_dict)
-            if not current_global_vector == gold_global_vector: 
-                w_vector.data_dict.iadd(delta_global_vector.feature_dict)
-                weight_sum_dict.data_dict.iadd(delta_global_vector.feature_dict)
+            weight_sum_dict.iadd(w_vector)
+            if not current_global_vector == gold_global_vector:
+                w_vector.iadd(delta_global_vector.feature_dict)
+                weight_sum_dict.iadd(delta_global_vector.feature_dict)
         dp.reset_index()
 
         vector_list = {}
-        for key in weight_sum_dict.data_dict.keys():
-            vector_list[str(key)] = (w_vector.data_dict[key],weight_sum_dict[key])
+        for key in weight_sum_dict.keys():
+            vector_list[str(key)] = (w_vector[key],weight_sum_dict[key])
         return vector_list.items()
