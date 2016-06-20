@@ -16,7 +16,10 @@ rm -f ../src/parse/ceisner.cpp
 rm -f ../src/parse/ceisner3.cpp
 rm -f ../src/*.db
 
-rm -r ../src/build/*
-rm -r ../src/hvector/build/*
+rm -r ../src/build
+rm -r ../src/hvector/build
 
-rm -f ../src/pos/*.pyc
+rm -f ../src/*/*.pyc
+rm -f ../src/hvector/*.egg-info
+rm -f ../src/*/*.so
+rm -r ../src/data/prep
