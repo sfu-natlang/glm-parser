@@ -162,9 +162,7 @@ if __name__ == '__main__':
     print "TAGGER [INFO]: Training Starts, Timer is on"
     start_time = time.time()
     tagger = PosTagger(train_regex, test_regex, test_data_path, tag_file, max_iter, data_format)
-    print "TAGGER [DEBUG]: Trainer Loaded"
     tagger.perc_train()
-    print "TAGGER [DEBUG]: Training Completed"
     end_time = time.time()
     training_time = end_time - start_time
     print "TAGGER [INFO]: Total Training Time: ", training_time

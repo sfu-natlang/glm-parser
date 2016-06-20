@@ -21,8 +21,10 @@ class PosPerceptron():
         self.max_iter = max_iter
         self.default_tag = default_tag
         self.tagset = pos_common.read_tagset(tag_file)
+        print "TAGGER [DEBUG]: Trainer Loaded"
 
     def avg_perc_train(self, train_data):
+        print "TAGGER [INFO]: Using Average Perceptron Trainer"
         if len(self.tagset) <= 0:
             raise valueError("Empty tagset")
         argmax = pos_viterbi.Viterbi()
@@ -32,10 +34,11 @@ class PosPerceptron():
         c = 0
 
         for iteration in range(self.max_iter):
+            print "TAGGER [INFO]: Starting Iteration %d"%iteration
             log_miss = 0
 
             for (word_list, pos_list, gold_out_fv) in train_data:
-
+                print "\rTAGGER [INFO]: %d sentences trained"%c,
                 output = argmax.perc_test(w_vec,word_list,self.tagset,self.default_tag)
                 c += 1
 
@@ -69,8 +72,8 @@ class PosPerceptron():
 
                             last_iter[item] = c
 
-            print "number of mistakes:", log_miss, " iteration:", iteration+1
-
+            print "TAGGER [INFO]: Iteration completed, number of mistakes:", log_miss
+        print "TAGGER [DEBUG]: Finalising"
         for item in w_vec:
             if item in last_iter:
                 u_vec[item] += (c - last_iter[item]) * w_vec[item]
@@ -78,15 +81,17 @@ class PosPerceptron():
                 u_vec[item] = w_vec[item]
 
             w_vec[item] = u_vec[item] / c
-
+        print "TAGGER [DEBUG]: Training Completed"
         return w_vec
 
     def dump_vector(self, filename, iteration, fv):
+        print "TAGGER [INFO]: Dumping weight_vec to " + filename + "_Iter_%d.db"%iteration
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
         w_vector.dump(filename + "_Iter_%d.db"%iteration)
 
     def dump_vector_per_iter(self, filename, iteration, weight_vec, last_iter, avg_vec, num_updates):
+        print "TAGGER [INFO]: Dumping weight_vec to " + filename + "_Iter_%d.db"%iteration
         fv = copy.deepcopy(weight_vec)
         av = copy.deepcopy(avg_vec)
         for feat in fv:
