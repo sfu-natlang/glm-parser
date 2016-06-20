@@ -1,0 +1,12 @@
+Machine: local ubuntu 14.04
+
+Branch: master
+
+Command:
+python glm_parser.py -i 1 -p ~/data/CoNLL-U/UD_Romanian --train="ro-ud-train.conllu" --test="ro-ud-dev.conllu" -d `date "+%d-%m-%y"` -a --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --format=format/conllu.format
+
+Result:
+06/13/2016 06:57:47 PM INFO: Training time usage(seconds): 21.733538
+06/13/2016 06:57:47 PM INFO: Feature count: 215439
+06/13/2016 06:57:47 PM INFO: Unlabeled accuracy: 0.751758087201 (1069, 1422)
+06/13/2016 06:57:47 PM INFO: Unlabeled attachment accuracy: 0.764352469960 (1145, 1498)

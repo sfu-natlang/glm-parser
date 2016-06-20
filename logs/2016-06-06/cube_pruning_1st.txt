@@ -1,0 +1,12 @@
+Machine: ubuntu virtual machine
+
+Branch: cube_pruning_merge
+
+Command:
+python glm_parser.py -i 1 -p ~/data/penn-wsj-deps/ --train="wsj_02[0-9][0-9].mrg.3.pa.gs.tab" --test="wsj_01[0-9][0-9].mrg.3.pa.gs.tab" -d `date "+%d-%m-%y"` -a --learner=average_perceptron --fgen=english_1st_fgen --parser=cube_pruning --config=config/penn2malt.config
+
+Result:
+06/06/2016 04:06:32 PM INFO: Training time usage(seconds): 1659.004055
+06/06/2016 04:06:32 PM INFO: Feature count: 695786
+06/06/2016 04:06:32 PM INFO: Unlabeled accuracy: 0.830306720131 (39550, 47633)
+06/06/2016 04:06:32 PM INFO: Unlabeled attachment accuracy: 0.837121670092 (41543, 49626)

@@ -60,7 +60,7 @@ class Evaluator():
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
         if training_time is not None:
             logging.info("Training time usage(seconds): %f" % (training_time,))
-        logging.info("Feature count: %d" % len(w_vector.data_dict.keys()))
+        logging.info("Feature count: %d" % len(w_vector.keys()))
         logging.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
         print "Unlabeled accuracy: %.12f" %self.get_acc_unlabeled_accuracy()
         self.unlabeled_attachment_accuracy(data_pool.get_sent_num())

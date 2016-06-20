@@ -86,7 +86,7 @@ class Decoder:
         #self.reset_weights()
         feat_vec = weight_vector.WeightVector()
         feat_vec.load(weight_file)
-        self.weight_vec = feat_vec.data_dict
+        self.weight_vec = feat_vec
 
 
 

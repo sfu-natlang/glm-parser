@@ -1,0 +1,11 @@
+Machine: cs-nll-15
+
+Branch: 8c8c5a751329ebd84c0a6db574fca16d22a6e3bc
+
+Command:
+python glm_parser.py -i 1 -s 16 -p /cs/natlang-user/vivian/penn-wsj-deps/ --train='wsj_0[2-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_1[0-9][0-9][0-9].mrg.3.pa.gs.tab|wsj_2[0-1][0-9][0-9].mrg.3.pa.gs.tab' --test='wsj_0[0-1][0-9][0-9].mrg.3.pa.gs.tab|wsj_22[0-9][0-9].mrg.3.pa.gs.tab|wsj_24[0-9][0-9].mrg.3.pa.gs.tab' --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --format=${project_path}/src/format/penn2malt.format
+
+Result:
+Total Training Time:  3005.1084609
+Unlabeled accuracy: 0.865941551834
+Unlabeled attachment accuracy: 0.871303458342
