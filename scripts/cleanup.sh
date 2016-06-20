@@ -18,3 +18,5 @@ rm -f ../src/*.db
 
 rm -r ../src/build/*
 rm -r ../src/hvector/build/*
+
+rm -f ../src/pos/*.pyc

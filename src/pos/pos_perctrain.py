@@ -1,9 +1,11 @@
+# This is the machine learning algorithm of the Part of Speech Tagger.
+# As of right now, we are using the average perceptron to do the training.
 
 from __future__ import division
 import time,copy,logging
 import os,sys,inspect
 from collections import defaultdict
-import pos_features,pos_viterbi
+import pos_features, pos_viterbi, pos_common
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -18,16 +20,7 @@ class PosPerceptron():
         self.w_vector = w_vector
         self.max_iter = max_iter
         self.default_tag = default_tag
-
-        self.tagset = self.read_tagset(tag_file)
-    # read the valid output tags for the task
-    def read_tagset(self, file_path):
-        tagset = []
-        with open(file_path,"r") as in_file:
-            for line in in_file:
-                line = line.strip()
-                tagset.append(line)
-        return tagset
+        self.tagset = pos_common.read_tagset(tag_file)
 
     def avg_perc_train(self, train_data):
         if len(self.tagset) <= 0:
