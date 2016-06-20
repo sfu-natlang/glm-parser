@@ -14,7 +14,7 @@ class Decoder():
         result_size = len(result_list)
         gold_size = len(gold_list)
         if(result_size!=gold_size):
-            raise ValueError("tag results do not align with gold results")
+            raise ValueError("TAGGER [ERRO]: Tag results do not align with gold results")
         correct_num = 0
         for i in range(result_size):
             if result_list[i] == gold_list[i]:
@@ -30,5 +30,5 @@ class Decoder():
             correct_num += cnum
             gold_set_size += gnum
         acc = float(correct_num) /gold_set_size
-        print "whole accraccy: ", acc
+        print "TAGGER [INFO]: Total Accraccy: ", acc
         return acc

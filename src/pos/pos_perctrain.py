@@ -72,7 +72,7 @@ class PosPerceptron():
 
                             last_iter[item] = c
 
-            print "TAGGER [INFO]: Iteration completed, number of mistakes:", log_miss
+            print "\rTAGGER [INFO]: Iteration completed, number of mistakes:", log_miss
         print "TAGGER [DEBUG]: Finalising"
         for item in w_vec:
             if item in last_iter:
