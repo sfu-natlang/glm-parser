@@ -26,7 +26,7 @@ class PosPerceptron():
     def avg_perc_train(self, train_data):
         print "TAGGER [INFO]: Using Average Perceptron Trainer"
         if len(self.tagset) <= 0:
-            raise valueError("Empty tagset")
+            raise valueError("TAGGER [ERRO]: Empty tagset")
         argmax = pos_viterbi.Viterbi()
         w_vec = defaultdict(float)
         u_vec = defaultdict(float)
