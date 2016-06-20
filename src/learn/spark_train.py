@@ -108,5 +108,5 @@ class ParallelPerceptronLearner():
             self.w_vector.iadd(fv)
             #dump the weight vector
             #d_filename: change the full path to hdfs file name
-            if d_filename is not None:
-                self.w_vector.dump(d_filename + "_Iter_%d.db"%max_iter)
+        if d_filename is not None:
+            self.w_vector.dump(d_filename + "_Iter_%d.db"%max_iter)
