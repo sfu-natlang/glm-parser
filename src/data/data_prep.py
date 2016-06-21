@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+
+#
+# Global Linear Model Parser
+# Simon Fraser University
+# NLP Lab
+#
+# Author: Vivian Kou, Sean La, Jetic Gu
+# (Please add on your name if you have authored this file)
+#
+# Origin: src/learn/partition.py
+#
+
+#
+# The DataPrep class aims to serve one purpose and one purpose only,
+# to upload the data to hdfs when running the glm_parser on spark yarn
+# cluster mode.
+#
 import logging
 import sys, os
 import re
@@ -7,15 +25,19 @@ import ConfigParser
 from ConfigParser import SafeConfigParser
 
 class DataPrep():
-    def __init__(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None, configFile=None):
+    def __init__(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None, configFile=None, debug=False):
         self.dataPath=""
         self.dataRegex=""
         self.shardNum=0
         self.targetPath=""
-        print "DATAPREP [DEBUG]: Preparing data for hdfs"
+        self.debug=debug
+        if self.debug: print "DATAPREP [DEBUG]: Preparing data for hdfs"
+
+        # Load config file
         if configFile:
             self.loadFromConfig(configFile)
-        
+
+        # Load params
         if dataPath:
             if not os.path.isdir(dataPath):
                 raise ValueError("DATAPREP [ERROR]: source directory do not exist")
@@ -29,6 +51,7 @@ class DataPrep():
         if targetPath:
 		    self.targetPath = targetPath
 
+        # Check param validity
         if self.dataPath=="":
             raise ValueError("DATAPREP [ERROR]: dataPath not specified")
         if self.dataRegex=="":
@@ -85,21 +108,21 @@ class DataPrep():
         :param shardNum: the number of partisions of data_pool
         :param targetPath: the output directory storing the sharded data_pool
         '''
-        print "DATAPREP [DEBUG]: Partitioning Data locally"
+        if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(targetPath):
             os.makedirs(targetPath)
 
         sectionPattern = re.compile(dataRegex)
-        fileList = []
+        aFileList = []
 
         for dirName, subdirList, fileList in os.walk(dataPath):
             for fileName in fileList:
                 if sectionPattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
-                    print "DATAPREP [DEBUG]: Pendng file " + filePath
-                    fileList.append(filePath)
+                    if self.debug: print "DATAPREP [DEBUG]: Pendng file " + filePath
+                    aFileList.append(filePath)
 
-        input_string = ''.join(fileList) + str(shardNum)
+        input_string = ''.join(aFileList) + str(shardNum)
         folder = hashlib.md5(input_string).hexdigest()[:7]
         output_path = targetPath + folder + '/'
 
@@ -115,8 +138,8 @@ class DataPrep():
 
             n = self.sentCount(dataPath,dataRegex)/shardNum # number of sentences per shard
 
-            for filePath in fileList:
-                print "DATAPREP [DEBUG]: Opening file "+ filePath
+            for filePath in aFileList:
+                if self.debug: print "DATAPREP [DEBUG]: Opening file "+ filePath
                 fin = open(filePath, "r")
 
                 for line in fin:
@@ -133,18 +156,21 @@ class DataPrep():
                         count += 1
 
             fout.close()
-            print "DATAPREP [DEBUG]: Partition complete"
+            if self.debug: print "DATAPREP [DEBUG]: Partition complete"
         return output_path
 
     def dataUpload(self, sourcePath, targetPath="./data/prep/"):
-        print "DATAPREP [DEBUG]: Uploading data to HDFS"
-        print "DATAPREP [DEBUG]: Creating target directory " + targetPath
+        '''
+        This function uploads the folder sourcePath to targetPath on hadoop.
+        '''
+        if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
+        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + targetPath
         os.system("hdfs dfs -mkdir -p " + targetPath)
         os.system("hdfs dfs -put -f %s %s"%(sourcePath,targetPath))
-        print "DATAPREP [DEBUG]: Upload complete"
+        if self.debug: print "DATAPREP [DEBUG]: Upload complete"
         return
 
-
+# Uncomment the following code for tests
 
 if __name__ == "__main__":
     #dataPath   = sys.argv[1]
