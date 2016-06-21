@@ -12,9 +12,9 @@
 #
 
 #
-# The DataPrep class aims to serve one purpose and one purpose only,
-# to upload the data to hdfs when running the glm_parser on spark yarn
-# cluster mode.
+# The DataPrep class aims to partition the data and also
+# to upload the data to hdfs when running the glm_parser
+# on spark yarn cluster mode.
 #
 import logging
 import sys, os
@@ -63,8 +63,6 @@ class DataPrep():
 
         print "DATAPREP [INFO]: Using data from path:" + self.dataPath
 
-        sourcePath = self.dataPrep(self.dataPath, self.dataRegex, self.shardNum)
-        self.dataUpload(sourcePath, self.targetPath)
         return
 
     def loadFromConfig(self, configFile):
@@ -102,12 +100,19 @@ class DataPrep():
                                 count += 1
         return count
 
-    def dataPrep(self, dataPath, dataRegex, shardNum, targetPath="../data/prep/"):
+    def dataPartition(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None):
         '''
         :param dataPath: the input directory storing training data_pool
         :param shardNum: the number of partisions of data_pool
         :param targetPath: the output directory storing the sharded data_pool
         '''
+        # Process params
+        if dataPath   == None: dataPath   = self.dataPath
+        if dataRegex  == None: dataRegex  = self.dataRegex
+        if shardNum   == None: shardNum   = self.shardNum
+        if targetPath == None: targetPath = "data/prep/"
+
+
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(targetPath):
             os.makedirs(targetPath)
@@ -159,10 +164,12 @@ class DataPrep():
             if self.debug: print "DATAPREP [DEBUG]: Partition complete"
         return output_path
 
-    def dataUpload(self, sourcePath, targetPath="./data/prep/"):
+    def dataUpload(self, sourcePath, targetPath=None):
         '''
         This function uploads the folder sourcePath to targetPath on hadoop.
         '''
+        if targetPath == None: targetPath = self.targetPath
+
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + targetPath
         os.system("hdfs dfs -mkdir -p " + targetPath)
@@ -176,4 +183,6 @@ if __name__ == "__main__":
     #dataPath   = sys.argv[1]
     #dataRegex  = sys.argv[2]
     #shardNum   = int(sys.argv[3])
-    DataPrep(targetPath="data/meow/", shardNum=8, configFile=sys.argv[1])
+    dataPrep = DataPrep(targetPath="data/meow/", shardNum=8, configFile=sys.argv[1])
+    sourcePath = dataPrep.dataPartition()
+    dataPrep.dataUpload(sourcePath)

@@ -16,7 +16,7 @@ from evaluate.evaluator import *
 
 from weight.weight_vector import *
 
-from learn.partition import partition_data
+from data.data_prep import *
 
 import debug.debug
 import debug.interact
@@ -367,6 +367,12 @@ if __name__ == "__main__":
         data_format = args.format;
 
     # process options
+
+    # This will upload all the train data to hdfs
+    if h_flag == True and parallel_flag == True:
+        dataPrep   = DataPrep(dataPath=test_data_path, dataRegex=train_regex, shardNum=shards_number, targetPath=prep_path, debug=false)
+        sourcePath = dataPrep.dataPartition()
+        dataPrep.dataUpload(sourcePath)
     if debug.debug.time_accounting_flag == True:
         print("Time accounting is ON")
 

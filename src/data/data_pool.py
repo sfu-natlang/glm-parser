@@ -4,7 +4,7 @@ import os, re
 from sentence import Sentence
 import logging
 import re
-from learn.partition import partition_data
+from data_prep import *
 
 
 logging.basicConfig(filename='glm_parser.log',
@@ -149,7 +149,7 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        output_path = partition_data(self.data_path, self.section_regex, 1, self.prep_path)
+        output_path = DataPrep(dataPath=self.data_path, dataRegex=self.section_regex, shardNum=1, targetPath=self.prep_path).dataPartition()
 
         for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:
