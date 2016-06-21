@@ -221,7 +221,7 @@ cdef class EisnerParser:
     
     def parse(self, sent, arc_weight, tagger=None):
         if (tagger != None):
-            sent.set_pos_list(tagger.getTangs(['_B_-2', '_B_-1'] + sent.get_word_list()[1:] + ['_B_+1', '_B_+2']))
+            sent.set_pos_list(tagger.getTags(['_B_-2', '_B_-1'] + sent.get_word_list()[1:] + ['_B_+1', '_B_+2']))
 
         self.n = len(sent.get_word_list())
         self.init_eisner_matrix()

@@ -9,6 +9,7 @@
 
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
+from ast import literal_eval
 
 import logging
 
@@ -71,7 +72,7 @@ class WeightVector(mydefaultdict):
         with open(filename) as f:
             for line in f:
                 line = line[:-1].split("    ")
-                self[line[0]] = float(line[1])
+                self[literal_eval(line[0])] = float(line[1])
 
     def dump(self, filename):
         """

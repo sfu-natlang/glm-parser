@@ -66,7 +66,7 @@ class PosTagger():
         tester = pos_decode.Decoder(self.test_data)
         acc = tester.get_accuracy(self.w_vector)
 
-    def getTangs(self, word_list):
+    def getTags(self, word_list):
         tagger = pos_decode.Decoder(tag_file=self.tag_file)
         return tagger.getTags(word_list, self.w_vector)
 
@@ -157,6 +157,7 @@ if __name__ == '__main__':
         test_data_path = cf.get("data", "data_path")
         data_format    = cf.get("data", "format")
         tag_file       = cf.get("data", "tag_file")
+        w_vector       = cf.get("data", "tagger_w_vector")
 
         max_iter                             = cf.getint(    "option", "iteration")
 
@@ -175,10 +176,17 @@ if __name__ == '__main__':
         tag_file = args.tagset
 
     start_time = time.time()
+    if not w_vector == '':
+        train_regex = ""
     tagger = PosTagger(train_regex, test_regex, test_data_path, tag_file, max_iter, data_format)
-    tagger.perc_train()
+
+    if not w_vector == '':
+        tagger.load_w_vec(w_vector)
+    else:
+        tagger.perc_train()
     end_time = time.time()
     training_time = end_time - start_time
     print "Total Training Time: ", training_time
+    print tagger.w_vector
 
     tagger.evaluate()
