@@ -62,7 +62,7 @@ class PosTagger():
         feat_vec.load(fv_path)
         self.w_vector = feat_vec
 
-    def eveluate(self):
+    def evaluate(self):
         tester = pos_decode.Decoder(self.test_data)
         acc = tester.get_accuracy(self.w_vector)
 
