@@ -8,6 +8,7 @@ import timeit
 import time
 import ConfigParser
 
+import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
@@ -59,7 +60,7 @@ class PosTagger():
     def load_w_vec(self, fv_path=None):
         feat_vec = weight_vector.WeightVector()
         feat_vec.load(fv_path)
-        self.w_vector = feat_vec.data_dict
+        self.w_vector = feat_vec
 
     def eveluate(self):
         tester = pos_decode.Decoder(self.test_data)
@@ -109,72 +110,75 @@ if __name__ == '__main__':
     tag_file = 'tagset.txt'
     data_format = 'format/penn2malt.format'
 
+    arg_parser = argparse.ArgumentParser(description="""Part Of Speech (POS) Tagger
+        Version %d.%d""" % (MAJOR_VERSION, MINOR_VERSION))
+    arg_parser.add_argument('config', metavar='CONFIG_FILE',
+        help="""specify the config file. This will load all the setting from the config file,
+        in order to avoid massive command line inputs. Please consider using config files
+        instead of manually typing all the options.
 
-    #tag_file = sys.argv[1]
-    #max_iter = int(sys.argv[2])
-    #data_path = sys.argv[3]
-    #train_regex = sys.argv[4]
-    #test_regex = sys.argv[5]
-    #data_format = sys.argv[6]
+        Additional options by command line will override the settings in the config file.
 
-    try:
-        opt_spec = "aht:f:r:c:p:"
-        long_opt_spec = ['train=','test=','format=', 'tag_target=']
+        Officially provided config files are located in src/config/
+        """)
+    arg_parser.add_argument('--train', metavar='TRAIN_REGEX',
+        help="""specify the data for training with regular expression
+        """)
+    arg_parser.add_argument('--test', metavar='TEST_REGEX',
+        help="""specify the data for testing with regular expression
+        """)
+    arg_parser.add_argument('--path', '-p', metavar='DATA_PATH',
+        help="""Path to data files (to the parent directory for all sections)
+        default "./penn-wsj-deps/"
+        """)
+    arg_parser.add_argument('--format', metavar='DATA_FORMAT',
+        help="""specify the format file for the training and testing files.
+        Officially supported format files are located in src/format/
+        """)
+    arg_parser.add_argument('--tagset', metavar='TAG_TARGET',
+        help="""specify the file containing the tags we want to use.
+        Officially provided TAG_TARGET file is src/tagset.txt
+        """)
+    arg_parser.add_argument('--iteration', '-i', metavar='ITERATIONS', type=int,
+        help="""Number of iterations
+        default 1
+        """)
+    args=arg_parser.parse_args()
+    # load configuration from file
+    #   configuration files are stored under src/format/
+    #   configuration files: *.format
+    if args.config:
+        print("Reading configurations from file: %s" % (args.config))
+        cf = SafeConfigParser(os.environ)
+        cf.read(args.config)
 
-        # load configuration from file
-        #   configuration files are stored under src/format/
-        #   configuration files: *.format
-        if os.path.isfile(sys.argv[1]) == True:
-            print("Reading configurations from file: %s" % (sys.argv[1]))
-            cf = SafeConfigParser(os.environ)
-            cf.read(sys.argv[1])
+        train_regex    = cf.get("data", "train")
+        test_regex     = cf.get("data", "test")
+        test_data_path = cf.get("data", "data_path")
+        data_format    = cf.get("data", "format")
+        tag_file       = cf.get("data", "tag_file")
 
-            train_regex    = cf.get("data", "train")
-            test_regex     = cf.get("data", "test")
-            test_data_path = cf.get("data", "data_path")
-            data_format    = cf.get("data", "format")
-            tag_file       = cf.get("data", "tag_file")
+        max_iter                             = cf.getint(    "option", "iteration")
 
-            max_iter                             = cf.getint(    "option", "iteration")
+    # load configuration from command line
+    if args.path:
+        test_data_path = args.path
+    if args.iteration:
+        max_iter = int(args.iteration)
+    if args.train:
+        train_regex = args.train
+    if args.test:
+        test_regex = args.test
+    if args.format:
+        data_format = args.format
+    if args.tagset:
+        tag_file = args.tagset
 
-            opts, args = getopt.getopt(sys.argv[2:], opt_spec, long_opt_spec)
-        else:
-            opts, args = getopt.getopt(sys.argv[1:], opt_spec, long_opt_spec)
+    start_time = time.time()
+    tagger = PosTagger(train_regex, test_regex, test_data_path, tag_file, max_iter, data_format)
+    tagger.perc_train()
+    end_time = time.time()
+    training_time = end_time - start_time
+    print "Total Training Time: ", training_time
 
-        # load configuration from command line
-        for opt, value in opts:
-            if opt == "-h":
-                print("")
-                print("Part Of Speech (POS) Tagger")
-                print("Version %d.%d" % (MAJOR_VERSION, MINOR_VERSION))
-                print(HELP_MSG)
-                sys.exit(0)
-            elif opt == "-p":
-                test_data_path = value
-            elif opt == "-i":
-                max_iter = int(value)
-            elif opt == '--train':
-                train_regex = value
-            elif opt == '--test':
-                test_regex = value
-            elif opt == '--format':
-                data_format = value
-            elif opt == '--tag_target':
-                tag_file = value
-            else:
-                #print "Invalid argument, try -h"
-                sys.exit(0)
-
-        start_time = time.time()
-        tagger = PosTagger(train_regex, test_regex, test_data_path, tag_file, max_iter, data_format)
-        tagger.perc_train()
-        end_time = time.time()
-        training_time = end_time - start_time
-        print "Total Training Time: ", training_time
-
-        tagger.eveluate()
-    except getopt.GetoptError, e:
-        print("Invalid argument. \n")
-        print(HELP_MSG)
-        # Make sure we know what's the error
-        raise
+    tagger.evaluate()

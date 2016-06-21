@@ -86,9 +86,9 @@ class ParallelPerceptronLearner():
                 for (feat, (a,b,c)) in feat_vec_list:
                     fv[feat] = (float(a)/float(c),b)
 
-            self.w_vector.data_dict.clear()
+            self.w_vector.clear()
             for feat in fv.keys():
-                self.w_vector.data_dict[feat] = fv[feat][1]/c
+                self.w_vector[feat] = fv[feat][1]/c
         if learner.__class__.__name__== "PerceptronLearner":
             fv = {}
             for round in range(max_iter):
@@ -104,9 +104,9 @@ class ParallelPerceptronLearner():
                 fv = {}
                 for (feat,(a,b)) in feat_vec_list:
                     fv[feat] = float(a)/float(b)
-            self.w_vector.data_dict.clear()
-            self.w_vector.data_dict.iadd(fv)
+            self.w_vector.clear()
+            self.w_vector.iadd(fv)
             #dump the weight vector
             #d_filename: change the full path to hdfs file name
-            if d_filename is not None:
-                self.w_vector.dump(d_filename + "_Iter_%d.db"%max_iter)
+        if d_filename is not None:
+            self.w_vector.dump(d_filename + "_Iter_%d.db"%max_iter)
