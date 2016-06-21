@@ -1,30 +1,48 @@
 import logging
-import sys
+import sys, os
 import re
-import os
 import os.path
 import hashlib
 import ConfigParser
 from ConfigParser import SafeConfigParser
 
 class DataPrep():
-    def __init__(self, dataPath="", dataRegex="", shardNum=0, targetPath="", configFile=""):
+    def __init__(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None, configFile=None):
+        self.dataPath=""
+        self.dataRegex=""
+        self.shardNum=0
+        self.targetPath=""
         print "DATAPREP [DEBUG]: Preparing data for hdfs"
-        if not os.path.isdir(dataPath):
-            raise ValueError("DATAPREP [ERROR]: source directory do not exist")
-        if (not isinstance(shardNum, int)) and int(shardNum)<=0 :
-            raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
-        self.dataPath = dataPath
-        self.dataRegex = dataRegex
-        self.shardNum = shardNum
-        self.targetPath = targetPath
+        if configFile:
+            self.loadFromConfig(configFile)
+        
+        if dataPath:
+            if not os.path.isdir(dataPath):
+                raise ValueError("DATAPREP [ERROR]: source directory do not exist")
+            self.dataPath = dataPath
+        if shardNum:
+            if (not isinstance(shardNum, int)) and int(shardNum)<=0 :
+                raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
+            self.shardNum = shardNum
+        if dataRegex:
+		    self.dataRegex = dataRegex
+        if targetPath:
+		    self.targetPath = targetPath
 
-        if configFile!="":
-            loadFromConfig(configFile)
+        if self.dataPath=="":
+            raise ValueError("DATAPREP [ERROR]: dataPath not specified")
+        if self.dataRegex=="":
+            raise ValueError("DATAPREP [ERROR]: dataRegex not specified")
+        if self.shardNum==0:
+            raise ValueError("DATAPREP [ERROR]: shardNumber not specified")
+        if self.targetPath=="":
+            raise ValueError("DATAPREP [ERROR]: targetPath not specified")
+
         print "DATAPREP [INFO]: Using data from path:" + self.dataPath
 
-        sourcePath = dataPrep(self.dataPath, self.dataRegex, self.shardNum, self.targetPath)
+        sourcePath = self.dataPrep(self.dataPath, self.dataRegex, self.shardNum)
         self.dataUpload(sourcePath, self.targetPath)
+        return
 
     def loadFromConfig(self, configFile):
         if not os.path.exists(configFile):
@@ -36,14 +54,11 @@ class DataPrep():
         cf = SafeConfigParser(os.environ)
         cf.read(configFile)
 
-        if self.dataRegex != "":
-            self.dataRegex    =    cf.get("data",   "train")
-        if self.dataPath != "":
-            self.dataPath     =    cf.get("data",   "data_path")
-        if self.targetPath != "":
-            self.targetPath   =    cf.get("data",   "prep_path")
-        if self.shardNum != "":
-            self.shardNum     = cf.getint("option", "shards")
+        self.dataRegex    =    cf.get("data",   "train")
+        self.dataPath     =    cf.get("data",   "data_path")
+        self.targetPath   =    cf.get("data",   "prep_path")
+        self.shardNum     = cf.getint("option", "shards")
+        return
 
     def sentCount(self, dataPath, dataRegex):
         '''
@@ -81,6 +96,7 @@ class DataPrep():
             for fileName in fileList:
                 if sectionPattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
+                    print "DATAPREP [DEBUG]: Pendng file " + filePath
                     fileList.append(filePath)
 
         input_string = ''.join(fileList) + str(shardNum)
@@ -97,9 +113,10 @@ class DataPrep():
 
             count = 0
 
-            n = sentCount(dataPath,dataRegex)/shardNum # number of sentences per shard
+            n = self.sentCount(dataPath,dataRegex)/shardNum # number of sentences per shard
 
             for filePath in fileList:
+                print "DATAPREP [DEBUG]: Opening file "+ filePath
                 fin = open(filePath, "r")
 
                 for line in fin:
@@ -121,17 +138,16 @@ class DataPrep():
 
     def dataUpload(self, sourcePath, targetPath="./data/prep/"):
         print "DATAPREP [DEBUG]: Uploading data to HDFS"
-        print "DATAPREP [DEBUG]: Creating target directory" + targetPath
-        os.system("hdfs dfs -mkdir -p" + targetPath)
-        os.system("hdfs dfs -put %s %s"%(sourcePath,targetPath)
+        print "DATAPREP [DEBUG]: Creating target directory " + targetPath
+        os.system("hdfs dfs -mkdir -p " + targetPath)
+        os.system("hdfs dfs -put -f %s %s"%(sourcePath,targetPath))
         print "DATAPREP [DEBUG]: Upload complete"
+        return
 
 
 
 if __name__ == "__main__":
-    dataPath   = sys.argv[1]
-    dataRegex  = sys.argv[2]
-    shardNum   = int(sys.argv[3])
-    targetPath = "../data/prep/"
-    configFile = sys.argv[4]
-    data = DataPrep(dataPath, dataRegex, shardNum, targetPath, configFile)
+    #dataPath   = sys.argv[1]
+    #dataRegex  = sys.argv[2]
+    #shardNum   = int(sys.argv[3])
+    DataPrep(targetPath="data/meow/", shardNum=8, configFile=sys.argv[1])
