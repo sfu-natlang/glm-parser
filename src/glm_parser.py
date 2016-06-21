@@ -62,7 +62,7 @@ class GlmParser():
 
 
         self.parser = parser()
-        self.tagger = PosTagger(train_regex=train_regex, test_regex=test_regex, data_path=data_path, max_iter=max_iter, data_format=data_format)
+        self.tagger = PosTagger(train_regex="", test_regex="", data_path="", max_iter=max_iter, data_format=data_format)
 
         if learner is not None:
             if spark:
