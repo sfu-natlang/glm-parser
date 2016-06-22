@@ -25,60 +25,24 @@ import ConfigParser
 from ConfigParser import SafeConfigParser
 
 class DataPrep():
-    def __init__(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None, configFile=None, debug=True):
-        self.dataPath=""
-        self.dataRegex=""
-        self.shardNum=0
-        self.targetPath=""
-        self.debug=debug
+    def __init__(self, dataPath, dataRegex, shardNum, targetPath, debug=False):
+        self.dataPath  = dataPath
+        self.dataRegex = dataRegex
+        self.shardNum  = shardNum
+        self.targetPath= targetPath + "/" # Avoid error
+        self.debug     = debug
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for hdfs"
 
-        # Load config file
-        if configFile:
-            self.loadFromConfig(configFile)
-
-        # Load params
-        if dataPath:
-            if not os.path.isdir(dataPath):
-                raise ValueError("DATAPREP [ERROR]: source directory do not exist")
-            self.dataPath = dataPath
-        if shardNum:
-            if (not isinstance(shardNum, int)) and int(shardNum)<=0 :
-                raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
-            self.shardNum = shardNum
-        if dataRegex:
-		    self.dataRegex = dataRegex
-        if targetPath:
-		    self.targetPath = targetPath
-
         # Check param validity
-        if self.dataPath=="":
-            raise ValueError("DATAPREP [ERROR]: dataPath not specified")
+        if not os.path.isdir(dataPath):
+            raise ValueError("DATAPREP [ERROR]: source directory do not exist")
+        if (not isinstance(shardNum, int)) or int(shardNum)<=0 :
+            raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
         if self.dataRegex=="":
             raise ValueError("DATAPREP [ERROR]: dataRegex not specified")
-        if self.shardNum==0:
-            raise ValueError("DATAPREP [ERROR]: shardNumber not specified")
         if self.targetPath=="":
             raise ValueError("DATAPREP [ERROR]: targetPath not specified")
-
         print "DATAPREP [INFO]: Using data from path:" + self.dataPath
-
-        return
-
-    def loadFromConfig(self, configFile):
-        if not os.path.exists(configFile):
-            raise ValueError("DATAPREP [ERROR]: config file does not exist")
-        if os.path.isdir(configFile):
-            raise ValueError("DATAPREP [ERROR]: config file leads to directory instead of file")
-
-        print("DARAPREP [INFO]: Reading configurations from file: %s" % (configFile))
-        cf = SafeConfigParser(os.environ)
-        cf.read(configFile)
-
-        self.dataRegex    =    cf.get("data",   "train")
-        self.dataPath     =    cf.get("data",   "data_path")
-        self.targetPath   =    cf.get("data",   "prep_path")
-        self.shardNum     = cf.getint("option", "shards")
         return
 
     def sentCount(self, dataPath, dataRegex):
@@ -100,18 +64,17 @@ class DataPrep():
                                 count += 1
         return count
 
-    def dataPartition(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None):
+    def loadToPath(self):
         '''
         :param dataPath: the input directory storing training data_pool
         :param shardNum: the number of partisions of data_pool
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
-        if dataPath   == None: dataPath   = self.dataPath
-        if dataRegex  == None: dataRegex  = self.dataRegex
-        if shardNum   == None: shardNum   = self.shardNum
-        if targetPath == None: targetPath = "data/prep/"
-
+        dataPath   = self.dataPath
+        dataRegex  = self.dataRegex
+        shardNum   = self.shardNum
+        targetPath = self.targetPath
 
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(targetPath):
@@ -164,26 +127,52 @@ class DataPrep():
             if self.debug: print "DATAPREP [DEBUG]: Partition complete"
         return output_path
 
-    def dataUpload(self, sourcePath, targetPath=None):
+    def dataUpload(self):
         '''
         This function uploads the folder sourcePath to targetPath on hadoop.
         '''
-        if targetPath == None: targetPath = self.targetPath
+        from pyspark import SparkContext
 
+        sc = SparkContext()
+
+        aFilePattern = re.compile(self.dataRegex)
+        aRdd = sc.emptyRDD()
+        aFileList = []
+
+        for dirName, subdirList, fileList in os.walk(self.dataPath):
+            for fileName in fileList:
+                if aFilePattern.match(str(fileName)) != None:
+                    filePath = "%s/%s" % ( str(dirName), str(fileName) )
+                    if self.debug: print "DATAPREP [DEBUG]: Adding file " + filePath
+                    aRdd = aRdd + sc.textFile("file://"+filePath)
+                    aFileList.append(filePath)
+
+        aRdd.filter(lambda x: x!='').collect()
+
+        hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
-        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + targetPath
-        os.system("$HADOOP_HOME/bin/hdfs dfs -mkdir -p " + targetPath)
-        if self.debug: print "DATAPREP [DEBUG]: Uploading directory " + sourcePath
-        os.system("$HADOOP_HOME/bin/hdfs dfs -put -f %s %s"%(sourcePath,targetPath))
+        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.targetPath + hashCode
+        # Save as specific amount of files
+        # aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.targetPath + hashCode)
+        # Save as default amount of files
+        aRdd.saveAsTextFile(self.targetPath + hashCode)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
         return
 
 # Uncomment the following code for tests
-
+'''
 if __name__ == "__main__":
-    #dataPath   = sys.argv[1]
-    #dataRegex  = sys.argv[2]
-    #shardNum   = int(sys.argv[3])
-    dataPrep = DataPrep(targetPath="data/meow/", shardNum=8, configFile=sys.argv[1])
-    sourcePath = dataPrep.dataPartition()
-    dataPrep.dataUpload(sourcePath)
+    configFile = sys.argv[1]
+    print("DATAPREP [INFO]: Reading configurations from file: %s" % (configFile))
+    cf = SafeConfigParser(os.environ)
+    cf.read(configFile)
+
+    dataRegex    =    cf.get("data",   "train")
+    dataPath     =    cf.get("data",   "data_path")
+    targetPath   =    cf.get("data",   "prep_path")
+    shardNum     = cf.getint("option", "shards")
+    dataPrep = DataPrep(dataPath, dataRegex, shardNum, targetPath)
+    #dataPrep.loadToPath()
+    dataPrep.dataUpload()
+    print("DATAPREP [INFO]: Test Complete")
+'''
