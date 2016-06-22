@@ -46,12 +46,12 @@ Parse(sentence, arc_weight):
                 score = calculate the score of heap[s][t][1][0]
                 push (score, q, N1, N2) into heap[s][t][1][0].heap
 
-            Expore(heap[s][t][0][1].heap, heap[s][t][0][1].buf, score_calculator_func)
-            Expore(heap[s][t][1][1].heap, heap[s][t][1][1].buf, score_calculator_func)
-            Expore(heap[s][t][0][0].heap, heap[s][t][0][0].buf, score_calculator_func)
-            Expore(heap[s][t][1][0].heap, heap[s][t][1][0].buf, score_calculator_func)
+            Explore(heap[s][t][0][1].heap, heap[s][t][0][1].buf, score_calculator_func)
+            Explore(heap[s][t][1][1].heap, heap[s][t][1][1].buf, score_calculator_func)
+            Explore(heap[s][t][0][0].heap, heap[s][t][0][0].buf, score_calculator_func)
+            Explore(heap[s][t][1][0].heap, heap[s][t][1][0].buf, score_calculator_func)
 
-Expore(heap, buf, score_calculator_func):
+Explore(heap, buf, score_calculator_func):
 	while heap is not empty and size of buf < bestK:
 		node T = heap.pop()
 		push T to buf

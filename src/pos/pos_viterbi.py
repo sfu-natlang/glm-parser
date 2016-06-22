@@ -27,7 +27,6 @@ class Viterbi():
 
 
     def perc_test(self, feat_vec, labeled_list, tagset, default_tag):
-
         output = []
 
 
