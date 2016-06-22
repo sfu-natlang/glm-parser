@@ -149,7 +149,7 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        output_path = DataPrep(dataPath=self.data_path, dataRegex=self.section_regex, shardNum=1, targetPath=self.prep_path).dataPartition()
+        output_path = DataPrep(dataPath=self.data_path, dataRegex=self.section_regex, shardNum=1, targetPath=self.prep_path).loadToPath()
 
         for dirName, subdirList, fileList in os.walk(output_path):
             for file_name in fileList:

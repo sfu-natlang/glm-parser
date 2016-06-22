@@ -31,19 +31,32 @@ class DataPrep():
         self.shardNum  = shardNum
         self.targetPath= targetPath + "/" # Avoid error
         self.debug     = debug
-        if self.debug: print "DATAPREP [DEBUG]: Preparing data for hdfs"
+        if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
         # Check param validity
         if not os.path.isdir(dataPath):
             raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if (not isinstance(shardNum, int)) or int(shardNum)<=0 :
             raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
-        if self.dataRegex=="":
+        if dataRegex=="":
             raise ValueError("DATAPREP [ERROR]: dataRegex not specified")
-        if self.targetPath=="":
+        if targetPath=="":
             raise ValueError("DATAPREP [ERROR]: targetPath not specified")
-        print "DATAPREP [INFO]: Using data from path:" + self.dataPath
+        if self.debug: print "DATAPREP [DEBUG]: Using data from path:" + self.dataPath
         return
+
+    def path(self):
+        if self.path: return self.path
+        aFileList = []
+
+        for dirName, subdirList, fileList in os.walk(self.dataPath):
+            for fileName in fileList:
+                if aFilePattern.match(str(fileName)) != None:
+                    filePath = "%s/%s" % ( str(dirName), str(fileName) )
+                    aFileList.append(filePath)
+        hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
+        self.path = self.targetPath + hashCode
+
 
     def sentCount(self, dataPath, dataRegex):
         '''
@@ -71,50 +84,47 @@ class DataPrep():
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
-        dataPath   = self.dataPath
-        dataRegex  = self.dataRegex
-        shardNum   = self.shardNum
-        targetPath = self.targetPath
-
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
-        if not os.path.exists(targetPath):
-            os.makedirs(targetPath)
+        if not os.path.exists(self.targetPath):
+            os.makedirs(self.targetPath)
 
-        sectionPattern = re.compile(dataRegex)
+        sectionPattern = re.compile(self.dataRegex)
         aFileList = []
 
-        for dirName, subdirList, fileList in os.walk(dataPath):
+        for dirName, subdirList, fileList in os.walk(self.dataPath):
             for fileName in fileList:
                 if sectionPattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
-                    if self.debug: print "DATAPREP [DEBUG]: Pendng file " + filePath
+                    #if self.debug: print "DATAPREP [DEBUG]: Pendng file " + filePath
                     aFileList.append(filePath)
 
-        input_string = ''.join(aFileList) + str(shardNum)
-        folder = hashlib.md5(input_string).hexdigest()[:7]
-        output_path = targetPath + folder + '/'
+        input_string = ''.join(aFileList) + str(self.shardNum)
+        hashCode = hashlib.md5(input_string).hexdigest()[:7]
 
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+        self.path = self.targetPath + hashCode
 
-            fid = shardNum-1
+        if not os.path.exists(self.path):
+            if self.debug: print "DATAPREP [DEBUG]: Copying data to local directory: " + self.path
+            os.makedirs(self.path)
 
-            output_file = output_path + str(fid)
+            fid = self.shardNum-1
+
+            output_file = self.path + '/'+ str(fid)
             fout = open(output_file,"w")
 
             count = 0
 
-            n = self.sentCount(dataPath,dataRegex)/shardNum # number of sentences per shard
+            n = self.sentCount(self.dataPath, self.dataRegex)/self.shardNum # number of sentences per shard
 
             for filePath in aFileList:
-                if self.debug: print "DATAPREP [DEBUG]: Opening file "+ filePath
+                #if self.debug: print "DATAPREP [DEBUG]: Opening file "+ filePath
                 fin = open(filePath, "r")
 
                 for line in fin:
                     if count == n and fid is not 0:
                         fid -= 1
                         fout.close()
-                        output_file = output_path + str(fid)
+                        output_file = self.path + '/' + str(fid)
                         fout = open(output_file,"w")
                         count = 0
 
@@ -124,8 +134,10 @@ class DataPrep():
                         count += 1
 
             fout.close()
-            if self.debug: print "DATAPREP [DEBUG]: Partition complete"
-        return output_path
+        else:
+            if self.debug: print "DATAPREP [DEBUG]: local directory: " + self.path + " already exists, will not proceed to copy"
+        if self.debug: print "DATAPREP [DEBUG]: Partition complete"
+        return self.path
 
     def dataUpload(self):
         '''
@@ -143,19 +155,20 @@ class DataPrep():
             for fileName in fileList:
                 if aFilePattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
-                    if self.debug: print "DATAPREP [DEBUG]: Adding file " + filePath
+                    #if self.debug: print "DATAPREP [DEBUG]: Adding file " + filePath
                     aRdd = aRdd + sc.textFile("file://"+filePath)
                     aFileList.append(filePath)
 
         aRdd.filter(lambda x: x!='').collect()
 
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
+        self.path = self.targetPath + hashCode
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.targetPath + hashCode
         # Save as specific amount of files
-        # aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.targetPath + hashCode)
+        aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.targetPath + hashCode)
         # Save as default amount of files
-        aRdd.saveAsTextFile(self.targetPath + hashCode)
+        # aRdd.saveAsTextFile(self.targetPath + hashCode)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
         return
 
@@ -163,7 +176,7 @@ class DataPrep():
 '''
 if __name__ == "__main__":
     configFile = sys.argv[1]
-    print("DATAPREP [INFO]: Reading configurations from file: %s" % (configFile))
+    print("DATAPREP [DEBUG]: Reading configurations from file: %s" % (configFile))
     cf = SafeConfigParser(os.environ)
     cf.read(configFile)
 
@@ -174,5 +187,5 @@ if __name__ == "__main__":
     dataPrep = DataPrep(dataPath, dataRegex, shardNum, targetPath)
     #dataPrep.loadToPath()
     dataPrep.dataUpload()
-    print("DATAPREP [INFO]: Test Complete")
+    print("DATAPREP [DEBUG]: Test Complete")
 '''
