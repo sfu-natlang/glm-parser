@@ -25,7 +25,7 @@ import ConfigParser
 from ConfigParser import SafeConfigParser
 
 class DataPrep():
-    def __init__(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None, configFile=None, debug=False):
+    def __init__(self, dataPath=None, dataRegex=None, shardNum=None, targetPath=None, configFile=None, debug=True):
         self.dataPath=""
         self.dataRegex=""
         self.shardNum=0
@@ -172,8 +172,9 @@ class DataPrep():
 
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + targetPath
-        os.system("hdfs dfs -mkdir -p " + targetPath)
-        os.system("hdfs dfs -put -f %s %s"%(sourcePath,targetPath))
+        os.system("$HADOOP_HOME/bin/hdfs dfs -mkdir -p " + targetPath)
+        if self.debug: print "DATAPREP [DEBUG]: Uploading directory " + sourcePath
+        os.system("$HADOOP_HOME/bin/hdfs dfs -put -f %s %s"%(sourcePath,targetPath))
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
         return
 

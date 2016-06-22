@@ -88,7 +88,10 @@ class GlmParser():
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
         output_dir = self.prep_path
-        output_path = partition_data(self.data_path, train_regex, shards, output_dir)
+        trainDataPrep = DataPrep(dataPath=self.data_path, dataRegex=train_regex, shardNum=shards, targetPath=output_dir)
+        output_path = trainDataPrep.dataPartition()
+        if hadoop:
+            trainDataPrep.dataUpload(output_path)
 
         parallel_learner = pl(self.w_vector,max_iter)
         if max_iter == -1:
@@ -369,10 +372,6 @@ if __name__ == "__main__":
     # process options
 
     # This will upload all the train data to hdfs
-    if h_flag == True and parallel_flag == True:
-        dataPrep   = DataPrep(dataPath=test_data_path, dataRegex=train_regex, shardNum=shards_number, targetPath=prep_path, debug=false)
-        sourcePath = dataPrep.dataPartition()
-        dataPrep.dataUpload(sourcePath)
     if debug.debug.time_accounting_flag == True:
         print("Time accounting is ON")
 

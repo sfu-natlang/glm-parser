@@ -23,3 +23,6 @@ rm -f ../src/*/*.pyc
 rm -f ../src/hvector/*.egg-info
 rm -f ../src/*/*.so
 rm -r ../src/data/prep
+rm -f ../src/*.egg
+rm -r ../src/*.egg-info
+rm -r ../src/dist
