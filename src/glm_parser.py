@@ -5,7 +5,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu
 # (Please add on your name if you have authored this file)
 #
 from feature import feature_vector
@@ -174,6 +174,7 @@ MINOR_VERSION = 0
 if __name__ == "__main__":
     import getopt, sys
 
+    # Default values
     train_regex = ''
     test_regex = ''
     max_iter = 1
@@ -192,8 +193,7 @@ if __name__ == "__main__":
     parserValue   = 'ceisner'
     data_format   = 'format/penn2malt.format'
 
-    # parser = parse.ceisner3.EisnerParser
-    # Main driver is glm_parser instance defined in this file
+    # Dealing with arguments here
     glm_parser = GlmParser
     arg_parser = argparse.ArgumentParser(description="""Global Linear Model (GLM) Parser
         Version %d.%d""" % (MAJOR_VERSION, MINOR_VERSION))
@@ -408,9 +408,6 @@ if __name__ == "__main__":
                     part_data=prep_path)
 
     training_time = None
-
-    #parallel_learn = get_class_from_module('parallel_learn','learn','spark_train')
-    #gp.parallel_train(train_regex,max_iter,shards_number,pl=parallel_learn)
 
     if train_regex is not '':
         start_time = time.time()
