@@ -303,6 +303,8 @@ if __name__ == "__main__":
     arg_parser.add_argument('--hadoop', '-c', action='store_true')
     args=arg_parser.parse_args()
     if args.config:
+        if not os.path.isfile(args.config):
+            raise ValueError('Specified config file does not exist or is not a file: ' + args.config)
         print("Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
         cf.read(args.config)
