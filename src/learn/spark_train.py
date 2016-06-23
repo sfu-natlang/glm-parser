@@ -75,7 +75,7 @@ class ParallelPerceptronLearner():
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
             print dir_name
             train_files= sc.wholeTextFiles("file://" + dir_name ,minPartitions=10).cache()
-        
+
         dp = train_files.map(lambda t: create_dp(t,fgen,format_list,comment_sign)).cache()
 
         if learner.__class__.__name__== "AveragePerceptronLearner":
@@ -85,7 +85,6 @@ class ParallelPerceptronLearner():
             c = total_sent*max_iter
             for iteration in range(max_iter):
                 print "[INFO]: Starting Iteration %d"%iteration
-                print "[INFO]: Initial Number of Keys: %d"%len(fv.keys())
                 #mapper: computer the weight vector in each shard using avg_perc_train
                 feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,parser))
                 #reducer: combine the weight vectors from each shard
@@ -96,7 +95,7 @@ class ParallelPerceptronLearner():
                 fv = {}
                 for (feat, (a,b,c)) in feat_vec_list:
                     fv[feat] = (float(a)/float(c),b)
-                print "[INFO]: Iteration complete"
+                print "[INFO]: Iteration complete, total number of keys: %d"%len(fv.keys())
 
             self.w_vector.clear()
             for feat in fv.keys():

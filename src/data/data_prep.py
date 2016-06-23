@@ -25,7 +25,7 @@ import ConfigParser
 from ConfigParser import SafeConfigParser
 
 class DataPrep():
-    def __init__(self, dataPath, dataRegex, shardNum, targetPath, debug=False):
+    def __init__(self, dataPath, dataRegex, shardNum, targetPath, sparkContext=None, debug=True):
         self.dataPath  = dataPath
         self.dataRegex = dataRegex
         self.shardNum  = shardNum
@@ -33,6 +33,7 @@ class DataPrep():
         # which could be problematic in the future
         self.targetPath= targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath
         self.debug     = debug
+        self.sc = sparkContext
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
         # Check param validity
@@ -154,30 +155,27 @@ class DataPrep():
         '''
         from pyspark import SparkContext
 
-        sc = SparkContext()
+        if self.sc == None: self.sc = SparkContext()
 
         aFilePattern = re.compile(self.dataRegex)
-        aRdd = sc.emptyRDD()
         aFileList = []
 
         for dirName, subdirList, fileList in os.walk(self.dataPath):
             for fileName in fileList:
                 if aFilePattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
-                    #if self.debug: print "DATAPREP [DEBUG]: Adding file " + filePath
-                    aRdd = aRdd + sc.textFile("file://"+filePath)
-                    aFileList.append(filePath)
+                    aFileList.append("file://"+filePath)
 
-        aRdd.filter(lambda x: x!='').collect()
+        aRdd = self.sc.textFile(','.join(aFileList)).cache()
 
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
-        self.path = self.targetPath + hashCode + '/'
+        self.path = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
-        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.targetPath + hashCode
+        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.path
         # Save as specific amount of files
-        aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.targetPath + hashCode)
+        # aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.path)
         # Save as default amount of files
-        # aRdd.saveAsTextFile(self.targetPath + hashCode)
+        aRdd.saveAsTextFile(self.path)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
         return
 

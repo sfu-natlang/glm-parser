@@ -87,7 +87,7 @@ class GlmParser():
 
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
-        trainDataPrep = DataPrep(dataPath=self.data_path, dataRegex=train_regex, shardNum=shards, targetPath=self.prep_path)
+        trainDataPrep = DataPrep(dataPath=self.data_path, dataRegex=train_regex, shardNum=shards, sparkContext=spark_Context, targetPath=self.prep_path)
         if hadoop == True:
             trainDataPrep.dataUpload()
         else:

@@ -13,4 +13,4 @@ mv dist/module-0.1-py2.7.egg module.egg
 
 #change the data paths of the penn-wsj-deps and format files to user's local dir which the hadoop workers can access
 # It is very important to use the option --hadoop here, otherwise the clusters will only use the data from local hard drives instead of hdfs
-spark-submit --master yarn-cluster --num-executors 8 --driver-memory 7g --executor-memory 7g --py-files module.egg glm_parser.py -s 8 -i 1 --hadoop ~/Daten/glm-parser-config/default.config
+spark-submit --master yarn-cluster --num-executors 9 --driver-memory 7g --executor-memory 7g --executor-cores 3 --py-files module.egg glm_parser.py -s 8 -i 1 --hadoop ~/Daten/glm-parser-config/default.config
