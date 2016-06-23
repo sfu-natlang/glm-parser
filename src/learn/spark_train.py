@@ -29,7 +29,7 @@ class ParallelPerceptronLearner():
         logging.debug("Initialize ParallelPerceptronLearner ... ")
         self.w_vector = w_vector
         return
-    def parallel_learn(self, max_iter=-1, dir_name=None, shards=1, fgen=None,parser=None,format_path=None,learner=None,sc=None,d_filename=None):
+    def parallel_learn(self, max_iter=-1, dir_name=None, shards=1, fgen=None, parser=None, format_path=None, learner=None, sc=None, d_filename=None, hadoop=False):
         '''
         This is the function which does distributed training using Spark
 
@@ -68,7 +68,12 @@ class ParallelPerceptronLearner():
 
         #nodes_num = "local[%d]"%shards
         #sc = SparkContext(master=nodes_num)
-        train_files= sc.wholeTextFiles(dir_name,minPartitions=10).cache()
+        if hadoop == True:
+            train_files= sc.wholeTextFiles(dir_name,minPartitions=10).cache()
+        else:
+            dir_name = os.path.abspath(os.path.expanduser(dir_name))
+            print dir_name
+            train_files= sc.wholeTextFiles("file://" + dir_name ,minPartitions=10).cache()
         dp = train_files.map(lambda t: create_dp(t,fgen,format_list,comment_sign)).cache()
 
         if learner.__class__.__name__== "AveragePerceptronLearner":

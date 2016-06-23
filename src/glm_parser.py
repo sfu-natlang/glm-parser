@@ -87,9 +87,8 @@ class GlmParser():
 
     def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
         #partition the data for the spark trainer
-        output_dir = self.prep_path
-        trainDataPrep = DataPrep(dataPath=self.data_path, dataRegex=train_regex, shardNum=shards, targetPath=output_dir)
-        if hadoop:
+        trainDataPrep = DataPrep(dataPath=self.data_path, dataRegex=train_regex, shardNum=shards, targetPath=self.prep_path)
+        if hadoop == True:
             trainDataPrep.dataUpload()
         else:
             trainDataPrep.loadToPath()
@@ -97,7 +96,7 @@ class GlmParser():
         parallel_learner = pl(self.w_vector,max_iter)
         if max_iter == -1:
             max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter, trainDataPrep.path(), shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename)
+        parallel_learner.parallel_learn(max_iter=max_iter, dir_name=trainDataPrep.loadedPath(), shards=shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename, hadoop=hadoop)
 
     def evaluate(self, training_time,  test_regex=''):
         if not test_regex == '':

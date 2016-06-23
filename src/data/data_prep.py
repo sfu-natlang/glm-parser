@@ -29,7 +29,7 @@ class DataPrep():
         self.dataPath  = dataPath
         self.dataRegex = dataRegex
         self.shardNum  = shardNum
-        self.targetPath= targetPath + "/" # Avoid error
+        self.targetPath= targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath # Avoid error
         self.debug     = debug
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
@@ -45,7 +45,7 @@ class DataPrep():
         if self.debug: print "DATAPREP [DEBUG]: Using data from path:" + self.dataPath
         return
 
-    def path(self):
+    def loadedPath(self):
         if self.path: return self.path
         aFileList = []
 
@@ -55,7 +55,8 @@ class DataPrep():
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
                     aFileList.append(filePath)
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
-        self.path = self.targetPath + hashCode
+        self.path = self.targetPath + hashCode + '/'
+        return self.path
 
 
     def sentCount(self, dataPath, dataRegex):
@@ -101,7 +102,7 @@ class DataPrep():
         input_string = ''.join(aFileList) + str(self.shardNum)
         hashCode = hashlib.md5(input_string).hexdigest()[:7]
 
-        self.path = self.targetPath + hashCode
+        self.path = self.targetPath + hashCode + '/'
 
         if not os.path.exists(self.path):
             if self.debug: print "DATAPREP [DEBUG]: Copying data to local directory: " + self.path
@@ -109,7 +110,7 @@ class DataPrep():
 
             fid = self.shardNum-1
 
-            output_file = self.path + '/'+ str(fid)
+            output_file = self.path + str(fid)
             fout = open(output_file,"w")
 
             count = 0
@@ -124,7 +125,7 @@ class DataPrep():
                     if count == n and fid is not 0:
                         fid -= 1
                         fout.close()
-                        output_file = self.path + '/' + str(fid)
+                        output_file = self.path + str(fid)
                         fout = open(output_file,"w")
                         count = 0
 
@@ -162,7 +163,7 @@ class DataPrep():
         aRdd.filter(lambda x: x!='').collect()
 
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
-        self.path = self.targetPath + hashCode
+        self.path = self.targetPath + hashCode + '/'
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.targetPath + hashCode
         # Save as specific amount of files
