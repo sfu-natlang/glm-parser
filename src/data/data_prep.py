@@ -29,7 +29,9 @@ class DataPrep():
         self.dataPath  = dataPath
         self.dataRegex = dataRegex
         self.shardNum  = shardNum
-        self.targetPath= targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath # Avoid error
+        # Avoid error. We do not know whether the user has got a / at the end of the string or not,
+        # which could be problematic in the future
+        self.targetPath= targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath
         self.debug     = debug
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
@@ -46,7 +48,11 @@ class DataPrep():
         return
 
     def loadedPath(self):
+        '''
+        Return the path of the present data.
+        '''
         if self.path: return self.path
+        print ("DATAPREP [WARN]: data not loaded yet.")
         aFileList = []
 
         for dirName, subdirList, fileList in os.walk(self.dataPath):
@@ -55,6 +61,8 @@ class DataPrep():
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
                     aFileList.append(filePath)
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
+        # Adding a / at the end of the string to prevent confusion. It is in fact a directory,
+        # not a file.
         self.path = self.targetPath + hashCode + '/'
         return self.path
 
@@ -142,7 +150,7 @@ class DataPrep():
 
     def dataUpload(self):
         '''
-        This function uploads the folder sourcePath to targetPath on hadoop.
+        This function uploads the data to targetPath on hadoop.
         '''
         from pyspark import SparkContext
 

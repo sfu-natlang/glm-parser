@@ -66,14 +66,16 @@ class ParallelPerceptronLearner():
 
         fformat.close()
 
-        #nodes_num = "local[%d]"%shards
-        #sc = SparkContext(master=nodes_num)
+
+        # By default, when the hdfs is configured for spark, even in local mode it will
+        # still try to load from hdfs. The following code is to resolve this confusion.
         if hadoop == True:
             train_files= sc.wholeTextFiles(dir_name,minPartitions=10).cache()
         else:
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
             print dir_name
             train_files= sc.wholeTextFiles("file://" + dir_name ,minPartitions=10).cache()
+        
         dp = train_files.map(lambda t: create_dp(t,fgen,format_list,comment_sign)).cache()
 
         if learner.__class__.__name__== "AveragePerceptronLearner":
