@@ -49,15 +49,6 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a feature generator")
 
-        # why load the data here???
-        if not spark:
-            self.train_data_pool = DataPool(train_regex, data_path, fgen=self.fgen,
-                                        format_path=data_format)
-        if test_regex:
-            self.test_data_pool = DataPool(test_regex, data_path, fgen=self.fgen,
-                                       format_path=data_format)
-
-
         self.parser = parser()
 
         if learner is not None:
@@ -69,44 +60,47 @@ class GlmParser():
         else:
             raise ValueError("You need to specify a learner")
 
-
         self.evaluator = Evaluator()
 
-    def sequential_train(self, train_regex='', max_iter=-1, d_filename=None, dump_freq = 1):
-        if not train_regex == '':
-            train_data_pool = DataPool(train_regex, self.data_path, fgen=self.fgen,
-                                       format_path=data_format)
+    def train(self, dataPool=None, maxIteration=None, dumpPath=None, dumpFrequency=1, parallel=False, shardNum=None, sc=None, hadoop=False):
+        if dataPool == None:
+            raise ValueError("PARSER [ERRO]: DataPool for training not specified")
+        if maxIteration == None:
+            # We shall encourage the users to specify the number of iterations by themselves
+            print ("PARSER [WARN]: Number of Iterations not specified, using 1")
+            maxIteration = 1
+
+        if parallel == False:
+            # It means we will be using sequential training
+            self.learner.sequential_learn(self.compute_argmax, dataPool, maxIteration, dumpPath,
+                                          dumpFrequency)
         else:
-            train_data_pool = self.train_data_pool
+            if shardNum == None:
+                # We shall encourage the users to specify the number of shards by themselves
+                print ("PARSER [WARN]: Number of shards not specified, using 1")
+                shardNum = 1
+            if sc == None:
+                print ("PARSER [INFO]: SparkContext not specified, will try to specify now")
+                try:
+                    from pyspark import SparkContext,SparkConf
+                    conf = SparkConf()
+                    sc = SparkContext(conf=conf)
+                except:
+                    raise RuntimeError('PARSER [ERRO]: SparkContext entity conflict, entity already exists')
 
-        if max_iter == -1:
-            max_iter = self.max_iter
-        self.learner.sequential_learn(self.compute_argmax, train_data_pool, max_iter, d_filename,
-                                      dump_freq)
+            parallelLearnClass = get_class_from_module('parallel_learn', 'learn', 'spark_train')
+            learner = parallelLearnClass(self.w_vector,max_iter)
+            learner.parallel_learn(max_iter=maxIteration, dir_name=trainDataPrep.loadedPath(), shards=shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner, sc=sc,d_filename=dumpPath, hadoop=hadoop)
 
+    def evaluate(self, dataPool=None, trainingTime=None):
+        if dataPool == None:
+            raise ValueError("PARSER [ERRO]: DataPool for evaluation not specified")
+        if trainingTime == None:
+            # We shall encourage the users to specify the number of iterations by themselves
+            print ("PARSER [WARN]: Timer of evaluation not specified")
+            trainingTime = 1
 
-    def parallel_train(self, train_regex='', max_iter=-1, shards=1, d_filename=None, dump_freq=1, shards_dir=None, pl = None, spark_Context=None,hadoop=False):
-        #partition the data for the spark trainer
-        trainDataPrep = DataPrep(dataPath=self.data_path, dataRegex=train_regex, shardNum=shards, sparkContext=spark_Context, targetPath=self.prep_path)
-        if hadoop == True:
-            trainDataPrep.dataUpload()
-        else:
-            trainDataPrep.loadToPath()
-
-        parallel_learner = pl(self.w_vector,max_iter)
-        if max_iter == -1:
-            max_iter = self.max_iter
-        parallel_learner.parallel_learn(max_iter=max_iter, dir_name=trainDataPrep.loadedPath(), shards=shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner,sc=spark_Context,d_filename=d_filename, hadoop=hadoop)
-
-    def evaluate(self, training_time,  test_regex=''):
-        if not test_regex == '':
-            test_data_pool = DataPool(test_regex, self.data_path, fgen=self.fgen,
-                                      format_path=data_format)
-
-        else:
-            test_data_pool = self.test_data_pool
-
-        self.evaluator.evaluate(test_data_pool, self.parser, self.w_vector, training_time)
+        self.evaluator.evaluate(dataPool, self.parser, self.w_vector, trainingTime)
 
 
     def compute_argmax(self, sentence):
@@ -178,7 +172,7 @@ if __name__ == "__main__":
     train_regex = ''
     test_regex = ''
     max_iter = 1
-    test_data_path = ''  #"./penn-wsj-deps/"
+    data_path = ''  #"./penn-wsj-deps/"
     l_filename = None
     d_filename = None
     dump_freq = 1
@@ -311,7 +305,7 @@ if __name__ == "__main__":
 
         train_regex    = cf.get("data", "train")
         test_regex     = cf.get("data", "test")
-        test_data_path = cf.get("data", "data_path")
+        data_path = cf.get("data", "data_path")
         prep_path      = cf.get("data", "prep_path")
         data_format    = cf.get("data", "format")
 
@@ -335,7 +329,7 @@ if __name__ == "__main__":
         shards_number = int(args.spark)
         parallel_flag = True
     if args.path:
-        test_data_path = args.path
+        data_path = args.path
     if args.iteration:
         max_iter = int(args.iteration)
     if args.l:
@@ -401,7 +395,7 @@ if __name__ == "__main__":
         print("Enable feature request log")
 
     # Initialisation
-    gp = glm_parser(train_regex, test_regex, data_path=test_data_path, l_filename=l_filename,
+    gp = glm_parser(train_regex, test_regex, data_path=data_path, l_filename=l_filename,
                     learner=learner,
                     fgen=fgen,
                     parser=parser,
@@ -410,22 +404,44 @@ if __name__ == "__main__":
                     part_data=prep_path)
 
     training_time = None
+    sc = None
 
     if train_regex is not '':
-        start_time = time.time()
-        if parallel_flag:
+        # Preparing training data and datapool
+        if h_flag == True:
             from pyspark import SparkContext,SparkConf
             conf = SparkConf()
             sc = SparkContext(conf=conf)
-            parallel_learn = get_class_from_module('parallel_learn', 'learn', 'spark_train')
-            gp.parallel_train(train_regex,max_iter,shards_number,d_filename,pl=parallel_learn,spark_Context=sc,hadoop=h_flag)
+            trainDataPrep = DataPrep(dataPath=data_path,
+                                     dataRegex=train_regex,
+                                     shardNum=shards_number,
+                                     sparkContext=sc,
+                                     targetPath=prep_path)
+            trainDataPrep.dataUpload()
         else:
-            gp.sequential_train(train_regex, max_iter, d_filename, dump_freq)
+            trainDataPrep = DataPrep(dataPath=data_path,
+                                     dataRegex=train_regex,
+                                     shardNum=shards_number,
+                                     sparkContext=None,
+                                     targetPath=prep_path)
+            trainDataPrep.loadToPath()
+        trainDataPool = DataPool(train_regex, data_path, fgen=fgen, format_path=data_format)
+
+        start_time = time.time()
+        gp.train(dataPool = trainDataPool,
+                 maxIteration  = max_iter,
+                 dumpPath      = d_filename,
+                 dumpFrequency = 1,
+                 parallel      = parallel_flag,
+                 shardNum      = shards_number,
+                 sc            = sc,
+                 hadoop        = h_flag)
         end_time = time.time()
         training_time = end_time - start_time
         print "Total Training Time: ", training_time
     if test_regex is not '':
+        testDataPool = DataPool(test_regex, data_path, fgen=fgen, format_path=data_format)
         print "Evaluating..."
-        gp.evaluate(training_time)
+        gp.evaluate(testDataPool, training_time)
     if parallel_flag:
         sc.stop()
