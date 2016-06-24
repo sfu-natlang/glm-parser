@@ -30,8 +30,17 @@ class DataPool():
     be reset to initial value -1 when reset() is called (manually or
     during init).
     """
-    def __init__(self, section_regex='', data_path="./penn-wsj-deps/",
-                 fgen=None, format_path=None, textString=None, format_list=None, comment_sign='', prep_path='data/prep/'):
+    def __init__(   self,
+                    section_regex='',
+                    data_path="./penn-wsj-deps/",
+                    fgen=None,
+                    format_path=None,
+                    textString=None,
+                    format_list=None,
+                    comment_sign='',
+                    prep_path='data/prep/',
+                    sc=None,
+                    hadoop=False):
 
         """
         Initialize the Data set
@@ -48,8 +57,11 @@ class DataPool():
         :param format_path: the file that describes the file format for the type of data
         :type format_path: str
         """
-        self.fgen = fgen
+        self.fgen   = fgen
+        self.hadoop = hadoop
+        self.sc     = sc
         self.reset_all()
+        
         if textString is not None:
             self.load_stringtext(textString,format_list,comment_sign)
         else:
@@ -57,6 +69,11 @@ class DataPool():
             self.section_regex = section_regex
             self.format_path = format_path
             self.prep_path = prep_path
+            self.dataPrep = DataPrep(   dataPath=self.data_path,
+                                        dataRegex=self.section_regex,
+                                        shardNum=1,
+                                        targetPath=self.prep_path,
+                                        sparkContext=sc)
             self.load()
         return
 
@@ -149,9 +166,12 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        output_path = DataPrep(dataPath=self.data_path, dataRegex=self.section_regex, shardNum=1, targetPath=self.prep_path).loadToPath()
+        self.dataPrep.loadLocal()
 
-        for dirName, subdirList, fileList in os.walk(output_path):
+        if self.hadoop == True:
+            self.dataPrep.loadHadoop()
+
+        for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
             for file_name in fileList:
                 file_path = "%s/%s" % ( str(dirName), str(file_name) )
                 self.data_list += self.get_data_list(file_path)

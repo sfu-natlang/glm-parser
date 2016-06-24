@@ -48,12 +48,12 @@ class DataPrep():
         if self.debug: print "DATAPREP [DEBUG]: Using data from path:" + self.dataPath
         return
 
-    def loadedPath(self):
+    def localPath(self):
         '''
         Return the path of the present data.
         '''
         if self.path: return self.path
-        print ("DATAPREP [WARN]: data not loaded yet.")
+        print ("DATAPREP [WARN]: data not locally loaded yet, will not be loaded this time.")
         aFileList = []
 
         for dirName, subdirList, fileList in os.walk(self.dataPath):
@@ -67,6 +67,13 @@ class DataPrep():
         self.path = self.targetPath + hashCode + '/'
         return self.path
 
+    def hadoopPath(self):
+        '''
+        Return the path of the present data.
+        '''
+        if self.hdfsPath: return self.hdfsPath
+        raise RuntimeError("DATAPREP [ERROR]: data not uploaded to HDFS yet")
+        return
 
     def sentCount(self, dataPath, dataRegex):
         '''
@@ -87,7 +94,7 @@ class DataPrep():
                                 count += 1
         return count
 
-    def loadToPath(self):
+    def loadLocal(self):
         '''
         :param dataPath: the input directory storing training data_pool
         :param shardNum: the number of partisions of data_pool
@@ -149,7 +156,7 @@ class DataPrep():
         if self.debug: print "DATAPREP [DEBUG]: Partition complete"
         return self.path
 
-    def dataUpload(self):
+    def loadHadoop(self):
         '''
         This function uploads the data to targetPath on hadoop.
         '''
@@ -169,15 +176,15 @@ class DataPrep():
         aRdd = self.sc.textFile(','.join(aFileList)).cache()
 
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
-        self.path = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
+        self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
-        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.path
+        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.hdfsPath
         # Save as specific amount of files
         # aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.path)
         # Save as default amount of files
-        aRdd.saveAsTextFile(self.path)
+        aRdd.saveAsTextFile(self.hdfsPath)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
-        return
+        return self.hdfsPath
 
 # Uncomment the following code for tests
 '''
@@ -192,7 +199,7 @@ if __name__ == "__main__":
     targetPath   =    cf.get("data",   "prep_path")
     shardNum     = cf.getint("option", "shards")
     dataPrep = DataPrep(dataPath, dataRegex, shardNum, targetPath)
-    #dataPrep.loadToPath()
-    dataPrep.dataUpload()
+    #dataPrep.loadLocal()
+    dataPrep.loadHadoop()
     print("DATAPREP [DEBUG]: Test Complete")
 '''
