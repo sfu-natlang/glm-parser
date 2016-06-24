@@ -39,6 +39,7 @@ class GlmParser():
                  data_format="format/penn2malt.format",
                  spark=False):
 
+        print ("PARSER [DEBUG]: Initialising Parser")
         if fgen == None:
             raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner == None:
@@ -55,6 +56,7 @@ class GlmParser():
             self.learner = learner()
         else:
             self.learner = learner(self.w_vector, max_iter)
+        print ("PARSER [DEBUG]: Initialisation Complete")
 
     def train(self,
               dataPool      = None,
@@ -66,6 +68,8 @@ class GlmParser():
               sc            = None,
               hadoop        = False):
 
+        print ("PARSER [DEBUG]: Starting Training Process")
+
         if dataPool == None:
             raise ValueError("PARSER [ERROR]: DataPool for training not specified")
         if maxIteration == None:
@@ -75,9 +79,14 @@ class GlmParser():
 
         if parallel == False:
             # It means we will be using sequential training
-            self.learner.sequential_learn(self.compute_argmax, dataPool, maxIteration, dumpPath,
+            print ("PARSER [DEBUG]: Using Sequential Training")
+            self.learner.sequential_learn(self.compute_argmax,
+                                          dataPool,
+                                          maxIteration,
+                                          dumpPath,
                                           dumpFrequency)
         else:
+            print ("PARSER [DEBUG]: Using Parallel Training")
             if shardNum == None:
                 # We shall encourage the users to specify the number of shards by themselves
                 print ("PARSER [WARN]: Number of shards not specified, using 1")
@@ -93,7 +102,16 @@ class GlmParser():
 
             parallelLearnClass = get_class_from_module('parallel_learn', 'learn', 'spark_train')
             learner = parallelLearnClass(self.w_vector,max_iter)
-            learner.parallel_learn(max_iter=maxIteration, dir_name=trainDataPrep.loadedPath(), shards=shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner, sc=sc,d_filename=dumpPath, hadoop=hadoop)
+            learner.parallel_learn(max_iter    = maxIteration,
+                                   dir_name    = trainDataPrep.loadedPath(),
+                                   shards      = shards,
+                                   fgen        = self.fgen,
+                                   parser      = self.parser,
+                                   format_path = data_format,
+                                   learner     = self.learner,
+                                   sc          = sc,
+                                   d_filename  = dumpPath,
+                                   hadoop      = hadoop)
 
     def evaluate(self,
                  dataPool     = None):
