@@ -1,24 +1,42 @@
 Branch: pos_spark_train
 
-Update date: 22 Juni 2016, 23:32
+Update date: 2016-06-24 13:49
 
 Author: Jetic Gu
 
 Ongoing tasks:
-1. Test the glm_parser with data_prep on hadoop
+1. Test the glm_parser with data_prep on hadoop (DONE: 2016-06-23 04:52)
+
 2. Integrate data_prep and data_pool
-    a). I think that the data_prep should be a part of the data_pool, because all it does is preparing the data.
-    b). I am seeing a lot of data_pool instances, they shouldn't all be necessary. For sequential run, there should
-        only be two, one for training and one for testing.
-    c). Why is the feature generator specified in the data_pool instead of the learner? Is it just me or is it
-        really ridiculous?
-    d). There should be a debug switch.
+    Thoughts:
+        a). I think that the data_prep should be a part of the data_pool,
+            because all it does is preparing the data.
+        b). I am seeing a lot of data_pool instances, they shouldn't all be
+            necessary. For sequential run, there should
+            only be two, one for training and one for testing.
+        c). Why is the feature generator specified in the data_pool instead of
+            the learner? Is it just me or is it really ridiculous?
+        d). There should be a debug switch.
+    Steps:
+        a). Restructure the training part of glm_parser.py, we need the train
+            function to take the datapool as an argument.
+            (DONE: 2016-06-24 13:49. The only problem with parallel part is that we
+            need to restructure the data_pool first, because it now takes
+            dataPrep.loadedPath as an argument)
+        b). Restructure the data_pool so that it uses data_prep to prepare the
+            data.
+        c). Restructure the learner to take the datapool as an argument.
+
 3. Restructure the learners
-    a). There should be four learners now: 1) averaged perceptron; 2) perceptron; 3) averaged perceptron in parallel;
-        4) perceptron in parallel. But currently 3) and 4) are squeezed into one file while part of 3) and 4) is in
-        2).
+    a). There should be four learners now: 1) averaged perceptron;
+        2) perceptron; 3) averaged perceptron in parallel; 4) perceptron in
+        parallel. But currently 3) and 4) are squeezed into one file while part
+        of 3) and 4) is in 2).
     b). Functions of a specific class should make sense. Now, it's chaos.
     c). There should be a debug switch.
+
 4. pos_tagger should be using data_pool as main data storage device.
+
 5. pos_tagger should be using learners just like the parser.
+
 6. After all is done, merge with Kingston.
