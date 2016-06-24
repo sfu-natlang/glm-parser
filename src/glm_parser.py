@@ -24,6 +24,8 @@ import debug.interact
 import timeit
 import time
 import sys,os
+import logging
+
 import argparse
 import ConfigParser
 from ConfigParser import SafeConfigParser
@@ -37,28 +39,33 @@ class GlmParser():
                  data_format="format/penn2malt.format",
                  spark=False):
 
+        if fgen == None:
+            raise ValueError("PARSER [ERROR]: Feature Generator not specified")
+        if learner == None:
+            raise ValueError("PARSER [ERROR]: Learner not specified")
 
         self.max_iter = max_iter
         self.data_path = data_path
         self.w_vector = WeightVector(l_filename)
-        if fgen is not None:
-            # Do not instanciate this; used elsewhere
-            self.fgen = fgen
-        else:
-            raise ValueError("PARSER [ERROR]: Feature Generator not specified")
-
-        if learner is not None:
-            if spark:
-                self.learner = learner()
-            else:
-                self.learner = learner(self.w_vector, max_iter)
-        else:
-            raise ValueError("PARSER [ERROR]: Learner not specified")
-
+        self.fgen = fgen
         self.parser = parser()
         self.evaluator = Evaluator()
 
-    def train(self, dataPool=None, maxIteration=None, dumpPath=None, dumpFrequency=1, parallel=False, shardNum=None, sc=None, hadoop=False):
+        if spark:
+            self.learner = learner()
+        else:
+            self.learner = learner(self.w_vector, max_iter)
+
+    def train(self,
+              dataPool      = None,
+              maxIteration  = None,
+              dumpPath      = None,
+              dumpFrequency = 1,
+              parallel      = False,
+              shardNum      = None,
+              sc            = None,
+              hadoop        = False):
+
         if dataPool == None:
             raise ValueError("PARSER [ERROR]: DataPool for training not specified")
         if maxIteration == None:
@@ -88,15 +95,13 @@ class GlmParser():
             learner = parallelLearnClass(self.w_vector,max_iter)
             learner.parallel_learn(max_iter=maxIteration, dir_name=trainDataPrep.loadedPath(), shards=shards, fgen=self.fgen, parser=self.parser, format_path=data_format, learner = self.learner, sc=sc,d_filename=dumpPath, hadoop=hadoop)
 
-    def evaluate(self, dataPool=None, trainingTime=None):
+    def evaluate(self,
+                 dataPool     = None):
+
         if dataPool == None:
             raise ValueError("PARSER [ERROR]: DataPool for evaluation not specified")
-        if trainingTime == None:
-            # We shall encourage the users to specify the number of iterations by themselves
-            print ("PARSER [WARN]: Timer of evaluation not specified")
-            trainingTime = 1
 
-        self.evaluator.evaluate(dataPool, self.parser, self.w_vector, trainingTime)
+        self.evaluator.evaluate(dataPool, self.parser, self.w_vector)
 
 
     def compute_argmax(self, sentence):
@@ -363,7 +368,6 @@ if __name__ == "__main__":
 
     # process options
 
-    # This will upload all the train data to hdfs
     if debug.debug.time_accounting_flag == True:
         print("Time accounting is ON")
 
@@ -390,7 +394,8 @@ if __name__ == "__main__":
     if debug.debug.log_feature_request_flag == True:
         print("Enable feature request log")
 
-    # Initialisation
+    # Initialisation:
+    #     Initialise Parser
     gp = glm_parser(l_filename=l_filename,
                     learner=learner,
                     fgen=fgen,
@@ -398,16 +403,18 @@ if __name__ == "__main__":
                     spark=parallel_flag,
                     data_format=data_format)
 
-    training_time = None
+    #     Initialise sparkcontext
     sc = None
+    if h_flag == True:
+        from pyspark import SparkContext,SparkConf
+        conf = SparkConf()
+        sc = SparkContext(conf=conf)
 
+    #     Initialise Timer
+    training_time = None
+
+    # Run training
     if train_regex is not '':
-        # Preparing training data and datapool
-        if h_flag == True:
-            from pyspark import SparkContext,SparkConf
-            conf = SparkConf()
-            sc = SparkContext(conf=conf)
-
         trainDataPool = DataPool(section_regex = train_regex,
                                  data_path     = data_path,
                                  fgen          = fgen,
@@ -425,15 +432,20 @@ if __name__ == "__main__":
                  sc            = sc,
                  hadoop        = h_flag)
         end_time = time.time()
-        
+
         training_time = end_time - start_time
         print "Total Training Time: ", training_time
+        logging.info("Training time usage(seconds): %f" % (training_time,))
+
+    # Run evaluation
     if test_regex is not '':
         testDataPool = DataPool(section_regex = test_regex,
                                 data_path     = data_path,
                                 fgen          = fgen,
                                 format_path   = data_format)
         print "Evaluating..."
-        gp.evaluate(testDataPool, training_time)
+        gp.evaluate(testDataPool)
+
+    # Finalising
     if parallel_flag:
         sc.stop()

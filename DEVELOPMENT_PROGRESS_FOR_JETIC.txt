@@ -20,11 +20,12 @@ Ongoing tasks:
     Steps:
         a). Restructure the training part of glm_parser.py, we need the train
             function to take the datapool as an argument.
-            (DONE: 2016-06-24 13:49. The only problem with parallel part is that we
-            need to restructure the data_pool first, because it now takes
-            dataPrep.loadedPath as an argument)
+            (DONE: 2016-06-24 13:49. The only problem with parallel part is that
+            we need to restructure the data_pool and learner first, because it
+            now takes dataPrep.loadedPath as an argument)
         b). Restructure the data_pool so that it uses data_prep to prepare the
-            data.
+            data. (DONE: 2016-06-24 15:12. Parallel tests will be done after
+            learner restructure.)
         c). Restructure the learner to take the datapool as an argument.
 
 3. Restructure the learners
