@@ -1,13 +1,18 @@
 Branch: pos_spark_train
 
-Update date: 2016-06-24 13:49
+Update date: 2016-06-25 00:05
 
 Author: Jetic Gu
 
+# For more information on Jetic's changes, he keeps a very detailed dev log on
+# his note pad. If you ask him, he'll get you a copy.
+
 Ongoing tasks:
-1. Test the glm_parser with data_prep on hadoop (DONE: 2016-06-23 04:52)
+1. Test the glm_parser with data_prep on hadoop
+    (DONE: 2016-06-23 04:52)
 
 2. Integrate data_prep and data_pool
+    (DONE: 2016-06-25 00:05)
     Thoughts:
         a). I think that the data_prep should be a part of the data_pool,
             because all it does is preparing the data.
@@ -24,9 +29,17 @@ Ongoing tasks:
             we need to restructure the data_pool and learner first, because it
             now takes dataPrep.loadedPath as an argument)
         b). Restructure the data_pool so that it uses data_prep to prepare the
-            data. (DONE: 2016-06-24 15:12. Parallel tests will be done after
-            learner restructure.)
+            data.
+            (DONE: 2016-06-24 15:12. Parallel tests will be done after learner
+            restructure.)
         c). Restructure the learner to take the datapool as an argument.
+            (DONE: 2016-06-25 00:05. Implementation has passed sequential test
+            on debug.config, parallel test on standalone mode with debug.config
+            (4 shards) and yarn mode with default.config(8 shards)
+        d). In the end, I didn't implement the debug switch for data_pool,
+            I haven't really gotten that far with data_pool. Maybe I'll do that
+            when I am restructuring the learner.
+        e). I shall now merge with master.
 
 3. Restructure the learners
     a). There should be four learners now: 1) averaged perceptron;
