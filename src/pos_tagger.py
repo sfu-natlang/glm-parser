@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+#
+# Part of Speech Tagger
+# Simon Fraser University
+# NLP Lab
+#
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu
+# (Please add on your name if you have authored this file)
+#
+# This is the main programme of the Part of Speech Tagger.
+# Individual modules of the tagger are located in src/pos/
+
 from data import data_pool
 from pos import pos_decode, pos_perctrain, pos_features
 from weight import weight_vector
@@ -15,8 +28,11 @@ from collections import defaultdict
 class PosTagger():
     def __init__(self, train_regex="", test_regex="", data_path="../../penn-wsj-deps/", tag_file="tagset.txt",
                  max_iter=1,data_format="format/penn2malt.format"):
+        print "TAGGER [INFO]: Loading Training Data"
         self.train_data = self.load_data(train_regex, data_path, data_format)
+        print "TAGGER [INFO]: Loading Testing Data"
         self.test_data = self.load_data(test_regex, data_path, data_format)
+        print "TAGGER [INFO]: Total Iteration: %d" % max_iter
         self.max_iter = max_iter
         self.default_tag = "NN"
 
@@ -47,7 +63,7 @@ class PosTagger():
 
             data_list.append((word_list,pos_list,gold_out_fv))
 
-        print "Sentence Number: %d" % sentence_count
+        print "TAGGER [INFO]: Sentence Number: %d" % sentence_count
         return data_list
 
     def perc_train(self, dump_data=True):
@@ -64,31 +80,6 @@ class PosTagger():
             self.w_vector = feat_vec
 
         acc = tester.get_accuracy(self.w_vector)
-HELP_MSG =\
-"""
-
-options:
-    -h:     Print this help message
-
-    -p:     Path to data files (to the parent directory for all sections)
-            default "./penn-wsj-deps/"
-
-    -i:     Number of iterations
-            default 1
-
-    --train=
-            Sections for training
-        Input a regular expression to indicate which files to read e.g.
-        "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
-
-    --test=
-            Sections for testing
-        Input a regular expression to indicate which files to test on e.g.
-        "-r (0[2-9])|(1[0-9])|(2[0-1])/*.tab"
-
-	--tag_target=
-			Specifying tagging target file
-"""
 
 MAJOR_VERSION = 0
 MINOR_VERSION = 1
@@ -142,7 +133,7 @@ if __name__ == '__main__':
     #   configuration files are stored under src/format/
     #   configuration files: *.format
     if args.config:
-        print("Reading configurations from file: %s" % (args.config))
+        print("TAGGER [INFO]: Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
         cf.read(args.config)
 
@@ -168,11 +159,12 @@ if __name__ == '__main__':
     if args.tagset:
         tag_file = args.tagset
 
+    print "TAGGER [INFO]: Training Starts, Timer is on"
     start_time = time.time()
     tagger = PosTagger(train_regex, test_regex, test_data_path, tag_file, max_iter, data_format)
     tagger.perc_train()
     end_time = time.time()
     training_time = end_time - start_time
-    print "Total Training Time: ", training_time
+    print "TAGGER [INFO]: Total Training Time: ", training_time
 
     tagger.evaluate()

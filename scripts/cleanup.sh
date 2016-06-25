@@ -2,6 +2,8 @@
 
 # Use before setup_env.sh is run to make sure environment is ready
 
+cd "$( dirname "$0" )"
+
 echo "Cleaning up directories..."
 
 rm -f ../docs/*.log
@@ -16,5 +18,13 @@ rm -f ../src/parse/ceisner.cpp
 rm -f ../src/parse/ceisner3.cpp
 rm -f ../src/*.db
 
-rm -r ../src/build/*
-rm -r ../src/hvector/build/*
+rm -r ../src/build
+rm -r ../src/hvector/build
+
+rm -f ../src/*/*.pyc
+rm -f ../src/hvector/*.egg-info
+rm -f ../src/*/*.so
+rm -r ../src/data/prep
+rm -f ../src/*.egg
+rm -r ../src/*.egg-info
+rm -r ../src/dist
