@@ -110,6 +110,7 @@ class DataPool():
         """
         if type(fgen) is str:
             self.fgen = getClassFromModule('get_local_vector', 'feature', fgen)
+            self.fgen = self.fgen()
         else:
             self.fgen = fgen
         self.hadoop = hadoop
