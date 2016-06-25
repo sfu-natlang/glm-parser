@@ -26,14 +26,15 @@ from ConfigParser import SafeConfigParser
 
 class DataPrep():
     def __init__(self, dataPath, dataRegex, shardNum, targetPath, sparkContext=None, debug=True):
-        self.dataPath  = dataPath
-        self.dataRegex = dataRegex
-        self.shardNum  = shardNum
+        self.dataPath   = dataPath
+        self.dataRegex  = dataRegex
+        self.shardNum   = shardNum
         # Avoid error. We do not know whether the user has got a / at the end of the string or not,
         # which could be problematic in the future
-        self.targetPath= targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath
-        self.debug     = debug
-        self.sc = sparkContext
+        self.targetPath = targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath
+        self.debug      = debug
+        self.sc         = sparkContext
+        
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
         # Check param validity

@@ -29,7 +29,17 @@ class ParallelPerceptronLearner():
         logging.debug("Initialize ParallelPerceptronLearner ... ")
         self.w_vector = w_vector
         return
-    def parallel_learn(self, max_iter=-1, dir_name=None, shards=1, fgen=None, parser=None, format_path=None, learner=None, sc=None, d_filename=None, hadoop=False):
+    def parallel_learn(self,
+                       max_iter=-1,
+                       dataPool=None,
+                       shards=1,
+                       fgen=None,
+                       parser=None,
+                       format_path=None,
+                       learner=None,
+                       sc=None,
+                       d_filename=None,
+                       hadoop=False):
         '''
         This is the function which does distributed training using Spark
 
@@ -47,6 +57,8 @@ class ParallelPerceptronLearner():
 
         def get_sent_num(dp):
             return dp.get_sent_num()
+
+        dir_name = dataPool.loadedPath()
 
         fformat = open(format_path)
         format_list = []
