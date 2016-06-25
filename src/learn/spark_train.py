@@ -58,6 +58,10 @@ class ParallelPerceptronLearner():
         def get_sent_num(dp):
             return dp.get_sent_num()
 
+        if type(fgen) == 'str':
+            fgen = getClassFromModule('get_local_vector', 'feature', fgen)
+            fgen = fgen()
+
         dir_name = dataPool.loadedPath()
 
         fformat = open(format_path)

@@ -50,6 +50,7 @@ class GlmParser():
 
         self.maxIteration = maxIteration
         self.w_vector     = WeightVector(weightVectorLoadPath)
+        self.dataFormat   = dataFormat
         self.evaluator    = Evaluator()
 
         if parallelFlag:
@@ -117,10 +118,10 @@ class GlmParser():
             learner = parallelLearnClass(self.w_vector,maxIteration)
             learner.parallel_learn(max_iter     = maxIteration,
                                    dataPool     = dataPool,
-                                   shards       = shards,
+                                   shards       = shardNum,
                                    fgen         = self.fgen,
                                    parser       = self.parser,
-                                   format_path  = dataFormat,
+                                   format_path  = self.dataFormat,
                                    learner      = self.learner,
                                    sc           = sc,
                                    d_filename   = weightVectorDumpPath,
