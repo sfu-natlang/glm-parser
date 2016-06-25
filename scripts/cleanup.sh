@@ -2,6 +2,8 @@
 
 # Use before setup_env.sh is run to make sure environment is ready
 
+cd "$( dirname "$0" )"
+
 echo "Cleaning up directories..."
 
 rm -f ../docs/*.log

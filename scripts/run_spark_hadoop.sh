@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$( dirname "$0" )"
+
 source $MODULESHOME/init/bash
 module load natlang
 module load bigdata

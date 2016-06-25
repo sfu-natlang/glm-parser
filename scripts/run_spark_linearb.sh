@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$( dirname "$0" )"
+
 project_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )'/..'
 
 source $MODULESHOME/init/bash

@@ -206,8 +206,9 @@ if __name__ == "__main__":
     parserValue   = 'ceisner'
     data_format   = 'format/penn2malt.format'
 
-    # Dealing with arguments here
     glm_parser = GlmParser
+
+    # Dealing with arguments here
     arg_parser = argparse.ArgumentParser(description="""Global Linear Model (GLM) Parser
         Version %d.%d""" % (MAJOR_VERSION, MINOR_VERSION))
     arg_parser.add_argument('config', metavar='CONFIG_FILE',
