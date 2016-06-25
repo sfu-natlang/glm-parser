@@ -62,7 +62,6 @@ class GlmParser():
         print("PARSER [INFO]: Using learner: %s " % (learner))
 
         self.fgen = getClassFromModule('get_local_vector', 'feature', fgen)
-        self.fgen = self.fgen()
         print("PARSER [INFO]: Using feature generator: %s " % (fgen))
 
         self.parser = getClassFromModule('parse', 'parse', parser)
