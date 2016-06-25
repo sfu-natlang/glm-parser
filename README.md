@@ -38,7 +38,7 @@ In this example we are doing 5 iterations of training `-i 5` and using section 0
 The data for training is in the directory after `-p` and the data must be in the CoNLL format. The directory structure (if any) is the usual Penn Treebank directory structure. The format file parameter `--format` indicates the column structure of the CoNLL data.
 The rest of the arguments load the actual filenames in `learn` and `feature` and `parser` respectively in order to configure the learning method, the feature generator and the parser which is used to find the argmax tree for each sentence.
 
-Notice the config file is mandatory now. This issue has now been resolved to yet.
+Notice the config file is mandatory now. This issue has not been resolved yet.
 
 ####Using Config Files:
 
