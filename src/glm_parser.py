@@ -423,7 +423,7 @@ if __name__ == "__main__":
 
     #     Initialise sparkcontext
     sc = None
-    if h_flag == True:
+    if parallel_flag == True:
         from pyspark import SparkContext,SparkConf
         conf = SparkConf()
         sc = SparkContext(conf=conf)
