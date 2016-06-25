@@ -60,7 +60,6 @@ class ParallelPerceptronLearner():
 
         if type(fgen) is str:
             fgen = getClassFromModule('get_local_vector', 'feature', fgen)
-            fgen = fgen()
 
         dir_name = dataPool.loadedPath()
 
