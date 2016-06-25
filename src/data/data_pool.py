@@ -108,7 +108,7 @@ class DataPool():
         :param format_path: the file that describes the file format for the type of data
         :type format_path: str
         """
-        if type(fgen) == 'str':
+        if type(fgen) is str:
             self.fgen = getClassFromModule('get_local_vector', 'feature', fgen)
             self.fgen = self.fgen()
         else:

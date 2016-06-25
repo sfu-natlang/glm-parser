@@ -58,7 +58,7 @@ class ParallelPerceptronLearner():
         def get_sent_num(dp):
             return dp.get_sent_num()
 
-        if type(fgen) == 'str':
+        if type(fgen) is str:
             fgen = getClassFromModule('get_local_vector', 'feature', fgen)
             fgen = fgen()
 
