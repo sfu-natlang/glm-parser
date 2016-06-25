@@ -1,6 +1,6 @@
 Branch: pos_spark_train
 
-Update date: 2016-06-25 00:05
+Update date: 2016-06-25 01:31
 
 Author: Jetic Gu
 
@@ -42,15 +42,25 @@ Ongoing tasks:
         e). I shall now merge with master.
 
 3. Restructure the learners
-    a). There should be four learners now: 1) averaged perceptron;
-        2) perceptron; 3) averaged perceptron in parallel; 4) perceptron in
-        parallel. But currently 3) and 4) are squeezed into one file while part
-        of 3) and 4) is in 2).
-    b). Functions of a specific class should make sense. Now, it's chaos.
-    c). There should be a debug switch.
+    (ONGOING)
+    Thoughts:
+        a). There should be four learners now: 1) averaged perceptron;
+            2) perceptron; 3) averaged perceptron in parallel; 4) perceptron in
+            parallel. But currently 3) and 4) are squeezed into one file while
+            part of 3) and 4) is in 2).
+        b). Functions of a specific class should make sense. Now, it's chaos.
+        c). There should be a debug switch.
+    Steps:
+        a). Move the parallel_train part for parallel train to spark_train.py
+        b). Separate the code for averaged_perceptron_parallel and
+            perceptron_parallel.
+        c). Unify the parameters for all learners if necessary.
 
 4. pos_tagger should be using data_pool as main data storage device.
+    (Coming)
 
 5. pos_tagger should be using learners just like the parser.
+    (Coming)
 
 6. After all is done, merge with Kingston.
+    (Coming)
