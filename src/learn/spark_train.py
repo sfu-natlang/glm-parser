@@ -137,7 +137,10 @@ class ParallelPerceptronLearner():
             self.w_vector.clear()
             self.w_vector.iadd(fv)
 
-        #dump the weight vector
-        #d_filename: change the full path to hdfs file name
         if d_filename is not None:
-            self.w_vector.dump(d_filename + "_Iter_%d.db"%max_iter)
+            if hadoop == False:
+                print ("[INFO]: Dumping trained weight vector to local directory: " + os.path.abspath(os.path.expanduser(d_filename)))
+                self.w_vector.dump(os.path.abspath(os.path.expanduser(d_filename)) + "_Iter_%d.db"%max_iter)
+            else:
+                print ("[INFO]: Dumping trained weight vector to HDFS")
+                print ("[ERROR]: Dumping function for HDFS not implemented yet")

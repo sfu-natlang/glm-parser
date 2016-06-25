@@ -29,15 +29,29 @@ Parse(sentence, arc_weight):
 	for m in (1, n):
 		for s in (0, n):
 			t = s + m
-			for q in (s, t):
-				find top node N1 in heap[s][q].buf, top node N2 in heap[q][t].buf
-				init heap[s][t].cube[q]
-				node N = state_generating_func(N1, N2)
-				cube[q][0][0] = N
-				push N into heap[s][q].heap
-			Expore(heap[s][q].heap, heaps[s][q].buf, state_generating_func)
+            for q in (s, t):
+                find top node N1 in heap[s][q][1][0].buf, top node N2 in heap[q][t][0][0].buf
+                score = calculate the score of heap[s][t][0][1]
+                push (score, q, N1, N2) into heap[s][t][0][1].heap
 
-Expore(heap, buf, state_generating_func):
+                find top node N1 in heap[s][q][1][0].buf, top node N2 in heap[q][t][0][0].buf
+                score = calculate the score of heap[s][t][1][1]
+                push (score, q, N1, N2) into heap[s][t][1][1].heap
+
+                find top node N1 in heap[s][q][0][0].buf, top node N2 in heap[q][t][0][1].buf
+                score = calculate the score of heap[s][t][0][0]
+                push (score, q, N1, N2) into heap[s][t][0][0].heap
+
+                find top node N1 in heap[s][q][1][1].buf, top node N2 in heap[q][t][1][0].buf
+                score = calculate the score of heap[s][t][1][0]
+                push (score, q, N1, N2) into heap[s][t][1][0].heap
+
+            Explore(heap[s][t][0][1].heap, heap[s][t][0][1].buf, score_calculator_func)
+            Explore(heap[s][t][1][1].heap, heap[s][t][1][1].buf, score_calculator_func)
+            Explore(heap[s][t][0][0].heap, heap[s][t][0][0].buf, score_calculator_func)
+            Explore(heap[s][t][1][0].heap, heap[s][t][1][0].buf, score_calculator_func)
+
+Explore(heap, buf, score_calculator_func):
 	while heap is not empty and size of buf < bestK:
 		node T = heap.pop()
 		push T to buf

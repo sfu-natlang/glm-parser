@@ -284,7 +284,10 @@ if __name__ == "__main__":
 
         train_regex    = cf.get("data", "train")
         test_regex     = cf.get("data", "test")
-        data_path      = cf.get("data", "data_path")
+        try:
+            data_path      = cf.get("data", "data_path")
+        except:
+            print ("WARNING: Unable to read data_path from config file. It could be caused by the environment variable settings, which it not supported when running in yarn mode")
         prep_path      = cf.get("data", "prep_path")
         data_format    = cf.get("data", "format")
 
