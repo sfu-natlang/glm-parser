@@ -188,7 +188,10 @@ class DataPrep():
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Uploading to target directory " + self.hdfsPath
         # Save as specific amount of files
-        aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.hdfsPath)
+        aRdd.coalesce(self.shardNum,True).cache()
+        aRdd.saveAsTextFile(self.hdfsPath)
+        aRdd.unpersist()
+        aRdd = None
         # Save as default amount of files
         # aRdd.saveAsTextFile(self.hdfsPath)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
