@@ -111,7 +111,7 @@ class GlmParser():
                     conf = SparkConf()
                     sc = SparkContext(conf=conf)
                 except:
-                    raise RuntimeError('DATAPREP [ERROR]: SparkContext entity conflict, entity already exists')
+                    raise RuntimeError('PARSER [ERROR]: SparkContext entity conflict, entity already exists')
                 externalSparkContext = False
             else:
                 externalSparkContext = True
