@@ -34,7 +34,7 @@ class DataPrep():
         self.targetPath = targetPath + "/" if targetPath[len(targetPath)-1] != "/" else targetPath
         self.debug      = debug
         self.sc         = sparkContext
-        
+
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
         # Check param validity
@@ -179,11 +179,11 @@ class DataPrep():
         hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
-        if self.debug: print "DATAPREP [DEBUG]: Creating target directory " + self.hdfsPath
+        if self.debug: print "DATAPREP [DEBUG]: Uploading to target directory " + self.hdfsPath
         # Save as specific amount of files
-        # aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.path)
+        aRdd.coalesce(self.shardNum,True).saveAsTextFile(self.hdfsPath)
         # Save as default amount of files
-        aRdd.saveAsTextFile(self.hdfsPath)
+        # aRdd.saveAsTextFile(self.hdfsPath)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
         return self.hdfsPath
 
