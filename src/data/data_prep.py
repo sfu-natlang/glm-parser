@@ -161,9 +161,16 @@ class DataPrep():
         '''
         This function uploads the data to targetPath on hadoop.
         '''
-        from pyspark import SparkContext
-
-        if self.sc == None: self.sc = SparkContext()
+        if self.sc == None:
+            try:
+                from pyspark import SparkContext,SparkConf
+                conf = SparkConf()
+                self.sc = SparkContext(conf=conf)
+            except:
+                raise RuntimeError('DATAPREP [ERROR]: SparkContext entity conflict, entity already exists')
+            externalSparkContext = True
+        else:
+            externalSparkContext = False
 
         aFilePattern = re.compile(self.dataRegex)
         aFileList = []
@@ -185,6 +192,9 @@ class DataPrep():
         # Save as default amount of files
         # aRdd.saveAsTextFile(self.hdfsPath)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
+        if externalSparkContext == False:
+            self.sc.stop()
+            self.sc = None
         return self.hdfsPath
 
 # Uncomment the following code for tests

@@ -111,7 +111,10 @@ class GlmParser():
                     conf = SparkConf()
                     sc = SparkContext(conf=conf)
                 except:
-                    raise RuntimeError('PARSER [ERROR]: SparkContext entity conflict, entity already exists')
+                    raise RuntimeError('DATAPREP [ERROR]: SparkContext entity conflict, entity already exists')
+                externalSparkContext = True
+            else:
+                externalSparkContext = False
 
             parallelLearnClass = getClassFromModule('parallel_learn', 'learn', 'spark_train')
             learner = parallelLearnClass(self.w_vector,maxIteration)
@@ -125,6 +128,9 @@ class GlmParser():
                                    sc           = sc,
                                    d_filename   = weightVectorDumpPath,
                                    hadoop       = hadoop)
+            if externalSparkContext == False:
+                sc.stop()
+                sc = None
         return
 
     def evaluate(self, dataPool = None):
