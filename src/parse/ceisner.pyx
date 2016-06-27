@@ -8,7 +8,7 @@ from libc.stdlib cimport malloc, calloc, free
 cdef struct EisnerNode:
     float score
     int mid_index
-    
+
 #TODO try size_t
 cdef struct EdgeRecoverNode:
     int s
@@ -17,16 +17,16 @@ cdef struct EdgeRecoverNode:
     int shape
 
 ctypedef EisnerNode* P_EisnerNode
-ctypedef EisnerNode** PP_EisnerNode   
+ctypedef EisnerNode** PP_EisnerNode
 
-cdef class EisnerParser:
+cdef class Parser:
     cdef PP_EisnerNode ***e
     cdef list[pair[int, int]] edge_list
     cdef int n
     cdef int tt
     def __cinit__(self):
         pass
-    
+
     def init_eisner_matrix(self):
         self.e = <PP_EisnerNode***>malloc(self.n*sizeof(PP_EisnerNode**))
         cdef int i, j, k, l
@@ -51,12 +51,12 @@ cdef class EisnerParser:
                 free(self.e[i][j])
             free(self.e[i])
 
-    
+
     def combine_triangle(self, head, modifier, arc_weight, sent):
         # s < t strictly
         if head == modifier:
             print "invalid head and modifier for combine triangle!!!"
-            
+
         cdef int s, t, q
         if head < modifier:
             s = head
@@ -64,7 +64,7 @@ cdef class EisnerParser:
         else:
             s = modifier
             t = head
-            
+
         cdef float edge_score = arc_weight(sent.get_local_vector(head, modifier))
         cdef int max_index = s
         cdef float max_score = \
@@ -76,13 +76,13 @@ cdef class EisnerParser:
             if max_score < cur_score:
                 max_score = cur_score
                 max_index = q
-        return max_score, max_index 
-    
-    cdef combine_left(self, int s, int t):        
+        return max_score, max_index
+
+    cdef combine_left(self, int s, int t):
         # s < t strictly
         if s >= t:
             print "invalid head and modifier for combine left!!!"
-        
+
         cdef int max_index = s
         cdef float max_score = self.e[s][s][0][0].score + self.e[s][t][0][1].score
 
@@ -94,13 +94,13 @@ cdef class EisnerParser:
                 max_score = cur_score
                 max_index = q
 
-        return max_score, max_index 
-       
+        return max_score, max_index
+
     cdef combine_right(self, int s, int t):
         # s < t strictly
         if s >= t:
             print "invalid head and modifier for combine right!!!"
-        
+
         cdef int max_index = s+1
         cdef float max_score = self.e[s][s+1][1][1].score + self.e[s+1][t][1][0].score
 
@@ -111,8 +111,8 @@ cdef class EisnerParser:
             if max_score < cur_score:
                 max_score = cur_score
                 max_index = q
-                
-        return max_score, max_index     
+
+        return max_score, max_index
 
     cdef EdgeRecoverNode new_edge_recover_node(self, int s, int t, int orien, int shape):
         cdef EdgeRecoverNode new_node
@@ -122,28 +122,28 @@ cdef class EisnerParser:
         new_node.shape = shape
 
         return new_node
-    
+
     cdef split_right_triangle(self, EdgeRecoverNode node):
         """
         right triangle: e[s][t][1][0]
         """
         cdef EdgeRecoverNode node_left, node_right
-        
+
         cdef int q = self.e[node.s][node.t][1][0].mid_index
-        
+
         node_left = self.new_edge_recover_node(node.s, q, 1, 1)
         node_right = self.new_edge_recover_node(q, node.t, 1, 0)
 
         return node_left, node_right
-        
+
     cdef split_left_triangle(self, EdgeRecoverNode node):
         """
         left triangle: e[s][t][0][0]
         """
         cdef EdgeRecoverNode node_left, node_right
-        
+
         cdef int q = self.e[node.s][node.t][0][0].mid_index
-        
+
         node_left = self.new_edge_recover_node(node.s, q, 0, 0)
         node_right = self.new_edge_recover_node(q, node.t, 0, 1)
 
@@ -157,13 +157,13 @@ cdef class EisnerParser:
         edge.first = node.s
         edge.second = node.t
         self.edge_list.push_back(edge)
-        
+
         cdef EdgeRecoverNode node_left, node_right
 
         cdef int q = self.e[node.s][node.t][1][1].mid_index
         node_left = self.new_edge_recover_node(node.s, q, 1, 0)
         node_right = self.new_edge_recover_node(q+1, node.t, 0, 0)
-        
+
         return node_left, node_right
 
     cdef split_left_trapezoid(self, EdgeRecoverNode node):
@@ -174,7 +174,7 @@ cdef class EisnerParser:
         edge.first = node.t
         edge.second = node.s
         self.edge_list.push_back(edge)
-        
+
         cdef EdgeRecoverNode node_left, node_right
 
         cdef int q = self.e[node.s][node.t][0][1].mid_index
@@ -183,21 +183,21 @@ cdef class EisnerParser:
 
         return node_left, node_right
 
-    
+
     cdef get_edge_list(self):
-        
+
         cdef EdgeRecoverNode node, node_left, node_right
         cdef queue[EdgeRecoverNode] node_queue
 
         if not self.edge_list.empty():
             self.edge_list.clear()
-        
+
         node_queue.push(self.new_edge_recover_node(0, self.n-1, 1, 0))
         while not node_queue.empty():
             push = False
             node = node_queue.front()
             node_queue.pop()
-            
+
             if node.orientation == 1 and node.shape == 0:
                 node_left, node_right = self.split_right_triangle(node)
                 push = True
@@ -210,23 +210,23 @@ cdef class EisnerParser:
             if node.orientation == 0 and node.shape == 1:
                 node_left, node_right = self.split_left_trapezoid(node)
                 push = True
-                
+
             if push:
                 if node_left.s != node_left.t:
                     node_queue.push(node_left)
                 if node_right.s != node_right.t:
                     node_queue.push(node_right)
         return
-    
-    def parse(self, sent, arc_weight):	
+
+    def parse(self, sent, arc_weight):
 
         self.n = len(sent.get_word_list())
         self.init_eisner_matrix()
 
         cdef int m, s, t, q
-        
+
         #TODO: try for m in range(1,self.n)
-        for m from 1 <= m < self.n by 1: 
+        for m from 1 <= m < self.n by 1:
             for s from 0 <= s < self.n by 1:
                 t = s + m
                 if t >= self.n:
@@ -240,9 +240,9 @@ cdef class EisnerParser:
                     self.combine_left(s, t)
                 self.e[s][t][1][0].score, self.e[s][t][1][0].mid_index =\
                     self.combine_right(s, t)
-       
-        self.get_edge_list()       
+
+        self.get_edge_list()
         self.delete_eisner_matrix()
 
         return self.edge_list
-        
+

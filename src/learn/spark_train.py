@@ -10,13 +10,13 @@ from os.path import isfile, join, isdir
 from pyspark import SparkContext
 
 
-
 logging.basicConfig(filename='glm_parser.log',
                     level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class ParallelPerceptronLearner():
+
+class Learner(object):
 
     def __init__(self, w_vector=None, max_iter=1):
         """

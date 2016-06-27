@@ -10,7 +10,7 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class PerceptronLearner():
+class Learner():
 
     def __init__(self, w_vector=None, max_iter=1):
         logging.debug("Initialize PerceptronLearner ... ")

@@ -15,7 +15,7 @@ import debug.debug
 
 import copy
 
-class SecondOrderFeatureGenerator():
+class FeatureGenerator():
     """
     Second order feature generator: Sibling features and grandchild features
     """
@@ -438,7 +438,7 @@ def test():
             return self.pos_list
 
     sentence = test_class()
-    fg = SecondOrderFeatureGenerator(sentence)
+    fg = FeatureGenerator(sentence)
     fv = fg.get_second_order_local_vector(1, 5, [3],
                              feature_type=0)
     print(fv)
