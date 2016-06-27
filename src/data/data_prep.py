@@ -168,9 +168,9 @@ class DataPrep():
                 self.sc = SparkContext(conf=conf)
             except:
                 raise RuntimeError('DATAPREP [ERROR]: SparkContext entity conflict, entity already exists')
-            externalSparkContext = True
-        else:
             externalSparkContext = False
+        else:
+            externalSparkContext = True
 
         aFilePattern = re.compile(self.dataRegex)
         aFileList = []
