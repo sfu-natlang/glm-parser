@@ -82,16 +82,17 @@ class DataPool():
     during init).
     """
     def __init__(   self,
-                    section_regex='',
-                    data_path="./penn-wsj-deps/",
-                    fgen=None,
-                    format_path=None,
-                    textString=None,
-                    format_list=None,
-                    comment_sign='',
-                    prep_path='data/prep/',
-                    sc=None,
-                    hadoop=False):
+                    section_regex = '',
+                    data_path     = "./penn-wsj-deps/",
+                    fgen          = None,
+                    format_path   = None,
+                    textString    = None,
+                    format_list   = None,
+                    comment_sign  = '',
+                    prep_path     = 'data/prep/',
+                    shardNum      = 1,
+                    sc            = None,
+                    hadoop        = False):
 
         """
         Initialize the Data set
@@ -112,22 +113,23 @@ class DataPool():
             self.fgen = getClassFromModule('get_local_vector', 'feature', fgen)
         else:
             self.fgen = fgen
-        self.hadoop = hadoop
-        self.sc     = sc
+        self.hadoop   = hadoop
+        self.sc       = sc
+        self.shardNum = shardNum
         self.reset_all()
 
         if textString is not None:
             self.load_stringtext(textString,format_list,comment_sign)
         else:
-            self.data_path = data_path
+            self.data_path     = data_path
             self.section_regex = section_regex
-            self.format_path = format_path
-            self.prep_path = prep_path
-            self.dataPrep = DataPrep(   dataPath=self.data_path,
-                                        dataRegex=self.section_regex,
-                                        shardNum=1,
-                                        targetPath=self.prep_path,
-                                        sparkContext=sc)
+            self.format_path   = format_path
+            self.prep_path     = prep_path
+            self.dataPrep      = DataPrep(dataPath     = self.data_path,
+                                          dataRegex    = self.section_regex,
+                                          shardNum     = self.shardNum,
+                                          targetPath   = self.prep_path,
+                                          sparkContext = sc)
             self.load()
         return
 

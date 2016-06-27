@@ -396,6 +396,7 @@ if __name__ == "__main__":
                                  data_path     = data_path,
                                  fgen          = fgenValue,
                                  format_path   = data_format,
+                                 shardNum      = shards_number,
                                  sc            = sc,
                                  hadoop        = h_flag)
 
