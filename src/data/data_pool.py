@@ -231,12 +231,11 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        # Load data to local directory
-        self.dataPrep.loadLocal()
-
-        # Load data to HDFS
+        # Load data
         if self.hadoop == True:
             self.dataPrep.loadHadoop()
+        else:
+            self.dataPrep.loadLocal()
 
         # Load format file
         if self.hadoop == True:
@@ -264,11 +263,12 @@ class DataPool():
         fformat.close()
 
         # Add data to data_list
-        for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
-            for file_name in fileList:
-                file_path = "%s/%s" % ( str(dirName), str(file_name) )
-                self.data_list += self.get_data_list(file_path)
-
+        # If using yarn mode, local data will not be loaded
+        if self.hadoop == False:
+            for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
+                for file_name in fileList:
+                    file_path = "%s/%s" % ( str(dirName), str(file_name) )
+                    self.data_list += self.get_data_list(file_path)
         return
 
 
