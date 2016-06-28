@@ -5,6 +5,7 @@ from sentence import Sentence
 import logging
 import re
 from data_prep import *
+from file_io import *
 
 
 logging.basicConfig(filename='glm_parser.log',
@@ -231,12 +232,6 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        # Load data
-        if self.hadoop == True:
-            self.dataPrep.loadHadoop()
-        else:
-            self.dataPrep.loadLocal()
-
         # Load format file
         if self.hadoop == True:
             fformat = fileRead(formatPath, sparkContext=sparkContext)
@@ -260,7 +255,14 @@ class DataPool():
             if format_line[0] == "comment_sign:":
                 self.comment_sign = format_line[1]
 
-        fformat.close()
+        if self.hadoop == False:
+            fformat.close()
+
+        # Load data
+        if self.hadoop == True:
+            self.dataPrep.loadHadoop()
+        else:
+            self.dataPrep.loadLocal()
 
         # Add data to data_list
         # If using yarn mode, local data will not be loaded
@@ -269,6 +271,13 @@ class DataPool():
                 for file_name in fileList:
                     file_path = "%s/%s" % ( str(dirName), str(file_name) )
                     self.data_list += self.get_data_list(file_path)
+        else:
+            aRdd = sparkContext.textFile(self.dataPrep.hadoopPath()).cache()
+            tmp  = aRdd.collect()
+            tmpStr = ''.join(str(e)+"\n" for e in tmp)
+            self.load_stringtext(textString  = tmpStr,
+                                format_list  = self.field_name_list,
+                                comment_sign = self.comment_sign)
         return
 
 

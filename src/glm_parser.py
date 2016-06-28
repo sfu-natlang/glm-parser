@@ -278,7 +278,12 @@ if __name__ == "__main__":
         args=arg_parser.parse_args()
     #     Initialise sparkcontext
     sc = None
-    if args.hadoop or args.spark:
+    if args.hadoop:
+        h_flag = True
+    if args.spark:
+        parallel_flag = True
+
+    if parallel_flag or h_flag:
         from pyspark import SparkContext,SparkConf
         conf = SparkConf()
         sc = SparkContext(conf=conf)
@@ -305,7 +310,6 @@ if __name__ == "__main__":
         prep_path      = cf.get("data", "prep_path")
         data_format    = cf.get("data", "format")
 
-        h_flag                               = cf.get(       "option", "h_flag")
         parallel_flag                        = cf.getboolean("option", "parallel_train")
         shards_number                        = cf.getint(    "option", "shards")
         maxIteration                         = cf.getint(    "option", "iteration")
@@ -420,7 +424,9 @@ if __name__ == "__main__":
         testDataPool = DataPool(section_regex = test_regex,
                                 data_path     = data_path,
                                 fgen          = fgenValue,
-                                format_path   = data_format)
+                                format_path   = data_format,
+								sc            = sc,
+								hadoop        = h_flag)
         print "Evaluating..."
         gp.evaluate(dataPool = testDataPool)
 
