@@ -123,14 +123,13 @@ class DataPool():
         else:
             self.data_path     = data_path
             self.section_regex = section_regex
-            self.format_path   = format_path
             self.prep_path     = prep_path
             self.dataPrep      = DataPrep(dataPath     = self.data_path,
                                           dataRegex    = self.section_regex,
                                           shardNum     = self.shardNum,
                                           targetPath   = self.prep_path,
                                           sparkContext = sc)
-            self.load()
+            self.load(format_path, sc)
         return
 
     def loadedPath(self):
@@ -221,7 +220,7 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
-    def load(self):
+    def load(self, formatPath, sparkContext=None):
         """
         For each section in the initializer, iterate through all files
         under that section directory, and load the content of each
@@ -232,17 +231,44 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        self.dataPrep.loadLocal()
-
+        # Load data
         if self.hadoop == True:
             self.dataPrep.loadHadoop()
+        else:
+            self.dataPrep.loadLocal()
 
-        for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
-            for file_name in fileList:
-                file_path = "%s/%s" % ( str(dirName), str(file_name) )
-                self.data_list += self.get_data_list(file_path)
+        # Load format file
+        if self.hadoop == True:
+            fformat = fileRead(formatPath, sparkContext=sparkContext)
+        else:
+            fformat = open(formatPath)
 
+        self.field_name_list = []
+        self.comment_sign = ''
 
+        remaining_field_names = 0
+        for line in fformat:
+            format_line = line.strip().split()
+
+            if remaining_field_names > 0:
+                self.field_name_list.append(line.strip())
+                remaining_field_names -= 1
+
+            if format_line[0] == "field_names:":
+                remaining_field_names = int(format_line[1])
+
+            if format_line[0] == "comment_sign:":
+                self.comment_sign = format_line[1]
+
+        fformat.close()
+
+        # Add data to data_list
+        # If using yarn mode, local data will not be loaded
+        if self.hadoop == False:
+            for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
+                for file_name in fileList:
+                    file_path = "%s/%s" % ( str(dirName), str(file_name) )
+                    self.data_list += self.get_data_list(file_path)
         return
 
 
@@ -257,55 +283,35 @@ class DataPool():
         :rtype: list(Sentence)
         """
 
-        fformat = open(self.format_path)
-        field_name_list = []
-        comment_sign = ''
-
-        remaining_field_names = 0
-        for line in fformat:
-            format_line = line.strip().split()
-
-            if remaining_field_names > 0:
-                field_name_list.append(line.strip())
-                remaining_field_names -= 1
-
-            if format_line[0] == "field_names:":
-                remaining_field_names = int(format_line[1])
-
-            if format_line[0] == "comment_sign:":
-                comment_sign = format_line[1]
-
-        fformat.close()
-
         f = open(file_path)
         data_list = []
 
         column_list = {}
 
-        for field in field_name_list:
+        for field in self.field_name_list:
             if not(field.isdigit()):
                 column_list[field] = []
 
-        length = len(field_name_list)
+        length = len(self.field_name_list)
 
         for entity in f:
             entity = entity[:-1].split()
-            if len(entity) == length and entity[0] != comment_sign:
+            if len(entity) == length and entity[0] != self.comment_sign:
                 for i in range(length):
-                    if not(field_name_list[i].isdigit()):
-                        column_list[field_name_list[i]].append(entity[i])
+                    if not(self.field_name_list[i].isdigit()):
+                        column_list[self.field_name_list[i]].append(entity[i])
 
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
-                if not(field_name_list[0].isdigit()) and column_list[field_name_list[0]] != []:
+                if not(self.field_name_list[0].isdigit()) and column_list[self.field_name_list[0]] != []:
 
                     # Add "ROOT" for word and pos here
-                    sent = Sentence(column_list, field_name_list, self.fgen)
+                    sent = Sentence(column_list, self.field_name_list, self.fgen)
                     data_list.append(sent)
 
                 column_list = {}
 
-                for field in field_name_list:
+                for field in self.field_name_list:
                     if not (field.isdigit()):
                         column_list[field] = []
 

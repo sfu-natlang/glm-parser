@@ -38,7 +38,6 @@ class GlmParser():
                  learner              = None,
                  fgen                 = None,
                  parser               = None,
-                 dataFormat           = None,
                  parallelFlag         = False):
 
         print ("PARSER [DEBUG]: Initialising Parser")
@@ -46,12 +45,9 @@ class GlmParser():
             raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner == None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-        if dataFormat == None and parallelFlag == True:
-            raise ValueError("PARSER [ERROR]: DataFormat not specified")
 
         self.maxIteration = maxIteration
         self.w_vector     = WeightVector(weightVectorLoadPath)
-        self.dataFormat   = dataFormat
         self.evaluator    = Evaluator()
 
         if parallelFlag:
@@ -124,7 +120,6 @@ class GlmParser():
                                    shards       = shardNum,
                                    fgen         = self.fgen,
                                    parser       = self.parser,
-                                   format_path  = self.dataFormat,
                                    learner      = self.learner,
                                    sc           = sc,
                                    d_filename   = weightVectorDumpPath,
@@ -281,6 +276,12 @@ if __name__ == "__main__":
             """)
         arg_parser.add_argument('--hadoop', '-c', action='store_true')
         args=arg_parser.parse_args()
+    #     Initialise sparkcontext
+    sc = None
+    if args.hadoop or args.spark:
+        from pyspark import SparkContext,SparkConf
+        conf = SparkConf()
+        sc = SparkContext(conf=conf)
 
     if args.config: # Process config
         if (not os.path.isfile(args.config)) and (not args.hadoop):
@@ -288,9 +289,9 @@ if __name__ == "__main__":
         print("Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
         if args.hadoop:
-            listContent = fileRead(args.config)
+            listContent = fileRead(args.config, sc)
         else:
-            listContent = fileRead("file://" + args.config)
+            listContent = fileRead("file://" + args.config, sc)
         tmpStr = ''.join(str(e)+"\n" for e in listContent)
         stringIOContent = StringIO.StringIO(tmpStr)
         cf.readfp(stringIOContent)
@@ -384,15 +385,7 @@ if __name__ == "__main__":
                     learner              = learnerValue,
                     fgen                 = fgenValue,
                     parser               = parserValue,
-                    parallelFlag         = parallel_flag,
-                    dataFormat           = data_format)
-
-    #     Initialise sparkcontext
-    sc = None
-    if parallel_flag == True:
-        from pyspark import SparkContext,SparkConf
-        conf = SparkConf()
-        sc = SparkContext(conf=conf)
+                    parallelFlag         = parallel_flag)
 
     #     Initialise Timer
     training_time = None
