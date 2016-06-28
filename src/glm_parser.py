@@ -283,7 +283,7 @@ if __name__ == "__main__":
         args=arg_parser.parse_args()
 
     if args.config: # Process config
-        if not os.path.isfile(args.config):
+        if not os.path.isfile(args.config) && not args.hadoop:
             raise ValueError('Specified config file does not exist or is not a file: ' + args.config)
         print("Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
