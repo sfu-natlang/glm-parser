@@ -271,6 +271,13 @@ class DataPool():
                 for file_name in fileList:
                     file_path = "%s/%s" % ( str(dirName), str(file_name) )
                     self.data_list += self.get_data_list(file_path)
+        else:
+            aRdd = sparkContext.textFile(self.dataPrep.hadoopPath()).cache()
+            tmp  = aRdd.collect()
+            tmpStr = ''.join(str(e)+"\n" for e in tmp)
+            self.load_stringtext(textString  = tmpStr,
+                                format_list  = self.field_name_list,
+                                comment_sign = self.comment_sign)
         return
 
 
