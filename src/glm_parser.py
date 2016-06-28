@@ -16,7 +16,7 @@ from evaluate.evaluator import *
 
 from weight.weight_vector import *
 
-from data.data_prep import *
+from data.file_io import *
 
 import debug.debug
 import debug.interact
@@ -27,6 +27,7 @@ import sys,os
 import logging
 
 import argparse
+import StringIO
 import ConfigParser
 from ConfigParser import SafeConfigParser
 
@@ -282,11 +283,17 @@ if __name__ == "__main__":
         args=arg_parser.parse_args()
 
     if args.config: # Process config
-        if not os.path.isfile(args.config):
+        if (not os.path.isfile(args.config)) and (not args.hadoop):
             raise ValueError('Specified config file does not exist or is not a file: ' + args.config)
         print("Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
-        cf.read(args.config)
+        if args.hadoop:
+            listContent = fileRead(args.config)
+        else:
+            listContent = fileRead("file://" + args.config)
+        tmpStr = ''.join(str(e)+"\n" for e in listContent)
+        stringIOContent = StringIO.StringIO(tmpStr)
+        cf.readfp(stringIOContent)
 
         train_regex    = cf.get("data", "train")
         test_regex     = cf.get("data", "test")
