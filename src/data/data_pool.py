@@ -255,7 +255,8 @@ class DataPool():
             if format_line[0] == "comment_sign:":
                 self.comment_sign = format_line[1]
 
-        fformat.close()
+        if self.hadoop == False:
+            fformat.close()
 
         # Load data
         if self.hadoop == True:
