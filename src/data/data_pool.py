@@ -231,12 +231,6 @@ class DataPool():
         """
         logging.debug("Loading data...")
 
-        # Load data
-        if self.hadoop == True:
-            self.dataPrep.loadHadoop()
-        else:
-            self.dataPrep.loadLocal()
-
         # Load format file
         if self.hadoop == True:
             fformat = fileRead(formatPath, sparkContext=sparkContext)
@@ -261,6 +255,12 @@ class DataPool():
                 self.comment_sign = format_line[1]
 
         fformat.close()
+
+        # Load data
+        if self.hadoop == True:
+            self.dataPrep.loadHadoop()
+        else:
+            self.dataPrep.loadLocal()
 
         # Add data to data_list
         # If using yarn mode, local data will not be loaded
