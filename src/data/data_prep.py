@@ -38,8 +38,6 @@ class DataPrep():
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
         # Check param validity
-        if not os.path.isdir(dataPath):
-            raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if (not isinstance(shardNum, int)) or int(shardNum)<=0 :
             raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
         if dataRegex=="":
@@ -102,6 +100,8 @@ class DataPrep():
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
+        if not os.path.isdir(dataPath):
+            raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(self.targetPath):
             os.makedirs(self.targetPath)
@@ -179,7 +179,7 @@ class DataPrep():
             for fileName in fileList:
                 if aFilePattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
-                    aFileList.append("file://"+filePath)
+                    aFileList.append(filePath)
 
         aRdd = self.sc.textFile(','.join(aFileList)).cache()
 
