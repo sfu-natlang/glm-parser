@@ -53,7 +53,7 @@ def fileWriteHDFS(filePath=None, contents=None, sparkContext=None):
     sc = sparkContext
 
     try:
-        aRdd = sc.parallelize(contents).cache()
+        aRdd = sc.parallelize(contents, 1).cache()
         aRdd.coalesce(1,True).cache()
         aRdd.saveAsTextFile(filePath)
     except:
@@ -68,7 +68,7 @@ def fileRead(filePath=None, sparkContext=None):
             contents = []
             f = open(filePath[7:])
             for line in f:
-                contents.append(line)
+                contents.append(line.rstrip('\n'))
             return contents
         except:
             raise RuntimeError('FILEIO [ERROR]: Unable to read from local directory: ' + filePath)
@@ -87,7 +87,7 @@ def fileWrite(filePath=None, contents=None, sparkContext=None):
         try:
             f = open(filePath[7:], "w")
             for line in contents:
-                f.write(line)
+                f.write(line + "\n")
             return filePath
         except:
             raise RuntimeError('FILEIO [ERROR]: Unable to save to local directory: ' + filePath)
