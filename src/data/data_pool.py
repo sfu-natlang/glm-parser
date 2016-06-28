@@ -5,6 +5,7 @@ from sentence import Sentence
 import logging
 import re
 from data_prep import *
+from file_io import *
 
 
 logging.basicConfig(filename='glm_parser.log',
