@@ -35,7 +35,6 @@ class ParallelPerceptronLearner():
                        shards=1,
                        fgen=None,
                        parser=None,
-                       format_path=None,
                        learner=None,
                        sc=None,
                        d_filename=None,
@@ -61,25 +60,9 @@ class ParallelPerceptronLearner():
         if isinstance(fgen, basestring):
             fgen = getClassFromModule('get_local_vector', 'feature', fgen)
 
-        dir_name = dataPool.loadedPath()
-
-        fformat = open(format_path)
-        format_list = []
-        comment_sign = ''
-        remaining_field_names = 0
-        for line in fformat:
-            format_line = line.strip().split()
-            if remaining_field_names > 0:
-                format_list.append(line.strip())
-                remaining_field_names -= 1
-
-            if format_line[0] == "field_names:":
-                remaining_field_names = int(format_line[1])
-
-            if format_line[0] == "comment_sign:":
-                comment_sign = format_line[1]
-
-        fformat.close()
+        dir_name     = dataPool.loadedPath()
+        format_list  = dataPool.field_name_list
+        comment_sign = dataPool.comment_sign
 
 
         # By default, when the hdfs is configured for spark, even in local mode it will
