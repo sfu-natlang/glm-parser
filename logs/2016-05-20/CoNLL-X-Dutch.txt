@@ -1,8 +1,0 @@
-Branch: master
-
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Dutch/data --train="dutch_alpino_train.conll" --test="dutch_alpino_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
-
-05/20/2016 11:18:45 AM INFO: Training time usage(seconds): 165.870846
-05/20/2016 11:18:45 AM INFO: Feature count: 1915244
-05/20/2016 11:18:45 AM INFO: Unlabeled accuracy: 0.763115487914 (4262, 5585)
-05/20/2016 11:18:45 AM INFO: Unlabeled attachment accuracy: 0.778429073857 (4648, 5971)

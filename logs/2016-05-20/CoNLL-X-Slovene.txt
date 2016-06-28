@@ -1,8 +1,0 @@
-Branch: master
-
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Slovene/data --train="slovene_sdt_train.conll" --test="slovene_sdt_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
-
-05/20/2016 11:50:05 AM INFO: Training time usage(seconds): 27.082374
-05/20/2016 11:50:05 AM INFO: Feature count: 546726
-05/20/2016 11:50:05 AM INFO: Unlabeled accuracy: 0.764945226917 (4888, 6390)
-05/20/2016 11:50:05 AM INFO: Unlabeled attachment accuracy: 0.778857479388 (5290, 6792)

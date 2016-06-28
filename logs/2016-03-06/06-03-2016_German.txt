@@ -1,3 +1,0 @@
-03/07/2016 01:30:20 AM INFO: Feature count: 7585306
-03/07/2016 01:30:20 AM INFO: Unlabeled accuracy: 0.854759395855 (4867, 5694)
-03/07/2016 01:30:20 AM INFO: Unlabeled attachment accuracy: 0.863328375475 (5224, 6051)
