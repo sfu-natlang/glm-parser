@@ -276,6 +276,12 @@ if __name__ == "__main__":
             """)
         arg_parser.add_argument('--hadoop', '-c', action='store_true')
         args=arg_parser.parse_args()
+    #     Initialise sparkcontext
+    sc = None
+    if args.hadoop or args.spark:
+        from pyspark import SparkContext,SparkConf
+        conf = SparkConf()
+        sc = SparkContext(conf=conf)
 
     if args.config: # Process config
         if (not os.path.isfile(args.config)) and (not args.hadoop):
@@ -283,9 +289,9 @@ if __name__ == "__main__":
         print("Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
         if args.hadoop:
-            listContent = fileRead(args.config)
+            listContent = fileRead(args.config, sc)
         else:
-            listContent = fileRead("file://" + args.config)
+            listContent = fileRead("file://" + args.config, sc)
         tmpStr = ''.join(str(e)+"\n" for e in listContent)
         stringIOContent = StringIO.StringIO(tmpStr)
         cf.readfp(stringIOContent)
@@ -380,13 +386,6 @@ if __name__ == "__main__":
                     fgen                 = fgenValue,
                     parser               = parserValue,
                     parallelFlag         = parallel_flag)
-
-    #     Initialise sparkcontext
-    sc = None
-    if parallel_flag == True:
-        from pyspark import SparkContext,SparkConf
-        conf = SparkConf()
-        sc = SparkContext(conf=conf)
 
     #     Initialise Timer
     training_time = None
