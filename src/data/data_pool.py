@@ -129,7 +129,7 @@ class DataPool():
                                           shardNum     = self.shardNum,
                                           targetPath   = self.prep_path,
                                           sparkContext = sc)
-            self.load(format_path)
+            self.load(format_path, sc)
         return
 
     def loadedPath(self):
@@ -220,7 +220,7 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
-    def load(self, formatPath):
+    def load(self, formatPath, sparkContext=None):
         """
         For each section in the initializer, iterate through all files
         under that section directory, and load the content of each
@@ -240,7 +240,7 @@ class DataPool():
 
         # Load format file
         if self.hadoop == True:
-            fformat = fileRead(formatPath)
+            fformat = fileRead(formatPath, sparkContext=sparkContext)
         else:
             fformat = open(formatPath)
 

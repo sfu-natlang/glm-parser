@@ -58,6 +58,11 @@ def fileWriteHDFS(filePath=None, contents=None, sparkContext=None):
         aRdd.saveAsTextFile(filePath)
     except:
         raise RuntimeError('FILEIO [ERROR]: Unable to save file to HDFS: ' + filePath)
+
+    # Finalising
+    if externalSparkContext == False:
+        sc.stop()
+        sc = None
     return filePath + "/part-00000"
 
 def fileRead(filePath=None, sparkContext=None):
