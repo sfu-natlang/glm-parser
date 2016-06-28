@@ -172,7 +172,9 @@ class DataPrep():
         else:
             externalSparkContext = True
 
-        aRdd = self.sc.textFile(self.dataPath + self.dataRegex + ", " + self.dataPath + "*/" + self.dataRegex).cache()
+        tmp = self.dataPath + "*/" + self.dataRegex
+        if self.debug: print "DATAPREP [DEBUG]: Using regular expression for files: " + tmp 
+        aRdd = self.sc.textFile(tmp).cache()
 
         hashCode = hashlib.md5(self.dataPath + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'

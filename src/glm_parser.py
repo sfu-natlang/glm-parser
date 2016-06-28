@@ -420,7 +420,9 @@ if __name__ == "__main__":
         testDataPool = DataPool(section_regex = test_regex,
                                 data_path     = data_path,
                                 fgen          = fgenValue,
-                                format_path   = data_format)
+                                format_path   = data_format,
+								sc            = sc,
+								hadoop        = h_flag)
         print "Evaluating..."
         gp.evaluate(dataPool = testDataPool)
 
