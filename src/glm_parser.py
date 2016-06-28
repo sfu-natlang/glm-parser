@@ -38,7 +38,6 @@ class GlmParser():
                  learner              = None,
                  fgen                 = None,
                  parser               = None,
-                 dataFormat           = None,
                  parallelFlag         = False):
 
         print ("PARSER [DEBUG]: Initialising Parser")
@@ -46,12 +45,9 @@ class GlmParser():
             raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner == None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-        if dataFormat == None and parallelFlag == True:
-            raise ValueError("PARSER [ERROR]: DataFormat not specified")
 
         self.maxIteration = maxIteration
         self.w_vector     = WeightVector(weightVectorLoadPath)
-        self.dataFormat   = dataFormat
         self.evaluator    = Evaluator()
 
         if parallelFlag:
@@ -124,7 +120,6 @@ class GlmParser():
                                    shards       = shardNum,
                                    fgen         = self.fgen,
                                    parser       = self.parser,
-                                   format_path  = self.dataFormat,
                                    learner      = self.learner,
                                    sc           = sc,
                                    d_filename   = weightVectorDumpPath,
@@ -384,8 +379,7 @@ if __name__ == "__main__":
                     learner              = learnerValue,
                     fgen                 = fgenValue,
                     parser               = parserValue,
-                    parallelFlag         = parallel_flag,
-                    dataFormat           = data_format)
+                    parallelFlag         = parallel_flag)
 
     #     Initialise sparkcontext
     sc = None
