@@ -100,7 +100,7 @@ class DataPrep():
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
-        if not os.path.isdir(dataPath):
+        if not os.path.isdir(self.dataPath):
             raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(self.targetPath):
@@ -162,35 +162,21 @@ class DataPrep():
         This function uploads the data to targetPath on hadoop.
         '''
         if self.sc == None:
-            try:
-                from pyspark import SparkContext,SparkConf
-                conf = SparkConf()
-                self.sc = SparkContext(conf=conf)
-            except:
-                raise RuntimeError('DATAPREP [ERROR]: SparkContext entity conflict, entity already exists')
-            externalSparkContext = False
-        else:
-            externalSparkContext = True
-
+            raise RuntimeError('DATAPREP [ERROR]: SparkContext not initialised')
         tmp = self.dataPath + "*/" + self.dataRegex
-        if self.debug: print "DATAPREP [DEBUG]: Using regular expression for files: " + tmp 
+        if self.debug: print "DATAPREP [DEBUG]: Using regular expression for files: " + tmp
         aRdd = self.sc.textFile(tmp).cache()
 
         hashCode = hashlib.md5(self.dataPath + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Uploading to target directory " + self.hdfsPath
-        # Save as specific amount of files
+
         aRdd.coalesce(self.shardNum,True).cache()
         aRdd.saveAsTextFile(self.hdfsPath)
         aRdd.unpersist()
         aRdd = None
-        # Save as default amount of files
-        # aRdd.saveAsTextFile(self.hdfsPath)
         if self.debug: print "DATAPREP [DEBUG]: Upload complete"
-        if externalSparkContext == False:
-            self.sc.stop()
-            self.sc = None
         return self.hdfsPath
 
 # Uncomment the following code for tests

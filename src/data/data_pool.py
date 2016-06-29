@@ -143,7 +143,7 @@ class DataPool():
             raise RuntimeError("DATAPOOL [ERROR]: Data has not been loaded by DataPrep, cannot retrieve data path.")
         return
 
-    def load_stringtext(self,textString,format_list,comment_sign):
+    def load_stringtext(self, textString, format_list, comment_sign):
         lines = textString.splitlines()
         column_list = {}
         for field in format_list:
@@ -221,6 +221,14 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
+    def get_format_list(self):
+        if self.field_name_list == []:
+            raise RuntimeError("DATAPOOL [ERROR]: format_list empty")
+        return self.field_name_list
+
+    def get_comment_sign(self):
+        return self.comment_sign
+
     def load(self, formatPath, sparkContext=None):
         """
         For each section in the initializer, iterate through all files
@@ -231,8 +239,10 @@ class DataPool():
         and before any get_data method is called.
         """
         logging.debug("Loading data...")
+        print("Loading data...")
 
         # Load format file
+        print("Loading dataFormat from: " + formatPath)
         if self.hadoop == True:
             fformat = fileRead(formatPath, sparkContext=sparkContext)
         else:
@@ -254,6 +264,9 @@ class DataPool():
 
             if format_line[0] == "comment_sign:":
                 self.comment_sign = format_line[1]
+
+        if self.field_name_list == []:
+            raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
 
         if self.hadoop == False:
             fformat.close()

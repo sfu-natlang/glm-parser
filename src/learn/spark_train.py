@@ -61,18 +61,18 @@ class ParallelPerceptronLearner():
             fgen = getClassFromModule('get_local_vector', 'feature', fgen)
 
         dir_name     = dataPool.loadedPath()
-        format_list  = dataPool.field_name_list
-        comment_sign = dataPool.comment_sign
+        format_list  = dataPool.get_format_list()
+        comment_sign = dataPool.get_comment_sign()
 
 
         # By default, when the hdfs is configured for spark, even in local mode it will
         # still try to load from hdfs. The following code is to resolve this confusion.
         if hadoop == True:
-            train_files= sc.wholeTextFiles(dir_name,minPartitions=10).cache()
+            train_files= sc.wholeTextFiles(dir_name, minPartitions=10).cache()
         else:
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
             print dir_name
-            train_files= sc.wholeTextFiles("file://" + dir_name ,minPartitions=10).cache()
+            train_files= sc.wholeTextFiles("file://" + dir_name, minPartitions=10).cache()
 
         dp = train_files.map(lambda t: create_dp(t,fgen,format_list,comment_sign)).cache()
 
@@ -126,4 +126,7 @@ class ParallelPerceptronLearner():
                 self.w_vector.dump(os.path.abspath(os.path.expanduser(d_filename)) + "_Iter_%d.db"%max_iter)
             else:
                 print ("[INFO]: Dumping trained weight vector to HDFS")
-                print ("[ERROR]: Dumping function for HDFS not implemented yet")
+                contents = []
+                for k, v in w_vector.iteritems():
+                    contents.append(str(k) + "    " + str(v) + "\n")
+                print ("[INFO]: Dumping to: " + fileWrite(d_filename + "_Iter_%d.db" % max_iter, contents, sc))
