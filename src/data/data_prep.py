@@ -26,7 +26,7 @@ from ConfigParser import SafeConfigParser
 
 class DataPrep():
     def __init__(self, dataPath, dataRegex, shardNum, targetPath, sparkContext=None, debug=True):
-        self.dataPath   = dataPath
+        self.dataPath   = dataPath + "/" if dataPath[len(dataPath)-1] != "/" else dataPath
         self.dataRegex  = dataRegex
         self.shardNum   = shardNum
         # Avoid error. We do not know whether the user has got a / at the end of the string or not,
@@ -38,8 +38,6 @@ class DataPrep():
         if self.debug: print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
 
         # Check param validity
-        if not os.path.isdir(dataPath):
-            raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if (not isinstance(shardNum, int)) or int(shardNum)<=0 :
             raise ValueError("DATAPREP [ERROR]: shard number needs to be a positive integer")
         if dataRegex=="":
@@ -102,6 +100,8 @@ class DataPrep():
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
+        if not os.path.isdir(dataPath):
+            raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(self.targetPath):
             os.makedirs(self.targetPath)
@@ -172,18 +172,11 @@ class DataPrep():
         else:
             externalSparkContext = True
 
-        aFilePattern = re.compile(self.dataRegex)
-        aFileList = []
+        tmp = self.dataPath + "*/" + self.dataRegex
+        if self.debug: print "DATAPREP [DEBUG]: Using regular expression for files: " + tmp 
+        aRdd = self.sc.textFile(tmp).cache()
 
-        for dirName, subdirList, fileList in os.walk(self.dataPath):
-            for fileName in fileList:
-                if aFilePattern.match(str(fileName)) != None:
-                    filePath = "%s/%s" % ( str(dirName), str(fileName) )
-                    aFileList.append("file://"+filePath)
-
-        aRdd = self.sc.textFile(','.join(aFileList)).cache()
-
-        hashCode = hashlib.md5(''.join(aFileList) + str(self.shardNum)).hexdigest()[:7]
+        hashCode = hashlib.md5(self.dataPath + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug: print "DATAPREP [DEBUG]: Uploading data to HDFS"
         if self.debug: print "DATAPREP [DEBUG]: Uploading to target directory " + self.hdfsPath

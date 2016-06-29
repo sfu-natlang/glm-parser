@@ -16,7 +16,7 @@ from evaluate.evaluator import *
 
 from weight.weight_vector import *
 
-from data.data_prep import *
+from data.file_io import *
 
 import debug.debug
 import debug.interact
@@ -27,6 +27,7 @@ import sys,os
 import logging
 
 import argparse
+import StringIO
 import ConfigParser
 from ConfigParser import SafeConfigParser
 
@@ -37,7 +38,6 @@ class GlmParser():
                  learner              = None,
                  fgen                 = None,
                  parser               = None,
-                 dataFormat           = None,
                  parallelFlag         = False):
 
         print ("PARSER [DEBUG]: Initialising Parser")
@@ -45,12 +45,9 @@ class GlmParser():
             raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner == None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-        if dataFormat == None and parallelFlag == True:
-            raise ValueError("PARSER [ERROR]: DataFormat not specified")
 
         self.maxIteration = maxIteration
         self.w_vector     = WeightVector(weightVectorLoadPath)
-        self.dataFormat   = dataFormat
         self.evaluator    = Evaluator()
 
         if parallelFlag:
@@ -123,7 +120,6 @@ class GlmParser():
                                    shards       = shardNum,
                                    fgen         = self.fgen,
                                    parser       = self.parser,
-                                   format_path  = self.dataFormat,
                                    learner      = self.learner,
                                    sc           = sc,
                                    d_filename   = weightVectorDumpPath,
@@ -280,13 +276,30 @@ if __name__ == "__main__":
             """)
         arg_parser.add_argument('--hadoop', '-c', action='store_true')
         args=arg_parser.parse_args()
+    #     Initialise sparkcontext
+    sc = None
+    if args.hadoop:
+        h_flag = True
+    if args.spark:
+        parallel_flag = True
+
+    if parallel_flag or h_flag:
+        from pyspark import SparkContext,SparkConf
+        conf = SparkConf()
+        sc = SparkContext(conf=conf)
 
     if args.config: # Process config
-        if not os.path.isfile(args.config):
+        if (not os.path.isfile(args.config)) and (not args.hadoop):
             raise ValueError('Specified config file does not exist or is not a file: ' + args.config)
         print("Reading configurations from file: %s" % (args.config))
         cf = SafeConfigParser(os.environ)
-        cf.read(args.config)
+        if args.hadoop:
+            listContent = fileRead(args.config, sc)
+        else:
+            listContent = fileRead("file://" + args.config, sc)
+        tmpStr = ''.join(str(e)+"\n" for e in listContent)
+        stringIOContent = StringIO.StringIO(tmpStr)
+        cf.readfp(stringIOContent)
 
         train_regex    = cf.get("data", "train")
         test_regex     = cf.get("data", "test")
@@ -297,7 +310,6 @@ if __name__ == "__main__":
         prep_path      = cf.get("data", "prep_path")
         data_format    = cf.get("data", "format")
 
-        h_flag                               = cf.get(       "option", "h_flag")
         parallel_flag                        = cf.getboolean("option", "parallel_train")
         shards_number                        = cf.getint(    "option", "shards")
         maxIteration                         = cf.getint(    "option", "iteration")
@@ -377,15 +389,7 @@ if __name__ == "__main__":
                     learner              = learnerValue,
                     fgen                 = fgenValue,
                     parser               = parserValue,
-                    parallelFlag         = parallel_flag,
-                    dataFormat           = data_format)
-
-    #     Initialise sparkcontext
-    sc = None
-    if parallel_flag == True:
-        from pyspark import SparkContext,SparkConf
-        conf = SparkConf()
-        sc = SparkContext(conf=conf)
+                    parallelFlag         = parallel_flag)
 
     #     Initialise Timer
     training_time = None
@@ -420,7 +424,9 @@ if __name__ == "__main__":
         testDataPool = DataPool(section_regex = test_regex,
                                 data_path     = data_path,
                                 fgen          = fgenValue,
-                                format_path   = data_format)
+                                format_path   = data_format,
+								sc            = sc,
+								hadoop        = h_flag)
         print "Evaluating..."
         gp.evaluate(dataPool = testDataPool)
 

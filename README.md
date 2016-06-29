@@ -73,11 +73,15 @@ The parallel run comes in two modes: spark standalone mode and spark yarn mode.
 Please see `scripts/run_spark_linearb.sh` for example run. The command will need to use an additional option `-s NUMBER` or `--spark NUMBER`:
 
 	$ spark-submit --driver-memory 4g --executor-memory 4g --master 'local[*]' glm_parser.py -s 4 config/default.config
-	
+
 ####Spark Yarn Mode
+When running on yarn mode, by default the glm_parser reads data, config, and format from HDFS(Hadoop file system). Reading these files from local directories will require the using of proper path, for example:
+
+    file:///Users/jetic/Data/penn-wsj-deps
+
 Please note that when running on yarn mode, environment variables could not be read in config files. Also, running the programme on yarn mode would require the `driver datanode` to possess access to the `glm-parser-data`, and the config file in local directories. Support for reading data directly from HDFS has not been implemented yet. Also, dumping weight vector for yarn mode has not been implemented either.
 
-The difference with command line options is that you need to use a `--hadoop` option in addition to `--spark NUMBER`. This will tell the glm_parser to upload the data to HDFS instead of preparing it in a local directory. 
+The difference with command line options is that you need to use a `--hadoop` option in addition to `--spark NUMBER`. This will tell the glm_parser to upload the data to HDFS instead of preparing it in a local directory.
 
 ######NOTE: Please do not use the same data for testing and training, HDFS doesn't support overwriting existing data by default.  
 
@@ -86,7 +90,7 @@ For the command of launching the glm_parser in yarn mode, please refer to `scrip
     $ python setup_module.py bdist_egg
 	$ mv dist/module-0.1-py2.7.egg module.egg
 
-	$ spark-submit --master yarn-cluster --num-executors 9 --driver-memory 7g --executor-memory 7g --executor-cores 3 --py-files module.egg glm_parser.py -s 8 -i 1 --hadoop ~/Daten/glm-parser-config/default.config	
+	$ spark-submit --master yarn-cluster --num-executors 9 --driver-memory 7g --executor-memory 7g --executor-cores 3 --py-files module.egg glm_parser.py -s 8 -i 1 --hadoop config/default.config
 
 Running Tests for SFU NatLang Lab
 ----------------
