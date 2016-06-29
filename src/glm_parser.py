@@ -332,8 +332,6 @@ if __name__ == "__main__":
             parallel_flag = True
         if args.path:
             data_path = args.path
-            if not os.path.isdir(dataPath):
-                raise ValueError("data_path directory do not exist")
         if args.iteration:
             maxIteration = int(args.iteration)
         if args.l:
