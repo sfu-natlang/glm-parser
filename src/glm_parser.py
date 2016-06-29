@@ -227,10 +227,6 @@ if __name__ == "__main__":
             *** Caution: Overrides -t (no evaluation will be conducted), and partially
             overrides -b -e (Only run specified number of sentences) -i (Run forever)
             """)
-        #arg_parser.add_argument('--interactive', action='store_true',
-        #    help="""use interactive version of glm-parser, in which you have access to some
-        #    critical points ("breakpoints") in the procedure
-        #    """)
         arg_parser.add_argument('--log-feature-request', action='store_true',
             help="""log each feature request based on feature type. This is helpful for
             analysing feature usage and building feature caching utility.
@@ -365,20 +361,15 @@ if __name__ == "__main__":
         if args.log_feature_request:
             debug.debug.log_feature_request_flag = True
         if args.format:
-            data_format = args.format;
+            data_format = args.format
 
     # process options
 
     if debug.debug.time_accounting_flag == True:
         print("Time accounting is ON")
 
-    #if interactValue == True:
-    #    glm_parser.sequential_train = debug.interact.glm_parser_sequential_train_wrapper
-    #    glm_parser.evaluate = debug.interact.glm_parser_evaluate_wrapper
-    #    glm_parser.f_argmax = debug.interact.glm_parser_compute_argmax_wrapper
-    #    DataPool.get_data_list = debug.interact.data_pool_get_data_list_wrapper
-    #    learner.sequential_learn = debug.interact.average_perceptron_learner_sequential_learn_wrapper
-    #    print("Enable interactive mode")
+    if (not os.path.isdir(data_path)) and (not h_flag):
+        raise ValueError("data_path directory do not exist")
 
     if debug.debug.log_feature_request_flag == True:
         print("Enable feature request log")
