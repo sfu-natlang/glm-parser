@@ -8,25 +8,12 @@ def fileReadHDFS(filePath=None, sparkContext=None):
         raise ValueError("FILEIO [ERROR]: Reading file not specified")
     # Initialising
     if sparkContext == None:
-        print ("FILEIO [INFO]: SparkContext not specified, will try to specify now")
-        try:
-            from pyspark import SparkContext,SparkConf
-            conf = SparkConf()
-            sparkContext = SparkContext(conf=conf)
-        except:
-            raise RuntimeError('FILEIO [ERROR]: SparkContext entity conflict, entity already exists')
-        externalSparkContext = False
-    else:
-        externalSparkContext = True
+        raise RuntimeError('FILEIO [ERROR]: SparkContext not initialised')
     sc = sparkContext
 
     aRdd = sc.textFile(filePath).cache()
     fileContent = aRdd.collect()
 
-    # Finalising
-    if externalSparkContext == False:
-        sc.stop()
-        sc = None
     return fileContent
 
 def fileWriteHDFS(filePath=None, contents=None, sparkContext=None):
@@ -40,16 +27,7 @@ def fileWriteHDFS(filePath=None, contents=None, sparkContext=None):
         raise ValueError("FILEIO [ERROR]: Contents to be saved should be a list(an array)")
     # Initialising
     if sparkContext == None:
-        print ("FILEIO [INFO]: SparkContext not specified, will try to specify now")
-        try:
-            from pyspark import SparkContext,SparkConf
-            conf = SparkConf()
-            sparkContext = SparkContext(conf=conf)
-        except:
-            raise RuntimeError('FILEIO [ERROR]: SparkContext entity conflict, entity already exists')
-        externalSparkContext = False
-    else:
-        externalSparkContext = True
+        raise RuntimeError('FILEIO [ERROR]: SparkContext not initialised')
     sc = sparkContext
 
     try:
@@ -59,10 +37,6 @@ def fileWriteHDFS(filePath=None, contents=None, sparkContext=None):
     except:
         raise RuntimeError('FILEIO [ERROR]: Unable to save file to HDFS: ' + filePath)
 
-    # Finalising
-    if externalSparkContext == False:
-        sc.stop()
-        sc = None
     return filePath + "/part-00000"
 
 def fileRead(filePath=None, sparkContext=None):
