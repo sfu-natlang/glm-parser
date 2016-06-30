@@ -26,6 +26,6 @@ class Decoder():
 	#print "\n"
 	#print total_Ner
         acc = correct_identified_Ner/total_Ner
-	print "accuracy is"+str(acc) 	
+	print "accuracy is\t"+str(acc) 	
 	f.close()
 

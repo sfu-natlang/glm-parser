@@ -214,7 +214,7 @@ class Trainer:
 
     def dump_vector(self, filename, i, fv):
         w_vector = weight_vector.WeightVector()
-        w_vector.data_dict.iadd(fv)
+        w_vector.iadd(fv)
         w_vector.dump(filename + "_Iter_%d.db"%i)
 
     def tag_data(self, test_file, weight_vec):
