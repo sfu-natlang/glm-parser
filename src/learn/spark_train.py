@@ -57,9 +57,6 @@ class ParallelPerceptronLearner():
         def get_sent_num(dp):
             return dp.get_sent_num()
 
-        if isinstance(fgen, basestring):
-            fgen = getClassFromModule('get_local_vector', 'feature', fgen)
-
         dir_name     = dataPool.loadedPath()
         format_list  = dataPool.get_format_list()
         comment_sign = dataPool.get_comment_sign()
@@ -76,7 +73,7 @@ class ParallelPerceptronLearner():
 
         dp = train_files.map(lambda t: create_dp(t,fgen,format_list,comment_sign)).cache()
 
-        if learner.__class__.__name__== "AveragePerceptronLearner":
+        if learner.learner_name() == "AveragePerceptronLearner":
             print "[INFO]: Using Averaged Perceptron Learner"
             fv = {}
             total_sent = dp.map(get_sent_num).sum()
@@ -99,7 +96,7 @@ class ParallelPerceptronLearner():
             for feat in fv.keys():
                 self.w_vector[feat] = fv[feat][1]/c
 
-        if learner.__class__.__name__== "PerceptronLearner":
+        if learner.learner_name() == "PerceptronLearner":
             print "[INFO]: Using Perceptron Learner"
             fv = {}
             for iteration in range(max_iter):

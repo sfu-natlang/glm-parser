@@ -19,13 +19,13 @@ from weight.weight_vector import *
 from data.file_io import *
 
 import debug.debug
-import debug.interact
 
 import timeit
 import time
 import os
 import sys
 import logging
+import importlib
 
 import argparse
 import StringIO
@@ -54,18 +54,15 @@ class GlmParser():
         self.evaluator    = Evaluator()
 
         if parallelFlag:
-            self.learner = getClassFromModule('parallel_learn', 'learn', learner)
-            self.learner = self.learner()
+            self.learner = importlib.import_module('learn.' + learner).Learner()
         else:
-            self.learner = getClassFromModule('sequential_learn', 'learn', learner)
-            self.learner = self.learner(self.w_vector, maxIteration)
-        print("PARSER [INFO]: Using learner: %s " % (learner))
+            self.learner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
+        print("PARSER [INFO]: Using learner: %s " % (self.learner.learner_name))
 
-        self.fgen = getClassFromModule('get_local_vector', 'feature', fgen)
+        self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
         print("PARSER [INFO]: Using feature generator: %s " % (fgen))
 
-        self.parser = getClassFromModule('parse', 'parse', parser)
-        self.parser = self.parser()
+        self.parser = importlib.import_module('parse.' + parser).EisnerParser()
         print("PARSER [INFO]: Using parser: %s" % (parser))
 
         print ("PARSER [DEBUG]: Initialisation Complete")
@@ -107,7 +104,7 @@ class GlmParser():
             if sc is None:
                 raise RuntimeError('PARSER [ERROR]: SparkContext not specified')
 
-            parallelLearnClass = getClassFromModule('parallel_learn', 'learn', 'spark_train')
+            parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
             learner = parallelLearnClass(self.w_vector, maxIteration)
             learner.parallel_learn(max_iter     = maxIteration,
                                    dataPool     = dataPool,

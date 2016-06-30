@@ -10,13 +10,24 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class PerceptronLearner():
+class Learner():
 
     def __init__(self, w_vector=None, max_iter=1):
+        """
+        :param w_vector: A global weight vector instance that stores
+         the weight value (float)
+        :param max_iter: Maximum iterations for training the weight vector
+         Could be overridden by parameter max_iter in the method
+        :return: None
+        """
         logging.debug("Initialize PerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
+
         return
+
+    def learner_name(self):
+        return "PerceptronLearner"
 
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
