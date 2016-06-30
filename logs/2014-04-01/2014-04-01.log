@@ -1,9 +1,0 @@
-Commit: 1c257fe0b734af45046306529ae45542cd56946a
-
-Tests bi-gram features, unigram features, in-between features and surrounding features.
-
-Only prints out non-zero feature count - will be fixed next time.
-
-===
-
-Observes an increasing accuracy, but the running speed is going down to 4 hours per iterartion

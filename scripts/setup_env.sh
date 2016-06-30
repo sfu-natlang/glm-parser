@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$( dirname "$0" )"
+
 project_path=$(python get_path.py)
 
 source $MODULESHOME/init/bash

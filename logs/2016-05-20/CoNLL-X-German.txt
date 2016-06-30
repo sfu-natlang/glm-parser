@@ -1,8 +1,0 @@
-Branch: master
-
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/German/data --train="german_tiger_train.conll" --test="german_tiger_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
-
-05/20/2016 10:45:26 AM INFO: Training time usage(seconds): 407.891597
-05/20/2016 10:45:26 AM INFO: Feature count: 6040736
-05/20/2016 10:45:26 AM INFO: Unlabeled accuracy: 0.866877414823 (4936, 5694)
-05/20/2016 10:45:26 AM INFO: Unlabeled attachment accuracy: 0.874731449347 (5293, 6051)

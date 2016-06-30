@@ -61,10 +61,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         """
 
         if not hasattr(self, 'FORM'):
-            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         if not hasattr(self, 'POSTAG'):
-            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
@@ -132,10 +132,10 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         local_fv = []
 
         if not hasattr(self, 'FORM'):
-            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         if not hasattr(self, 'POSTAG'):
-            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in config file")
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
@@ -292,7 +292,7 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         return local_fv + dir_dist_fv
 
     def get_dir_dist_feature(self, local_fv, direction, dist):
-        """ 
+        """
         Add direction and dist attachment to all the features
         in the local_fv. Notice: local_fv shouldn't already have
         features with dist and direction attachment
@@ -347,6 +347,5 @@ class FirstOrderFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         for head, dep in edge_list:
             fv += self.get_local_vector(head, dep)
-        
-        return fv
 
+        return fv

@@ -9,7 +9,7 @@
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
+sys.path.insert(0,parentdir)
 import copy
 from feature.feature_vector import FeatureVector
 
@@ -94,7 +94,7 @@ class Sentence():
         """
         self.column_list = column_list
         self.field_name_list = field_name_list
-    
+
         self.cache_key_func = hash
 
         # add ROOT to FORM and POSTAG
@@ -102,12 +102,12 @@ class Sentence():
         if "FORM" in self.column_list.keys():
             self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
         else:
-            sys.exit("'FORM' is needed in Sentence but it's not in config file")
+            sys.exit("'FORM' is needed in Sentence but it's not in format file")
 
         if "POSTAG" in self.column_list.keys():
             self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
         else:
-            sys.exit("'POSTAG' is needed in Sentence but it's not in config file")
+            sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
 
         # This will store the dict, dict.keys() and len(dict.keys())
         # into the instance
@@ -140,9 +140,9 @@ class Sentence():
         """
 
         if not "HEAD" in self.column_list.keys():
-            sys.exit("'HEAD' is needed in Sentence but it's not in config file")
+            sys.exit("'HEAD' is needed in Sentence but it's not in format file")
         if not "DEPREL" in self.column_list.keys():
-            sys.exit("'DEPREL' is needed in Sentence but it's not in config file")
+            sys.exit("'DEPREL' is needed in Sentence but it's not in format file")
 
         self.column_list["edge_set"] = {}
 
@@ -154,7 +154,7 @@ class Sentence():
                 node_key = (int(head), i + 1)
                 self.column_list["edge_set"][node_key] = deprel
         return self.column_list["edge_set"]
-            
+
     def return_column_list(self):
         return self.column_list
 
@@ -164,7 +164,7 @@ class Sentence():
     def fetch_column(self, field_name):
         """
         Return the column given the field name.
-        
+
         :param field_name: Name of the field you want to fetch.
         :type field_name: str
         """
@@ -172,7 +172,7 @@ class Sentence():
         if field_name in self.column_list.keys():
             return self.column_list[field_name]
         else:
-            sys.exit("'" + field_name + "' is needed in Sentence but it's not in config file")
+            sys.exit("'" + field_name + "' is needed in Sentence but it's not in format file")
 
     def set_current_global_vector(self, edge_list):
         """
@@ -187,7 +187,7 @@ class Sentence():
         :param edge_list: Return value from parser
         :return: None
         """
-        
+
         #self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
         #~self.cache_feature_for_edge_list(edge_list)
 
@@ -227,7 +227,7 @@ class Sentence():
         second order sibling features, and third order features. We compute them
         separately, although there are options of computing them in single call,
         we choose not to use it regarding code readability.
-        
+
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
@@ -237,7 +237,7 @@ class Sentence():
         return global_vector
 
 
-    def get_local_vector(self, 
+    def get_local_vector(self,
                          head_index,
                          dep_index,
                          another_index_list = [],
@@ -247,8 +247,8 @@ class Sentence():
 
         Argument another_index could be either sibling index or
         grand child index. It is implicitly defined by argument
-        feature_type. 
-        
+        feature_type.
+
         The last two arguments will not be used by english_
         1st_fgen
 
@@ -295,7 +295,7 @@ class Sentence():
         # Optimization: return a list to compute weight vector
         return second_order_fv
     '''
-        
+
     '''
     def set_word_list(self,word_list):
         """
@@ -393,27 +393,27 @@ class Sentence():
 # Unit test
 def test():
     lines = ['Rudolph   NNP 2   NMOD','Agnew    NNP 16  SUB','.  .   16  P', '']
-    config_list = ['FORM', 'POSTAG', 'HEAD', 'DEPREL', '2', '3']
+    format_list = ['FORM', 'POSTAG', 'HEAD', 'DEPREL', '2', '3']
     column_list = {}
-    for field in config_list:
+    for field in format_list:
         if not(field.isdigit()):
             column_list[field] = []
-            
-    length = len(config_list) - 2
+
+    length = len(format_list) - 2
 
     for line in lines:
         print line
         if line != '':
             entity = line.split()
             for i in range(length):
-                if not(config_list[i].isdigit()):
-                    column_list[config_list[i]].append(entity[i])
+                if not(format_list[i].isdigit()):
+                    column_list[format_list[i]].append(entity[i])
         else:
-            if not(config_list[0].isdigit()) and column_list[config_list[0]] != []:
-                sent = Sentence(column_list, config_list)
+            if not(format_list[0].isdigit()) and column_list[format_list[0]] != []:
+                sent = Sentence(column_list, format_list)
                 print sent.column_list['FORM']
             column_list = {}
-            for field in config_list:
+            for field in format_list:
                 if not (field.isdigit()):
                     column_list[field] = []
 
