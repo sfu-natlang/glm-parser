@@ -33,7 +33,6 @@ class ParallelPerceptronLearner():
                        max_iter=-1,
                        dataPool=None,
                        shards=1,
-                       fgen=None,
                        parser=None,
                        learner=None,
                        sc=None,
@@ -45,12 +44,14 @@ class ParallelPerceptronLearner():
 
         :param max_iter: iterations for training the weight vector
         :param dir_name: the output directory storing the sharded data
-        :param fgen: feature generator
         :param parser: parser for generating parse tree
         '''
 
-        def create_dp(textString,fgen,format,sign):
-            dp = data_pool.DataPool(textString=textString[1],fgen=fgen,format_list=format,comment_sign=sign)
+        def create_dp(textString, fgen, format, sign):
+            dp = data_pool.DataPool(textString=textString[1],
+                                    fgen=fgen,
+                                    format_list=format,
+                                    comment_sign=sign)
             return dp
 
 
@@ -60,6 +61,7 @@ class ParallelPerceptronLearner():
         dir_name     = dataPool.loadedPath()
         format_list  = dataPool.get_format_list()
         comment_sign = dataPool.get_comment_sign()
+        fgen         = dataPool.get_fgen()
 
 
         # By default, when the hdfs is configured for spark, even in local mode it will

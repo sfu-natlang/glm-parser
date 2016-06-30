@@ -62,7 +62,7 @@ class Learner(object):
 
                 if debug.debug.time_accounting_flag is True:
                     before_time = time.clock()
-                    current_global_vector = f_argmax(data_instance)
+                    current_global_vector = f_argmax(self.w_vector, data_instance)
                     after_time = time.clock()
                     time_usage = after_time - before_time
                     argmax_time_total += time_usage
@@ -71,7 +71,7 @@ class Learner(object):
                     logging.debug("Time usage %f" % (time_usage, ))
                 else:
                     # Just run the procedure without any interference
-                    current_global_vector = f_argmax(data_instance)
+                    current_global_vector = f_argmax(self.w_vector, data_instance)
 
                 delta_global_vector = gold_global_vector - current_global_vector
 
@@ -141,7 +141,7 @@ class Learner(object):
         d_vector.dump(d_filename + "_Iter_%d.db"%i)
         d_vector.clear()
 
-    def parallel_learn(self,dp,fv,parser):
+    def parallel_learn(self, dp, fv, parser):
         w_vec = WeightVector()
         weight_sum_dict = WeightVector()
         print "parallel_learn keys: %d"%len(fv.keys())

@@ -180,6 +180,9 @@ class DataPool():
     def get_comment_sign(self):
         return self.comment_sign
 
+    def get_fgen(self):
+        return self.fgen
+
     def load(self, formatPath, sparkContext=None):
         """
         For each section in the initializer, iterate through all files

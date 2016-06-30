@@ -42,7 +42,7 @@ class Learner():
                 data_instance = data_pool.get_next_data()
                 #data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
                 gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
-                current_global_vector = f_argmax(data_instance)
+                current_global_vector = f_argmax(self.w_vector, data_instance)
                 self.update_weight(current_global_vector, gold_global_vector)
 
             data_pool.reset_index()
@@ -58,7 +58,7 @@ class Learner():
         self.w_vector.iaddc(current_global_vector.feature_dict, -1)
         return
 
-    def parallel_learn(self,dp,fv,parser):
+    def parallel_learn(self, dp, fv, parser):
         #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,format_list=format)
         w_vector = weight_vector.WeightVector()
         for key in fv.keys():

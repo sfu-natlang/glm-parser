@@ -90,9 +90,9 @@ class GlmParser():
         if not parallel:
             # It means we will be using sequential training
             print ("PARSER [DEBUG]: Using Sequential Training")
-            self.learner.sequential_learn(f_argmax   = self.f_argmax,
+            self.learner.sequential_learn(max_iter   = maxIteration,
                                           data_pool  = dataPool,
-                                          max_iter   = maxIteration,
+                                          f_argmax   = self.f_argmax,
                                           d_filename = weightVectorDumpPath,
                                           dump_freq  = dumpFrequency)
         else:
@@ -108,12 +108,11 @@ class GlmParser():
             learner = parallelLearnClass(self.w_vector, maxIteration)
             learner.parallel_learn(max_iter     = maxIteration,
                                    dataPool     = dataPool,
-                                   shards       = shardNum,
-                                   fgen         = self.fgen,
                                    parser       = self.parser,
                                    learner      = self.learner,
-                                   sc           = sc,
                                    d_filename   = weightVectorDumpPath,
+                                   shards       = shardNum,
+                                   sc           = sc,
                                    hadoop       = hadoop)
         return
 
@@ -122,8 +121,8 @@ class GlmParser():
             raise ValueError("PARSER [ERROR]: DataPool for evaluation not specified")
         self.evaluator.evaluate(dataPool, self.parser, self.w_vector)
 
-    def f_argmax(self, sentence):
-        current_edge_set = self.parser.parse(sentence, self.w_vector.get_vector_score)
+    def f_argmax(self, w_vector, sentence):
+        current_edge_set = self.parser.parse(sentence, w_vector.get_vector_score)
         current_global_vector = sentence.set_current_global_vector(current_edge_set)
         return current_global_vector
 
