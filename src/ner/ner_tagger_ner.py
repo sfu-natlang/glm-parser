@@ -7,7 +7,7 @@ import os,sys,inspect
 from collections import defaultdict
 
 
-import ner_features_class 
+import ner_features
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -168,7 +168,7 @@ class Trainer:
 
                     #pos_feat = pos_features.Pos_feat_gen(labels)
 		    
-                    ner_feat = ner_features_class.Ner_feat_gen()
+                    ner_feat = ner_features.Ner_feat_gen()
 
                     gold_out_fv = defaultdict(int)
                     ner_feat.sent_feat_gen(gold_out_fv,labels, tags_cp,POS_tags,chunk_tags)
