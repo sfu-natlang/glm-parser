@@ -6,6 +6,7 @@ from data import data_pool
 import perceptron
 import debug.debug
 import sys,os,shutil,re
+import importlib
 from os.path import isfile, join, isdir
 from pyspark import SparkContext
 
@@ -33,7 +34,7 @@ class ParallelPerceptronLearner():
                        max_iter=-1,
                        dataPool=None,
                        shards=1,
-                       parser=None,
+                       f_argmax=None,
                        learner=None,
                        sc=None,
                        d_filename=None,
@@ -53,7 +54,6 @@ class ParallelPerceptronLearner():
                                     format_list=format,
                                     comment_sign=sign)
             return dp
-
 
         def get_sent_num(dp):
             return dp.get_sent_num()
@@ -82,8 +82,8 @@ class ParallelPerceptronLearner():
             c = total_sent*max_iter
             for iteration in range(max_iter):
                 print "[INFO]: Starting Iteration %d"%iteration
-                #mapper: computer the weight vector in each shard using avg_perc_train
-                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,parser))
+                #mapper: computer the weight vector in each shard using parallel_learn
+                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,f_argmax=f_argmax))
                 #reducer: combine the weight vectors from each shard
                 feat_vec_list = feat_vec_list.combineByKey(lambda value: (value[0], value[1], 1),
                                  lambda x, value: (x[0] + value[0], x[1] + value[1], x[2] + 1),
@@ -104,16 +104,15 @@ class ParallelPerceptronLearner():
             for iteration in range(max_iter):
                 print "[INFO]: Starting Iteration %d"%iteration
                 print "[INFO]: Initial Number of Keys: %d"%len(fv.keys())
-                #mapper: computer the weight vector in each shard using avg_perc_train
-                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,parser))
+                #mapper: computer the weight vector in each shard using parallel_learn
+                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(t,fv,f_argmax=f_argmax))
                 #reducer: combine the weight vectors from each shard
                 feat_vec_list = feat_vec_list.combineByKey(lambda value: (value, 1),
                                  lambda x, value: (x[0] + value, x[1] + 1),
                                  lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
-                #fv = feat_vec_list.map(lambda (label, (value_sum, count)): (label, value_sum / count)).collectAsMap()
 
                 fv = {}
-                for (feat,(a,b)) in feat_vec_list:
+                for (feat, (a,b)) in feat_vec_list:
                     fv[feat] = float(a)/float(b)
                 print "[INFO]: Iteration complete"
             self.w_vector.clear()

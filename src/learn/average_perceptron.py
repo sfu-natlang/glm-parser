@@ -141,7 +141,7 @@ class Learner(object):
         d_vector.dump(d_filename + "_Iter_%d.db"%i)
         d_vector.clear()
 
-    def parallel_learn(self, dp, fv, parser):
+    def parallel_learn(self, dp, fv, f_argmax):
         w_vec = WeightVector()
         weight_sum_dict = WeightVector()
         print "parallel_learn keys: %d"%len(fv.keys())
@@ -152,8 +152,7 @@ class Learner(object):
         while dp.has_next_data():
             data_instance = dp.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
-            current_edge_set = parser.parse(data_instance, w_vec.get_vector_score)
-            current_global_vector = data_instance.set_current_global_vector(current_edge_set)
+            current_global_vector = f_argmax(w_vec, data_instance)
 
             delta_global_vector = gold_global_vector - current_global_vector
             weight_sum_dict.iadd(w_vec)

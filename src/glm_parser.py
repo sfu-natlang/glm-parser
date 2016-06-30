@@ -26,6 +26,8 @@ import os
 import sys
 import logging
 import importlib
+import functools
+from functools import partial
 
 import argparse
 import StringIO
@@ -37,7 +39,6 @@ __version__ = '1.0'
 class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
-                 maxIteration         = 1,
                  learner              = None,
                  fgen                 = None,
                  parser               = None,
@@ -48,8 +49,6 @@ class GlmParser():
             raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner is None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-
-        self.maxIteration = maxIteration
         self.w_vector     = WeightVector(weightVectorLoadPath)
         self.evaluator    = Evaluator()
 
@@ -77,28 +76,32 @@ class GlmParser():
               shardNum             = None,
               sc                   = None,
               hadoop               = False):
-
-        print ("PARSER [DEBUG]: Starting Training Process")
-
-        if dataPool is None:
-            raise ValueError("PARSER [ERROR]: DataPool for training not specified")
+        # Check values
+        if not isinstance(dataPool, DataPool):
+            raise ValueError("PARSER [ERROR]: dataPool for training is not an DataPool object")
         if maxIteration is None:
-            # We shall encourage the users to specify the number of iterations by themselves
             print ("PARSER [WARN]: Number of Iterations not specified, using 1")
             maxIteration = 1
 
-        if not parallel:
-            # It means we will be using sequential training
+        # Prepare the suitable argmax
+        def parser_f_argmax(w_vector, sentence, parser):
+            current_edge_set = parser.parse(sentence, w_vector.get_vector_score)
+            current_global_vector = sentence.set_current_global_vector(current_edge_set)
+            return current_global_vector
+        f_argmax = functools.partial(parser_f_argmax, parser=self.parser)
+
+        # Star Training Process
+        print ("PARSER [DEBUG]: Starting Training Process")
+        if not parallel:  # using sequential training
             print ("PARSER [DEBUG]: Using Sequential Training")
             self.learner.sequential_learn(max_iter   = maxIteration,
                                           data_pool  = dataPool,
-                                          f_argmax   = self.f_argmax,
+                                          f_argmax   = f_argmax,
                                           d_filename = weightVectorDumpPath,
                                           dump_freq  = dumpFrequency)
-        else:
+        else:  # using parallel training
             print ("PARSER [DEBUG]: Using Parallel Training")
             if shardNum is None:
-                # We shall encourage the users to specify the number of shards by themselves
                 print ("PARSER [WARN]: Number of shards not specified, using 1")
                 shardNum = 1
             if sc is None:
@@ -108,7 +111,7 @@ class GlmParser():
             learner = parallelLearnClass(self.w_vector, maxIteration)
             learner.parallel_learn(max_iter     = maxIteration,
                                    dataPool     = dataPool,
-                                   parser       = self.parser,
+                                   f_argmax     = f_argmax,
                                    learner      = self.learner,
                                    d_filename   = weightVectorDumpPath,
                                    shards       = shardNum,
@@ -117,31 +120,26 @@ class GlmParser():
         return
 
     def evaluate(self, dataPool = None):
-        if dataPool is None:
-            raise ValueError("PARSER [ERROR]: DataPool for evaluation not specified")
+        if not isinstance(dataPool, DataPool):
+            raise ValueError("PARSER [ERROR]: dataPool for evaluation is not an DataPool object")
         self.evaluator.evaluate(dataPool, self.parser, self.w_vector)
-
-    def f_argmax(self, w_vector, sentence):
-        current_edge_set = self.parser.parse(sentence, w_vector.get_vector_score)
-        current_global_vector = sentence.set_current_global_vector(current_edge_set)
-        return current_global_vector
 
 if __name__ == "__main__":
     # Default values
     config = {
-        'train': None,
-        'test': None,
-        'iterations': 1,
-        'data_path': None,
-        'load_weight_from': None,
-        'dump_weight_to': None,
-        'dump_frequency': 1,
-        'spark_shards': 1,
-        'prep_path': 'data/prep',
-        'learner': 'average_perceptron',
-        'parser': 'ceisner',
+        'train':             None,
+        'test':              None,
+        'iterations':        1,
+        'data_path':         None,
+        'load_weight_from':  None,
+        'dump_weight_to':    None,
+        'dump_frequency':    1,
+        'spark_shards':      1,
+        'prep_path':         'data/prep',
+        'learner':           'average_perceptron',
+        'parser':            'ceisner',
         'feature_generator': 'english_1st_fgen',
-        'format': 'format/penn2malt.format',
+        'format':            'format/penn2malt.format'
     }
 
     glm_parser = GlmParser
@@ -210,15 +208,18 @@ if __name__ == "__main__":
             overrides -b -e (Only run specified number of sentences) -i (Run forever)
             """)
         arg_parser.add_argument('--log-feature-request', action='store_true',
-            help="""log each feature request based on feature type. This is helpful for
-            analysing feature usage and building feature caching utility.
+            help="""log each feature request based on feature type. This is
+            helpful for analysing feature usage and building feature caching
+            utility.
             Upon exiting the main program will dump feature request information
             into a file named "feature_request.log"
             """)
         arg_parser.add_argument('--spark-shards', '-s', metavar='SHARDS_NUM', type=int,
             help='train using parallelisation with spark')
         arg_parser.add_argument('--prep-path',
-            help="""specify the directory in which you would like to store prepared data files after partitioning
+            help="""specify the directory in which you would like to store the
+            prepared data files after partitioning. For yarn mode the directory
+            will be on HDFS.
             """)
         arg_parser.add_argument('--data-path', '-p', metavar='DATA_PATH',
             help="""Path to data files (to the parent directory for all sections)
@@ -229,8 +230,8 @@ if __name__ == "__main__":
             example: "./Weight.db"
             """)
         arg_parser.add_argument('--dump-weight-to', '-d', metavar='PREFIX',
-            help="""Path for dumping weight vector. Please also specify a prefix
-            of file names, which will be added with iteration count and
+            help="""Path for dumping weight vector. Please also specify a
+            prefix of file names, which will be added with iteration count and
             ".db" suffix when dumping the file
 
             example: "./weight_dump", and the resulting files could be:
@@ -238,13 +239,14 @@ if __name__ == "__main__":
             "./weight_dump_Iter_2.db"...
             """)
         arg_parser.add_argument('--dump-frequency', '-f', type=int,
-            help="""Frequency of dumping weight vector. The weight vector of last
-            iteration will always be dumped
+            help="""Frequency of dumping weight vector. This option is only
+            valid with option dump-weight-to. The weight vector of last
+            iteration will always be dumped.
             example: "-i 6 -f 2"
             weight vector will be dumped at iteration 0, 2, 4, 5.
             """)
-        arg_parser.add_argument('--iterations', '-i', metavar='ITERATIONS', type=int,
-            help="""Number of iterations
+        arg_parser.add_argument('--iterations', '-i', metavar='ITERATIONS',
+            type=int, help="""Number of iterations
             default 1
             """)
         arg_parser.add_argument('--timing', '-a', action='store_true',
@@ -271,7 +273,7 @@ if __name__ == "__main__":
     if args.max_sentences:
         debug.debug.run_first_num = int(args.max_sentences)
         if debug.debug.run_first_num <= 0:
-            raise ValueError("Illegal integer: %d" % (debug.debug.run_first_num, ))
+            raise ValueError("Illegal integer: " + debug.debug.run_first_num)
         else:
             print("Debug run number = %d" % (debug.debug.run_first_num, ))
     if args.log_feature_request:
@@ -319,7 +321,8 @@ if __name__ == "__main__":
         try:
             config['data_path'] = cf.get('data', 'data_path')
         except:
-            print "WARNING: Unable to read data_path from config file. ",
+            print "WARNING: Encountered exception while attempting to read ",
+            print "data_path from config file. ",
             print "It could be caused by the environment variable settings, ",
             print "which is not supported when running in yarn mode"
 
