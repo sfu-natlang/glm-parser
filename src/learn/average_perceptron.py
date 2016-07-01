@@ -13,8 +13,9 @@ logging.basicConfig(filename='glm_parser.log',
 
 class Learner(object):
 
+    name = "AveragePerceptronLearner"
+
     def __init__(self, w_vector=None, max_iter=1):
-        self.name = "AveragePerceptronLearner"
         """
         :param w_vector: A global weight vector instance that stores
          the weight value (float)
