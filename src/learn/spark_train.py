@@ -128,3 +128,4 @@ class ParallelPerceptronLearner():
                 for k, v in w_vector.iteritems():
                     contents.append(str(k) + "    " + str(v) + "\n")
                 print ("[INFO]: Dumping to: " + fileWrite(d_filename + "_Iter_%d.db" % max_iter, contents, sc))
+        return self.w_vector

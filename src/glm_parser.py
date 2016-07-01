@@ -94,11 +94,12 @@ class GlmParser():
         print ("PARSER [DEBUG]: Starting Training Process")
         if not parallel:  # using sequential training
             print ("PARSER [DEBUG]: Using Sequential Training")
-            self.learner.sequential_learn(max_iter   = maxIteration,
-                                          data_pool  = dataPool,
-                                          f_argmax   = f_argmax,
-                                          d_filename = weightVectorDumpPath,
-                                          dump_freq  = dumpFrequency)
+            self.w_vector = self.learner.sequential_learn(
+                                        max_iter   = maxIteration,
+                                        data_pool  = dataPool,
+                                        f_argmax   = f_argmax,
+                                        d_filename = weightVectorDumpPath,
+                                        dump_freq  = dumpFrequency)
         else:  # using parallel training
             print ("PARSER [DEBUG]: Using Parallel Training")
             if shardNum is None:
@@ -109,14 +110,15 @@ class GlmParser():
 
             parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
             learner = parallelLearnClass(self.w_vector, maxIteration)
-            learner.parallel_learn(max_iter     = maxIteration,
-                                   dataPool     = dataPool,
-                                   f_argmax     = f_argmax,
-                                   learner      = self.learner,
-                                   d_filename   = weightVectorDumpPath,
-                                   shards       = shardNum,
-                                   sc           = sc,
-                                   hadoop       = hadoop)
+            self.w_vector = learner.parallel_learn(
+                                        max_iter     = maxIteration,
+                                        dataPool     = dataPool,
+                                        f_argmax     = f_argmax,
+                                        learner      = self.learner,
+                                        d_filename   = weightVectorDumpPath,
+                                        shards       = shardNum,
+                                        sc           = sc,
+                                        hadoop       = hadoop)
         return
 
     def evaluate(self, dataPool = None):
@@ -345,6 +347,8 @@ if __name__ == "__main__":
     if (not os.path.isfile(config['format'])) and (not yarn_mode):
         sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
         sys.exit(1)
+    if not spark_mode:
+        config['spark_shards'] = 1
 
     # Initialise Parser
     gp = glm_parser(weightVectorLoadPath = config['load_weight_from'],

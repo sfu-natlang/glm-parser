@@ -127,7 +127,7 @@ class Learner(object):
 
         self.avg_weight(self.w_vector, self.c - 1)
 
-        return
+        return self.w_vector
 
     def avg_weight(self, w_vector, count):
         if count > 0:

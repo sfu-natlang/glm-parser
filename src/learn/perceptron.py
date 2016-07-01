@@ -48,6 +48,7 @@ class Learner():
             if d_filename is not None:
                 if i % dump_freq == 0 or i == max_iter - 1:
                     self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
+        return self.w_vector
 
 
     def update_weight(self, current_global_vector, gold_global_vector):
