@@ -56,7 +56,7 @@ class GlmParser():
             self.learner = importlib.import_module('learn.' + learner).Learner()
         else:
             self.learner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
-        print("PARSER [INFO]: Using learner: %s " % (self.learner.learner_name))
+        print("PARSER [INFO]: Using learner: %s " % (self.learner.name))
 
         self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
         print("PARSER [INFO]: Using feature generator: %s " % (fgen))
@@ -273,7 +273,8 @@ if __name__ == "__main__":
     if args.max_sentences:
         debug.debug.run_first_num = int(args.max_sentences)
         if debug.debug.run_first_num <= 0:
-            raise ValueError("Illegal integer: " + debug.debug.run_first_num)
+            sys.stderr.write("Illegal integer: %s\n" % debug.debug.run_first_num)
+            sys.exit(1)
         else:
             print("Debug run number = %d" % (debug.debug.run_first_num, ))
     if args.log_feature_request:
@@ -286,7 +287,8 @@ if __name__ == "__main__":
     if args.config:
         # Check local config path
         if (not os.path.isfile(args.config)) and (not yarn_mode):
-            raise ValueError("The config file doesn't exist: " + args.config)
+            sys.stderr.write("The config file doesn't exist: %s\n" % args.config)
+            sys.exit(1)
 
         # Initialise the config parser
         print("Reading configurations from file: %s" % (args.config))
@@ -315,7 +317,7 @@ if __name__ == "__main__":
                 config[int_option] = config_parser.getint('option', int_option)
 
         for option in ['learner', 'feature_generator', 'parser']:
-            if config_parser.get('option', int_option) != '':
+            if config_parser.get('core', option) != '':
                 config[option] = config_parser.get('core', option)
 
         try:
@@ -335,11 +337,14 @@ if __name__ == "__main__":
 
     # Check values of config[]
     if config['data_path'] is None:
-        raise ValueError("data_path not specified.")
+        sys.stderr.write('data_path not specified\n')
+        sys.exit(1)
     if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        raise ValueError("The data_path directory doesn't exist: " + config['data_path'])
+        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
+        sys.exit(1)
     if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        raise ValueError("The format file doesn't exist: " + config['format'])
+        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
+        sys.exit(1)
 
     # Initialise Parser
     gp = glm_parser(weightVectorLoadPath = config['load_weight_from'],

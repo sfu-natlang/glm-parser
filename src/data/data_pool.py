@@ -68,6 +68,8 @@ class DataPool():
         self.hadoop   = hadoop
         self.sc       = sc
         self.shardNum = shardNum
+        self.format_list = None
+        self.comment_sign = None
         self.reset_all()
 
         if textString is not None:
@@ -172,17 +174,6 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
-    def get_format_list(self):
-        if self.field_name_list == []:
-            raise RuntimeError("DATAPOOL [ERROR]: format_list empty")
-        return self.field_name_list
-
-    def get_comment_sign(self):
-        return self.comment_sign
-
-    def get_fgen(self):
-        return self.fgen
-
     def load(self, formatPath, sparkContext=None):
         """
         For each section in the initializer, iterate through all files
@@ -202,7 +193,7 @@ class DataPool():
         else:
             fformat = open(formatPath)
 
-        self.field_name_list = []
+        self.format_list = []
         self.comment_sign = ''
 
         remaining_field_names = 0
@@ -210,7 +201,7 @@ class DataPool():
             format_line = line.strip().split()
 
             if remaining_field_names > 0:
-                self.field_name_list.append(line.strip())
+                self.format_list.append(line.strip())
                 remaining_field_names -= 1
 
             if format_line[0] == "field_names:":
@@ -219,7 +210,7 @@ class DataPool():
             if format_line[0] == "comment_sign:":
                 self.comment_sign = format_line[1]
 
-        if self.field_name_list == []:
+        if self.format_list == []:
             raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
 
         if self.hadoop == False:
@@ -243,7 +234,7 @@ class DataPool():
             tmp  = aRdd.collect()
             tmpStr = ''.join(str(e)+"\n" for e in tmp)
             self.load_stringtext(textString  = tmpStr,
-                                format_list  = self.field_name_list,
+                                format_list  = self.format_list,
                                 comment_sign = self.comment_sign)
         return
 
@@ -264,30 +255,30 @@ class DataPool():
 
         column_list = {}
 
-        for field in self.field_name_list:
+        for field in self.format_list:
             if not(field.isdigit()):
                 column_list[field] = []
 
-        length = len(self.field_name_list)
+        length = len(self.format_list)
 
         for entity in f:
             entity = entity[:-1].split()
             if len(entity) == length and entity[0] != self.comment_sign:
                 for i in range(length):
-                    if not(self.field_name_list[i].isdigit()):
-                        column_list[self.field_name_list[i]].append(entity[i])
+                    if not(self.format_list[i].isdigit()):
+                        column_list[self.format_list[i]].append(entity[i])
 
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
-                if not(self.field_name_list[0].isdigit()) and column_list[self.field_name_list[0]] != []:
+                if not(self.format_list[0].isdigit()) and column_list[self.format_list[0]] != []:
 
                     # Add "ROOT" for word and pos here
-                    sent = Sentence(column_list, self.field_name_list, self.fgen)
+                    sent = Sentence(column_list, self.format_list, self.fgen)
                     data_list.append(sent)
 
                 column_list = {}
 
-                for field in self.field_name_list:
+                for field in self.format_list:
                     if not (field.isdigit()):
                         column_list[field] = []
 

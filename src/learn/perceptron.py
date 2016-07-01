@@ -13,6 +13,7 @@ logging.basicConfig(filename='glm_parser.log',
 class Learner():
 
     def __init__(self, w_vector=None, max_iter=1):
+        self.name = "PerceptronLearner"
         """
         :param w_vector: A global weight vector instance that stores
          the weight value (float)
@@ -25,9 +26,6 @@ class Learner():
         self.max_iter = max_iter
 
         return
-
-    def learner_name(self):
-        return "PerceptronLearner"
 
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
