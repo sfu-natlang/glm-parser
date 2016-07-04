@@ -179,7 +179,7 @@ class Trainer:
                     feat_vec_update = defaultdict(int)
 
                     for feature in gold_out_fv:
-			feat_vec_update[feature]+=gold_out_fv[feature]
+                        feat_vec_update[feature]+=gold_out_fv[feature]
                         feat_count[feature]+=gold_out_fv[feature]
 			#fileptr.write("feature is %s\n" %str(feature))
 			#fileptr.write("feat_vec_update due to gold_vec %s\n" %(feat_vec_update)
@@ -190,11 +190,14 @@ class Trainer:
 		    #num_updates = number of times the featue_vectors have been updated = num_sentences*iterations
                     for upd_feat in feat_vec_update.keys():
                         if feat_vec_update[upd_feat] != 0:
+                            # this should not be updated here
                             weight_vec[upd_feat] += feat_vec_update[upd_feat]
                             if (upd_feat) in last_iter:
                                 avg_vec[upd_feat] += (num_updates - last_iter[upd_feat]) * weight_vec[upd_feat]
+                                #avg_vec[upd_feat] += (num_updates - last_iter[upd_feat]) * feat_vec_update[upd_feat]
                             else:
                                 avg_vec[upd_feat] = weight_vec[upd_feat]
+                                #avg_vec[upd_feat] = feat_vec_update[upd_feat]
                             last_iter[upd_feat] = num_updates
 		    #fileptr.write("last_iter%s\n" %(last_iter))
             
