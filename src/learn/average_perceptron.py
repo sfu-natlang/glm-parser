@@ -11,7 +11,9 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class AveragePerceptronLearner(object):
+class Learner(object):
+
+    name = "AveragePerceptronLearner"
 
     def __init__(self, w_vector=None, max_iter=1):
         """
@@ -59,7 +61,7 @@ class AveragePerceptronLearner(object):
 
                 if debug.debug.time_accounting_flag is True:
                     before_time = time.clock()
-                    current_global_vector = f_argmax(data_instance)
+                    current_global_vector = f_argmax(self.w_vector, data_instance)
                     after_time = time.clock()
                     time_usage = after_time - before_time
                     argmax_time_total += time_usage
@@ -68,7 +70,7 @@ class AveragePerceptronLearner(object):
                     logging.debug("Time usage %f" % (time_usage, ))
                 else:
                     # Just run the procedure without any interference
-                    current_global_vector = f_argmax(data_instance)
+                    current_global_vector = f_argmax(self.w_vector, data_instance)
 
                 delta_global_vector = gold_global_vector - current_global_vector
 
@@ -126,7 +128,7 @@ class AveragePerceptronLearner(object):
 
         self.avg_weight(self.w_vector, self.c - 1)
 
-        return
+        return self.w_vector
 
     def avg_weight(self, w_vector, count):
         if count > 0:
@@ -138,7 +140,7 @@ class AveragePerceptronLearner(object):
         d_vector.dump(d_filename + "_Iter_%d.db"%i)
         d_vector.clear()
 
-    def parallel_learn(self,dp,fv,parser):
+    def parallel_learn(self, dp, fv, f_argmax):
         w_vec = WeightVector()
         weight_sum_dict = WeightVector()
         print "parallel_learn keys: %d"%len(fv.keys())
@@ -149,8 +151,7 @@ class AveragePerceptronLearner(object):
         while dp.has_next_data():
             data_instance = dp.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
-            current_edge_set = parser.parse(data_instance, w_vec.get_vector_score)
-            current_global_vector = data_instance.set_current_global_vector(current_edge_set)
+            current_global_vector = f_argmax(w_vec, data_instance)
 
             delta_global_vector = gold_global_vector - current_global_vector
             weight_sum_dict.iadd(w_vec)

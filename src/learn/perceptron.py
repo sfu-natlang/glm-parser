@@ -10,12 +10,22 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-class PerceptronLearner():
+class Learner():
+
+    name = "PerceptronLearner"
 
     def __init__(self, w_vector=None, max_iter=1):
+        """
+        :param w_vector: A global weight vector instance that stores
+         the weight value (float)
+        :param max_iter: Maximum iterations for training the weight vector
+         Could be overridden by parameter max_iter in the method
+        :return: None
+        """
         logging.debug("Initialize PerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
+
         return
 
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
@@ -31,7 +41,7 @@ class PerceptronLearner():
                 data_instance = data_pool.get_next_data()
                 #data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
                 gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
-                current_global_vector = f_argmax(data_instance)
+                current_global_vector = f_argmax(self.w_vector, data_instance)
                 self.update_weight(current_global_vector, gold_global_vector)
 
             data_pool.reset_index()
@@ -39,6 +49,7 @@ class PerceptronLearner():
             if d_filename is not None:
                 if i % dump_freq == 0 or i == max_iter - 1:
                     self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
+        return self.w_vector
 
 
     def update_weight(self, current_global_vector, gold_global_vector):
@@ -47,7 +58,7 @@ class PerceptronLearner():
         self.w_vector.iaddc(current_global_vector.feature_dict, -1)
         return
 
-    def parallel_learn(self,dp,fv,parser):
+    def parallel_learn(self, dp, fv, f_argmax):
         #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,format_list=format)
         w_vector = weight_vector.WeightVector()
         for key in fv.keys():
@@ -56,8 +67,8 @@ class PerceptronLearner():
         while dp.has_next_data():
             data_instance = dp.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
-            current_edge_set = parser.parse(data_instance, w_vector.get_vector_score)
-            current_global_vector = data_instance.set_current_global_vector(current_edge_set)
+            current_global_vector = f_argmax(w_vector, data_instance)
+
             w_vector.iadd(gold_global_vector.feature_dict)
             w_vector.iaddc(current_global_vector.feature_dict, -1)
 

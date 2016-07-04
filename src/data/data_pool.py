@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-import os, re
+import os
+import re
+import importlib
 from sentence import Sentence
 import logging
-import re
 from data_prep import *
 from file_io import *
 
@@ -13,56 +14,6 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
-def getClassFromModule(attr_name, module_path, module_name,
-                          silent=False):
-    """
-    This procedure is used by argument processing. It returns a class object
-    given a module path and attribute name.
-
-    Basically what it does is to find the module using module path, and then
-    iterate through all objects inside that module's namespace (including those
-    introduced by import statements). For each object in the name space, this
-    function would then check existence of attr_name, i.e. the desired interface
-    name (could be any attribute fetch-able by getattr() built-in). If and only if
-    one such desired interface exists then the object containing that interface
-    would be returned, which is mostly a class, but could theoretically be anything
-    object instance with a specified attribute.
-
-    If import error happens (i.e. module could not be found/imported), or there is/are
-    no/more than one interface(s) existing, then exception will be raised.
-
-    :param attr_name: The name of the desired interface
-    :type attr_name: str
-    :param module_path: The path of the module. Relative to src/
-    :type module_path: str
-    :param module_name: Name of the module e.g. file name
-    :type module_name: str
-    :param silent: Whether to report existences of interface objects
-    :return: class object
-    """
-    # Load module by import statement (mimic using __import__)
-    # We first load the module (i.e. directory) and then fetch its attribute (i.e. py file)
-    module_obj = getattr(__import__(module_path + '.' + module_name,
-                                    globals(),   # Current global
-                                    locals(),    # Current local
-                                    [],          # I don't know what is this
-                                    -1), module_name)
-    intf_class_count = 0
-    intf_class_name = None
-    for obj_name in dir(module_obj):
-        if hasattr(getattr(module_obj, obj_name), attr_name):
-            intf_class_count += 1
-            intf_class_name = obj_name
-            if silent is False:
-                print("Interface object %s detected\n\t with interface %s" %
-                      (obj_name, attr_name))
-    if intf_class_count < 1:
-        raise ImportError("Interface object with attribute %s not found" % (attr_name, ))
-    elif intf_class_count > 1:
-        raise ImportError("Could not resolve arbitrary on attribute %s" % (attr_name, ))
-    else:
-        class_obj = getattr(module_obj, intf_class_name)
-        return class_obj
 
 class DataPool():
     """
@@ -111,12 +62,14 @@ class DataPool():
         :type format_path: str
         """
         if isinstance(fgen, basestring):
-            self.fgen = getClassFromModule('get_local_vector', 'feature', fgen)
+            self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
         else:
             self.fgen = fgen
         self.hadoop   = hadoop
         self.sc       = sc
         self.shardNum = shardNum
+        self.format_list = None
+        self.comment_sign = None
         self.reset_all()
 
         if textString is not None:
@@ -221,14 +174,6 @@ class DataPool():
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
 
-    def get_format_list(self):
-        if self.field_name_list == []:
-            raise RuntimeError("DATAPOOL [ERROR]: format_list empty")
-        return self.field_name_list
-
-    def get_comment_sign(self):
-        return self.comment_sign
-
     def load(self, formatPath, sparkContext=None):
         """
         For each section in the initializer, iterate through all files
@@ -248,7 +193,7 @@ class DataPool():
         else:
             fformat = open(formatPath)
 
-        self.field_name_list = []
+        self.format_list = []
         self.comment_sign = ''
 
         remaining_field_names = 0
@@ -256,7 +201,7 @@ class DataPool():
             format_line = line.strip().split()
 
             if remaining_field_names > 0:
-                self.field_name_list.append(line.strip())
+                self.format_list.append(line.strip())
                 remaining_field_names -= 1
 
             if format_line[0] == "field_names:":
@@ -265,7 +210,7 @@ class DataPool():
             if format_line[0] == "comment_sign:":
                 self.comment_sign = format_line[1]
 
-        if self.field_name_list == []:
+        if self.format_list == []:
             raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
 
         if self.hadoop == False:
@@ -289,7 +234,7 @@ class DataPool():
             tmp  = aRdd.collect()
             tmpStr = ''.join(str(e)+"\n" for e in tmp)
             self.load_stringtext(textString  = tmpStr,
-                                format_list  = self.field_name_list,
+                                format_list  = self.format_list,
                                 comment_sign = self.comment_sign)
         return
 
@@ -310,30 +255,30 @@ class DataPool():
 
         column_list = {}
 
-        for field in self.field_name_list:
+        for field in self.format_list:
             if not(field.isdigit()):
                 column_list[field] = []
 
-        length = len(self.field_name_list)
+        length = len(self.format_list)
 
         for entity in f:
             entity = entity[:-1].split()
             if len(entity) == length and entity[0] != self.comment_sign:
                 for i in range(length):
-                    if not(self.field_name_list[i].isdigit()):
-                        column_list[self.field_name_list[i]].append(entity[i])
+                    if not(self.format_list[i].isdigit()):
+                        column_list[self.format_list[i]].append(entity[i])
 
             else:
                 # Prevent any non-mature (i.e. trivial) sentence structure
-                if not(self.field_name_list[0].isdigit()) and column_list[self.field_name_list[0]] != []:
+                if not(self.format_list[0].isdigit()) and column_list[self.format_list[0]] != []:
 
                     # Add "ROOT" for word and pos here
-                    sent = Sentence(column_list, self.field_name_list, self.fgen)
+                    sent = Sentence(column_list, self.format_list, self.fgen)
                     data_list.append(sent)
 
                 column_list = {}
 
-                for field in self.field_name_list:
+                for field in self.format_list:
                     if not (field.isdigit()):
                         column_list[field] = []
 

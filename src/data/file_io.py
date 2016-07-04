@@ -71,15 +71,3 @@ def fileWrite(filePath=None, contents=None, sparkContext=None):
         except:
             raise RuntimeError('FILEIO [ERROR]: Unable to save to local directory: ' + filePath)
     return fileWriteHDFS(filePath=filePath, contents=contents, sparkContext=sparkContext)
-
-
-if __name__ == "__main__":
-    inputLocalFile   = sys.argv[1]
-    outputLocalFile  = sys.argv[2]
-    #inputHadoopFile  = sys.argv[3]
-    #outputHadoopFile = sys.argv[4]
-
-    contents = fileRead(inputLocalFile)
-    fileWrite(outputLocalFile, contents)
-    #contents = fileRead(inputHadoopFile)
-    #fileWrite(outputHadoopFile, contents)
