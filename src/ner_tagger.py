@@ -5,7 +5,7 @@ import time,copy,logging
 import os,sys,inspect
 from collections import defaultdict
 
-from ner import ner_features
+from ner import Ner_features
 from ner import ner_viterbi
 from ner import ner_accuracy
 
@@ -168,7 +168,7 @@ class Trainer:
 
                     #pos_feat = pos_features.Pos_feat_gen(labels)
 		    
-                    ner_feat = ner_features.Ner_feat_gen()
+                    ner_feat = Ner_features.Ner_feat_gen()
 
                     gold_out_fv = defaultdict(int)
                     ner_feat.sent_feat_gen(gold_out_fv,labels, tags_cp,POS_tags,chunk_tags)

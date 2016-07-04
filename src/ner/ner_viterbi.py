@@ -2,6 +2,7 @@ from __future__ import division
 import os,sys,inspect 
 import copy, operator, optparse
 from collections import defaultdict
+import Ner_features
 
 class Viterbi():
     def __init__(self, w_vector=None):
@@ -52,6 +53,7 @@ class Viterbi():
         N = len(labels)
 
         # Set up the data structure for viterbi search
+	ner_feat =  Ner_features.Ner_feat_gen()
         viterbi = {}
         for i in range(0, N):
             viterbi[i] = {} # each column contains for each tag: a (value, backpointer) tuple
@@ -69,7 +71,7 @@ class Viterbi():
                 for prev_tag in viterbi[i-1]:
                     feats = []
                     (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
-                    self.get_pos_feature(feats,i,prev_tag,prev_backpointer,labels)
+                    ner_feat.get_ner_features(feats,i,prev_tag,prev_backpointer,labels)
                     weight = 0.0
                     # sum up the weights for all features except the bigram features
                     #for feat in feats:
