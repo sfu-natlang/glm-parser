@@ -72,14 +72,19 @@ class Viterbi():
                     self.get_pos_feature(feats,i,prev_tag,prev_backpointer,labels)
                     weight = 0.0
                     # sum up the weights for all features except the bigram features
-                    for feat in feats:
+                    #for feat in feats:
                         #print str((feat, tag))
-                        key = (feat,tag)
-                        strkey = str(key)
-                        if strkey in feat_vec:
-                            weight += feat_vec[strkey]
+                     #  key = (feat,tag)
+                     #   strkey = str(key)
+                     #  if strkey in feat_vec:
+                     #       weight += feat_vec[strkey]
+                     #  prev_tag_weight = weight
+                    for feat in feats:
+                        if (feat, tag) in feat_vec:
+                            weight += feat_vec[feat, tag]
+               
                     prev_tag_weight = weight
-                    
+
                     prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
                 (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
                 
@@ -89,8 +94,7 @@ class Viterbi():
             if found_tag is False:
                 viterbi[i][default_tag] = (0.0, default_tag)
 
-
-        # recover the best sequence using backpointers
+# recover the best sequence using backpointers
         maxvalue = self.get_maxvalue(viterbi[N-3])
         best_tag = maxvalue[0]
         for i in range(N-3, 1, -1):
@@ -99,4 +103,3 @@ class Viterbi():
             best_tag = backpointer
 
         return output
-

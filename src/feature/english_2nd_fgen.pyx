@@ -15,14 +15,14 @@ import debug.debug
 
 import copy
 
-class SecondOrderFeatureGenerator():
+class FeatureGenerator():
     """
     Second order feature generator: Sibling features and grandchild features
     """
     def __init__(self, sent):
         # Construct a first order feature generator, and pre-cache some necessary data
         # We just wrap around first order
-        self.first_order_generator = english_1st_fgen.FirstOrderFeatureGenerator(sent)
+        self.first_order_generator = english_1st_fgen.FeatureGenerator(sent)
 
         # Make shortcuts - Not necessary, but saves some key strokes
         self.word_list = self.first_order_generator.word_list
@@ -438,7 +438,7 @@ def test():
             return self.pos_list
 
     sentence = test_class()
-    fg = SecondOrderFeatureGenerator(sentence)
+    fg = FeatureGenerator(sentence)
     fv = fg.get_second_order_local_vector(1, 5, [3],
                              feature_type=0)
     print(fv)

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$( dirname "$0" )"
+
 project_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )'/..'
 
 source $MODULESHOME/init/bash
@@ -15,4 +17,4 @@ cd hvector
 python setup.py install --install-lib .
 
 cd ..
-spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 5 -p /cs/natlang-data/CoNLL/universal-dependencies-1.2 --train='grc_proiel-ud-train.conllu' --test='grc_proiel-ud-test.conllu' --learner=average_perceptron --fgen=english_1st_fgen --parser=ceisner --format=format/conllu.format
+spark-submit --driver-memory 4g --executor-memory 4g --master 'local[*]' glm_parser.py -s 4 -i 1 config/default.config

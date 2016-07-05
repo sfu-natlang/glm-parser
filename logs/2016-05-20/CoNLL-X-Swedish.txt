@@ -1,8 +1,0 @@
-Branch: master
-
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Swedish/data --train="swedish_talbanken05_train.conll" --test="swedish_talbanken05_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
-
-05/20/2016 12:15:43 PM INFO: Training time usage(seconds): 126.874286
-05/20/2016 12:15:43 PM INFO: Feature count: 2118233
-05/20/2016 12:15:43 PM INFO: Unlabeled accuracy: 0.852192362093 (4820, 5656)
-05/20/2016 12:15:43 PM INFO: Unlabeled attachment accuracy: 0.861703887510 (5209, 6045)

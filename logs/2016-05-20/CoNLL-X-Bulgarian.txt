@@ -1,9 +1,0 @@
-Branch: master
-
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Bulgarian/data --train="bulgarian_bultreebank_train.conll" --test="bulgarian_bultreebank_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
-
-05/20/2016 10:57:57 AM INFO: Training time usage(seconds): 154.728828
-05/20/2016 10:57:57 AM INFO: Feature count: 1912315
-05/20/2016 10:57:57 AM INFO: Unlabeled accuracy: 0.881024603977 (5228, 5934)
-05/20/2016 10:57:57 AM INFO: Unlabeled attachment accuracy: 0.888502842704 (5626, 6332)
-

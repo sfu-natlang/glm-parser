@@ -5,10 +5,10 @@ class EisnerParser():
     """
     An Eisner parsing algorithm implementation
     """
-    
+
     def __init__(self):
         return
-        
+
     def init_eisner_matrix(self,n):
         """
         Initialize a dynamic programming table, i.e. e[0..n][0..n][0..1][0..1]
@@ -43,12 +43,12 @@ class EisnerParser():
         self.max_score = parsed_result[0]
         self.edge_set = parsed_result[1]
         return
-    
 
-    def parse(self,n,arc_weight,sentence=None):
+
+    def parse(self, n, arc_weight, sentence=None, tagger=None):
         """
         Implementation of Eisner Algorithm using dynamic programming table
-        
+
         :param n: The number of input words that constitute a sentence.
         :type n: int
         :param arc_weight: A scoring function that gives scores to edges
@@ -57,6 +57,8 @@ class EisnerParser():
         :return: The maximum score of the dependency structure as well as all edges
         :rtype: tuple(integer,list(tuple(integer,integer)))
         """
+        if (tagger != None):
+            sent.set_pos_list(tagger.getTags(['_B_-2', '_B_-1'] + sent.get_word_list()[1:] + ['_B_+1', '_B_+2']))
         #tt = 0;
         e = self.init_eisner_matrix(n)
         for m in range(1, n):
@@ -69,38 +71,37 @@ class EisnerParser():
                 #tt += (time.clock() - t1)
                 e[s][t][0][1][0], q_max = max(
                     [(e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight, q)
-                    for q in range(s, t)], 
+                    for q in range(s, t)],
                     key=lambda (a,c): a)
                 e[s][t][0][1][1] =\
                     e[s][q_max][1][0][1] + e[q_max+1][t][0][0][1] + [(t,s)]
-                
-                
+
+
                 #t1 = time.clock()
                 weight = arc_weight(s,t)
                 #tt += (time.clock() - t1)
                 e[s][t][1][1][0], q_max = max(
                     [(e[s][q][1][0][0] + e[q+1][t][0][0][0] + weight, q)
-                    for q in range(s, t)], 
+                    for q in range(s, t)],
                     key=lambda (a,c): a)
                 e[s][t][1][1][1] =\
                     e[s][q_max][1][0][1] + e[q_max+1][t][0][0][1] + [(s,t)]
-                
-                
+
+
                 e[s][t][0][0][0], q_max = max(
                     [(e[s][q][0][0][0] + e[q][t][0][1][0],q)
-                    for q in range(s, t)], 
+                    for q in range(s, t)],
                     key=lambda (a,c): a)
                 e[s][t][0][0][1] = e[s][q_max][0][0][1] + e[q_max][t][0][1][1]
-                
-                
+
+
                 e[s][t][1][0][0], q_max = max(
                     [(e[s][q][1][1][0] + e[q][t][1][0][0], q)
-                    for q in range(s+1, t+1)], 
+                    for q in range(s+1, t+1)],
                     key=lambda (a,c): a)
                 e[s][t][1][0][1] = e[s][q_max][1][1][1] + e[q_max][t][1][0][1]
                 #print s, t
-                
+
         self.store_parsed_result(e[0][n - 1][1][0])
-        #print "edge query time", tt    
+        #print "edge query time", tt
         return set(e[0][n - 1][1][0][1])
-    
