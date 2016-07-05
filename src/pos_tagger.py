@@ -11,9 +11,9 @@
 # This is the main programme of the Part of Speech Tagger.
 # Individual modules of the tagger are located in src/pos/
 
-from data import data_pool
+from data.data_pool import DataPool
 from pos import pos_decode, pos_perctrain, pos_features
-from weight import weight_vector
+from weight.weight_vector import WeightVector
 import debug.debug
 import os
 import sys
@@ -25,6 +25,7 @@ import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
+__version__ = '1.0'
 
 class PosTagger():
     def __init__(self,
@@ -88,13 +89,14 @@ class PosTagger():
         if dataPool is None:
             sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
             sys.exit(1)
+
         print "TAGGER [INFO]: Loading Testing Data"
         test_data = self.load_data(dataPool, data_format)
         tester = pos_decode.Decoder(test_data)
         acc = tester.get_accuracy(self.w_vector)
 
     def load_w_vec(self, fv_path=None):
-        feat_vec = weight_vector.WeightVector()
+        feat_vec = WeightVector()
         feat_vec.load(fv_path)
         self.w_vector = feat_vec
 
@@ -107,6 +109,15 @@ MAJOR_VERSION = 0
 MINOR_VERSION = 1
 
 if __name__ == '__main__':
+    config = {
+        'train':           None,
+        'test':            None,
+        'iterations':      1,
+        'data_path':       None,
+        'tag_file':        None,
+        'format':          'format/penn2malt.format',
+        'tagger_w_vector': None
+    }
 
     # Process Defaults
     train_regex = ''
@@ -117,8 +128,8 @@ if __name__ == '__main__':
     data_format = 'format/penn2malt.format'
 
     arg_parser = argparse.ArgumentParser(description="""Part Of Speech (POS) Tagger
-        Version %d.%d""" % (MAJOR_VERSION, MINOR_VERSION))
-    arg_parser.add_argument('config', metavar='CONFIG_FILE', help="""
+        Version %s""" % __version__)
+    arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?', help="""
         specify the config file. This will load all the setting from the config
         file, in order to avoid massive command line inputs. Please consider
         using config files instead of manually typing all the options.
@@ -142,7 +153,7 @@ if __name__ == '__main__':
         specify the format file for the training and testing files.
         Officially supported format files are located in src/format/
         """)
-    arg_parser.add_argument('--tagset', metavar='TAG_TARGET', help="""
+    arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""
         specify the file containing the tags we want to use.
         Officially provided TAG_TARGET file is src/tagset.txt
         """)
@@ -152,6 +163,11 @@ if __name__ == '__main__':
         Number of iterations
         default 1
         """)
+    arg_parser.add_argument('--tagger-w-vector', metavar='FILENAME',
+        help="""Path to an existing w-vector for tagger. Use this option if
+        you need to evaluate the glm_parser with a trained tagger.
+        """)
+
     args = arg_parser.parse_args()
     # load configuration from file
     #   configuration files are stored under src/format/
@@ -161,49 +177,55 @@ if __name__ == '__main__':
         cf = SafeConfigParser(os.environ)
         cf.read(args.config)
 
-        train_regex = cf.get("data", "train")
-        test_regex = cf.get("data", "test")
-        test_data_path = cf.get("data", "data_path")
-        data_format = cf.get("data", "format")
-        tag_file = cf.get("data", "tag_file")
-        w_vector = cf.get("data", "tagger_w_vector")
+        for option in ['train', 'test', 'data_path', 'tag_file', 'format']:
+            if cf.get('data', option) != '':
+                config[option] = cf.get('data', option)
 
-        max_iter = cf.getint("option", "iterations")
+        if cf.get('option', 'iterations') != '':
+            config['iterations'] = cf.getint("option", "iterations")
 
-    # load configuration from command line
-    if args.path:
-        test_data_path = args.path
-    if args.iteration:
-        max_iter = int(args.iteration)
-    if args.train:
-        train_regex = args.train
-    if args.test:
-        test_regex = args.test
-    if args.format:
-        data_format = args.format
-    if args.tagset:
-        tag_file = args.tagset
+        if cf.get('option', 'tagger_w_vector') != '':
+            config['tagger_w_vector'] = cf.get(   'option', 'tagger_w_vector')
 
-    tagger = PosTagger(tag_file=tag_file,
-                       max_iter=max_iter,
-                       data_format=data_format)
+    # we do this here because we want the defaults to include our config file
+    arg_parser.set_defaults(**config)
+    args = arg_parser.parse_args()
 
-    if not w_vector == '':
-        tagger.load_w_vec(w_vector)
+    # we want to the CLI parameters to override the config file
+    config.update(vars(args))
 
-    if not train_regex == '':
+    # Check values of config[]
+    if config['data_path'] is None:
+        sys.stderr.write('data_path not specified\n')
+        sys.exit(1)
+    if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
+        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
+        sys.exit(1)
+    if (not os.path.isfile(config['format'])) and (not yarn_mode):
+        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
+        sys.exit(1)
+
+    tagger = PosTagger(tag_file    = config['tag_file'],
+                       data_format = config['format'])
+
+    if config['tagger_w_vector'] is not None:
+        tagger.load_w_vec(config['tagger_w_vector'])
+
+    if config['train'] is not None:
+        trainDataPool = DataPool(section_regex = config['train'],
+                                 data_path     = config['data_path'],
+                                 format_path   = config['format'])
+
         print "TAGGER [INFO]: Training Starts, Timer is on"
         start_time = time.time()
-        train_data = DataPool(train_regex,
-                              test_data_path,
-                              format_path=data_format)
-        tagger.perc_train(train_data)
+        tagger.perc_train(dataPool = trainDataPool,
+                          max_iter = config['iterations'])
         end_time = time.time()
         training_time = end_time - start_time
         print "TAGGER [INFO]: Total Training Time: ", training_time
 
-    if not text_regex == '':
-        test_data = DataPool(test_regex,
-                              test_data_path,
-                              format_path=data_format)
-        tagger.evaluate(test_data)
+    if config['test'] is not None:
+        testDataPool = DataPool(section_regex = config['test'],
+                                data_path     = config['data_path'],
+                                format_path   = config['format'])
+        tagger.evaluate(dataPool=testDataPool)

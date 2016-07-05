@@ -184,10 +184,10 @@ class DataPool():
         and before any get_data method is called.
         """
         logging.debug("Loading data...")
-        print("Loading data...")
+        print("DATAPOOL [INFO]: Loading data...")
 
         # Load format file
-        print("Loading dataFormat from: " + formatPath)
+        print("DATAPOOL [INFO]: Loading dataFormat from: " + formatPath)
         if self.hadoop == True:
             fformat = fileRead(formatPath, sparkContext=sparkContext)
         else:
