@@ -69,7 +69,7 @@ class PosTagger():
                    dataPool=None,
                    max_iter=1,
                    dump_data=True):
-                   
+
         print "TAGGER [INFO]: Loading Training Data"
         if dataPool is None:
             sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
@@ -155,7 +155,7 @@ if __name__ == '__main__':
         Officially provided TAG_TARGET file is src/tagset.txt
         """)
     arg_parser.add_argument(
-        '--iteration', '-i',
+        '--iterations', '-i',
         metavar='ITERATIONS', type=int, help="""
         Number of iterations
         default 1

@@ -144,7 +144,8 @@ if __name__ == "__main__":
         'parser':            'ceisner',
         'feature_generator': 'english_1st_fgen',
         'format':            'format/penn2malt.format',
-        'tagger_w_vector':   None
+        'tagger_w_vector':   None,
+        'tag_file':          None
     }
 
     glm_parser = GlmParser
@@ -265,6 +266,11 @@ if __name__ == "__main__":
             help="""Path to an existing w-vector for tagger. Use this option if
             you need to evaluate the glm_parser with a trained tagger.
             """)
+        arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""
+            specify the file containing the tags we want to use.
+            This option is only valid while using option tagger-w-vector.
+            Officially provided TAG_TARGET file is src/tagset.txt
+            """)
 
         args = arg_parser.parse_args()
 
@@ -313,7 +319,8 @@ if __name__ == "__main__":
         config_parser.readfp(stringIOContent)
 
         # Process the contents of config file
-        for option in ['train', 'test', 'data_path', 'prep_path', 'format']:
+        for option in ['train', 'test', 'data_path',
+                       'prep_path', 'format', 'tag_file']:
             if config_parser.get('data', option) != '':
                 config[option] = config_parser.get('data', option)
 
@@ -366,7 +373,8 @@ if __name__ == "__main__":
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         print "Using Tagger weight vector: " + config['tagger_w_vector']
-        tagger = PosTagger(data_format = config['format'])
+        tagger = PosTagger(tag_file    = config['tag_file'],
+                           data_format = config['format'])
         tagger.load_w_vec(config['tagger_w_vector'])
         print "Tagger weight vector loaded"
     else:
