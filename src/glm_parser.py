@@ -366,8 +366,7 @@ if __name__ == "__main__":
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         print "Using Tagger weight vector: " + config['tagger_w_vector']
-        tagger = PosTagger(max_iter    = 1,
-                           data_format = config['format'])
+        tagger = PosTagger(data_format = config['format'])
         tagger.load_w_vec(config['tagger_w_vector'])
         print "Tagger weight vector loaded"
     else:
