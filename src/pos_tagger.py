@@ -69,6 +69,7 @@ class PosTagger():
                    dataPool=None,
                    max_iter=1,
                    dump_data=True):
+                   
         print "TAGGER [INFO]: Loading Training Data"
         if dataPool is None:
             sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
@@ -103,10 +104,6 @@ class PosTagger():
     def getTags(self, word_list):
         tagger = pos_decode.Decoder(tag_file=self.tag_file)
         return tagger.getTags(word_list, self.w_vector)
-
-
-MAJOR_VERSION = 0
-MINOR_VERSION = 1
 
 if __name__ == '__main__':
     config = {
