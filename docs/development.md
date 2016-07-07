@@ -167,6 +167,21 @@ the branch names (and tab complete should work here):
     $ git push --force origin feature/my-feature:feature/my-feature
 
 
+### And many more
+
+There are a ton of "git tips" blog posts online, and it's redundant to repeat
+everything here, but some more general tips:
+
+* Read the man pages for the commands you're running. They're very well
+  written, and have plenty of examples.
+* For any issue you have, there's a question on StackOverflow about it.
+* If you're doing something that may be error-prone, or may cause you to lose
+  information, make a copy of your project repo first.
+* Use `gitk` to view your history.
+* Set `git config --global push.default simple`
+* Set `git config --global merge.conflictstyle diff3`
+
+
 ## Related models
 
 Although we don't use this model, Vincent Driessen's [git flow
