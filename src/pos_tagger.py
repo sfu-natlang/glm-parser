@@ -29,14 +29,15 @@ __version__ = '1.0'
 
 class PosTagger():
     def __init__(self,
-                 tag_file="tagset.txt",
-                 data_format="format/penn2malt.format"):
+                 tag_file     = "file://tagset.txt",
+                 sparkContext = None):
 
         print "TAGGER [INFO]: Tag File selected: %s" % tag_file
         self.tag_file = tag_file
         self.default_tag = "NN"
+        self.sparkContext = sparkContext
 
-    def load_data(self, dataPool, data_format):
+    def load_data(self, dataPool):
         data_list = []
         sentence_count = 0
         while dataPool.has_next_data():
@@ -74,12 +75,13 @@ class PosTagger():
         if dataPool is None:
             sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
             sys.exit(1)
-        train_data = self.load_data(dataPool, data_format)
+        train_data = self.load_data(dataPool)
 
         print "TAGGER [INFO]: Training with Iterations: %d" % max_iter
         perc = pos_perctrain.PosPerceptron(max_iter=max_iter,
                                            default_tag="NN",
-                                           tag_file="tagset.txt")
+                                           tag_file="file://tagset.txt",
+                                           sparkContext=self.sparkContext)
 
         print "TAGGER [INFO]: Dumping trained weight vector"
         self.w_vector = perc.avg_perc_train(train_data)
@@ -92,13 +94,13 @@ class PosTagger():
             sys.exit(1)
 
         print "TAGGER [INFO]: Loading Testing Data"
-        test_data = self.load_data(dataPool, data_format)
+        test_data = self.load_data(dataPool)
         tester = pos_decode.Decoder(test_data)
         acc = tester.get_accuracy(self.w_vector)
 
     def load_w_vec(self, fv_path=None):
         feat_vec = WeightVector()
-        feat_vec.load(fv_path)
+        feat_vec.load(fv_path, self.sparkContext)
         self.w_vector = feat_vec
 
     def getTags(self, word_list):
@@ -106,6 +108,7 @@ class PosTagger():
         return tagger.getTags(word_list, self.w_vector)
 
 if __name__ == '__main__':
+    # Process Defaults
     config = {
         'train':           None,
         'test':            None,
@@ -115,14 +118,6 @@ if __name__ == '__main__':
         'format':          'format/penn2malt.format',
         'tagger_w_vector': None
     }
-
-    # Process Defaults
-    train_regex = ''
-    test_regex = ''
-    max_iter = 1
-    test_data_path = ''  # "./penn-wsj-deps/"
-    tag_file = 'tagset.txt'
-    data_format = 'format/penn2malt.format'
 
     arg_parser = argparse.ArgumentParser(description="""Part Of Speech (POS) Tagger
         Version %s""" % __version__)
@@ -202,8 +197,7 @@ if __name__ == '__main__':
         sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
         sys.exit(1)
 
-    tagger = PosTagger(tag_file    = config['tag_file'],
-                       data_format = config['format'])
+    tagger = PosTagger(tag_file=config['tag_file'])
 
     if config['tagger_w_vector'] is not None:
         tagger.load_w_vec(config['tagger_w_vector'])

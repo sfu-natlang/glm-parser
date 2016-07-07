@@ -44,7 +44,7 @@ class DataPrep():
             raise ValueError("DATAPREP [ERROR]: dataRegex not specified")
         if targetPath=="":
             raise ValueError("DATAPREP [ERROR]: targetPath not specified")
-        if self.debug: print "DATAPREP [DEBUG]: Using data from path:" + self.dataPath
+        if self.debug: print "DATAPREP [DEBUG]: Using data from path: " + self.dataPath
         return
 
     def localPath(self):
@@ -100,7 +100,9 @@ class DataPrep():
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
-        if not os.path.isdir(self.dataPath):
+        if (self.dataPath[:7] != "file://"):
+            raise ValueError("DATAPREP [ERROR]: Shouldn't use none local path for loading data locally: " + self.dataPath)
+        if not os.path.isdir(self.dataPath[7:]):
             raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if self.debug: print "DATAPREP [DEBUG]: Partitioning Data locally"
         if not os.path.exists(self.targetPath):
@@ -109,7 +111,7 @@ class DataPrep():
         sectionPattern = re.compile(self.dataRegex)
         aFileList = []
 
-        for dirName, subdirList, fileList in os.walk(self.dataPath):
+        for dirName, subdirList, fileList in os.walk(self.dataPath[7:]):
             for fileName in fileList:
                 if sectionPattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )
@@ -132,7 +134,7 @@ class DataPrep():
 
             count = 0
 
-            n = self.sentCount(self.dataPath, self.dataRegex)/self.shardNum # number of sentences per shard
+            n = self.sentCount(self.dataPath[7:], self.dataRegex)/self.shardNum # number of sentences per shard
 
             for filePath in aFileList:
                 #if self.debug: print "DATAPREP [DEBUG]: Opening file "+ filePath

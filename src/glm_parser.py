@@ -44,14 +44,15 @@ class GlmParser():
                  learner              = None,
                  fgen                 = None,
                  parser               = None,
-                 parallelFlag         = False):
+                 parallelFlag         = False,
+                 sparkContext         = None):
 
         print ("PARSER [DEBUG]: Initialising Parser")
         if fgen is None:
             raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner is None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-        self.w_vector     = WeightVector(weightVectorLoadPath)
+        self.w_vector     = WeightVector(weightVectorLoadPath, sparkContext)
         self.evaluator    = Evaluator()
 
         if parallelFlag:
@@ -313,7 +314,11 @@ if __name__ == "__main__":
         if yarn_mode:
             listContent = fileRead(args.config, sparkContext)
         else:
-            listContent = fileRead("file://" + args.config, sparkContext)
+            if args.config[:7] != 'file://' and args.config[:7] != 'hdfs://':
+                listContent = fileRead('file://' + args.config, sparkContext)
+            else:
+                listContent = fileRead(args.config, sparkContext)
+
         tmpStr = ''.join(str(e)+"\n" for e in listContent)
         stringIOContent = StringIO.StringIO(tmpStr)
         config_parser.readfp(stringIOContent)
@@ -352,36 +357,40 @@ if __name__ == "__main__":
     config.update(vars(args))
 
     # Check values of config[]
-    if config['data_path'] is None:
-        sys.stderr.write('data_path not specified\n')
-        sys.exit(1)
-    if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
-        sys.exit(1)
-    if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
-        sys.exit(1)
     if not spark_mode:
         config['spark_shards'] = 1
+    if not yarn_mode:
+        for option in [
+                'data_path',
+                'load_weight_from',
+                'dump_weight_to',
+                'format',
+                'tagger_w_vector',
+                'tag_file']:
+            if config[option] is not None:
+                if (not config[option][:7] == "file://") and (not config[option][:7] == "hdfs://"):
+                    config[option] = 'file://' + config[option]
 
     # Initialise Parser
     gp = glm_parser(weightVectorLoadPath = config['load_weight_from'],
                     learner              = config['learner'],
                     fgen                 = config['feature_generator'],
                     parser               = config['parser'],
-                    parallelFlag         = spark_mode)
+                    parallelFlag         = spark_mode,
+                    sparkContext         = sparkContext)
+
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         print "Using Tagger weight vector: " + config['tagger_w_vector']
-        tagger = PosTagger(tag_file    = config['tag_file'],
-                           data_format = config['format'])
+        tagger = PosTagger(tag_file     = config['tag_file'],
+                           sparkContext = sparkContext)
         tagger.load_w_vec(config['tagger_w_vector'])
         print "Tagger weight vector loaded"
     else:
         tagger = None
 
     # Run training
-    if config['train'] is not None:
+    if config['train']:
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
                                  fgen          = config['feature_generator'],

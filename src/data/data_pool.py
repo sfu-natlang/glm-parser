@@ -188,10 +188,7 @@ class DataPool():
 
         # Load format file
         print("DATAPOOL [INFO]: Loading dataFormat from: " + formatPath)
-        if self.hadoop == True:
-            fformat = fileRead(formatPath, sparkContext=sparkContext)
-        else:
-            fformat = open(formatPath)
+        fformat = fileRead(formatPath, sparkContext=sparkContext)
 
         self.format_list = []
         self.comment_sign = ''
@@ -212,9 +209,6 @@ class DataPool():
 
         if self.format_list == []:
             raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
-
-        if self.hadoop == False:
-            fformat.close()
 
         # Load data
         if self.hadoop == True:

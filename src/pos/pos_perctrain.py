@@ -30,12 +30,14 @@ class PosPerceptron():
                  w_vector=None,
                  max_iter=1,
                  default_tag="NN",
-                 tag_file="tagset.txt"):
+                 tag_file="tagset.txt",
+                 sparkContext=None):
 
         self.w_vector = w_vector
         self.max_iter = max_iter
         self.default_tag = default_tag
-        self.tagset = pos_common.read_tagset(tag_file)
+        self.sparkContext = sparkContext
+        self.tagset = pos_common.read_tagset(tag_file, self.sparkContext)
         print "TAGGER [DEBUG]: Trainer Loaded"
 
     def avg_perc_train(self, train_data):
@@ -110,7 +112,7 @@ class PosPerceptron():
              "_Iter_%d.db" % iteration)
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
-        w_vector.dump(filename + "_Iter_%d.db" % iteration)
+        w_vector.dump("file://" + filename + "_Iter_%d.db" % iteration)
 
     def dump_vector_per_iter(self,
                              filename,
@@ -136,4 +138,4 @@ class PosPerceptron():
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
         i = i + 1
-        w_vector.dump(filename + "_Iter_%d.db" % iteration)
+        w_vector.dump("file://" + filename + "_Iter_%d.db" % iteration)

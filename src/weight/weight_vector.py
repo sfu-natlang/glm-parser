@@ -10,6 +10,7 @@
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
 from ast import literal_eval
+from data.file_io import *
 
 import logging
 
@@ -42,7 +43,7 @@ class WeightVector(mydefaultdict):
     Users must provide a file name as well as an operating mode to support
     both persistent and non-persistent (or semi-persistent) operations.
     """
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, sparkContext=None):
         """
         :param store_type: Specify the type of database you want to use
         :type store_type: int
@@ -55,12 +56,12 @@ class WeightVector(mydefaultdict):
         super(WeightVector, self).__init__(mydouble)
 
         if filename is not None:
-            self.load(filename)
+            self.load(filename, sparkContext)
 
     def get_vector_score(self, fv):
         return self.evaluate(fv)
 
-    def load(self, filename):
+    def load(self, filename, sparkContext=None):
         """
         Load the dumped memory dictionary Pickle file into memory. Essentially
         you can do this with a shelve object, however it does not have effect,
@@ -69,12 +70,15 @@ class WeightVector(mydefaultdict):
         Parameter is the same as constructor (__init__).
         """
         logging.debug("Loading Weight Vector from %s " % filename)
-        with open(filename) as f:
-            for line in f:
-                line = line[:-1].split("    ")
-                self[literal_eval(line[0])] = float(line[1])
+        print "Loading Weight Vector from %s " % filename
 
-    def dump(self, filename):
+        f = fileRead(filename, sparkContext)
+
+        for line in f:
+            line = line.split("    ")
+            self[literal_eval(line[0])] = float(line[1])
+
+    def dump(self, filename, sparkContext=None):
         """
         Called when memory dictionary is used. Dump the content of the dict
         into a disk file using Pickle
@@ -86,6 +90,7 @@ class WeightVector(mydefaultdict):
         logging.debug("Dumping Weight Vector to %s " % filename)
         logging.debug("Total Feature Num: %d " % len(self))
 
-        with open(filename, "w") as f:
-            for k, v in self.iteritems():
-                f.write(str(k) + "    " + str(v) + "\n")
+        f = []
+        for k, v in self.iteritems():
+            f.append(str(k) + "    " + str(v))
+        fileWrite(filename, f, sparkContext)

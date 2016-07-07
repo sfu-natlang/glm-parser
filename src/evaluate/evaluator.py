@@ -43,7 +43,10 @@ class Evaluator():
 
     def evaluate(self, data_pool, parser, w_vector, tagger=None):
         logging.debug("Start evaluating ...")
+        sentence_count = 1
         while data_pool.has_next_data():
+            print "Processing Sentence " + str(sentence_count)
+            sentence_count += 1
             sent = data_pool.get_next_data()
 
             logging.debug("data instance: ")
