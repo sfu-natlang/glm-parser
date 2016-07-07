@@ -27,7 +27,7 @@ revert merges.
 Work on features should happen in `feature/*` branches which branch off the
 latest `develop`.
 
-  $ git checkout -b feature/some-feature develop
+    $ git checkout -b feature/some-feature develop
 
 Once the feature is completed, push your feature branch to the main repository,
 and open a pull request against `origin/develop`.
@@ -82,7 +82,7 @@ save. Vim users can use the `python-mode` or `vim-flake8` plugins.
 The general consensus on good git commit messages is the following format
 (copied from Tim Pope's [blog
 post](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html) on
-the subject:
+the subject):
 
 ```
 Capitalized, short (50 chars or less) summary
@@ -126,7 +126,7 @@ interactively to re-order, squash, and modify existing commits.
 
 An example of non-interactive usage is
 
-  $ git rebase develop feature/my-feature
+    $ git rebase develop feature/my-feature
 
 This will take all the commits from `feature/my-feature` and re-apply them on
 top of the current `develop`. This is effectively changing the base of your
@@ -134,7 +134,7 @@ branch (hence the name).
 
 You can also run this interactively while you're in your `feature/*` branch
 
-  $ git rebase -i develop
+    $ git rebase -i develop
 
 This should open up a text editor with a list of commands, commit hashes, and
 commit messages and some instructions at the bottom about what you can do.
@@ -159,12 +159,12 @@ merged anyways).
 First thing to be careful about is that you're pushing the correct branch! It's
 _highly_ recommended to set `push.default` to `simple` (default in version 2.0):
 
-  $ git config --global push.default simple
+    $ git config --global push.default simple
 
 Then you can run `git push --force`, but it's a lot safer to be specific about
 the branch names (and tab complete should work here):
 
-  $ git push --force origin feature/my-feature:feature/my-feature
+    $ git push --force origin feature/my-feature:feature/my-feature
 
 
 ## Related models
