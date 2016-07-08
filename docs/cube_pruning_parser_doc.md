@@ -30,42 +30,51 @@ Parse(sentence, arc_weight):
 		for s in (0, n):
 			t = s + m
             for q in (s, t):
-                find top node N1 in heap[s][q][1][0].buf, top node N2 in heap[q][t][0][0].buf
-                score = calculate the score of heap[s][t][0][1]
-                push (score, q, N1, N2) into heap[s][t][0][1].heap
+                score = calculate the score of merging C[s][q][1][0].buf[0] and C[q][t][0][0].buf[0]
+                push (score, 0, 0) into heap
+                top_score = Explore(heap, s, q, t, 0, 1)
+                if top_score > C[s][q][0][1].buf[0].score:
+                    c[s][q][0][1].buf[0] = {'score':top_score, 'feature_signature':t}
 
-                find top node N1 in heap[s][q][1][0].buf, top node N2 in heap[q][t][0][0].buf
-                score = calculate the score of heap[s][t][1][1]
-                push (score, q, N1, N2) into heap[s][t][1][1].heap
+                score = calculate the score of merging C[s][q][1][0].buf[0] and C[q][t][0][0].buf[0]
+                push (score, 0, 0) into heap
+                top_score = Explore(heap, s, q, t, 1, 1)
+                if top_score > C[s][q][1][1].buf[0].score:
+                    c[s][q][1][1].buf[0] = {'score':top_score, 'feature_signature':t}
 
-                find top node N1 in heap[s][q][0][0].buf, top node N2 in heap[q][t][0][1].buf
-                score = calculate the score of heap[s][t][0][0]
-                push (score, q, N1, N2) into heap[s][t][0][0].heap
+                score = calculate the score of merging C[s][q][0][0].buf[0] and C[q][t][0][1].buf[0]
+                push (score, 0, 0) into heap
+                top_score = Explore(heap, s, q, t, 0, 0)
+                C[s][t][0][0].buf.append({'score':top_score, 'feature_signature':q})
 
-                find top node N1 in heap[s][q][1][1].buf, top node N2 in heap[q][t][1][0].buf
-                score = calculate the score of heap[s][t][1][0]
-                push (score, q, N1, N2) into heap[s][t][1][0].heap
+                score = calculate the score of merging C[s][q][1][1].buf[0] and C[q][t][1][0].buf[0]
+                push (score, 0, 0) into heap
+                top_score = Explore(heap, s, q, t, 1, 0)
+                C[s][t][1][0].buf.append({'score':top_score, 'feature_signature':q})
 
-            Explore(heap[s][t][0][1].heap, heap[s][t][0][1].buf, score_calculator_func)
-            Explore(heap[s][t][1][1].heap, heap[s][t][1][1].buf, score_calculator_func)
-            Explore(heap[s][t][0][0].heap, heap[s][t][0][0].buf, score_calculator_func)
-            Explore(heap[s][t][1][0].heap, heap[s][t][1][0].buf, score_calculator_func)
+            sort C[s][t][0][0].buf, keep the k node with the highest score
+            sort C[s][t][1][0].buf, keep the k node with the highest score
 
-Explore(heap, buf, score_calculator_func):
-	while heap is not empty and size of buf < bestK:
-		node T = heap.pop()
-		push T to buf
-		find the cube C that generate T
-		for each neighbour E of T in C:
-			if E is not marked:
-				E.score = state_generating_func(E)
-				mark E in C
-				heap.push(E)
+Explore(heap, s, q, t, dir, shape):
+    top_score = -Inf
 
+    for i in range (0, k):
+        if heap is empty:
+            break
+
+        cell = heap.pop()   # cell: [score, left_index, right_index]
+        if cell[0] > top_score:
+            top_score = cell[0]
+
+        # neighbors
+        for (i, j) in [(cell[1]-1, cell[2]), (cell[1], cell[2]-1), (cell[1]+1, cell[2]), (cell[1], cell[2]+1)]:
+            if (i, j) is in range:
+                find node N1 as C[s][q][dir|shape][!dir & !shape].buf[i], node N2 as C[q][t][!shape & dir][!shape & dir].buf[j]
+        calculate the score of neighboring cells
+        push neighboring cells into heap
+
+    heap.empty()
+    return top_score
 ```
 
-
-
 ![cube_pruning](cube_pruning.png) 
-
-
