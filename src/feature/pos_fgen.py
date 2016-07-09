@@ -54,7 +54,7 @@ class Pos_feat_gen():
 		#fv.append((26,pretag_2,word))
 		#fv.append((27,pretag_3,word))
 
-	
+
 	def get_sent_feature(self, fv, poslist):
 		for i in range(3, len(self.wl)-2):
 			word = self.wl[i].lower()
@@ -95,5 +95,3 @@ class Pos_feat_gen():
 			#fv[(25,poslist[i-1],word),tag]+=1
 			#fv[(26,poslist[i-2],word),tag]+=1
 			#fv[(27,poslist[i-3],word),tag]+=1
-
-    

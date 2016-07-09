@@ -42,14 +42,11 @@ class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
                  learner              = None,
-                 fgen                 = None,
                  parser               = None,
                  parallelFlag         = False,
                  sparkContext         = None):
 
         print ("PARSER [DEBUG]: Initialising Parser")
-        if fgen is None:
-            raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner is None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
         self.w_vector     = WeightVector(weightVectorLoadPath, sparkContext)
@@ -60,9 +57,6 @@ class GlmParser():
         else:
             self.learner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
         print("PARSER [INFO]: Using learner: %s " % (self.learner.name))
-
-        self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
-        print("PARSER [INFO]: Using feature generator: %s " % (fgen))
 
         self.parser = importlib.import_module('parse.' + parser).EisnerParser()
         print("PARSER [INFO]: Using parser: %s" % (parser))
@@ -374,7 +368,6 @@ if __name__ == "__main__":
     # Initialise Parser
     gp = glm_parser(weightVectorLoadPath = config['load_weight_from'],
                     learner              = config['learner'],
-                    fgen                 = config['feature_generator'],
                     parser               = config['parser'],
                     parallelFlag         = spark_mode,
                     sparkContext         = sparkContext)
@@ -415,7 +408,7 @@ if __name__ == "__main__":
         logging.info("Training time usage(seconds): %f" % (training_time,))
 
     # Run evaluation
-    if config['train'] is not None:
+    if config['test'] is not None:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],

@@ -63,6 +63,7 @@ class DataPool():
         """
         if isinstance(fgen, basestring):
             self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
+            print("DATAPOOL [INFO]: Using feature generator: %s " % (fgen))
         else:
             self.fgen = fgen
         self.hadoop   = hadoop

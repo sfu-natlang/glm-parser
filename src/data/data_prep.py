@@ -55,7 +55,7 @@ class DataPrep():
         print ("DATAPREP [WARN]: data not locally loaded yet, will not be loaded this time.")
         aFileList = []
 
-        for dirName, subdirList, fileList in os.walk(self.dataPath):
+        for dirName, subdirList, fileList in os.walk(self.dataPath[7:]):
             for fileName in fileList:
                 if aFilePattern.match(str(fileName)) != None:
                     filePath = "%s/%s" % ( str(dirName), str(fileName) )

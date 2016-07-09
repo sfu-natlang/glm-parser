@@ -45,7 +45,7 @@ class Evaluator():
         logging.debug("Start evaluating ...")
         sentence_count = 1
         while data_pool.has_next_data():
-            print "Processing Sentence " + str(sentence_count)
+            #print "Processing Sentence " + str(sentence_count)
             sentence_count += 1
             sent = data_pool.get_next_data()
 
