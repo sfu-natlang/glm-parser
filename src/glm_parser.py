@@ -383,7 +383,7 @@ if __name__ == "__main__":
         logging.info("Training time usage(seconds): %f" % (training_time,))
 
     # Run evaluation
-    if config['train'] is not None:
+    if config['test'] is not None:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],
