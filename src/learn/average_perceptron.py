@@ -11,6 +11,7 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
+
 class Learner(object):
 
     name = "AveragePerceptronLearner"
@@ -122,7 +123,7 @@ class Learner(object):
                         args=(d_filename, t))
 
                     p_fork.start()
-                    #self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
+                    # self.w_vector.dump(d_filename + "_Iter_%d.db"%t)
 
         self.w_vector.clear()
 
@@ -136,17 +137,17 @@ class Learner(object):
 
     def dump_vector(self, d_filename, i):
         d_vector = WeightVector()
-        self.avg_weight(d_vector, self.c-1)
-        d_vector.dump(d_filename + "_Iter_%d.db"%i)
+        self.avg_weight(d_vector, self.c - 1)
+        d_vector.dump(d_filename + "_Iter_%d.db" % i)
         d_vector.clear()
 
     def parallel_learn(self, dp, fv, f_argmax):
         w_vec = WeightVector()
         weight_sum_dict = WeightVector()
-        print "parallel_learn keys: %d"%len(fv.keys())
+        print "parallel_learn keys: %d" % len(fv.keys())
         for key in fv.keys():
-            w_vec[key]=fv[key][0]
-            weight_sum_dict[key]=fv[key][1]
+            w_vec[key] = fv[key][0]
+            weight_sum_dict[key] = fv[key][1]
 
         while dp.has_next_data():
             data_instance = dp.get_next_data()
@@ -162,5 +163,5 @@ class Learner(object):
 
         vector_list = {}
         for key in weight_sum_dict.keys():
-            vector_list[str(key)] = (w_vec[key],weight_sum_dict[key])
+            vector_list[str(key)] = (w_vec[key], weight_sum_dict[key])
         return vector_list.items()

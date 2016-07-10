@@ -5,7 +5,8 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu, Kingston Chen,
+#         Andrei Vacariu
 # (Please add on your name if you have authored this file)
 #
 from feature import feature_vector
@@ -17,6 +18,8 @@ from evaluate.evaluator import *
 from weight.weight_vector import *
 
 from data.file_io import *
+
+from pos_tagger import PosTagger
 
 import debug.debug
 
@@ -40,16 +43,14 @@ class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
                  learner              = None,
-                 fgen                 = None,
                  parser               = None,
-                 parallelFlag         = False):
+                 parallelFlag         = False,
+                 sparkContext         = None):
 
         print ("PARSER [DEBUG]: Initialising Parser")
-        if fgen is None:
-            raise ValueError("PARSER [ERROR]: Feature Generator not specified")
         if learner is None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-        self.w_vector     = WeightVector(weightVectorLoadPath)
+        self.w_vector     = WeightVector(weightVectorLoadPath, sparkContext)
         self.evaluator    = Evaluator()
 
         if parallelFlag:
@@ -57,9 +58,6 @@ class GlmParser():
         else:
             self.learner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
         print("PARSER [INFO]: Using learner: %s " % (self.learner.name))
-
-        self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
-        print("PARSER [INFO]: Using feature generator: %s " % (fgen))
 
         self.parser = importlib.import_module('parse.' + parser).EisnerParser()
         print("PARSER [INFO]: Using parser: %s" % (parser))
@@ -95,11 +93,11 @@ class GlmParser():
         if not parallel:  # using sequential training
             print ("PARSER [DEBUG]: Using Sequential Training")
             self.w_vector = self.learner.sequential_learn(
-                                        max_iter   = maxIteration,
-                                        data_pool  = dataPool,
-                                        f_argmax   = f_argmax,
-                                        d_filename = weightVectorDumpPath,
-                                        dump_freq  = dumpFrequency)
+                max_iter   = maxIteration,
+                data_pool  = dataPool,
+                f_argmax   = f_argmax,
+                d_filename = weightVectorDumpPath,
+                dump_freq  = dumpFrequency)
         else:  # using parallel training
             print ("PARSER [DEBUG]: Using Parallel Training")
             if shardNum is None:
@@ -111,20 +109,20 @@ class GlmParser():
             parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
             learner = parallelLearnClass(self.w_vector, maxIteration)
             self.w_vector = learner.parallel_learn(
-                                        max_iter     = maxIteration,
-                                        dataPool     = dataPool,
-                                        f_argmax     = f_argmax,
-                                        learner      = self.learner,
-                                        d_filename   = weightVectorDumpPath,
-                                        shards       = shardNum,
-                                        sc           = sc,
-                                        hadoop       = hadoop)
+                max_iter     = maxIteration,
+                dataPool     = dataPool,
+                f_argmax     = f_argmax,
+                learner      = self.learner,
+                d_filename   = weightVectorDumpPath,
+                shards       = shardNum,
+                sc           = sc,
+                hadoop       = hadoop)
         return
 
-    def evaluate(self, dataPool = None):
+    def evaluate(self, dataPool=None, tagger=None):
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for evaluation is not an DataPool object")
-        self.evaluator.evaluate(dataPool, self.parser, self.w_vector)
+        self.evaluator.evaluate(dataPool, self.parser, self.w_vector, tagger)
 
 if __name__ == "__main__":
     # Default values
@@ -141,13 +139,15 @@ if __name__ == "__main__":
         'learner':           'average_perceptron',
         'parser':            'ceisner',
         'feature_generator': 'english_1st_fgen',
-        'format':            'format/penn2malt.format'
+        'format':            'format/penn2malt.format',
+        'tagger_w_vector':   None,
+        'tag_file':          None
     }
 
     glm_parser = GlmParser
 
     # Dealing with arguments here
-    if True: # Adding arguments
+    if True:  # Adding arguments
         arg_parser = argparse.ArgumentParser(description="""Global Linear Model (GLM) Parser
             Version %s""" % __version__)
         arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?',
@@ -257,7 +257,16 @@ if __name__ == "__main__":
             prints out average time usage
             """)
         arg_parser.add_argument('--hadoop', '-c', action='store_true',
-           help="""Using Glm Parser in Spark Yarn Mode""")
+            help="""Using Glm Parser in Spark Yarn Mode""")
+        arg_parser.add_argument('--tagger-w-vector', metavar='FILENAME',
+            help="""Path to an existing w-vector for tagger. Use this option if
+            you need to evaluate the glm_parser with a trained tagger.
+            """)
+        arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""
+            specify the file containing the tags we want to use.
+            This option is only valid while using option tagger-w-vector.
+            Officially provided TAG_TARGET file is src/tagset.txt
+            """)
 
         args = arg_parser.parse_args()
 
@@ -300,13 +309,18 @@ if __name__ == "__main__":
         if yarn_mode:
             listContent = fileRead(args.config, sparkContext)
         else:
-            listContent = fileRead("file://" + args.config, sparkContext)
-        tmpStr = ''.join(str(e)+"\n" for e in listContent)
+            if args.config[:7] != 'file://' and args.config[:7] != 'hdfs://':
+                listContent = fileRead('file://' + args.config, sparkContext)
+            else:
+                listContent = fileRead(args.config, sparkContext)
+
+        tmpStr = ''.join(str(e) + "\n" for e in listContent)
         stringIOContent = StringIO.StringIO(tmpStr)
         config_parser.readfp(stringIOContent)
 
         # Process the contents of config file
-        for option in ['train', 'test', 'data_path', 'prep_path', 'format']:
+        for option in ['train', 'test', 'data_path',
+                       'prep_path', 'format', 'tag_file']:
             if config_parser.get('data', option) != '':
                 config[option] = config_parser.get('data', option)
 
@@ -338,27 +352,43 @@ if __name__ == "__main__":
     config.update(vars(args))
 
     # Check values of config[]
-    if config['data_path'] is None:
-        sys.stderr.write('data_path not specified\n')
-        sys.exit(1)
-    if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
-        sys.exit(1)
-    if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
-        sys.exit(1)
     if not spark_mode:
         config['spark_shards'] = 1
+    if not yarn_mode:
+        for option in [
+                'data_path',
+                'load_weight_from',
+                'dump_weight_to',
+                'format',
+                'tagger_w_vector',
+                'tag_file']:
+            if config[option] is not None:
+                if (not config[option][:7] == "file://") and \
+                        (not config[option][:7] == "hdfs://"):
+                    config[option] = 'file://' + config[option]
 
     # Initialise Parser
     gp = glm_parser(weightVectorLoadPath = config['load_weight_from'],
                     learner              = config['learner'],
-                    fgen                 = config['feature_generator'],
                     parser               = config['parser'],
-                    parallelFlag         = spark_mode)
+                    parallelFlag         = spark_mode,
+                    sparkContext         = sparkContext)
+
+    # Initialise Tagger
+    if config['tagger_w_vector'] is not None:
+        print "Using Tagger weight vector: " + config['tagger_w_vector']
+        if config['tag_file'] is None:
+            sys.stderr.write("The tag_file has not been specified")
+            sys.exit(1)
+        tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
+                           tag_file             = config['tag_file'],
+                           sparkContext         = sparkContext)
+        print "Tagger weight vector loaded"
+    else:
+        tagger = None
 
     # Run training
-    if config['train'] is not None:
+    if config['train']:
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
                                  fgen          = config['feature_generator'],
@@ -383,15 +413,15 @@ if __name__ == "__main__":
         logging.info("Training time usage(seconds): %f" % (training_time,))
 
     # Run evaluation
-    if config['train'] is not None:
+    if config['test'] is not None:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],
                                 format_path   = config['format'],
-								sc            = sparkContext,
-								hadoop        = yarn_mode)
+                                sc            = sparkContext,
+                                hadoop        = yarn_mode)
         print "Evaluating..."
-        gp.evaluate(dataPool=testDataPool)
+        gp.evaluate(dataPool=testDataPool, tagger=tagger)
 
     # Finalising, shutting down spark
     if spark_mode:

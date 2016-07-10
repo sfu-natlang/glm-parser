@@ -33,18 +33,18 @@ class DataPool():
     be reset to initial value -1 when reset() is called (manually or
     during init).
     """
-    def __init__(   self,
-                    section_regex = '',
-                    data_path     = "./penn-wsj-deps/",
-                    fgen          = None,
-                    format_path   = None,
-                    textString    = None,
-                    format_list   = None,
-                    comment_sign  = '',
-                    prep_path     = 'data/prep/',
-                    shardNum      = 1,
-                    sc            = None,
-                    hadoop        = False):
+    def __init__(self,
+                 section_regex = '',
+                 data_path     = "./penn-wsj-deps/",
+                 fgen          = None,
+                 format_path   = None,
+                 textString    = None,
+                 format_list   = None,
+                 comment_sign  = '',
+                 prep_path     = 'data/prep/',
+                 shardNum      = 1,
+                 sc            = None,
+                 hadoop        = False):
 
         """
         Initialize the Data set
@@ -63,6 +63,7 @@ class DataPool():
         """
         if isinstance(fgen, basestring):
             self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
+            print("DATAPOOL [INFO]: Using feature generator: %s " % (fgen))
         else:
             self.fgen = fgen
         self.hadoop   = hadoop
@@ -73,7 +74,7 @@ class DataPool():
         self.reset_all()
 
         if textString is not None:
-            self.load_stringtext(textString,format_list,comment_sign)
+            self.load_stringtext(textString, format_list, comment_sign)
         else:
             self.data_path     = data_path
             self.section_regex = section_regex
@@ -88,7 +89,7 @@ class DataPool():
 
     def loadedPath(self):
         if self.dataPrep:
-            if self.hadoop == True:
+            if self.hadoop is True:
                 return self.dataPrep.hadoopPath()
             else:
                 return self.dataPrep.localPath()
@@ -169,7 +170,7 @@ class DataPool():
             # Logging how many entries we have supplied
             if self.current_index % 1000 == 0:
                 logging.debug("Data finishing %.2f%% ..." %
-                             (100 * self.current_index/len(self.data_list), ))
+                             (100 * self.current_index / len(self.data_list), ))
 
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
@@ -184,14 +185,11 @@ class DataPool():
         and before any get_data method is called.
         """
         logging.debug("Loading data...")
-        print("Loading data...")
+        print("DATAPOOL [INFO]: Loading data...")
 
         # Load format file
-        print("Loading dataFormat from: " + formatPath)
-        if self.hadoop == True:
-            fformat = fileRead(formatPath, sparkContext=sparkContext)
-        else:
-            fformat = open(formatPath)
+        print("DATAPOOL [INFO]: Loading dataFormat from: " + formatPath)
+        fformat = fileRead(formatPath, sparkContext=sparkContext)
 
         self.format_list = []
         self.comment_sign = ''
@@ -213,31 +211,27 @@ class DataPool():
         if self.format_list == []:
             raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
 
-        if self.hadoop == False:
-            fformat.close()
-
         # Load data
-        if self.hadoop == True:
+        if self.hadoop is True:
             self.dataPrep.loadHadoop()
         else:
             self.dataPrep.loadLocal()
 
         # Add data to data_list
         # If using yarn mode, local data will not be loaded
-        if self.hadoop == False:
+        if self.hadoop is False:
             for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
                 for file_name in fileList:
-                    file_path = "%s/%s" % ( str(dirName), str(file_name) )
+                    file_path = "%s/%s" % (str(dirName), str(file_name))
                     self.data_list += self.get_data_list(file_path)
         else:
             aRdd = sparkContext.textFile(self.dataPrep.hadoopPath()).cache()
             tmp  = aRdd.collect()
-            tmpStr = ''.join(str(e)+"\n" for e in tmp)
+            tmpStr = ''.join(str(e) + "\n" for e in tmp)
             self.load_stringtext(textString  = tmpStr,
                                 format_list  = self.format_list,
                                 comment_sign = self.comment_sign)
         return
-
 
     def get_data_list(self, file_path):
         """

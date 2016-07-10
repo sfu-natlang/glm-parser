@@ -4,11 +4,12 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen
 # (Please add on your name if you have authored this file)
 #
 
 import debug.debug
+import sys
 
 #################################################################################################
 # Notes on writing modularized feature generator:
@@ -92,6 +93,11 @@ class FeatureGeneratorBase:
             self.feature_request_log = {}
 
         return
+
+    def reTag(self, pos_list):
+        if not hasattr(self, 'POSTAG'):
+            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
+        self.POSTAG = pos_list
 
     def log_feature_request(self, h, d, o, t):
         """

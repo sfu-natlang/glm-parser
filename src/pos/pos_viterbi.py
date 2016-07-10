@@ -9,7 +9,7 @@ import pos_features
 from collections import defaultdict
 
 gottenFile = inspect.getfile(inspect.currentframe())
-currentdir = os.path.dirname(os.path.abspath())
+currentdir = os.path.dirname(os.path.abspath(gottenFile))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
@@ -33,7 +33,6 @@ class Viterbi():
         return maxvalue
 
     def perc_test(self, feat_vec, labeled_list, tagset, default_tag):
-
         output = []
 
         # size of the viterbi data structure

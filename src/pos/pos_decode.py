@@ -12,19 +12,17 @@ sys.path.insert(0, parentdir)
 
 
 class Decoder():
-    def __init__(self, test_list=None, tag_file="tagset.txt"):
+    def __init__(self, test_list=None, tag_file="file://tagset.txt", sparkContext=None):
         self.test_list = test_list
-        self.tagset = read_tagset(tag_file)
+        self.tagset = read_tagset(tag_file, sparkContext)
 
     def sent_evaluate(self, result_list, gold_list):
-        result_size = len(result_list)
-        gold_size = len(gold_list)
-        if result_size != gold_size:
+        if len(result_list) != len(gold_list):
             raise ValueError("""
             TAGGER [ERRO]: Tag results do not align with gold results
             """)
         correct_num = 0
-        for i in range(result_size):
+        for i in range(len(result_list)):
             if result_list[i] == gold_list[i]:
                 correct_num += 1
         return correct_num, gold_size
