@@ -10,6 +10,7 @@ logging.basicConfig(filename='glm_parser.log',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
+
 class Learner():
 
     name = "PerceptronLearner"
@@ -39,7 +40,6 @@ class Learner():
 
             while data_pool.has_next_data():
                 data_instance = data_pool.get_next_data()
-                #data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
                 gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
                 current_global_vector = f_argmax(self.w_vector, data_instance)
                 self.update_weight(current_global_vector, gold_global_vector)
@@ -48,9 +48,8 @@ class Learner():
 
             if d_filename is not None:
                 if i % dump_freq == 0 or i == max_iter - 1:
-                    self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
+                    self.w_vector.dump(d_filename + "_Iter_%d.db" % i)
         return self.w_vector
-
 
     def update_weight(self, current_global_vector, gold_global_vector):
         # otherwise, the gold_global_vector will change because of the change in weights
@@ -59,11 +58,9 @@ class Learner():
         return
 
     def parallel_learn(self, dp, fv, f_argmax):
-        #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,format_list=format)
         w_vector = weight_vector.WeightVector()
         for key in fv.keys():
-            w_vector[key]=fv[key]
-        #print data_pool.get_sent_num
+            w_vector[key] = fv[key]
         while dp.has_next_data():
             data_instance = dp.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)

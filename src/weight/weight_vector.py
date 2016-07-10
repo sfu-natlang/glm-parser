@@ -3,7 +3,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu
 # (Please add on your name if you have authored this file)
 #
 

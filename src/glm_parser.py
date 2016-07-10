@@ -38,6 +38,7 @@ from ConfigParser import SafeConfigParser
 
 __version__ = '1.0'
 
+
 class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
@@ -92,11 +93,11 @@ class GlmParser():
         if not parallel:  # using sequential training
             print ("PARSER [DEBUG]: Using Sequential Training")
             self.w_vector = self.learner.sequential_learn(
-                                        max_iter   = maxIteration,
-                                        data_pool  = dataPool,
-                                        f_argmax   = f_argmax,
-                                        d_filename = weightVectorDumpPath,
-                                        dump_freq  = dumpFrequency)
+                max_iter   = maxIteration,
+                data_pool  = dataPool,
+                f_argmax   = f_argmax,
+                d_filename = weightVectorDumpPath,
+                dump_freq  = dumpFrequency)
         else:  # using parallel training
             print ("PARSER [DEBUG]: Using Parallel Training")
             if shardNum is None:
@@ -108,14 +109,14 @@ class GlmParser():
             parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
             learner = parallelLearnClass(self.w_vector, maxIteration)
             self.w_vector = learner.parallel_learn(
-                                        max_iter     = maxIteration,
-                                        dataPool     = dataPool,
-                                        f_argmax     = f_argmax,
-                                        learner      = self.learner,
-                                        d_filename   = weightVectorDumpPath,
-                                        shards       = shardNum,
-                                        sc           = sc,
-                                        hadoop       = hadoop)
+                max_iter     = maxIteration,
+                dataPool     = dataPool,
+                f_argmax     = f_argmax,
+                learner      = self.learner,
+                d_filename   = weightVectorDumpPath,
+                shards       = shardNum,
+                sc           = sc,
+                hadoop       = hadoop)
         return
 
     def evaluate(self, dataPool=None, tagger=None):
@@ -146,7 +147,7 @@ if __name__ == "__main__":
     glm_parser = GlmParser
 
     # Dealing with arguments here
-    if True: # Adding arguments
+    if True:  # Adding arguments
         arg_parser = argparse.ArgumentParser(description="""Global Linear Model (GLM) Parser
             Version %s""" % __version__)
         arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?',
@@ -313,7 +314,7 @@ if __name__ == "__main__":
             else:
                 listContent = fileRead(args.config, sparkContext)
 
-        tmpStr = ''.join(str(e)+"\n" for e in listContent)
+        tmpStr = ''.join(str(e) + "\n" for e in listContent)
         stringIOContent = StringIO.StringIO(tmpStr)
         config_parser.readfp(stringIOContent)
 
@@ -362,7 +363,8 @@ if __name__ == "__main__":
                 'tagger_w_vector',
                 'tag_file']:
             if config[option] is not None:
-                if (not config[option][:7] == "file://") and (not config[option][:7] == "hdfs://"):
+                if (not config[option][:7] == "file://") and \
+                        (not config[option][:7] == "hdfs://"):
                     config[option] = 'file://' + config[option]
 
     # Initialise Parser
@@ -375,6 +377,9 @@ if __name__ == "__main__":
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         print "Using Tagger weight vector: " + config['tagger_w_vector']
+        if config['tag_file'] is None:
+            sys.stderr.write("The tag_file has not been specified")
+            sys.exit(1)
         tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
                            tag_file             = config['tag_file'],
                            sparkContext         = sparkContext)

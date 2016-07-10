@@ -45,7 +45,7 @@ class Evaluator():
         logging.debug("Start evaluating ...")
         sentence_count = 1
         while data_pool.has_next_data():
-            #print "Processing Sentence " + str(sentence_count)
+            # print "Processing Sentence " + str(sentence_count)
             sentence_count += 1
             sent = data_pool.get_next_data()
 
@@ -54,11 +54,11 @@ class Evaluator():
             logging.debug(sent.get_edge_list())
 
             gold_edge_set = \
-                set([(head_index,dep_index) for head_index,dep_index,_ in sent.get_edge_list()])
+                set([(head_index, dep_index) for head_index, dep_index, _ in sent.get_edge_list()])
 
             sent_len = len(sent.get_word_list())
             test_edge_set = \
-               parser.parse(sent, w_vector.get_vector_score, tagger)
+                parser.parse(sent, w_vector.get_vector_score, tagger)
 
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
 
@@ -67,7 +67,7 @@ class Evaluator():
         print "Unlabeled accuracy: %.12f" % self.get_acc_unlabeled_accuracy()
         self.unlabeled_attachment_accuracy(data_pool.get_sent_num())
         logging.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
-        print "Unlabeled attachment accuracy: %.12f" %self.get_acc_unlabeled_accuracy()
+        print "Unlabeled attachment accuracy: %.12f" % self.get_acc_unlabeled_accuracy()
 
     def unlabeled_accuracy(self, result_edge_set, gold_edge_set, accumulate=False):
         """
@@ -90,12 +90,9 @@ class Evaluator():
         correct_num, gold_set_size =\
             self._sent_unlabeled_accuracy(result_edge_set, gold_edge_set)
 
-        if accumulate == True:
+        if accumulate is True:
             self.unlabeled_correct_num += correct_num
-            #correct_num = self.unlabeled_correct_num
-
             self.unlabeled_gold_set_size += gold_set_size
-            #gold_set_size = self.unlabeled_gold_set_size
             logging.debug("Correct_num: %d, Gold set size: %d, Unlabeled correct: %d, Unlabeled gold set size: %d" % (correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
         # WARNING: this function returns a value but the caller does not use it!

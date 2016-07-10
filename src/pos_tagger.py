@@ -28,6 +28,7 @@ from collections import defaultdict
 
 __version__ = '1.0'
 
+
 class PosTagger():
     def __init__(self,
                  weightVectorLoadPath = None,
@@ -179,7 +180,7 @@ if __name__ == '__main__':
             config['iterations'] = cf.getint("option", "iterations")
 
         if cf.get('option', 'tagger_w_vector') != '':
-            config['tagger_w_vector'] = cf.get(   'option', 'tagger_w_vector')
+            config['tagger_w_vector'] = cf.get('option', 'tagger_w_vector')
 
     # we do this here because we want the defaults to include our config file
     arg_parser.set_defaults(**config)

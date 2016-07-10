@@ -3,15 +3,19 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen, Jetic Gu
 # (Please add on your name if you have authored this file)
 #
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
+import os
+import sys
+import inspect
+
 import copy
 from feature.feature_vector import FeatureVector
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
 
 """
 Some basic comcepts are depicted here:
@@ -57,6 +61,7 @@ argmax |            | feature generator
 
 (How argmax query features from fgen)
 """
+
 
 class Sentence():
     """
@@ -139,9 +144,9 @@ class Sentence():
         in self.field_name_list, and returns edge_set dict
         """
 
-        if not "HEAD" in self.column_list.keys():
+        if "HEAD" not in self.column_list.keys():
             sys.exit("'HEAD' is needed in Sentence but it's not in format file")
-        if not "DEPREL" in self.column_list.keys():
+        if "DEPREL" not in self.column_list.keys():
             sys.exit("'DEPREL' is needed in Sentence but it's not in format file")
 
         self.column_list["edge_set"] = {}
@@ -188,15 +193,14 @@ class Sentence():
         :return: None
         """
 
-        #self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
-        #~self.cache_feature_for_edge_list(edge_list)
+        # self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
+        # ~self.cache_feature_for_edge_list(edge_list)
 
         return self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
 
     def set_second_order_cache(self):
         self.second_order_cache = {}
         return
-
 
     def dump_feature_request(self, suffix):
         """
@@ -205,17 +209,16 @@ class Sentence():
         self.f_gen.dump_feature_request(suffix)
         return
 
-    #~def cache_feature_for_edge_list(self, edge_list):
-    #~    # Compute cached feature for a given edge list
-    #~    self.f_gen.cache_feature_for_edge_list(edge_list)
-    #~    return
+    # ~def cache_feature_for_edge_list(self, edge_list):
+    # ~    # Compute cached feature for a given edge list
+    # ~    self.f_gen.cache_feature_for_edge_list(edge_list)
+    # ~    return
 
     def convert_list_vector_to_dict(self, fv):
         ret_fv = FeatureVector()
         for i in fv:
             ret_fv[i] += 1
         return ret_fv
-
 
     # Both 1st and 2nd order
     def get_global_vector(self, edge_list):
@@ -233,9 +236,8 @@ class Sentence():
         """
         global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
-        #return self.convert_list_vector_to_dict(global_vector)
+        # return self.convert_list_vector_to_dict(global_vector)
         return global_vector
-
 
     def get_local_vector(self,
                          head_index,
@@ -257,14 +259,12 @@ class Sentence():
 
         """
 
-
         lv = self.f_gen.get_local_vector(head_index,
                                          dep_index,
                                          another_index_list,
                                          feature_type)
 
         return lv
-
 
     '''
     def get_second_order_local_vector(self, head_index, dep_index,
@@ -306,7 +306,7 @@ class Sentence():
         return
     '''
 
-    def set_pos_list(self,pos_list):
+    def set_pos_list(self, pos_list):
         """
         Set the POS array in bulk. All data in pos_list will be copied, so
         users do not need to worry about data reference problems.
@@ -321,7 +321,7 @@ class Sentence():
         self.f_gen.reTag(self.column_list["POSTAG"])
         return
 
-    def set_edge_list(self,edge_list):
+    def set_edge_list(self, edge_list):
         """
         Initialize the edge_list using a dictionary which contains edges.
 
@@ -375,7 +375,7 @@ class Sentence():
             dependent index, and the last element is edge type
         :rtype: tuple(integer,integer,str)
         """
-        return [(i[0],i[1],self.edge_list[i]) for i in self.edge_list.keys()]
+        return [(i[0], i[1], self.edge_list[i]) for i in self.edge_list.keys()]
 
     def get_edge_list_index_only(self):
         """
@@ -394,7 +394,7 @@ class Sentence():
 
 # Unit test
 def test():
-    lines = ['Rudolph   NNP 2   NMOD','Agnew    NNP 16  SUB','.  .   16  P', '']
+    lines = ['Rudolph   NNP 2   NMOD', 'Agnew    NNP 16  SUB', '.  .   16  P', '']
     format_list = ['FORM', 'POSTAG', 'HEAD', 'DEPREL', '2', '3']
     column_list = {}
     for field in format_list:
@@ -418,7 +418,6 @@ def test():
             for field in format_list:
                 if not (field.isdigit()):
                     column_list[field] = []
-
 
 
 if __name__ == '__main__':

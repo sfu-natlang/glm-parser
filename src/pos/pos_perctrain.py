@@ -106,10 +106,9 @@ class PosPerceptron():
         return w_vec
 
     def dump_vector(self, filename, iteration, fv):
-        print (
-             "TAGGER [INFO]: Dumping weight_vec to ",
-             filename,
-             "_Iter_%d.db" % iteration)
+        print ("TAGGER [INFO]: Dumping weight_vec to ",
+               filename,
+               "_Iter_%d.db" % iteration)
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
         w_vector.dump("file://" + filename + "_Iter_%d.db" % iteration)
