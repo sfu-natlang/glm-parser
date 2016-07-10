@@ -17,14 +17,12 @@ class Decoder():
         self.tagset = read_tagset(tag_file, sparkContext)
 
     def sent_evaluate(self, result_list, gold_list):
-        result_size = len(result_list)
-        gold_size = len(gold_list)
-        if result_size != gold_size:
+        if len(result_list) != len(gold_list):
             raise ValueError("""
             TAGGER [ERRO]: Tag results do not align with gold results
             """)
         correct_num = 0
-        for i in range(result_size):
+        for i in range(len(result_list)):
             if result_list[i] == gold_list[i]:
                 correct_num += 1
         return correct_num, gold_size
@@ -40,8 +38,3 @@ class Decoder():
         acc = float(correct_num) / gold_set_size
         print "TAGGER [INFO]: Total Accraccy: ", acc
         return acc
-
-    def getTags(self, word_list, w_vec):
-        argmax = pos_viterbi.Viterbi()
-        pos_list = argmax.perc_test(w_vec, word_list, self.tagset, "NN")
-        return pos_list[2:]

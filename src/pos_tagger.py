@@ -12,8 +12,9 @@
 # Individual modules of the tagger are located in src/pos/
 
 from data.data_pool import DataPool
-from pos import pos_decode, pos_perctrain, pos_features
+from pos import pos_decode, pos_perctrain, pos_features, pos_viterbi
 from weight.weight_vector import WeightVector
+from pos.pos_common import *
 import debug.debug
 import os
 import sys
@@ -29,13 +30,17 @@ __version__ = '1.0'
 
 class PosTagger():
     def __init__(self,
-                 tag_file     = "file://tagset.txt",
-                 sparkContext = None):
+                 weightVectorLoadPath = None,
+                 tag_file             = "file://tagset.txt",
+                 sparkContext         = None):
 
         print "TAGGER [INFO]: Tag File selected: %s" % tag_file
-        self.tag_file = tag_file
+        self.tagset = read_tagset(tag_file, sparkContext)
         self.default_tag = "NN"
         self.sparkContext = sparkContext
+        if weightVectorLoadPath is not None:
+            self.w_vector = WeightVector()
+            self.w_vector.load(weightVectorLoadPath, self.sparkContext)
 
     def load_data(self, dataPool):
         data_list = []
@@ -87,6 +92,7 @@ class PosTagger():
         self.w_vector = perc.avg_perc_train(train_data)
         if dump_data:
             perc.dump_vector("fv", max_iter, self.w_vector)
+        return self.w_vector
 
     def evaluate(self, dataPool=None):
         if dataPool is None:
@@ -98,14 +104,10 @@ class PosTagger():
         tester = pos_decode.Decoder(test_data)
         acc = tester.get_accuracy(self.w_vector)
 
-    def load_w_vec(self, fv_path=None):
-        feat_vec = WeightVector()
-        feat_vec.load(fv_path, self.sparkContext)
-        self.w_vector = feat_vec
-
     def getTags(self, word_list):
-        tagger = pos_decode.Decoder(tag_file=self.tag_file)
-        return tagger.getTags(word_list, self.w_vector)
+        argmax = pos_viterbi.Viterbi()
+        pos_list = argmax.perc_test(self.w_vector, word_list, self.tagset, "NN")
+        return pos_list[2:]
 
 if __name__ == '__main__':
     # Process Defaults

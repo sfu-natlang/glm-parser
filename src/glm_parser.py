@@ -375,9 +375,9 @@ if __name__ == "__main__":
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         print "Using Tagger weight vector: " + config['tagger_w_vector']
-        tagger = PosTagger(tag_file     = config['tag_file'],
-                           sparkContext = sparkContext)
-        tagger.load_w_vec(config['tagger_w_vector'])
+        tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
+                           tag_file             = config['tag_file'],
+                           sparkContext         = sparkContext)
         print "Tagger weight vector loaded"
     else:
         tagger = None

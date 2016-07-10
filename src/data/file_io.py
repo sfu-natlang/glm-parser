@@ -12,6 +12,7 @@ def fileReadHDFS(filePath=None, sparkContext=None):
     sc = sparkContext
 
     aRdd = sc.textFile(filePath).cache()
+    aRdd = aRdd.map(lambda x: str(x)).cache()
     fileContent = aRdd.collect()
 
     return fileContent
