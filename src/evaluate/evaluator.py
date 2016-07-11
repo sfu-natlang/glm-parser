@@ -14,11 +14,6 @@ class Evaluator():
         self.unlabeled_gold_set_size = 0
         return
 
-    def reset(self):
-        self.unlabeled_correct_num = 0
-        self.unlabeled_gold_set_size = 0
-        return
-
     def get_statistics(self):
         return self.unlabeled_correct_num, self.unlabeled_gold_set_size
 
@@ -42,6 +37,9 @@ class Evaluator():
         return correct_num, gold_set_size
 
     def evaluate(self, data_pool, parser, w_vector, tagger=None):
+        self.unlabeled_correct_num = 0
+        self.unlabeled_gold_set_size = 0
+
         logging.debug("Start evaluating ...")
         sentence_count = 1
         while data_pool.has_next_data():
@@ -61,6 +59,7 @@ class Evaluator():
                 parser.parse(sent, w_vector.get_vector_score, tagger)
 
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+        data_pool.reset_index()
 
         logging.info("Feature count: %d" % len(w_vector.keys()))
         logging.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
