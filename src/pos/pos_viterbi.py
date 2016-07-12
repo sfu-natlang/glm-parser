@@ -51,14 +51,14 @@ class Viterbi():
         # find the value of best_tag for each word i in the input
         # feat_index = 0
         pos_feat = pos_features.Pos_feat_gen(labeled_list)
-        for i in range(2, N-2):
+        for i in range(2, N - 2):
             word = labeled_list[i]
             found_tag = False
             for tag in tagset:
                 prev_list = []
-                for prev_tag in viterbi[i-1]:
+                for prev_tag in viterbi[i - 1]:
                     feats = []
-                    (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
+                    (prev_value, prev_backpointer) = viterbi[i - 1][prev_tag]
                     pos_feat.get_pos_feature(feats,
                                              i,
                                              prev_tag,
@@ -81,9 +81,9 @@ class Viterbi():
                 viterbi[i][default_tag] = (0.0, default_tag)
 
         # recover the best sequence using backpointers
-        maxvalue = self.get_maxvalue(viterbi[N-3])
+        maxvalue = self.get_maxvalue(viterbi[N - 3])
         best_tag = maxvalue[0]
-        for i in range(N-3, 1, -1):
+        for i in range(N - 3, 1, -1):
             output.insert(0, best_tag)
             (value, backpointer) = viterbi[i][best_tag]
             best_tag = backpointer

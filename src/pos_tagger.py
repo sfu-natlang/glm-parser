@@ -48,9 +48,10 @@ class PosTagger():
         sentence_count = 0
         while dataPool.has_next_data():
             sentence_count += 1
-            data = dataPool.get_next_data()
-            word_list = data.column_list["FORM"]
-            pos_list = data.column_list["POSTAG"]
+            sentence = dataPool.get_next_data()
+
+            word_list = sentence.column_list["FORM"]
+            pos_list = sentence.column_list["POSTAG"]
 
             del word_list[0]
             del pos_list[0]  # delet Root

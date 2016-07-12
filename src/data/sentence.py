@@ -122,15 +122,18 @@ class Sentence():
         # we could store some data inside fgen instance, such as cache
         # THIS MUST BE PUT AFTER set_edge_list()
         if fgen is not None:
-            self.f_gen = fgen()
+            self.fgen = fgen()
             rsc_list = []
-            for field_name in self.f_gen.care_list:
+            for field_name in self.fgen.care_list:
                 rsc_list.append(self.fetch_column(field_name))
 
-            self.f_gen.init_resources(rsc_list)
+            self.fgen.init_resources(rsc_list)
 
             # Pre-compute the set of gold features
-            self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+            if name == "POSTaggerFeatureGenerator":
+                self.gold_global_vector = self.get_global_vector()
+            else:
+                self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
             # During initialization is has not been known yet. We will fill this later
             # self.current_global_vector = None
 
@@ -206,12 +209,12 @@ class Sentence():
         """
         See the same function in class FeatureGeneratorBase
         """
-        self.f_gen.dump_feature_request(suffix)
+        self.fgen.dump_feature_request(suffix)
         return
 
     # ~def cache_feature_for_edge_list(self, edge_list):
     # ~    # Compute cached feature for a given edge list
-    # ~    self.f_gen.cache_feature_for_edge_list(edge_list)
+    # ~    self.fgen.cache_feature_for_edge_list(edge_list)
     # ~    return
 
     def convert_list_vector_to_dict(self, fv):
@@ -234,9 +237,8 @@ class Sentence():
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
-        global_vector = self.f_gen.recover_feature_from_edges(edge_list)
+        global_vector = self.fgen.recover_feature_from_edges(edge_list)
 
-        # return self.convert_list_vector_to_dict(global_vector)
         return global_vector
 
     def get_local_vector(self,
@@ -259,10 +261,10 @@ class Sentence():
 
         """
 
-        lv = self.f_gen.get_local_vector(head_index,
-                                         dep_index,
-                                         another_index_list,
-                                         feature_type)
+        lv = self.fgen.get_local_vector(head_index,
+                                        dep_index,
+                                        another_index_list,
+                                        feature_type)
 
         return lv
 
@@ -285,7 +287,7 @@ class Sentence():
         #if key in self.second_order_cache:
         #    return self.second_order_cache[key]
 
-        second_order_fv = self.f_gen.get_local_vector(head_index,
+        second_order_fv = self.fgen.get_local_vector(head_index,
                                                       dep_index,
                                                       [another_index],
                                                       feature_type)
@@ -318,7 +320,7 @@ class Sentence():
             self.column_list["POSTAG"] = ["ROOT"] + pos_list
         else:
             sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
-        self.f_gen.reTag(self.column_list["POSTAG"])
+        self.fgen.reTag(self.column_list["POSTAG"])
         return
 
     def set_edge_list(self, edge_list):

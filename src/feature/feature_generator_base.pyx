@@ -4,7 +4,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen, Jetic Gu
 # (Please add on your name if you have authored this file)
 #
 
@@ -19,8 +19,9 @@ import sys
 #    is not enforced, since in some cases we know inheritance will not improve readability of
 #    code, and will degrade performance
 # 2. Each fgen class should be stored in a separate file, and each file should only have one
-#    class having the "get_local_vector()" interface (i.e. there must be only one class who has
-#    a method called get_local_vector). If multiple choice is possible then the behavior is undefined
+#    class having the "get_local_vector()" and "recover_feature_from_edges" interface (i.e. there
+#    must be only one class who has a method called get_local_vector and recover_feature_from_edges).
+#    If multiple choice is possible then the behavior is undefined
 # 3. Please make sure there is no direct "from ... import ..." statement, unless you are confirmed
 #    such statements will not introduce any class with a get_local_vector() interface
 #################################################################################################
@@ -43,7 +44,7 @@ class FeatureGeneratorBase:
     """
 
     # See __init__ below
-    key_gen_func = str 
+    key_gen_func = str
 
     #cdef list five_gram_word_list
 
@@ -197,7 +198,7 @@ class FeatureGeneratorBase:
         else:
             direction = 'R'
             dist = dep_index - head_index
-        
+
         if dist > 5:
             if dist < 10:
                 dist = 5

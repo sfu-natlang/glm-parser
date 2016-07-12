@@ -19,6 +19,8 @@ class FeatureGenerator():
     """
     Second order feature generator: Sibling features and grandchild features
     """
+    name = "EnglishSecondOrderFeatureGenerator"
+
     def __init__(self, sent):
         # Construct a first order feature generator, and pre-cache some necessary data
         # We just wrap around first order

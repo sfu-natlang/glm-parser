@@ -18,6 +18,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """
     First order feature generator for english
     """
+    name = "EnglishFirstOrderFeatureGenerator"
 
     def __init__(self):
         """
