@@ -41,10 +41,10 @@ Once the pull request is approved, it will be merged using GitHub's interface
 If there is an important bug in `master` that needs to be fixed and it can't
 wait for `develop` to be stable, create a `hotfix/*` branch off `master`,
 commit your fix, push it, and then create 2 pull requests: one against `master`
-and one against `develop`. This avoid us having to merge `master` into develop
-and then having a confusing git log; we'll have a `merge hotfix/bug-name into
-develop` which is going to be clear instead of having `merge master into
-develop` and people wondering "why did that happen?".
+and one against `develop`. This avoids us having to merge `master` into
+`develop` and then having a confusing git log; we'll have a `merge
+hotfix/bug-name into develop` which is going to be clear instead of having
+`merge master into develop` and people wondering "why did that happen?".
 
 
 ## Code reviews
