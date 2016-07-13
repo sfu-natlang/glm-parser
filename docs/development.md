@@ -49,23 +49,26 @@ hotfix/bug-name into develop` which is going to be clear instead of having
 
 ## Code reviews
 
-When a pull request is created, it needs to be reviewed before it can be
-merged. This includes general comments about the implementation as well as more
-specific things like code style improvements and typos. Merges can only happen
-with a "looks good to me" from whoever's supposed to say that for that specific
-pull request.
+Before your branch can be merged into the `develop` branch, it needs to be
+reviewed. This includes general comments about the implementation as well as
+more specific things like code style improvements and typos. Merges can only
+happen with a "looks good to me" from whoever's supposed to say that for that
+specific pull request.
 
-To have a coherent set of commits that implement a feature, you may need to
-re-order, modify, or squash some commits from your branch. You can then
-force-push your changes to the same branch, and the pull request will be
-updated with the new commits. The old comments will still be visible, however.
-GitHub will say "X commented on an outdated diff", with an option to view that
-diff.
+To prepare your pull request, you may need to re-order, modify, or squash some
+commits from your branch to have a coherent chain of commits that clearly
+explain the development process of the feature. Please do this before pushing
+your branch, as we want to avoid force-pushing. If you've already pushed your
+branch to the main repository, you can delete the old remote branch, rename
+your local branch, rebase, and then push the "new" branch. The rename is to
+avoid conflicts if someone else checked out that branch.
 
-**Caution:** When you're rebasing and force-pushing make sure you fully
-understand what is happening, and you're careful about what you just typed.
-The `master` and `develop` branches are protected, but none of the other
-branches are. Read the "Git tips" section on how to do this safely.
+If you need to make changes based on code review suggestions, add new commits
+to the branch, with subject lines which explain what the commit does just like
+regular commits, but mention the pull request number in the body of the commit
+message so that people reading the git log will be able to find the discussion
+that led to the commit. This can either be a full link to the pull request, or
+just `#49` since GitHub will automatically make that a link.
 
 
 ## Style checks
@@ -118,6 +121,15 @@ justifies all the "rules".
 The following are a few tips on using git that are relevant to this document.
 
 
+### You don't have to push
+
+Remember, git is a _distributed_ version control system, and this means you
+don't have to push your commits to the remote repository. It also means you can
+push commits to any other clone of the main repository, which is useful if you
+want to have a "backup" of your local repository while still being able to
+rebase your branch/commits.
+
+
 ### Rebasing
 
 Rebasing in git will take a series of commits (usually you'll use this with
@@ -143,6 +155,12 @@ More info: https://help.github.com/articles/about-git-rebase/
 
 
 ### Force-pushing safely
+
+**Note:** While it may be fine for other repositories (e.g. your own clones of
+this repository), we want to avoid force-pushing to this repository as much as
+possible. It is only acceptable when there is _no other option_ (e.g. if we
+need to remove any trace of a file), and even then, only with the permission of
+the owner/maintainer of the project.
 
 Force-pushing ensures the commits on the remote branch match what you have
 locally. This is only necessary if the two branches have diverged (git will
