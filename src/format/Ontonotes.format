@@ -1,0 +1,14 @@
+field_names: 11
+documentID
+partNumber
+wordNumber
+wordItself
+POS
+parseBit
+predicateLemma
+predicateFramesetID
+wordSense
+speaker/Author
+namedEntities
+comment_sign: #
+
