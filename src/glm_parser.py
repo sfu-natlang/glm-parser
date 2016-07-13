@@ -324,7 +324,7 @@ if __name__ == "__main__":
             if config_parser.get('data', option) != '':
                 config[option] = config_parser.get('data', option)
 
-        for option in ['load_weight_from', 'dump_weight_to']:
+        for option in ['load_weight_from', 'dump_weight_to', 'tagger_w_vector']:
             if config_parser.get('option', option) != '':
                 config[option] = config_parser.get('option', option)
 
@@ -354,6 +354,7 @@ if __name__ == "__main__":
     # Check values of config[]
     if not spark_mode:
         config['spark_shards'] = 1
+
     if not yarn_mode:
         for option in [
                 'data_path',
