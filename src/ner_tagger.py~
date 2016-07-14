@@ -168,7 +168,7 @@ class Trainer:
 
                     #pos_feat = pos_features.Pos_feat_gen(labels)
 		    
-                    ner_feat = ner_features.Ner_feat_gen()
+                    ner_feat = Ner_features.Ner_feat_gen()
 
                     gold_out_fv = defaultdict(int)
                     ner_feat.sent_feat_gen(gold_out_fv,labels, tags_cp,POS_tags,chunk_tags)
@@ -291,7 +291,7 @@ def main(training_file):
     trainer.read_training_data(training_file)
 
     # Compute the weight vector using the Perceptron algorithm
-    w_vec  = trainer.perceptron_algorithm(1)
+    w_vec  = trainer.perceptron_algorithm(5)
     print "evaluating"
     trainer.tag_data('./ner/DATA/eng.testa',w_vec)
     evaluate = ner_accuracy.Decoder('./ner/out_file.txt')

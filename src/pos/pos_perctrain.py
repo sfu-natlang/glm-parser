@@ -16,7 +16,7 @@ from weight import weight_vector
 
 class PosPerceptron():
 
-    def __init__(self, w_vector=None, max_iter=1, default_tag="NN", tag_file="tagset.txt"):
+    def __init__(self, w_vector=None, max_iter=1, default_tag="NN", tag_file="pos_tagset.txt"):
         self.w_vector = w_vector
         self.max_iter = max_iter
         self.default_tag = default_tag
