@@ -101,43 +101,75 @@ class Sentence():
         self.field_name_list = field_name_list
 
         self.cache_key_func = hash
+        self.fgen = None
+        self.load_fgen(fgen)
 
-        # add ROOT to FORM and POSTAG
-        edge_list = self.construct_edge_set()
-        if "FORM" in self.column_list.keys():
-            self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+    def load_fgen(self, fgen=None):
+        if fgen is None:
+            raise ValueError("FGEN [ERROR]: Feature Generator for loading not specified")
+        if self.fgen is not None:
+            if self.fgen.name == "POSTaggerFeatureGenerator":
+                del self.column_list["FORM"][0]
+                del self.column_list["FORM"][0]
+                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
+                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
+                del self.column_list["POSTAG"][0]
+                del self.column_list["POSTAG"][0]
+            elif self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
+                    self.fgen.name == "EnglishSecondOrderFeatureGenerator":
+                del self.column_list["FORM"][0]
+                del self.column_list["POSTAG"][0]
+            else:
+                raise ValueError("FGEN [ERROR]: Loaded feature generator invalid")
+
+        if fgen.name == "POSTaggerFeatureGenerator":
+            self.column_list["FORM"].insert(0, '_B_-1')
+            self.column_list["FORM"].insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
+            self.column_list["FORM"].append('_B_+1')
+            self.column_list["FORM"].append('_B_+2')     # last two 'words' are B_+1 B_+2
+
+            self.column_list["POSTAG"].insert(0, 'B_-1')
+            self.column_list["POSTAG"].insert(0, 'B_-2')
         else:
-            sys.exit("'FORM' is needed in Sentence but it's not in format file")
+            # add ROOT to FORM and POSTAG
+            edge_list = self.construct_edge_set()
+            if "FORM" in self.column_list.keys():
+                self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+            else:
+                sys.exit("'FORM' is needed in Sentence but it's not in format file")
 
-        if "POSTAG" in self.column_list.keys():
-            self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
-        else:
-            sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
+            if "POSTAG" in self.column_list.keys():
+                self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+            else:
+                sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
 
-        # This will store the dict, dict.keys() and len(dict.keys())
-        # into the instance
-        self.set_edge_list(edge_list)
+            # This will store the dict, dict.keys() and len(dict.keys())
+            # into the instance
+            self.set_edge_list(edge_list)
 
         # Each sentence instance has a exclusive fgen instance
         # we could store some data inside fgen instance, such as cache
         # THIS MUST BE PUT AFTER set_edge_list()
-        if fgen is not None:
-            self.fgen = fgen()
-            rsc_list = []
-            for field_name in self.fgen.care_list:
-                rsc_list.append(self.fetch_column(field_name))
+        self.fgen = fgen()
+        rsc_list = []
+        for field_name in self.fgen.care_list:
+            rsc_list.append(self.fetch_column(field_name))
 
-            self.fgen.init_resources(rsc_list)
+        self.fgen.init_resources(rsc_list)
 
-            # Pre-compute the set of gold features
-            if name == "POSTaggerFeatureGenerator":
-                self.gold_global_vector = self.get_global_vector()
-            else:
-                self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+        # Pre-compute the set of gold features
+        if self.fgen.name == "POSTaggerFeatureGenerator":
+            self.gold_global_vector = self.get_global_vector()
+        elif self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
+                self.fgen.name == "EnglishSecondOrderFeatureGenerator":
+            self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
             # During initialization is has not been known yet. We will fill this later
             # self.current_global_vector = None
 
             self.set_second_order_cache()
+        else:
+            raise ValueError("FGEN [ERROR]: Loaded feature generator invalid")
+
         return
 
     def construct_edge_set(self):
@@ -224,7 +256,7 @@ class Sentence():
         return ret_fv
 
     # Both 1st and 2nd order
-    def get_global_vector(self, edge_list):
+    def get_global_vector(self, edge_list=None):
         """
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
@@ -237,15 +269,25 @@ class Sentence():
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
-        global_vector = self.fgen.recover_feature_from_edges(edge_list)
+        if self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
+                self.fgen.name == "EnglishSecondOrderFeatureGenerator":
+            global_vector = self.fgen.recover_feature_from_edges(edge_list)
+        elif self.fgen.name == "POSTaggerFeatureGenerator":
+            global_vector = self.fgen.get_global_vector(self.column_list["FORM"],
+                                                        self.column_list["POSTAG"])
+        else:
+            raise ValueError("FGEN [ERROR]: Loaded feature generator invalid")
 
         return global_vector
 
     def get_local_vector(self,
-                         head_index,
-                         dep_index,
-                         another_index_list = [],
-                         feature_type = 0):
+                         head_index=None,
+                         dep_index=None,
+                         another_index_list=[],
+                         index=None,
+                         prev_tag=None,
+                         prev_backpointer=None,
+                         feature_type=0):
         """
         Return local vector from fgen
 
@@ -260,11 +302,16 @@ class Sentence():
         FeatureGenerator.get_second_order_local_vector() doc string.
 
         """
-
-        lv = self.fgen.get_local_vector(head_index,
-                                        dep_index,
-                                        another_index_list,
-                                        feature_type)
+        if self.fgen.name == "POSTaggerFeatureGenerator":
+            lv = self.fgen.get_local_vector(wordlist=self.column_list["FORM"],
+                                            index=index,
+                                            prev_tag=prev_tag,
+                                            prev_backpointer=prev_backpointer)
+        else:
+            lv = self.fgen.get_local_vector(head_index=head_index,
+                                            dep_index=dep_index,
+                                            other_index_list=another_index_list,
+                                            feature_type=feature_type)
 
         return lv
 

@@ -66,7 +66,7 @@ cdef class EisnerParser:
             s = modifier
             t = head
 
-        cdef float edge_score = arc_weight(sent.get_local_vector(head, modifier))
+        cdef float edge_score = arc_weight(sent.get_local_vector(head_index=head, dep_index=modifier))
         cdef int max_index = s
         cdef float max_score = \
             self.e[s][s][1][0].score + self.e[s+1][t][0][0].score + edge_score

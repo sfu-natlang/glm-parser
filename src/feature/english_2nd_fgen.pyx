@@ -200,7 +200,9 @@ class FeatureGenerator():
     SECOND_ORDER_SIBLING_ONLY = 3
     SECOND_ORDER_GRANDCHILD_ONLY = 4
 
-    def get_local_vector(self, head_index, dep_index,
+    def get_local_vector(self,
+                         head_index,
+                         dep_index,
                          other_index_list=None,
                          feature_type=0):
         local_fv = []

@@ -305,7 +305,10 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             dir_dist_fv.append( new_prefix + feature[2:] + new_suffix )
         return dir_dist_fv
 
-    def get_local_vector(self, head_index, dep_index, other_index_list=None,
+    def get_local_vector(self,
+                         head_index,
+                         dep_index,
+                         other_index_list=None,
                          feature_type=None):
         """
         Return first order local vector, which includes
