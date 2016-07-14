@@ -4,14 +4,12 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir) 
 import copy, operator, optparse
-import NER_features
+import ner_features
 from collections import defaultdict
 
 class Viterbi():
     def __init__(self,w_vector=None):
         self.w_vector = w_vector
-        #self.loc_list = loc_list
-        #self.per_list = per_list
         
     def get_maxvalue(self, viterbi_dict):
         maxvalue = (None, None) # maxvalue has tuple (tag, value)
@@ -47,7 +45,7 @@ class Viterbi():
         viterbi[1]['B_-1'] = (0.0, 'B_-2')
         # find the value of best_tag for each word i in the input
         # feat_index = 0
-        ner_feat = NER_features.Ner_feat_gen(labeled_list)
+        ner_feat = ner_features.Ner_feat_gen(labeled_list)
         for i in range(2, N-2):
             word = labeled_list[i]
             found_tag = False

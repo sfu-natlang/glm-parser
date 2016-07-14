@@ -2,13 +2,13 @@ import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
-import NER_viterbi, NER_tagset
+import ner_viterbi, ner_tagset
 import time
 
 class Decoder():
     def __init__(self,test_list=None, tag_file="ner_tagset.txt"):
         self.test_list = test_list
-        self.tagset = NER_tagset.read_ner_tagset()
+        self.tagset = ner_tagset.read_ner_tagset()
        
 
     def sent_evaluate(self, result_list, gold_list):
@@ -23,7 +23,7 @@ class Decoder():
         return correct_num, gold_size
 
     def get_accuracy(self, w_vec):
-        argmax = NER_viterbi.Viterbi()
+        argmax = ner_viterbi.Viterbi()
         correct_num = gold_set_size = 0
         y = ['_B_-1','_B_-2','_B_+1','_B_+2']
         f = open('./ner/output.txt','w')

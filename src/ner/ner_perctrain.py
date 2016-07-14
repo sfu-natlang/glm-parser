@@ -5,7 +5,7 @@ from __future__ import division
 import time,copy,logging
 import os,sys,inspect
 from collections import defaultdict
-import NER_features, NER_viterbi, NER_tagset
+import ner_features, ner_viterbi, ner_tagset
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -20,14 +20,14 @@ class NerPerceptron():
         self.w_vector = w_vector
         self.max_iter = max_iter
         self.default_tag = default_tag
-        self.tagset = NER_tagset.read_ner_tagset()
+        self.tagset = ner_tagset.read_ner_tagset()
         print "NER [DEBUG]: Trainer Loaded"
 
     def avg_perc_train(self, train_data):
         print "NER [INFO]: Training using the Average Perceptron Method"
         if len(self.tagset) <= 0:
             raise valueError("NER [ERROR]: tagset doesnt contain anything")
-        argmax = NER_viterbi.Viterbi()
+        argmax = ner_viterbi.Viterbi()
         weight_vec = defaultdict(float)
         average_vec = defaultdict(float)
         last_iter = {}
@@ -51,7 +51,7 @@ class NerPerceptron():
                     weight_delta = defaultdict(int)
 
                     # Get a
-                    ner_feat = NER_features.Ner_feat_gen(word_list)
+                    ner_feat = ner_features.Ner_feat_gen(word_list)
                     ner_feat.get_sent_feature(cur_out_fv,output,pos_list,chunk_list)
 
                     # Get Delta
@@ -104,7 +104,7 @@ class NerPerceptron():
                     w_delta = defaultdict(int)
 
                     # Get a
-                    ner_feat = NER_features.Ner_feat_gen(word_list)
+                    ner_feat = ner_features.Ner_feat_gen(word_list)
                     ner_feat.get_sent_feature(a,output,pos_list,chunk_list)
                     
                     for item in gold_out_fv:

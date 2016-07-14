@@ -1,7 +1,6 @@
 
 import string
 import copy
-import gazateers
 
 class Ner_feat_gen():
 
@@ -148,7 +147,7 @@ class Ner_feat_gen():
 	    return alist
 	    
                	
-	def get_ner_feature(self,fv, i, pretag_1, pretag_2,pos_list,chunk_list,brown_data):
+	def get_ner_feature(self,fv, i, pretag_1, pretag_2,pos_list,chunk_list):
 		word = self.wl[i]
 		if self.all_upper(word):
 		    fv.append((1,'cur_upper'))
@@ -229,7 +228,7 @@ class Ner_feat_gen():
 		fv.append((36,pos_list[i-1],pos_list[i-2]))
 		'''
 	
-	def get_sent_feature(self, fv, nerlist,pos_list,chunk_list,brown_data):
+	def get_sent_feature(self, fv, nerlist,pos_list,chunk_list):
 		for i in range(3, len(self.wl)-2):
 			word = self.wl[i]
 			tag = nerlist[i]
