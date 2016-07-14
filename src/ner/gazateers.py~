@@ -1,0 +1,21 @@
+# gazatteers
+
+def LOC_list_formation():
+    list_LOC = []
+    fileptr = open('./Ner/ned.list.LOC','r')
+    for line in fileptr:
+        x = line.split()
+        list_LOC.append(x[1])
+    #print list_LOC
+    fileptr.close()
+    return list_LOC
+        
+def PER_list_formation():
+    list_PER = []
+    fileptr = open('./Ner/ned.list.PER','r')
+    for line in fileptr:
+        x = line.split()
+        list_PER.append(x[1])
+    #print list_PER
+    #fileptr.close()
+    return list_PER
