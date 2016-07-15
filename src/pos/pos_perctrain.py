@@ -4,10 +4,10 @@
 from __future__ import division
 import time
 import copy
-import logging
 import os
 import sys
 import inspect
+import logging
 from collections import defaultdict
 
 import pos_features
@@ -22,6 +22,8 @@ gottenFile = inspect.getfile(inspect.currentframe())
 currentdir = os.path.dirname(os.path.abspath(gottenFile))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
+
+logger = logging.getLogger('TAGGER')
 
 
 class PosPerceptron():
@@ -38,10 +40,10 @@ class PosPerceptron():
         self.default_tag = default_tag
         self.sparkContext = sparkContext
         self.tagset = pos_common.read_tagset(tag_file, self.sparkContext)
-        print "TAGGER [DEBUG]: Trainer Loaded"
+        logger.debug("Trainer Loaded")
 
     def avg_perc_train(self, train_data):
-        print "TAGGER [INFO]: Using Average Perceptron Trainer"
+        logger.info("Using Average Perceptron Trainer")
         if len(self.tagset) <= 0:
             raise valueError("TAGGER [ERRO]: Empty tagset")
         argmax = pos_viterbi.Viterbi()
@@ -51,11 +53,11 @@ class PosPerceptron():
         c = 0
 
         for iteration in range(self.max_iter):
-            print "TAGGER [INFO]: Starting Iteration %d" % iteration
+            logger.info("Starting Iteration %d" % iteration)
             log_miss = 0
 
             for (word_list, pos_list, gold_out_fv) in train_data:
-                print "TAGGER [INFO]: %d sentences trained" % c
+                logger.info("%d sentences trained" % c)
                 output = argmax.perc_test(w_vec,
                                           word_list,
                                           self.tagset,
@@ -92,9 +94,8 @@ class PosPerceptron():
 
                             last_iter[i] = c
 
-            print ("\rTAGGER [INFO]: Iteration completed, number of mistakes:",
-                   log_miss)
-        print "TAGGER [DEBUG]: Finalising"
+            logger.info("Iteration completed, number of mistakes:", log_miss)
+        logger.debug("Finalising")
         for i in w_vec:
             if i in last_iter:
                 u_vec[i] += (c - last_iter[i]) * w_vec[i]
@@ -102,13 +103,12 @@ class PosPerceptron():
                 u_vec[i] = w_vec[i]
 
             w_vec[i] = u_vec[i] / c
-        print "TAGGER [DEBUG]: Training Completed"
+        logger.debug("Training Completed")
         return w_vec
 
     def dump_vector(self, filename, iteration, fv):
-        print ("TAGGER [INFO]: Dumping weight_vec to ",
-               filename,
-               "_Iter_%d.db" % iteration)
+        logger.info("Dumping weight_vec to ", filename,
+                    "_Iter_%d.db" % iteration)
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
         w_vector.dump("file://" + filename + "_Iter_%d.db" % iteration)
@@ -121,10 +121,8 @@ class PosPerceptron():
                              avg_vec,
                              num_updates):
 
-        print (
-            "TAGGER [INFO]: Dumping weight_vec to ",
-            filename,
-            "_Iter_%d.db" % iteration)
+        logger.info("Dumping weight_vec to ", filename,
+                    "_Iter_%d.db" % iteration)
         fv = copy.deepcopy(weight_vec)
         av = copy.deepcopy(avg_vec)
         for feat in fv:

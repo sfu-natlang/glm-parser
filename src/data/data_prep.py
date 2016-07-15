@@ -16,14 +16,16 @@
 # to upload the data to hdfs when running the glm_parser
 # on spark yarn cluster mode.
 #
-import logging
 import sys
 import os
 import re
 import os.path
 import hashlib
+import logging
 import ConfigParser
 from ConfigParser import SafeConfigParser
+
+logger = logging.getLogger('DATAPREP')
 
 
 class DataPrep():
@@ -38,7 +40,7 @@ class DataPrep():
         self.sc         = sparkContext
 
         if self.debug:
-            print "DATAPREP [DEBUG]: Preparing data for " + dataRegex
+            logger.debug("Preparing data for " + dataRegex)
 
         # Check param validity
         if (not isinstance(shardNum, int)) or int(shardNum) <= 0:
@@ -48,7 +50,7 @@ class DataPrep():
         if targetPath == "":
             raise ValueError("DATAPREP [ERROR]: targetPath not specified")
         if self.debug:
-            print "DATAPREP [DEBUG]: Using data from path: " + self.dataPath
+            logger.debug("Using data from path: " + self.dataPath)
         return
 
     def localPath(self):
@@ -57,7 +59,7 @@ class DataPrep():
         '''
         if self.path:
             return self.path
-        print ("DATAPREP [WARN]: data not locally loaded yet, will not be loaded this time.")
+        logger.warn("data not locally loaded yet, will not be loaded this time.")
         aFileList = []
 
         for dirName, subdirList, fileList in os.walk(self.dataPath[7:]):
@@ -111,7 +113,7 @@ class DataPrep():
         if not os.path.isdir(self.dataPath[7:]):
             raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if self.debug:
-            print "DATAPREP [DEBUG]: Partitioning Data locally"
+            logger.debug("Partitioning Data locally")
         if not os.path.exists(self.targetPath):
             os.makedirs(self.targetPath)
 
@@ -131,7 +133,7 @@ class DataPrep():
 
         if not os.path.exists(self.path):
             if self.debug:
-                print "DATAPREP [DEBUG]: Copying data to local directory: " + self.path
+                logger.debug("Copying data to local directory: " + self.path)
             os.makedirs(self.path)
 
             fid = self.shardNum - 1
@@ -162,9 +164,9 @@ class DataPrep():
             fout.close()
         else:
             if self.debug:
-                print "DATAPREP [DEBUG]: local directory: " + self.path + " already exists, will not proceed to copy"
+                logger.debug("local directory: " + self.path + " already exists, will not proceed to copy")
         if self.debug:
-            print "DATAPREP [DEBUG]: Partition complete"
+            logger.debug("Partition complete")
         return self.path
 
     def loadHadoop(self):
@@ -175,28 +177,28 @@ class DataPrep():
             raise RuntimeError('DATAPREP [ERROR]: SparkContext not initialised')
         tmp = self.dataPath + "*/" + self.dataRegex
         if self.debug:
-            print "DATAPREP [DEBUG]: Using regular expression for files: " + tmp
+            logger.debug("Using regular expression for files: " + tmp)
         aRdd = self.sc.textFile(tmp).cache()
 
         hashCode = hashlib.md5(self.dataPath + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug:
-            print "DATAPREP [DEBUG]: Uploading data to HDFS"
-            print "DATAPREP [DEBUG]: Uploading to target directory " + self.hdfsPath
+            logger.debug("Uploading data to HDFS")
+            logger.debug("Uploading to target directory " + self.hdfsPath)
 
         aRdd.coalesce(self.shardNum, True).cache()
         aRdd.saveAsTextFile(self.hdfsPath)
         aRdd.unpersist()
         aRdd = None
         if self.debug:
-            print "DATAPREP [DEBUG]: Upload complete"
+            logger.debug("Upload complete")
         return self.hdfsPath
 
 # Uncomment the following code for tests
 '''
 if __name__ == "__main__":
     configFile = sys.argv[1]
-    print("DATAPREP [DEBUG]: Reading configurations from file: %s" % (configFile))
+    logger.debug("Reading configurations from file: %s" % (configFile))
     cf = SafeConfigParser(os.environ)
     cf.read(configFile)
 
@@ -207,5 +209,5 @@ if __name__ == "__main__":
     dataPrep = DataPrep(dataPath, dataRegex, shardNum, targetPath)
     #dataPrep.loadLocal()
     dataPrep.loadHadoop()
-    print("DATAPREP [DEBUG]: Test Complete")
+    logger.debug("Test Complete")
 '''

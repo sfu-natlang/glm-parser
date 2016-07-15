@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #
 # Part of Speech Tagger
 # Simon Fraser University
@@ -21,12 +20,14 @@ import sys
 import timeit
 import time
 import ConfigParser
-
+import logging
 import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
 __version__ = '1.0'
+
+logger = logging.getLogger('TAGGER')
 
 
 class PosTagger():
@@ -35,7 +36,7 @@ class PosTagger():
                  tag_file             = "file://tagset.txt",
                  sparkContext         = None):
 
-        print "TAGGER [INFO]: Tag File selected: %s" % tag_file
+        logger.info("Tag File selected: %s" % tag_file)
         self.tagset = read_tagset(tag_file, sparkContext)
         self.default_tag = "NN"
         self.sparkContext = sparkContext
@@ -69,7 +70,7 @@ class PosTagger():
 
             data_list.append((word_list, pos_list, gold_out_fv))
 
-        print "TAGGER [INFO]: Sentence Number: %d" % sentence_count
+        logger.info("Sentence Number: %d" % sentence_count)
         return data_list
 
     def perc_train(self,
@@ -77,19 +78,19 @@ class PosTagger():
                    max_iter=1,
                    dump_data=True):
 
-        print "TAGGER [INFO]: Loading Training Data"
+        logger.info("Loading Training Data")
         if dataPool is None:
             sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
             sys.exit(1)
         train_data = self.load_data(dataPool)
 
-        print "TAGGER [INFO]: Training with Iterations: %d" % max_iter
+        logger.info("Training with Iterations: %d" % max_iter)
         perc = pos_perctrain.PosPerceptron(max_iter=max_iter,
                                            default_tag="NN",
                                            tag_file="file://tagset.txt",
                                            sparkContext=self.sparkContext)
 
-        print "TAGGER [INFO]: Dumping trained weight vector"
+        logger.info("Dumping trained weight vector")
         self.w_vector = perc.avg_perc_train(train_data)
         if dump_data:
             perc.dump_vector("fv", max_iter, self.w_vector)
@@ -100,7 +101,7 @@ class PosTagger():
             sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
             sys.exit(1)
 
-        print "TAGGER [INFO]: Loading Testing Data"
+        logger.info("Loading Testing Data")
         test_data = self.load_data(dataPool)
         tester = pos_decode.Decoder(test_data)
         acc = tester.get_accuracy(self.w_vector)
@@ -168,7 +169,7 @@ if __name__ == '__main__':
     #   configuration files are stored under src/format/
     #   configuration files: *.format
     if args.config:
-        print "TAGGER [INFO]: Reading configurations from file: " + args.config
+        logger.info("Reading configurations from file: " + args.config)
         cf = SafeConfigParser(os.environ)
         cf.read(args.config)
 
@@ -210,13 +211,13 @@ if __name__ == '__main__':
                                  data_path     = config['data_path'],
                                  format_path   = config['format'])
 
-        print "TAGGER [INFO]: Training Starts, Timer is on"
+        logger.info("Training Starts, Timer is on")
         start_time = time.time()
         tagger.perc_train(dataPool = trainDataPool,
                           max_iter = config['iterations'])
         end_time = time.time()
         training_time = end_time - start_time
-        print "TAGGER [INFO]: Total Training Time: ", training_time
+        logger.info("Total Training Time: ", training_time)
 
     if config['test'] is not None:
         testDataPool = DataPool(section_regex = config['test'],

@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
-import logging
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
 from weight import weight_vector
 from data import data_pool
-
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+from logger.parser_logger import *
 
 
 class Learner():
@@ -23,7 +18,7 @@ class Learner():
          Could be overridden by parameter max_iter in the method
         :return: None
         """
-        logging.debug("Initialize PerceptronLearner ... ")
+        logger.info("Initialize PerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
 
@@ -33,10 +28,10 @@ class Learner():
         if max_iter <= 0:
             max_iter = self.max_iter
 
-        logging.debug("Starting sequantial train...")
+        logger.info("Starting sequantial train...")
         for i in range(max_iter):
-            logging.debug("Iteration: %d" % i)
-            logging.debug("Data size: %d" % len(data_pool.data_list))
+            logger.info("Iteration: %d" % i)
+            logger.info("Data size: %d" % len(data_pool.data_list))
 
             while data_pool.has_next_data():
                 data_instance = data_pool.get_next_data()

@@ -3,12 +3,15 @@ import sys
 import inspect
 import time
 import pos_viterbi
+import logging
 from pos_common import *
 
 gottenFile = inspect.getfile(inspect.currentframe())
 currentdir = os.path.dirname(os.path.abspath(gottenFile))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
+
+logger = logging.getLogger('TAGGER')
 
 
 class Decoder():
@@ -36,5 +39,5 @@ class Decoder():
             correct_num += cnum
             gold_set_size += gnum
         acc = float(correct_num) / gold_set_size
-        print "TAGGER [INFO]: Total Accraccy: ", acc
+        logger.info("Total Accraccy: ", acc)
         return acc

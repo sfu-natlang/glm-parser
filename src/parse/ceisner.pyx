@@ -5,6 +5,10 @@ from libcpp.list cimport list
 from libcpp cimport bool
 from libc.stdlib cimport malloc, calloc, free
 from pos_tagger import PosTagger
+import logging
+
+logger = logging.getLogger('PARSER')
+
 
 cdef struct EisnerNode:
     float score
@@ -56,7 +60,7 @@ cdef class EisnerParser:
     def combine_triangle(self, head, modifier, arc_weight, sent):
         # s < t strictly
         if head == modifier:
-            print "invalid head and modifier for combine triangle!!!"
+            logger.warn("invalid head and modifier for combine triangle!!!")
 
         cdef int s, t, q
         if head < modifier:
@@ -82,7 +86,7 @@ cdef class EisnerParser:
     cdef combine_left(self, int s, int t):
         # s < t strictly
         if s >= t:
-            print "invalid head and modifier for combine left!!!"
+            logger.warn("invalid head and modifier for combine left!!!")
 
         cdef int max_index = s
         cdef float max_score = self.e[s][s][0][0].score + self.e[s][t][0][1].score
@@ -100,7 +104,7 @@ cdef class EisnerParser:
     cdef combine_right(self, int s, int t):
         # s < t strictly
         if s >= t:
-            print "invalid head and modifier for combine right!!!"
+            logger.warn("invalid head and modifier for combine right!!!")
 
         cdef int max_index = s+1
         cdef float max_score = self.e[s][s+1][1][1].score + self.e[s+1][t][1][0].score
