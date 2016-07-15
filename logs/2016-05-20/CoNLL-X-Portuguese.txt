@@ -1,8 +1,0 @@
-Branch: master
-
-Command: spark-submit --driver-memory 20g --executor-memory 20g --master 'local[*]' glm_parser.py -s 8 -i 1 -p /ugrad/2/jca303/data/CoNLL-X/Portuguese/data --train="portuguese_bosque_train.conll" --test="portuguese_bosque_test.conll" --learner=perceptron --fgen=english_1st_fgen --parser=ceisner --config=/ugrad/2/jca303/glm-parser/src/config/conllx.config
-
-05/20/2016 11:36:34 AM INFO: Training time usage(seconds): 177.507193
-05/20/2016 11:36:34 AM INFO: Feature count: 1853759
-05/20/2016 11:36:34 AM INFO: Unlabeled accuracy: 0.854099198909 (5011, 5867)
-05/20/2016 11:36:34 AM INFO: Unlabeled attachment accuracy: 0.860926076361 (5299, 6155)
