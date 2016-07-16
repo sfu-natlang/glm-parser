@@ -2,7 +2,8 @@ from __future__ import division
 from pos_tagger import PosTagger
 import logging
 
-logger = logging.getLogger('PARSER')
+logger = logging.getLogger('EVALUATOR')
+
 
 class Evaluator():
     def __init__(self):
@@ -41,9 +42,12 @@ class Evaluator():
         logger.debug("Start evaluating ...")
         sentence_count = 1
         while data_pool.has_next_data():
-            # print "Processing Sentence " + str(sentence_count)
-            sentence_count += 1
             sent = data_pool.get_next_data()
+
+            logger.info("Sentence %d, Length %d" % (
+                sentence_count,
+                len(sent.get_word_list()) - 1))
+            sentence_count += 1
 
             logger.debug("data instance: ")
             logger.debug(sent.get_word_list())

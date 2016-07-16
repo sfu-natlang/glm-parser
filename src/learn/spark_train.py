@@ -11,7 +11,7 @@ import re
 import importlib
 from os.path import isfile, join, isdir
 from pyspark import SparkContext
-from logger.parser_logger import *
+from learn import logger
 
 
 class ParallelPerceptronLearner():
@@ -24,7 +24,7 @@ class ParallelPerceptronLearner():
          Could be overridden by parameter max_iter in the method
         :return: None
         """
-        logger.info("Initialize ParallelPerceptronLearner ... ")
+        logger.debug("Initialize ParallelPerceptronLearner ... ")
         self.w_vector = w_vector
         return
 

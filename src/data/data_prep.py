@@ -22,8 +22,6 @@ import re
 import os.path
 import hashlib
 import logging
-import ConfigParser
-from ConfigParser import SafeConfigParser
 
 logger = logging.getLogger('DATAPREP')
 
@@ -40,7 +38,7 @@ class DataPrep():
         self.sc         = sparkContext
 
         if self.debug:
-            logger.debug("Preparing data for " + dataRegex)
+            logger.info("Preparing data for " + dataRegex)
 
         # Check param validity
         if (not isinstance(shardNum, int)) or int(shardNum) <= 0:
@@ -50,7 +48,7 @@ class DataPrep():
         if targetPath == "":
             raise ValueError("DATAPREP [ERROR]: targetPath not specified")
         if self.debug:
-            logger.debug("Using data from path: " + self.dataPath)
+            logger.info("Using data from path: " + self.dataPath)
         return
 
     def localPath(self):
@@ -108,12 +106,12 @@ class DataPrep():
         :param targetPath: the output directory storing the sharded data_pool
         '''
         # Process params
-        if (self.dataPath[:7] != "file://"):
+        if (not self.dataPath.startswith("file://")):
             raise ValueError("DATAPREP [ERROR]: Shouldn't use none local path for loading data locally: " + self.dataPath)
         if not os.path.isdir(self.dataPath[7:]):
             raise ValueError("DATAPREP [ERROR]: source directory do not exist")
         if self.debug:
-            logger.debug("Partitioning Data locally")
+            logger.info("Partitioning Data locally")
         if not os.path.exists(self.targetPath):
             os.makedirs(self.targetPath)
 
@@ -133,7 +131,7 @@ class DataPrep():
 
         if not os.path.exists(self.path):
             if self.debug:
-                logger.debug("Copying data to local directory: " + self.path)
+                logger.info("Copying data to local directory: " + self.path)
             os.makedirs(self.path)
 
             fid = self.shardNum - 1
@@ -164,9 +162,9 @@ class DataPrep():
             fout.close()
         else:
             if self.debug:
-                logger.debug("local directory: " + self.path + " already exists, will not proceed to copy")
+                logger.info("local directory: " + self.path + " already exists, will not proceed to copy")
         if self.debug:
-            logger.debug("Partition complete")
+            logger.info("Partition complete")
         return self.path
 
     def loadHadoop(self):
@@ -177,28 +175,30 @@ class DataPrep():
             raise RuntimeError('DATAPREP [ERROR]: SparkContext not initialised')
         tmp = self.dataPath + "*/" + self.dataRegex
         if self.debug:
-            logger.debug("Using regular expression for files: " + tmp)
+            logger.info("Using regular expression for files: " + tmp)
         aRdd = self.sc.textFile(tmp).cache()
 
         hashCode = hashlib.md5(self.dataPath + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
         if self.debug:
-            logger.debug("Uploading data to HDFS")
-            logger.debug("Uploading to target directory " + self.hdfsPath)
+            logger.info("Uploading data to HDFS")
+            logger.info("Uploading to target directory " + self.hdfsPath)
 
         aRdd.coalesce(self.shardNum, True).cache()
         aRdd.saveAsTextFile(self.hdfsPath)
         aRdd.unpersist()
         aRdd = None
         if self.debug:
-            logger.debug("Upload complete")
+            logger.info("Upload complete")
         return self.hdfsPath
 
 # Uncomment the following code for tests
 '''
 if __name__ == "__main__":
+    import ConfigParser
+    from ConfigParser import SafeConfigParser
     configFile = sys.argv[1]
-    logger.debug("Reading configurations from file: %s" % (configFile))
+    print("Reading configurations from file: %s" % (configFile))
     cf = SafeConfigParser(os.environ)
     cf.read(configFile)
 
@@ -209,5 +209,5 @@ if __name__ == "__main__":
     dataPrep = DataPrep(dataPath, dataRegex, shardNum, targetPath)
     #dataPrep.loadLocal()
     dataPrep.loadHadoop()
-    logger.debug("Test Complete")
+    print("Test Complete")
 '''

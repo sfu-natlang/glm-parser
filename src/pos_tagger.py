@@ -190,6 +190,8 @@ if __name__ == '__main__':
     # we want to the CLI parameters to override the config file
     config.update(vars(args))
 
+    yarn_mode = False
+
     # Check values of config[]
     if config['data_path'] is None:
         sys.stderr.write('data_path not specified\n')
@@ -200,6 +202,17 @@ if __name__ == '__main__':
     if (not os.path.isfile(config['format'])) and (not yarn_mode):
         sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
         sys.exit(1)
+
+    if not yarn_mode:
+        for option in [
+                'data_path',
+                'format',
+                'tagger_w_vector',
+                'tag_file']:
+            if config[option] is not None:
+                if (not config[option].startswith("file://")) and \
+                        (not config[option].startswith("hdfs://")):
+                    config[option] = 'file://' + config[option]
 
     tagger = PosTagger(tag_file=config['tag_file'])
 

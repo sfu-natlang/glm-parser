@@ -3,13 +3,13 @@ from __future__ import division
 import os
 import re
 import importlib
-import time
 import logging
 from sentence import Sentence
-from data_prep import *
-from file_io import *
+from data_prep import DataPrep
+from file_io import fileRead, fileWrite
 
 logger = logging.getLogger('DATAPOOL')
+
 
 class DataPool():
     """
@@ -225,6 +225,8 @@ class DataPool():
             self.load_stringtext(textString  = tmpStr,
                                 format_list  = self.format_list,
                                 comment_sign = self.comment_sign)
+
+        logger.info("Data loaded")
         return
 
     def get_data_list(self, file_path):

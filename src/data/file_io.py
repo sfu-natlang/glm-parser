@@ -1,6 +1,4 @@
-import logging
 import sys
-import os
 import re
 import os.path
 
@@ -48,7 +46,7 @@ def fileWriteHDFS(filePath=None, contents=None, sparkContext=None):
 def fileRead(filePath=None, sparkContext=None):
     if filePath is None:
         raise ValueError("FILEIO [ERROR]: File not specified")
-    if (filePath[:7] == "file://"):
+    if (filePath.startswith("file://")):
         try:
             contents = []
             f = open(filePath[7:])
@@ -69,7 +67,7 @@ def fileWrite(filePath=None, contents=None, sparkContext=None):
         raise ValueError("FILEIO [ERROR]: saving path not specified")
     if not isinstance(contents, list):
         raise ValueError("FILEIO [ERROR]: Contents to be saved should be a list(an array)")
-    if (filePath[:7] == "file://"):
+    if (filePath.startswith("file://")):
         try:
             f = open(filePath[7:], "w")
             for line in contents:
