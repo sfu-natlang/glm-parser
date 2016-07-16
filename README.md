@@ -114,10 +114,11 @@ Getting started on development
 
 Read the file `getting-started.md` in the `docs` directory.
 
-Before merging your branch
------------------
 
-Things to do before merging your branch to previous branch or master:
+Contributing
+------------
 
-1. Check the performance on penn-wsj-deps dataset (use linearb or other school servers).
-1. Check indentations using [tabnanny](https://pymotw.com/2/tabnanny)
+Before contributing to this project, please read `docs/development.md` which
+explains the development model we use. TL;DR, it's a somewhat simplified git
+flow model, using the regular git commit message convention, and `flake8` for
+checking your code.
