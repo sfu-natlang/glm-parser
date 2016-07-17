@@ -23,7 +23,7 @@ currentdir = os.path.dirname(os.path.abspath(gottenFile))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-logger = logging.getLogger('TAGGER')
+logger = logging.getLogger('LEARNER')
 
 
 class PosPerceptron():
@@ -45,10 +45,11 @@ class PosPerceptron():
     def avg_perc_train(self, train_data):
         logger.info("Using Average Perceptron Trainer")
         if len(self.tagset) <= 0:
-            raise valueError("TAGGER [ERRO]: Empty tagset")
+            raise valueError("LEARNER [ERRO]: Empty tagset")
         argmax = pos_viterbi.Viterbi()
         w_vec = defaultdict(float)
         u_vec = defaultdict(float)
+        data_size = len(train_data)
         last_iter = {}
         c = 0
 
@@ -57,12 +58,17 @@ class PosPerceptron():
             log_miss = 0
 
             for (word_list, pos_list, gold_out_fv) in train_data:
-                logger.info("%d sentences trained" % c)
+                logger.info("Iteration %d, Sentence %d of %d, Length %d" % (
+                    iteration,
+                    c,
+                    data_size,
+                    len(word_list) - 1))
+                c += 1
+
                 output = argmax.perc_test(w_vec,
                                           word_list,
                                           self.tagset,
                                           self.default_tag)
-                c += 1
 
                 if output != pos_list:
                     log_miss += 1

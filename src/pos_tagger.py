@@ -14,19 +14,19 @@ from data.data_pool import DataPool
 from pos import pos_decode, pos_perctrain, pos_features, pos_viterbi
 from weight.weight_vector import WeightVector
 from pos.pos_common import *
+
 import debug.debug
 import os
 import sys
 import timeit
 import time
-import ConfigParser
-import logging
+from logger.loggers import *
 import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
 __version__ = '1.0'
-
+init_logger('pos_tagger.log')
 logger = logging.getLogger('TAGGER')
 
 
@@ -90,9 +90,9 @@ class PosTagger():
                                            tag_file="file://tagset.txt",
                                            sparkContext=self.sparkContext)
 
-        logger.info("Dumping trained weight vector")
         self.w_vector = perc.avg_perc_train(train_data)
         if dump_data:
+            logger.info("Dumping trained weight vector")
             perc.dump_vector("fv", max_iter, self.w_vector)
         return self.w_vector
 
@@ -112,6 +112,7 @@ class PosTagger():
         return pos_list[2:]
 
 if __name__ == '__main__':
+    __logger = logging.getLogger('MAIN')
     # Process Defaults
     config = {
         'train':           None,

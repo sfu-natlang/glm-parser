@@ -28,6 +28,7 @@ import StringIO
 from ConfigParser import SafeConfigParser
 
 __version__ = '1.0'
+init_logger('glm_parser.log')
 logger = logging.getLogger('PARSER')
 
 
