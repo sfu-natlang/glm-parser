@@ -415,7 +415,7 @@ if __name__ == "__main__":
                  hadoop               = yarn_mode)
 
     # Run evaluation
-    if config['test'] is not None:
+    if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],

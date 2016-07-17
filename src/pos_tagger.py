@@ -215,12 +215,9 @@ if __name__ == '__main__':
                         (not config[option].startswith("hdfs://")):
                     config[option] = 'file://' + config[option]
 
-    tagger = PosTagger(tag_file=config['tag_file'])
+    tagger = PosTagger(weightVectorLoadPath=config['tagger_w_vector'], tag_file=config['tag_file'])
 
-    if config['tagger_w_vector'] is not None:
-        tagger.load_w_vec(config['tagger_w_vector'])
-
-    if config['train'] is not None:
+    if config['train']:
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
                                  format_path   = config['format'])
@@ -233,7 +230,7 @@ if __name__ == '__main__':
         training_time = end_time - start_time
         logger.info("Total Training Time: ", training_time)
 
-    if config['test'] is not None:
+    if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 format_path   = config['format'])

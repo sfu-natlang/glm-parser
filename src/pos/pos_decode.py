@@ -28,7 +28,7 @@ class Decoder():
         for i in range(len(result_list)):
             if result_list[i] == gold_list[i]:
                 correct_num += 1
-        return correct_num, gold_size
+        return correct_num, len(gold_list)
 
     def get_accuracy(self, w_vec):
         argmax = pos_viterbi.Viterbi()
