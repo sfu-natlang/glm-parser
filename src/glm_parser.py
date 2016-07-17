@@ -115,17 +115,22 @@ class GlmParser():
         logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
         return
 
-    def evaluate(self, dataPool=None, tagger=None):
+    def evaluate(self, dataPool=None, tagger=None, sc=None, hadoop=None):
         logger.info("Starting evaluation process")
         start_time = time.time()
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for evaluation is not an DataPool object")
-        self.evaluator.evaluate(dataPool, self.parser, self.w_vector, tagger)
+        self.evaluator.evaluate(data_pool = dataPool,
+                                parser    = self.parser,
+                                w_vector  = self.w_vector,
+                                tagger    = tagger,
+                                sc        = sc,
+                                hadoop    = hadoop)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
 if __name__ == "__main__":
-    logger = logging.getLogger('MAIN')
+    __logger = logging.getLogger('MAIN')
     # Default values
     config = {
         'train':             None,
@@ -288,10 +293,10 @@ if __name__ == "__main__":
             sys.stderr.write("Illegal integer: %s\n" % debug.debug.run_first_num)
             sys.exit(1)
         else:
-            logger.info("Debug run number = %d" % (debug.debug.run_first_num, ))
+            __logger.info("Debug run number = %d" % (debug.debug.run_first_num, ))
     if args.log_feature_request:
         debug.debug.log_feature_request_flag = True
-        logger.info("Enable feature request log")
+        __logger.info("Enable feature request log")
     if args.timing:
         debug.debug.time_accounting_flag = True
 
@@ -303,7 +308,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # Initialise the config parser
-        logger.info("Reading configurations from file: %s" % (args.config))
+        __logger.info("Reading configurations from file: %s" % (args.config))
         config_parser = SafeConfigParser(os.environ)
 
         # Read contents of config file
@@ -340,7 +345,7 @@ if __name__ == "__main__":
         try:
             config['data_path'] = cf.get('data', 'data_path')
         except:
-            logger.info("WARNING: Encountered exception while attempting to read" +
+            __logger.warn("WARNING: Encountered exception while attempting to read" +
                         "data_path from config file. It could be caused by the" +
                         "environment variable settings, which is not supported when" +
                         "running in yarn mode")
@@ -378,14 +383,14 @@ if __name__ == "__main__":
 
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
-        logger.info("Using Tagger weight vector: " + config['tagger_w_vector'])
+        __logger.info("Using Tagger weight vector: " + config['tagger_w_vector'])
         if config['tag_file'] is None:
             sys.stderr.write("The tag_file has not been specified")
             sys.exit(1)
         tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
                            tag_file             = config['tag_file'],
                            sparkContext         = sparkContext)
-        logger.info("Tagger weight vector loaded")
+        __logger.info("Tagger weight vector loaded")
     else:
         tagger = None
 
@@ -418,7 +423,9 @@ if __name__ == "__main__":
                                 hadoop        = yarn_mode)
 
         gp.evaluate(dataPool = testDataPool,
-                    tagger   = tagger)
+                    tagger   = tagger,
+                    sc       = sparkContext,
+                    hadoop   = yarn_mode)
 
     # Finalising, shutting down spark
     if spark_mode:

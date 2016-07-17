@@ -38,15 +38,18 @@ class Evaluator():
 
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, w_vector, tagger=None):
+    def evaluate(self, data_pool, parser, w_vector, tagger=None, sc=None, hadoop=None):
         logger.debug("Start evaluating ...")
         sentence_count = 1
+        data_size = len(data_pool.data_list)
         while data_pool.has_next_data():
             sent = data_pool.get_next_data()
 
-            logger.info("Sentence %d, Length %d" % (
-                sentence_count,
-                len(sent.get_word_list()) - 1))
+            if hadoop is None:
+                logger.info("Sentence %d of %d, Length %d" % (
+                    sentence_count,
+                    data_size,
+                    len(sent.get_word_list()) - 1))
             sentence_count += 1
 
             logger.debug("data instance: ")

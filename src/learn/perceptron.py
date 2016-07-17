@@ -27,11 +27,10 @@ class Learner():
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
             max_iter = self.max_iter
-
+        data_size = len(data_pool.data_list)
         logger.debug("Starting sequantial train...")
         for t in range(max_iter):
-            logger.debug("Iteration: %d" % t)
-            logger.debug("Data size: %d" % len(data_pool.data_list))
+            logger.debug("Iteration %d" % t)
             sentence_count = 1
 
             while data_pool.has_next_data():
@@ -39,9 +38,10 @@ class Learner():
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
 
-                logger.info("Iteration: %d, Sentence %d, Length %d" % (
+                logger.info("Iteration %d, Sentence %d of %d, Length %d" % (
                     t,
                     sentence_count,
+                    data_size,
                     len(data_instance.get_word_list()) - 1))
                 sentence_count += 1
 
@@ -75,7 +75,7 @@ class Learner():
         return
 
     def parallel_learn(self, dp, fv, f_argmax):
-        w_vector = weight_vector.WeightVector()
+        w_vector = WeightVector()
         for key in fv.keys():
             w_vector[key] = fv[key]
         while dp.has_next_data():
