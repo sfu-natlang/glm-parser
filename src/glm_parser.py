@@ -28,7 +28,8 @@ import StringIO
 from ConfigParser import SafeConfigParser
 
 __version__ = '1.0'
-init_logger('glm_parser.log')
+if __name__ == "__main__":
+    init_logger('glm_parser.log')
 logger = logging.getLogger('PARSER')
 
 
@@ -346,7 +347,7 @@ if __name__ == "__main__":
         try:
             config['data_path'] = cf.get('data', 'data_path')
         except:
-            __logger.warn("WARNING: Encountered exception while attempting to read" +
+            __logger.warn("Encountered exception while attempting to read" +
                         "data_path from config file. It could be caused by the" +
                         "environment variable settings, which is not supported when" +
                         "running in yarn mode")

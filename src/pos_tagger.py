@@ -26,7 +26,8 @@ from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
 __version__ = '1.0'
-init_logger('pos_tagger.log')
+if __name__ == '__main__':
+    init_logger('pos_tagger.log')
 logger = logging.getLogger('TAGGER')
 
 
@@ -170,7 +171,7 @@ if __name__ == '__main__':
     #   configuration files are stored under src/format/
     #   configuration files: *.format
     if args.config:
-        logger.info("Reading configurations from file: " + args.config)
+        __logger.info("Reading configurations from file: " + args.config)
         cf = SafeConfigParser(os.environ)
         cf.read(args.config)
 
@@ -222,13 +223,13 @@ if __name__ == '__main__':
                                  data_path     = config['data_path'],
                                  format_path   = config['format'])
 
-        logger.info("Training Starts, Timer is on")
+        __logger.info("Training Starts, Timer is on")
         start_time = time.time()
         tagger.perc_train(dataPool = trainDataPool,
                           max_iter = config['iterations'])
         end_time = time.time()
         training_time = end_time - start_time
-        logger.info("Total Training Time: ", training_time)
+        __logger.info("Total Training Time: ", training_time)
 
     if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
