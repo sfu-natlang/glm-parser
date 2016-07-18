@@ -45,7 +45,7 @@ class Evaluator():
         while data_pool.has_next_data():
             sent = data_pool.get_next_data()
 
-            if hadoop is None:
+            if not hadoop:
                 logger.info("Sentence %d of %d, Length %d" % (
                     sentence_count,
                     data_size,

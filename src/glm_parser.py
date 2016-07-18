@@ -347,10 +347,10 @@ if __name__ == "__main__":
         try:
             config['data_path'] = cf.get('data', 'data_path')
         except:
-            __logger.warn("Encountered exception while attempting to read" +
-                        "data_path from config file. It could be caused by the" +
-                        "environment variable settings, which is not supported when" +
-                        "running in yarn mode")
+            __logger.warn("Encountered exception while attempting to read " +
+                          "data_path from config file. It could be caused by the " +
+                          "environment variable settings, which is not supported " +
+                          "when running in yarn mode")
 
     # we do this here because we want the defaults to include our config file
     arg_parser.set_defaults(**config)
