@@ -229,7 +229,7 @@ if __name__ == '__main__':
                           max_iter = config['iterations'])
         end_time = time.time()
         training_time = end_time - start_time
-        __logger.info("Total Training Time: ", training_time)
+        __logger.info("Total Training Time: %f" % training_time)
 
     if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
