@@ -11,7 +11,7 @@ currentdir = os.path.dirname(os.path.abspath(gottenFile))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-logger = logging.getLogger('TAGGER')
+logger = logging.getLogger('EVALUATOR')
 
 
 class Decoder():
