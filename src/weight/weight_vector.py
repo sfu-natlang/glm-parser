@@ -10,14 +10,10 @@
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
 from ast import literal_eval
-from data.file_io import *
-
+from data.file_io import fileRead, fileWrite
 import logging
 
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+logger = logging.getLogger('WEIGHTVECTOR')
 
 
 class WeightVector(mydefaultdict):
@@ -69,8 +65,7 @@ class WeightVector(mydefaultdict):
 
         Parameter is the same as constructor (__init__).
         """
-        logging.debug("Loading Weight Vector from %s " % filename)
-        print "Loading Weight Vector from %s " % filename
+        logger.info("Loading Weight Vector from %s " % filename)
 
         f = fileRead(filename, sparkContext)
 
@@ -84,13 +79,11 @@ class WeightVector(mydefaultdict):
         into a disk file using Pickle
         """
         if filename is None:
-            print "Skipping dump ..."
+            logger.info("Skipping dump ...")
             return
-
-        logging.debug("Dumping Weight Vector to %s " % filename)
-        logging.debug("Total Feature Num: %d " % len(self))
-
         f = []
         for k, v in self.iteritems():
             f.append(str(k) + "    " + str(v))
-        fileWrite(filename, f, sparkContext)
+
+        logger.info("Dumping Weight Vector to %s " % fileWrite(filename, f, sparkContext))
+        logger.info("Total Feature Num: %d " % len(self))

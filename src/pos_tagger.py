@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #
 # Part of Speech Tagger
 # Simon Fraser University
@@ -14,19 +13,22 @@
 from data.data_pool import DataPool
 from pos import pos_decode, pos_perctrain, pos_features, pos_viterbi
 from weight.weight_vector import WeightVector
-from pos.pos_common import *
+from pos.pos_common import read_tagset
+from logger.loggers import logging, init_logger
+
 import debug.debug
 import os
 import sys
 import timeit
 import time
-import ConfigParser
-
 import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
 __version__ = '1.0'
+if __name__ == '__main__':
+    init_logger('pos_tagger.log')
+logger = logging.getLogger('TAGGER')
 
 
 class PosTagger():
@@ -35,7 +37,7 @@ class PosTagger():
                  tag_file             = "file://tagset.txt",
                  sparkContext         = None):
 
-        print "TAGGER [INFO]: Tag File selected: %s" % tag_file
+        logger.info("Tag File selected: %s" % tag_file)
         self.tagset = read_tagset(tag_file, sparkContext)
         self.default_tag = "NN"
         self.sparkContext = sparkContext
@@ -70,7 +72,7 @@ class PosTagger():
 
             data_list.append((word_list, pos_list, gold_out_fv))
 
-        print "TAGGER [INFO]: Sentence Number: %d" % sentence_count
+        logger.info("Sentence Number: %d" % sentence_count)
         return data_list
 
     def perc_train(self,
@@ -78,30 +80,30 @@ class PosTagger():
                    max_iter=1,
                    dump_data=True):
 
-        print "TAGGER [INFO]: Loading Training Data"
+        logger.info("Loading Training Data")
         if dataPool is None:
-            sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
+            logger.error('Training DataPool not specified\n')
             sys.exit(1)
         train_data = self.load_data(dataPool)
 
-        print "TAGGER [INFO]: Training with Iterations: %d" % max_iter
+        logger.info("Training with Iterations: %d" % max_iter)
         perc = pos_perctrain.PosPerceptron(max_iter=max_iter,
                                            default_tag="NN",
                                            tag_file="file://tagset.txt",
                                            sparkContext=self.sparkContext)
 
-        print "TAGGER [INFO]: Dumping trained weight vector"
         self.w_vector = perc.avg_perc_train(train_data)
         if dump_data:
+            logger.info("Dumping trained weight vector")
             perc.dump_vector("fv", max_iter, self.w_vector)
         return self.w_vector
 
     def evaluate(self, dataPool=None):
         if dataPool is None:
-            sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
+            logger.error('Training DataPool not specified\n')
             sys.exit(1)
 
-        print "TAGGER [INFO]: Loading Testing Data"
+        logger.info("Loading Testing Data")
         test_data = self.load_data(dataPool)
         tester = pos_decode.Decoder(test_data)
         acc = tester.get_accuracy(self.w_vector)
@@ -112,6 +114,7 @@ class PosTagger():
         return pos_list[2:]
 
 if __name__ == '__main__':
+    __logger = logging.getLogger('MAIN')
     # Process Defaults
     config = {
         'train':           None,
@@ -169,7 +172,7 @@ if __name__ == '__main__':
     #   configuration files are stored under src/format/
     #   configuration files: *.format
     if args.config:
-        print "TAGGER [INFO]: Reading configurations from file: " + args.config
+        __logger.info("Reading configurations from file: " + args.config)
         cf = SafeConfigParser(os.environ)
         cf.read(args.config)
 
@@ -190,36 +193,46 @@ if __name__ == '__main__':
     # we want to the CLI parameters to override the config file
     config.update(vars(args))
 
+    yarn_mode = False
+
     # Check values of config[]
     if config['data_path'] is None:
-        sys.stderr.write('data_path not specified\n')
+        __logger.error('data_path not specified\n')
         sys.exit(1)
     if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
+        __logger.error("The data_path directory doesn't exist: %s\n" % config['data_path'])
         sys.exit(1)
     if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
+        __logger.error("The format file doesn't exist: %s\n" % config['format'])
         sys.exit(1)
 
-    tagger = PosTagger(tag_file=config['tag_file'])
+    if not yarn_mode:
+        for option in [
+                'data_path',
+                'format',
+                'tagger_w_vector',
+                'tag_file']:
+            if config[option] is not None:
+                if (not config[option].startswith("file://")) and \
+                        (not config[option].startswith("hdfs://")):
+                    config[option] = 'file://' + config[option]
 
-    if config['tagger_w_vector'] is not None:
-        tagger.load_w_vec(config['tagger_w_vector'])
+    tagger = PosTagger(weightVectorLoadPath=config['tagger_w_vector'], tag_file=config['tag_file'])
 
-    if config['train'] is not None:
+    if config['train']:
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
                                  format_path   = config['format'])
 
-        print "TAGGER [INFO]: Training Starts, Timer is on"
+        __logger.info("Training Starts, Timer is on")
         start_time = time.time()
         tagger.perc_train(dataPool = trainDataPool,
                           max_iter = config['iterations'])
         end_time = time.time()
         training_time = end_time - start_time
-        print "TAGGER [INFO]: Total Training Time: ", training_time
+        __logger.info("Total Training Time: ", training_time)
 
-    if config['test'] is not None:
+    if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 format_path   = config['format'])

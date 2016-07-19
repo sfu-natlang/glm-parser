@@ -3,16 +3,12 @@ from __future__ import division
 import os
 import re
 import importlib
-from sentence import Sentence
 import logging
-from data_prep import *
-from file_io import *
+from sentence import Sentence
+from data_prep import DataPrep
+from file_io import fileRead, fileWrite
 
-
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+logger = logging.getLogger('DATAPOOL')
 
 
 class DataPool():
@@ -63,7 +59,6 @@ class DataPool():
         """
         if isinstance(fgen, basestring):
             self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
-            print("DATAPOOL [INFO]: Using feature generator: %s " % (fgen))
         else:
             self.fgen = fgen
         self.hadoop   = hadoop
@@ -79,7 +74,7 @@ class DataPool():
             self.data_path     = data_path
             self.section_regex = section_regex
             self.prep_path     = prep_path
-            self.dataPrep      = DataPrep(dataPath     = self.data_path,
+            self.dataPrep      = DataPrep(dataURI      = self.data_path,
                                           dataRegex    = self.section_regex,
                                           shardNum     = self.shardNum,
                                           targetPath   = self.prep_path,
@@ -169,7 +164,7 @@ class DataPool():
             self.current_index += 1
             # Logging how many entries we have supplied
             if self.current_index % 1000 == 0:
-                logging.debug("Data finishing %.2f%% ..." %
+                logger.debug("Data finishing %.2f%% ..." %
                              (100 * self.current_index / len(self.data_list), ))
 
             return self.data_list[self.current_index]
@@ -184,11 +179,10 @@ class DataPool():
         This method should be called after section regex has been initalized
         and before any get_data method is called.
         """
-        logging.debug("Loading data...")
-        print("DATAPOOL [INFO]: Loading data...")
+        logger.info("Loading data...")
 
         # Load format file
-        print("DATAPOOL [INFO]: Loading dataFormat from: " + formatPath)
+        logger.info("Loading dataFormat from: " + formatPath)
         fformat = fileRead(formatPath, sparkContext=sparkContext)
 
         self.format_list = []
@@ -231,6 +225,8 @@ class DataPool():
             self.load_stringtext(textString  = tmpStr,
                                 format_list  = self.format_list,
                                 comment_sign = self.comment_sign)
+
+        logger.info("Data loaded")
         return
 
     def get_data_list(self, file_path):

@@ -1,4 +1,3 @@
-import logging
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
 from weight import weight_vector
@@ -12,11 +11,7 @@ import re
 import importlib
 from os.path import isfile, join, isdir
 from pyspark import SparkContext
-
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+from learn import logger
 
 
 class ParallelPerceptronLearner():
@@ -29,7 +24,7 @@ class ParallelPerceptronLearner():
          Could be overridden by parameter max_iter in the method
         :return: None
         """
-        logging.debug("Initialize ParallelPerceptronLearner ... ")
+        logger.debug("Initialize ParallelPerceptronLearner ... ")
         self.w_vector = w_vector
         return
 
@@ -72,7 +67,6 @@ class ParallelPerceptronLearner():
             train_files = sc.wholeTextFiles(dir_name, minPartitions=10).cache()
         else:
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
-            print dir_name
             train_files = sc.wholeTextFiles("file://" + dir_name, minPartitions=10).cache()
 
         dp = train_files.map(lambda t: create_dp(textString   = t,
@@ -81,12 +75,12 @@ class ParallelPerceptronLearner():
                                                  comment_sign = comment_sign)).cache()
 
         if learner.name == "AveragePerceptronLearner":
-            print "[INFO]: Using Averaged Perceptron Learner"
+            logger.info("Using Averaged Perceptron Learner")
             fv = {}
             total_sent = dp.map(get_sent_num).sum()
             c = total_sent * max_iter
             for iteration in range(max_iter):
-                print "[INFO]: Starting Iteration %d" % iteration
+                logger.info("Starting Iteration %d" % iteration)
                 # mapper: computer the weight vector in each shard using parallel_learn
                 feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(dp=t,
                                                                             fv=fv,
@@ -100,18 +94,18 @@ class ParallelPerceptronLearner():
                 fv = {}
                 for (feat, (a, b, c)) in feat_vec_list:
                     fv[feat] = (float(a) / float(c), b)
-                print "[INFO]: Iteration complete, total number of keys: %d" % len(fv.keys())
+                logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
 
             self.w_vector.clear()
             for feat in fv.keys():
                 self.w_vector[feat] = fv[feat][1] / c
 
         if learner.name == "PerceptronLearner":
-            print "[INFO]: Using Perceptron Learner"
+            logger.info("Using Perceptron Learner")
             fv = {}
             for iteration in range(max_iter):
-                print "[INFO]: Starting Iteration %d" % iteration
-                print "[INFO]: Initial Number of Keys: %d" % len(fv.keys())
+                logger.info("Starting Iteration %d" % iteration)
+                logger.info("Initial Number of Keys: %d" % len(fv.keys()))
                 # mapper: computer the weight vector in each shard using parallel_learn
                 feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(dp=t,
                                                                             fv=fv,
@@ -125,19 +119,19 @@ class ParallelPerceptronLearner():
                 fv = {}
                 for (feat, (a, b)) in feat_vec_list:
                     fv[feat] = float(a) / float(b)
-                print "[INFO]: Iteration complete"
+                logger.info("Iteration complete")
             self.w_vector.clear()
             self.w_vector.iadd(fv)
 
         if d_filename is not None:
             if hadoop is False:
-                print ("[INFO]: Dumping trained weight vector to local directory: " +
+                logger.info("Dumping trained weight vector to local directory: " +
                        os.path.abspath(os.path.expanduser(d_filename)))
                 self.w_vector.dump(os.path.abspath(os.path.expanduser(d_filename)) + "_Iter_%d.db" % max_iter)
             else:
-                print ("[INFO]: Dumping trained weight vector to HDFS")
+                logger.info("Dumping trained weight vector to HDFS")
                 contents = []
                 for k, v in w_vector.iteritems():
                     contents.append(str(k) + "    " + str(v) + "\n")
-                print ("[INFO]: Dumping to: " + fileWrite(d_filename + "_Iter_%d.db" % max_iter, contents, sc))
+                logger.info("Dumping to: " + fileWrite(d_filename + "_Iter_%d.db" % max_iter, contents, sc))
         return self.w_vector

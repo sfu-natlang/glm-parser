@@ -2,10 +2,7 @@ from __future__ import division
 from pos_tagger import PosTagger
 import logging
 
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+logger = logging.getLogger('EVALUATOR')
 
 
 class Evaluator():
@@ -28,28 +25,34 @@ class Evaluator():
         correct_num = len(intersect_set)
         gold_set_size = len(gold_edge_set)
 
-        logging.debug("result edge set: ")
-        logging.debug(result_edge_set)
-        logging.debug("gold edge set: ")
-        logging.debug(gold_edge_set)
-        logging.debug("##############")
+        logger.debug("result edge set: ")
+        logger.debug(result_edge_set)
+        logger.debug("gold edge set: ")
+        logger.debug(gold_edge_set)
+        logger.debug("##############")
 
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, w_vector, tagger=None):
+    def evaluate(self, data_pool, parser, w_vector, tagger=None, sc=None, hadoop=None):
         self.unlabeled_correct_num = 0
         self.unlabeled_gold_set_size = 0
 
         logging.debug("Start evaluating ...")
         sentence_count = 1
+        data_size = len(data_pool.data_list)
         while data_pool.has_next_data():
-            # print "Processing Sentence " + str(sentence_count)
-            sentence_count += 1
             sent = data_pool.get_next_data()
 
-            logging.debug("data instance: ")
-            logging.debug(sent.get_word_list())
-            logging.debug(sent.get_edge_list())
+            if not hadoop:
+                logger.info("Sentence %d of %d, Length %d" % (
+                    sentence_count,
+                    data_size,
+                    len(sent.get_word_list()) - 1))
+            sentence_count += 1
+
+            logger.debug("data instance: ")
+            logger.debug(sent.get_word_list())
+            logger.debug(sent.get_edge_list())
 
             gold_edge_set = \
                 set([(head_index, dep_index) for head_index, dep_index, _ in sent.get_edge_list()])
@@ -61,12 +64,10 @@ class Evaluator():
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
         data_pool.reset_index()
 
-        logging.info("Feature count: %d" % len(w_vector.keys()))
-        logging.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
-        print "Unlabeled accuracy: %.12f" % self.get_acc_unlabeled_accuracy()
+        logger.info("Feature count: %d" % len(w_vector.keys()))
+        logger.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
         self.unlabeled_attachment_accuracy(data_pool.get_sent_num())
-        logging.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
-        print "Unlabeled attachment accuracy: %.12f" % self.get_acc_unlabeled_accuracy()
+        logger.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
     def unlabeled_accuracy(self, result_edge_set, gold_edge_set, accumulate=False):
         """
@@ -92,7 +93,7 @@ class Evaluator():
         if accumulate is True:
             self.unlabeled_correct_num += correct_num
             self.unlabeled_gold_set_size += gold_set_size
-            logging.debug("Correct_num: %d, Gold set size: %d, Unlabeled correct: %d, Unlabeled gold set size: %d" % (correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size))
+            logger.debug("Correct_num: %d, Gold set size: %d, Unlabeled correct: %d, Unlabeled gold set size: %d" % (correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size))
 
         # WARNING: this function returns a value but the caller does not use it!
         return correct_num / gold_set_size

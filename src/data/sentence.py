@@ -9,6 +9,7 @@
 import os
 import sys
 import inspect
+import logging
 
 import copy
 from feature.feature_vector import FeatureVector
@@ -16,6 +17,9 @@ from feature.feature_vector import FeatureVector
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
+
+logger = logging.getLogger('SENTENCE')
+
 
 """
 Some basic comcepts are depicted here:
@@ -133,12 +137,12 @@ class Sentence():
         else:
             # add ROOT to FORM and POSTAG
             edge_list = self.construct_edge_set()
-            if "FORM" in self.column_list.keys():
+            if "FORM" in self.column_list:
                 self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
             else:
                 sys.exit("'FORM' is needed in Sentence but it's not in format file")
 
-            if "POSTAG" in self.column_list.keys():
+            if "POSTAG" in self.column_list:
                 self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
             else:
                 sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
@@ -179,9 +183,9 @@ class Sentence():
         in self.field_name_list, and returns edge_set dict
         """
 
-        if "HEAD" not in self.column_list.keys():
+        if "HEAD" not in self.column_list:
             sys.exit("'HEAD' is needed in Sentence but it's not in format file")
-        if "DEPREL" not in self.column_list.keys():
+        if "DEPREL" not in self.column_list:
             sys.exit("'DEPREL' is needed in Sentence but it's not in format file")
 
         self.column_list["edge_set"] = {}
@@ -209,7 +213,7 @@ class Sentence():
         :type field_name: str
         """
 
-        if field_name in self.column_list.keys():
+        if field_name in self.column_list:
             return self.column_list[field_name]
         else:
             sys.exit("'" + field_name + "' is needed in Sentence but it's not in format file")

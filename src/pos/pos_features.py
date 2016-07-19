@@ -1,6 +1,8 @@
-
 import string
 import copy
+import logging
+
+logger = logging.getLogger('TAGGER')
 
 
 class Pos_feat_gen():

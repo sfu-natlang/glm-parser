@@ -16,6 +16,8 @@ src/parse/ceisner.cpp
 src/parse/ceisner3.cpp
 src/*.db
 
+scripts/tests/*
+
 src/postag/*.db
 src/postag/*.log
 chunker/*.model
@@ -26,4 +28,5 @@ src/*.egg
 src/data/prep
 
 *.swp
-
+*.bak
+*~
