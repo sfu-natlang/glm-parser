@@ -13,14 +13,14 @@
 from data.data_pool import DataPool
 from pos import pos_decode, pos_perctrain, pos_features, pos_viterbi
 from weight.weight_vector import WeightVector
-from pos.pos_common import *
+from pos.pos_common import read_tagset
+from logger.loggers import logging, init_logger
 
 import debug.debug
 import os
 import sys
 import timeit
 import time
-from logger.loggers import *
 import argparse
 from ConfigParser import SafeConfigParser
 from collections import defaultdict
@@ -81,7 +81,7 @@ class PosTagger():
 
         logger.info("Loading Training Data")
         if dataPool is None:
-            sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
+            logger.error('Training DataPool not specified\n')
             sys.exit(1)
         train_data = self.load_data(dataPool)
 
@@ -99,7 +99,7 @@ class PosTagger():
 
     def evaluate(self, dataPool=None):
         if dataPool is None:
-            sys.stderr.write('TAGGER [ERROR]: Training DataPool not specified\n')
+            logger.error('Training DataPool not specified\n')
             sys.exit(1)
 
         logger.info("Loading Testing Data")
@@ -196,13 +196,13 @@ if __name__ == '__main__':
 
     # Check values of config[]
     if config['data_path'] is None:
-        sys.stderr.write('data_path not specified\n')
+        __logger.error('data_path not specified\n')
         sys.exit(1)
     if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
+        __logger.error("The data_path directory doesn't exist: %s\n" % config['data_path'])
         sys.exit(1)
     if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
+        __logger.error("The format file doesn't exist: %s\n" % config['format'])
         sys.exit(1)
 
     if not yarn_mode:

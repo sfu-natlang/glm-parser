@@ -4,7 +4,7 @@ import inspect
 import time
 import pos_viterbi
 import logging
-from pos_common import *
+from pos_common import read_tagset
 
 gottenFile = inspect.getfile(inspect.currentframe())
 currentdir = os.path.dirname(os.path.abspath(gottenFile))

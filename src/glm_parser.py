@@ -15,6 +15,7 @@ from data.data_pool import DataPool
 from evaluate.evaluator import Evaluator
 from weight.weight_vector import WeightVector
 from pos_tagger import PosTagger
+from logger.loggers import logging, init_logger
 
 import time
 import os
@@ -22,7 +23,6 @@ import sys
 import importlib
 import functools
 from functools import partial
-from logger.loggers import *
 import argparse
 import StringIO
 from ConfigParser import SafeConfigParser
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     if args.max_sentences:
         debug.debug.run_first_num = int(args.max_sentences)
         if debug.debug.run_first_num <= 0:
-            sys.stderr.write("Illegal integer: %s\n" % debug.debug.run_first_num)
+            __logger.error("Illegal integer: %s\n" % debug.debug.run_first_num)
             sys.exit(1)
         else:
             __logger.info("Debug run number = %d" % (debug.debug.run_first_num, ))
@@ -306,7 +306,7 @@ if __name__ == "__main__":
     if args.config:
         # Check local config path
         if (not os.path.isfile(args.config)) and (not yarn_mode):
-            sys.stderr.write("The config file doesn't exist: %s\n" % args.config)
+            __logger.error("The config file doesn't exist: %s\n" % args.config)
             sys.exit(1)
 
         # Initialise the config parser
@@ -387,7 +387,7 @@ if __name__ == "__main__":
     if config['tagger_w_vector'] is not None:
         __logger.info("Using Tagger weight vector: " + config['tagger_w_vector'])
         if config['tag_file'] is None:
-            sys.stderr.write("The tag_file has not been specified")
+            __logger.error("The tag_file has not been specified")
             sys.exit(1)
         tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
                            tag_file             = config['tag_file'],
