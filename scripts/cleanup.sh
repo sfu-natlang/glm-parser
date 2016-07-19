@@ -22,6 +22,7 @@ rm -r ../src/build
 rm -r ../src/hvector/build
 
 rm -f ../src/*/*.pyc
+rm -f ../src/*.pyc
 rm -f ../src/*.pyv
 rm -f ../src/hvector/*.egg-info
 rm -f ../src/*/*.so

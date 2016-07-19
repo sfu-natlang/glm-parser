@@ -1,8 +1,6 @@
 from __future__ import division
 from pos_tagger import PosTagger
-import logging
-
-logger = logging.getLogger('EVALUATOR')
+from evaluate import logger
 
 
 class Evaluator():
