@@ -74,7 +74,7 @@ class DataPool():
             self.data_path     = data_path
             self.section_regex = section_regex
             self.prep_path     = prep_path
-            self.dataPrep      = DataPrep(dataPath     = self.data_path,
+            self.dataPrep      = DataPrep(dataURI      = self.data_path,
                                           dataRegex    = self.section_regex,
                                           shardNum     = self.shardNum,
                                           targetPath   = self.prep_path,
