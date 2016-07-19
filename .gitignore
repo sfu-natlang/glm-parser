@@ -28,6 +28,5 @@ src/*.egg
 src/data/prep
 
 *.swp
-
-
 *.bak
+*~
