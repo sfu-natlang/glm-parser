@@ -29,11 +29,11 @@ class Evaluator():
                 raise ValueError("""
                 TAGGER [ERRO]: Tag results do not align with gold results
                 """)
-            self.correct_num = 0
+            correct_num = 0
             for i in range(len(result_list)):
                 if result_list[i] == gold_list[i]:
-                    self.correct_num += 1
-            return self.correct_num, len(gold_list)
+                    correct_num += 1
+            return correct_num, len(gold_list)
 
         argmax = pos_viterbi.Viterbi()
 
@@ -63,5 +63,5 @@ class Evaluator():
 
         acc = float(self.correct_num) / self.gold_set_size
         logger.info("Feature count: %d" % len(w_vector.keys()))
-        logger.info("Total Accraccy: %.12f (%d, %d)" % acc, self.correct_num, self.gold_set_size)
+        logger.info("Total Accraccy: %.12f (%d, %d)" % (acc, self.correct_num, self.gold_set_size))
         return acc
