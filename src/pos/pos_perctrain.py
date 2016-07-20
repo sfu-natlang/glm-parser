@@ -42,14 +42,14 @@ class PosPerceptron():
         self.tagset = pos_common.read_tagset(tag_file, self.sparkContext)
         logger.debug("Trainer Loaded")
 
-    def avg_perc_train(self, train_data):
+    def sequential_learn(self, data_pool):
         logger.info("Using Average Perceptron Trainer")
         if len(self.tagset) <= 0:
             raise valueError("LEARNER [ERRO]: Empty tagset")
         argmax = pos_viterbi.Viterbi()
         w_vec = defaultdict(float)
         u_vec = defaultdict(float)
-        data_size = len(train_data)
+        data_size = len(data_pool.data_list)
         last_iter = {}
         c = 0
 
@@ -57,7 +57,16 @@ class PosPerceptron():
             logger.info("Starting Iteration %d" % iteration)
             log_miss = 0
 
-            for (word_list, pos_list, gold_out_fv) in train_data:
+            while data_pool.has_next_data():
+                sentence = data_pool.get_next_data()
+
+                word_list = sentence.get_word_list()
+                pos_list = sentence.column_list["POSTAG"]
+                pos_feat = pos_features.Pos_feat_gen(word_list)
+
+                gold_vector = defaultdict(int)
+                pos_feat.get_sent_feature(gold_vector, pos_list)
+
                 logger.info("Iteration %d, Sentence %d of %d, Length %d" % (
                     iteration,
                     c,
@@ -65,10 +74,10 @@ class PosPerceptron():
                     len(word_list) - 1))
                 c += 1
 
-                output = argmax.perc_test(w_vec,
-                                          word_list,
-                                          self.tagset,
-                                          self.default_tag)
+                output = argmax.tag(sentence    = sentence,
+                                    w_vector    = w_vec,
+                                    tagset      = self.tagset,
+                                    default_tag = self.default_tag)
 
                 if output != pos_list:
                     log_miss += 1
@@ -78,12 +87,11 @@ class PosPerceptron():
                     w_delta = defaultdict(int)
 
                     # Get a
-                    pos_feat = pos_features.Pos_feat_gen(word_list)
                     pos_feat.get_sent_feature(a, output)
 
                     # Get Delta
-                    for i in gold_out_fv:
-                        w_delta[i] += gold_out_fv[i]
+                    for i in gold_vector:
+                        w_delta[i] += gold_vector[i]
                     for i in a:
                         w_delta[i] -= a[i]
 
@@ -101,6 +109,8 @@ class PosPerceptron():
                             last_iter[i] = c
 
             logger.info("Iteration completed, number of mistakes:", log_miss)
+            data_pool.reset_index()
+
         logger.debug("Finalising")
         for i in w_vec:
             if i in last_iter:

@@ -111,6 +111,8 @@ class Sentence():
     def load_fgen(self, fgen=None):
         if fgen is None:
             raise ValueError("FGEN [ERROR]: Feature Generator for loading not specified")
+        if inspect.isclass(fgen):
+            fgen = fgen()
         if self.fgen is not None:
             if self.fgen.name == "POSTaggerFeatureGenerator":
                 del self.column_list["FORM"][0]
@@ -140,21 +142,21 @@ class Sentence():
             if "FORM" in self.column_list:
                 self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
             else:
-                sys.exit("'FORM' is needed in Sentence but it's not in format file")
+                raise RuntimeError("'FORM' is needed in Sentence but it's not in format file")
 
             if "POSTAG" in self.column_list:
                 self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
             else:
-                sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
+                raise RuntimeError("'POSTAG' is needed in Sentence but it's not in format file")
 
-            # This will store the dict, dict.keys() and len(dict.keys())
+            # This will store the dict, len(dict)
             # into the instance
             self.set_edge_list(edge_list)
 
         # Each sentence instance has a exclusive fgen instance
         # we could store some data inside fgen instance, such as cache
         # THIS MUST BE PUT AFTER set_edge_list()
-        self.fgen = fgen()
+        self.fgen = fgen
         rsc_list = []
         for field_name in self.fgen.care_list:
             rsc_list.append(self.fetch_column(field_name))
@@ -184,9 +186,9 @@ class Sentence():
         """
 
         if "HEAD" not in self.column_list:
-            sys.exit("'HEAD' is needed in Sentence but it's not in format file")
+            raise RuntimeError("'HEAD' is needed in Sentence but it's not in format file")
         if "DEPREL" not in self.column_list:
-            sys.exit("'DEPREL' is needed in Sentence but it's not in format file")
+            raise RuntimeError("'DEPREL' is needed in Sentence but it's not in format file")
 
         self.column_list["edge_set"] = {}
 
@@ -216,7 +218,7 @@ class Sentence():
         if field_name in self.column_list:
             return self.column_list[field_name]
         else:
-            sys.exit("'" + field_name + "' is needed in Sentence but it's not in format file")
+            raise RuntimeError("'" + field_name + "' is needed in Sentence but it's not in format file")
 
     def set_current_global_vector(self, edge_list):
         """
@@ -288,9 +290,7 @@ class Sentence():
                          head_index=None,
                          dep_index=None,
                          another_index_list=[],
-                         index=None,
-                         prev_tag=None,
-                         prev_backpointer=None,
+                         poslist=None,
                          feature_type=0):
         """
         Return local vector from fgen
@@ -307,10 +307,8 @@ class Sentence():
 
         """
         if self.fgen.name == "POSTaggerFeatureGenerator":
-            lv = self.fgen.get_local_vector(wordlist=self.column_list["FORM"],
-                                            index=index,
-                                            prev_tag=prev_tag,
-                                            prev_backpointer=prev_backpointer)
+            lv = self.fgen.get_global_vector(wordlist=self.column_list["FORM"],
+                                             poslist=poslist)
         else:
             lv = self.fgen.get_local_vector(head_index=head_index,
                                             dep_index=dep_index,
@@ -367,10 +365,10 @@ class Sentence():
         :param pos_list: A list that holds POS tags for all words in word_list
         :type pos_list: list(str)
         """
-        if "POSTAG" in self.column_list.keys():
+        if "POSTAG" in self.column_list:
             self.column_list["POSTAG"] = ["ROOT"] + pos_list
         else:
-            sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
+            raise RuntimeError("'POSTAG' is needed in Sentence but it's not in format file")
         self.fgen.reTag(self.column_list["POSTAG"])
         return
 
@@ -384,7 +382,7 @@ class Sentence():
         """
         self.edge_list = edge_list
         # Let's do it this way. SHOULD be refeactored later
-        self.edge_list_index_only = edge_list.keys()
+        self.edge_list_index_only = edge_list
         self.edge_list_len = len(self.edge_list_index_only)
         return
 
@@ -393,7 +391,7 @@ class Sentence():
         Return the length of the edge list
 
         Basically the return value is equivalent to the length
-        of self.edge_list.keys(), or, the length of self.edge_list_index_only
+        of self.edge_list, or, the length of self.edge_list_index_only
         """
         return self.edge_list_len
 
@@ -428,7 +426,7 @@ class Sentence():
             dependent index, and the last element is edge type
         :rtype: tuple(integer,integer,str)
         """
-        return [(i[0], i[1], self.edge_list[i]) for i in self.edge_list.keys()]
+        return [(i[0], i[1], self.edge_list[i]) for i in self.edge_list]
 
     def get_edge_list_index_only(self):
         """

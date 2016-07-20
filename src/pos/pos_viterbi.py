@@ -21,25 +21,27 @@ class Viterbi():
     def __init__(self, w_vector=None):
         self.w_vector = w_vector
 
-    def get_maxvalue(self, viterbi_dict):
-        maxvalue = (None, None)  # maxvalue has tuple (tag, value)
-        for tag in viterbi_dict.keys():
-            value = viterbi_dict[tag]  # value is (score, backpointer)
-            if maxvalue[1] is None:
-                maxvalue = (tag, value[0])
-            elif maxvalue[1] < value[0]:
-                maxvalue = (tag, value[0])
-            else:
-                pass  # no change to maxvalue
-        if maxvalue[1] is None:
-            raise ValueError("max value tag for this word is None")
-        return maxvalue
+    def tag(self, sentence, w_vector, tagset, default_tag):
 
-    def perc_test(self, feat_vec, labeled_list, tagset, default_tag):
+        def get_maxvalue(viterbi_dict):
+            maxvalue = (None, None)  # maxvalue has tuple (tag, value)
+            for tag in viterbi_dict.keys():
+                value = viterbi_dict[tag]  # value is (score, backpointer)
+                if maxvalue[1] is None:
+                    maxvalue = (tag, value[0])
+                elif maxvalue[1] < value[0]:
+                    maxvalue = (tag, value[0])
+                else:
+                    pass  # no change to maxvalue
+            if maxvalue[1] is None:
+                raise ValueError("max value tag for this word is None")
+            return maxvalue
+
         output = []
+        word_list = sentence.get_word_list()
 
         # size of the viterbi data structure
-        N = len(labeled_list)
+        N = len(word_list)
 
         # Set up the data structure for viterbi search
         viterbi = {}
@@ -53,9 +55,9 @@ class Viterbi():
         viterbi[1]['B_-1'] = (0.0, 'B_-2')
         # find the value of best_tag for each word i in the input
         # feat_index = 0
-        pos_feat = pos_features.Pos_feat_gen(labeled_list)
+        pos_feat = pos_features.Pos_feat_gen(word_list)
         for i in range(2, N - 2):
-            word = labeled_list[i]
+            word = word_list[i]
             found_tag = False
             for tag in tagset:
                 prev_list = []
@@ -70,8 +72,8 @@ class Viterbi():
                     # sum up the weights for all features except the bigram
                     # features
                     for feat in feats:
-                        if (feat, tag) in feat_vec:
-                            weight += feat_vec[feat, tag]
+                        if (feat, tag) in w_vector:
+                            weight += w_vector[feat, tag]
                     prev_tag_weight = weight
                     prev_list.append((prev_tag_weight + prev_value, prev_tag))
                 (best_weight, backpointer) = sorted(prev_list,
@@ -84,7 +86,7 @@ class Viterbi():
                 viterbi[i][default_tag] = (0.0, default_tag)
 
         # recover the best sequence using backpointers
-        maxvalue = self.get_maxvalue(viterbi[N - 3])
+        maxvalue = get_maxvalue(viterbi[N - 3])
         best_tag = maxvalue[0]
         for i in range(N - 3, 1, -1):
             output.insert(0, best_tag)

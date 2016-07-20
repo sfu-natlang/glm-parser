@@ -37,7 +37,7 @@ class Evaluator():
         self.unlabeled_correct_num = 0
         self.unlabeled_gold_set_size = 0
 
-        logging.debug("Start evaluating ...")
+        logger.debug("Start evaluating ...")
         sentence_count = 1
         data_size = len(data_pool.data_list)
         while data_pool.has_next_data():

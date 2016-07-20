@@ -97,7 +97,7 @@ class FeatureGeneratorBase:
 
     def reTag(self, pos_list):
         if not hasattr(self, 'POSTAG'):
-            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
+            raise RuntimeError("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
         self.POSTAG = pos_list
 
     def log_feature_request(self, h, d, o, t):

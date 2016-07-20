@@ -15,6 +15,7 @@ from pos import pos_decode, pos_perctrain, pos_features, pos_viterbi
 from weight.weight_vector import WeightVector
 from pos.pos_common import read_tagset
 from logger.loggers import logging, init_logger
+import feature.pos_fgen
 
 import debug.debug
 import os
@@ -41,39 +42,8 @@ class PosTagger():
         self.tagset = read_tagset(tag_file, sparkContext)
         self.default_tag = "NN"
         self.sparkContext = sparkContext
-        if weightVectorLoadPath is not None:
-            self.w_vector = WeightVector()
-            self.w_vector.load(weightVectorLoadPath, self.sparkContext)
-
-    def load_data(self, dataPool):
-        data_list = []
-        sentence_count = 0
-        while dataPool.has_next_data():
-            sentence_count += 1
-            sentence = dataPool.get_next_data()
-
-            word_list = sentence.column_list["FORM"]
-            pos_list = sentence.column_list["POSTAG"]
-
-            del word_list[0]
-            del pos_list[0]  # delet Root
-
-            word_list.insert(0, '_B_-1')
-            word_list.insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
-            word_list.append('_B_+1')
-            word_list.append('_B_+2')     # last two 'words' are B_+1 B_+2
-            pos_list.insert(0, 'B_-1')
-            pos_list.insert(0, 'B_-2')
-
-            pos_feat = pos_features.Pos_feat_gen(word_list)
-
-            gold_out_fv = defaultdict(int)
-            pos_feat.get_sent_feature(gold_out_fv, pos_list)
-
-            data_list.append((word_list, pos_list, gold_out_fv))
-
-        logger.info("Sentence Number: %d" % sentence_count)
-        return data_list
+        self.w_vector = WeightVector(weightVectorLoadPath, self.sparkContext)
+        self.evaluator = pos_decode.Evaluator()
 
     def perc_train(self,
                    dataPool=None,
@@ -84,15 +54,15 @@ class PosTagger():
         if dataPool is None:
             logger.error('Training DataPool not specified\n')
             sys.exit(1)
-        train_data = self.load_data(dataPool)
 
         logger.info("Training with Iterations: %d" % max_iter)
-        perc = pos_perctrain.PosPerceptron(max_iter=max_iter,
+        learner = pos_perctrain.PosPerceptron(max_iter=max_iter,
                                            default_tag="NN",
                                            tag_file="file://tagset.txt",
                                            sparkContext=self.sparkContext)
 
-        self.w_vector = perc.avg_perc_train(train_data)
+        self.w_vector = learner.sequential_learn(dataPool)
+
         if dump_data:
             logger.info("Dumping trained weight vector")
             perc.dump_vector("fv", max_iter, self.w_vector)
@@ -102,15 +72,18 @@ class PosTagger():
         if dataPool is None:
             logger.error('Training DataPool not specified\n')
             sys.exit(1)
+        self.evaluator.evaluate(data_pool = dataPool,
+                                w_vector  = self.w_vector,
+                                tagset    = self.tagset)
 
-        logger.info("Loading Testing Data")
-        test_data = self.load_data(dataPool)
-        tester = pos_decode.Decoder(test_data)
-        acc = tester.get_accuracy(self.w_vector)
-
-    def getTags(self, word_list):
+    def getTags(self, sentence):
         argmax = pos_viterbi.Viterbi()
-        pos_list = argmax.perc_test(self.w_vector, word_list, self.tagset, "NN")
+        inital_fgen = sentence.fgen
+
+        sentence.load_fgen(feature.pos_fgen.FeatureGenerator)
+        pos_list = argmax.tag(sentence, self.w_vector, self.tagset, "NN")
+        sentence.load_fgen(inital_fgen)
+
         return pos_list[2:]
 
 if __name__ == '__main__':
@@ -222,6 +195,7 @@ if __name__ == '__main__':
     if config['train']:
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
+                                 fgen          = 'pos_fgen',
                                  format_path   = config['format'])
 
         __logger.info("Training Starts, Timer is on")
@@ -235,5 +209,6 @@ if __name__ == '__main__':
     if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
+                                fgen          = 'pos_fgen',
                                 format_path   = config['format'])
         tagger.evaluate(dataPool=testDataPool)

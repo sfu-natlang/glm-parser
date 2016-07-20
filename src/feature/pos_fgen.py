@@ -17,6 +17,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         feature_generator_base.FeatureGeneratorBase.__init__(self)
         self.care_list.append("FORM")
         self.care_list.append("POSTAG")
+        return
 
     def __contains_digits(self, s):
         return any(char.isdigit() for char in s)
