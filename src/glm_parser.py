@@ -5,66 +5,58 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu, Kingston Chen,
+#         Andrei Vacariu
 # (Please add on your name if you have authored this file)
 #
-from feature import feature_vector
-
-from data.data_pool import *
-
-from evaluate.evaluator import *
-
-from weight.weight_vector import *
-
-from data.file_io import *
-
 import debug.debug
+from data.file_io import fileRead, fileWrite
+from data.data_pool import DataPool
+from evaluate.evaluator import Evaluator
+from weight.weight_vector import WeightVector
+from pos_tagger import PosTagger
+from logger.loggers import logging, init_logger
 
-import timeit
 import time
 import os
 import sys
-import logging
 import importlib
 import functools
 from functools import partial
-
 import argparse
 import StringIO
 from ConfigParser import SafeConfigParser
 
 __version__ = '1.0'
+if __name__ == "__main__":
+    init_logger('glm_parser.log')
+logger = logging.getLogger('PARSER')
 
 
 class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
                  learner              = None,
-                 fgen                 = None,
                  parser               = None,
-                 parallelFlag         = False):
+                 parallelFlag         = False,
+                 sparkContext         = None):
 
-        print ("PARSER [DEBUG]: Initialising Parser")
-        if fgen is None:
-            raise ValueError("PARSER [ERROR]: Feature Generator not specified")
+        logger.info("Initialising Parser")
         if learner is None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
-        self.w_vector     = WeightVector(weightVectorLoadPath)
+        self.w_vector     = WeightVector(weightVectorLoadPath, sparkContext)
         self.evaluator    = Evaluator()
 
         if parallelFlag:
             self.learner = importlib.import_module('learn.' + learner).Learner()
         else:
             self.learner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
-        print("PARSER [INFO]: Using learner: %s " % (self.learner.name))
-
-        self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
-        print("PARSER [INFO]: Using feature generator: %s " % (fgen))
+        logger.info("Using learner: %s " % (self.learner.name))
 
         self.parser = importlib.import_module('parse.' + parser).EisnerParser()
-        print("PARSER [INFO]: Using parser: %s" % (parser))
+        logger.info("Using parser: %s" % (parser))
 
-        print ("PARSER [DEBUG]: Initialisation Complete")
+        logger.info("Initialisation Complete")
         return
 
     def train(self,
@@ -80,7 +72,7 @@ class GlmParser():
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for training is not an DataPool object")
         if maxIteration is None:
-            print ("PARSER [WARN]: Number of Iterations not specified, using 1")
+            logger.warn("Number of Iterations not specified, using 1")
             maxIteration = 1
 
         # Prepare the suitable argmax
@@ -91,19 +83,20 @@ class GlmParser():
         f_argmax = functools.partial(parser_f_argmax, parser=self.parser)
 
         # Star Training Process
-        print ("PARSER [DEBUG]: Starting Training Process")
+        logger.info("Starting Training Process")
+        start_time = time.time()
         if not parallel:  # using sequential training
-            print ("PARSER [DEBUG]: Using Sequential Training")
+            logger.info("Using Sequential Training")
             self.w_vector = self.learner.sequential_learn(
-                                        max_iter   = maxIteration,
-                                        data_pool  = dataPool,
-                                        f_argmax   = f_argmax,
-                                        d_filename = weightVectorDumpPath,
-                                        dump_freq  = dumpFrequency)
+                max_iter   = maxIteration,
+                data_pool  = dataPool,
+                f_argmax   = f_argmax,
+                d_filename = weightVectorDumpPath,
+                dump_freq  = dumpFrequency)
         else:  # using parallel training
-            print ("PARSER [DEBUG]: Using Parallel Training")
+            logger.info("Using Parallel Training")
             if shardNum is None:
-                print ("PARSER [WARN]: Number of shards not specified, using 1")
+                logger.warn("Number of shards not specified, using 1")
                 shardNum = 1
             if sc is None:
                 raise RuntimeError('PARSER [ERROR]: SparkContext not specified')
@@ -111,22 +104,35 @@ class GlmParser():
             parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
             learner = parallelLearnClass(self.w_vector, maxIteration)
             self.w_vector = learner.parallel_learn(
-                                        max_iter     = maxIteration,
-                                        dataPool     = dataPool,
-                                        f_argmax     = f_argmax,
-                                        learner      = self.learner,
-                                        d_filename   = weightVectorDumpPath,
-                                        shards       = shardNum,
-                                        sc           = sc,
-                                        hadoop       = hadoop)
+                max_iter     = maxIteration,
+                dataPool     = dataPool,
+                f_argmax     = f_argmax,
+                learner      = self.learner,
+                d_filename   = weightVectorDumpPath,
+                shards       = shardNum,
+                sc           = sc,
+                hadoop       = hadoop)
+
+        end_time = time.time()
+        logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
         return
 
-    def evaluate(self, dataPool = None):
+    def evaluate(self, dataPool=None, tagger=None, sc=None, hadoop=None):
+        logger.info("Starting evaluation process")
+        start_time = time.time()
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for evaluation is not an DataPool object")
-        self.evaluator.evaluate(dataPool, self.parser, self.w_vector)
+        self.evaluator.evaluate(data_pool = dataPool,
+                                parser    = self.parser,
+                                w_vector  = self.w_vector,
+                                tagger    = tagger,
+                                sc        = sc,
+                                hadoop    = hadoop)
+        end_time = time.time()
+        logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
 if __name__ == "__main__":
+    __logger = logging.getLogger('MAIN')
     # Default values
     config = {
         'train':             None,
@@ -141,13 +147,15 @@ if __name__ == "__main__":
         'learner':           'average_perceptron',
         'parser':            'ceisner',
         'feature_generator': 'english_1st_fgen',
-        'format':            'format/penn2malt.format'
+        'format':            'format/penn2malt.format',
+        'tagger_w_vector':   None,
+        'tag_file':          None
     }
 
     glm_parser = GlmParser
 
     # Dealing with arguments here
-    if True: # Adding arguments
+    if True:  # Adding arguments
         arg_parser = argparse.ArgumentParser(description="""Global Linear Model (GLM) Parser
             Version %s""" % __version__)
         arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?',
@@ -257,7 +265,16 @@ if __name__ == "__main__":
             prints out average time usage
             """)
         arg_parser.add_argument('--hadoop', '-c', action='store_true',
-           help="""Using Glm Parser in Spark Yarn Mode""")
+            help="""Using Glm Parser in Spark Yarn Mode""")
+        arg_parser.add_argument('--tagger-w-vector', metavar='FILENAME',
+            help="""Path to an existing w-vector for tagger. Use this option if
+            you need to evaluate the glm_parser with a trained tagger.
+            """)
+        arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""
+            specify the file containing the tags we want to use.
+            This option is only valid while using option tagger-w-vector.
+            Officially provided TAG_TARGET file is src/tagset.txt
+            """)
 
         args = arg_parser.parse_args()
 
@@ -275,13 +292,13 @@ if __name__ == "__main__":
     if args.max_sentences:
         debug.debug.run_first_num = int(args.max_sentences)
         if debug.debug.run_first_num <= 0:
-            sys.stderr.write("Illegal integer: %s\n" % debug.debug.run_first_num)
+            __logger.error("Illegal integer: %s\n" % debug.debug.run_first_num)
             sys.exit(1)
         else:
-            print("Debug run number = %d" % (debug.debug.run_first_num, ))
+            __logger.info("Debug run number = %d" % (debug.debug.run_first_num, ))
     if args.log_feature_request:
         debug.debug.log_feature_request_flag = True
-        print("Enable feature request log")
+        __logger.info("Enable feature request log")
     if args.timing:
         debug.debug.time_accounting_flag = True
 
@@ -289,28 +306,33 @@ if __name__ == "__main__":
     if args.config:
         # Check local config path
         if (not os.path.isfile(args.config)) and (not yarn_mode):
-            sys.stderr.write("The config file doesn't exist: %s\n" % args.config)
+            __logger.error("The config file doesn't exist: %s\n" % args.config)
             sys.exit(1)
 
         # Initialise the config parser
-        print("Reading configurations from file: %s" % (args.config))
+        __logger.info("Reading configurations from file: %s" % (args.config))
         config_parser = SafeConfigParser(os.environ)
 
         # Read contents of config file
         if yarn_mode:
             listContent = fileRead(args.config, sparkContext)
         else:
-            listContent = fileRead("file://" + args.config, sparkContext)
-        tmpStr = ''.join(str(e)+"\n" for e in listContent)
+            if not args.config.startswith("file://") and not args.config.startswith("hdfs://"):
+                listContent = fileRead('file://' + args.config, sparkContext)
+            else:
+                listContent = fileRead(args.config, sparkContext)
+
+        tmpStr = ''.join(str(e) + "\n" for e in listContent)
         stringIOContent = StringIO.StringIO(tmpStr)
         config_parser.readfp(stringIOContent)
 
         # Process the contents of config file
-        for option in ['train', 'test', 'data_path', 'prep_path', 'format']:
+        for option in ['train', 'test', 'data_path',
+                       'prep_path', 'format', 'tag_file']:
             if config_parser.get('data', option) != '':
                 config[option] = config_parser.get('data', option)
 
-        for option in ['load_weight_from', 'dump_weight_to']:
+        for option in ['load_weight_from', 'dump_weight_to', 'tagger_w_vector']:
             if config_parser.get('option', option) != '':
                 config[option] = config_parser.get('option', option)
 
@@ -325,10 +347,10 @@ if __name__ == "__main__":
         try:
             config['data_path'] = cf.get('data', 'data_path')
         except:
-            print "WARNING: Encountered exception while attempting to read ",
-            print "data_path from config file. ",
-            print "It could be caused by the environment variable settings, ",
-            print "which is not supported when running in yarn mode"
+            __logger.warn("Encountered exception while attempting to read " +
+                          "data_path from config file. It could be caused by the " +
+                          "environment variable settings, which is not supported " +
+                          "when running in yarn mode")
 
     # we do this here because we want the defaults to include our config file
     arg_parser.set_defaults(**config)
@@ -338,27 +360,44 @@ if __name__ == "__main__":
     config.update(vars(args))
 
     # Check values of config[]
-    if config['data_path'] is None:
-        sys.stderr.write('data_path not specified\n')
-        sys.exit(1)
-    if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        sys.stderr.write("The data_path directory doesn't exist: %s\n" % config['data_path'])
-        sys.exit(1)
-    if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        sys.stderr.write("The format file doesn't exist: %s\n" % config['format'])
-        sys.exit(1)
     if not spark_mode:
         config['spark_shards'] = 1
+
+    if not yarn_mode:
+        for option in [
+                'data_path',
+                'load_weight_from',
+                'dump_weight_to',
+                'format',
+                'tagger_w_vector',
+                'tag_file']:
+            if config[option] is not None:
+                if (not config[option].startswith("file://")) and \
+                        (not config[option].startswith("hdfs://")):
+                    config[option] = 'file://' + config[option]
 
     # Initialise Parser
     gp = glm_parser(weightVectorLoadPath = config['load_weight_from'],
                     learner              = config['learner'],
-                    fgen                 = config['feature_generator'],
                     parser               = config['parser'],
-                    parallelFlag         = spark_mode)
+                    parallelFlag         = spark_mode,
+                    sparkContext         = sparkContext)
+
+    # Initialise Tagger
+    if config['tagger_w_vector'] is not None:
+        __logger.info("Using Tagger weight vector: " + config['tagger_w_vector'])
+        if config['tag_file'] is None:
+            __logger.error("The tag_file has not been specified")
+            sys.exit(1)
+        tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
+                           tag_file             = config['tag_file'],
+                           sparkContext         = sparkContext)
+        __logger.info("Tagger weight vector loaded")
+    else:
+        tagger = None
 
     # Run training
-    if config['train'] is not None:
+    if config['train']:
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
                                  fgen          = config['feature_generator'],
@@ -367,7 +406,6 @@ if __name__ == "__main__":
                                  sc            = sparkContext,
                                  hadoop        = yarn_mode)
 
-        start_time = time.time()
         gp.train(dataPool             = trainDataPool,
                  maxIteration         = config['iterations'],
                  weightVectorDumpPath = config['dump_weight_to'],
@@ -376,22 +414,20 @@ if __name__ == "__main__":
                  parallel             = spark_mode,
                  sc                   = sparkContext,
                  hadoop               = yarn_mode)
-        end_time = time.time()
-
-        training_time = end_time - start_time
-        print "Total Training Time: ", training_time
-        logging.info("Training time usage(seconds): %f" % (training_time,))
 
     # Run evaluation
-    if config['test'] is not None:
+    if config['test']:
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],
                                 format_path   = config['format'],
-								sc            = sparkContext,
-								hadoop        = yarn_mode)
-        print "Evaluating..."
-        gp.evaluate(dataPool=testDataPool)
+                                sc            = sparkContext,
+                                hadoop        = yarn_mode)
+
+        gp.evaluate(dataPool = testDataPool,
+                    tagger   = tagger,
+                    sc       = sparkContext,
+                    hadoop   = yarn_mode)
 
     # Finalising, shutting down spark
     if spark_mode:

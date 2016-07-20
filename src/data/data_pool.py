@@ -3,16 +3,12 @@ from __future__ import division
 import os
 import re
 import importlib
-from sentence import Sentence
 import logging
-from data_prep import *
-from file_io import *
+from sentence import Sentence
+from data_prep import DataPrep
+from file_io import fileRead, fileWrite
 
-
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+logger = logging.getLogger('DATAPOOL')
 
 
 class DataPool():
@@ -33,18 +29,18 @@ class DataPool():
     be reset to initial value -1 when reset() is called (manually or
     during init).
     """
-    def __init__(   self,
-                    section_regex = '',
-                    data_path     = "./penn-wsj-deps/",
-                    fgen          = None,
-                    format_path   = None,
-                    textString    = None,
-                    format_list   = None,
-                    comment_sign  = '',
-                    prep_path     = 'data/prep/',
-                    shardNum      = 1,
-                    sc            = None,
-                    hadoop        = False):
+    def __init__(self,
+                 section_regex = '',
+                 data_path     = "./penn-wsj-deps/",
+                 fgen          = None,
+                 format_path   = None,
+                 textString    = None,
+                 format_list   = None,
+                 comment_sign  = '',
+                 prep_path     = 'data/prep/',
+                 shardNum      = 1,
+                 sc            = None,
+                 hadoop        = False):
 
         """
         Initialize the Data set
@@ -73,12 +69,12 @@ class DataPool():
         self.reset_all()
 
         if textString is not None:
-            self.load_stringtext(textString,format_list,comment_sign)
+            self.load_stringtext(textString, format_list, comment_sign)
         else:
             self.data_path     = data_path
             self.section_regex = section_regex
             self.prep_path     = prep_path
-            self.dataPrep      = DataPrep(dataPath     = self.data_path,
+            self.dataPrep      = DataPrep(dataURI      = self.data_path,
                                           dataRegex    = self.section_regex,
                                           shardNum     = self.shardNum,
                                           targetPath   = self.prep_path,
@@ -88,7 +84,7 @@ class DataPool():
 
     def loadedPath(self):
         if self.dataPrep:
-            if self.hadoop == True:
+            if self.hadoop is True:
                 return self.dataPrep.hadoopPath()
             else:
                 return self.dataPrep.localPath()
@@ -168,8 +164,8 @@ class DataPool():
             self.current_index += 1
             # Logging how many entries we have supplied
             if self.current_index % 1000 == 0:
-                logging.debug("Data finishing %.2f%% ..." %
-                             (100 * self.current_index/len(self.data_list), ))
+                logger.debug("Data finishing %.2f%% ..." %
+                             (100 * self.current_index / len(self.data_list), ))
 
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
@@ -183,15 +179,11 @@ class DataPool():
         This method should be called after section regex has been initalized
         and before any get_data method is called.
         """
-        logging.debug("Loading data...")
-        print("Loading data...")
+        logger.info("Loading data...")
 
         # Load format file
-        print("Loading dataFormat from: " + formatPath)
-        if self.hadoop == True:
-            fformat = fileRead(formatPath, sparkContext=sparkContext)
-        else:
-            fformat = open(formatPath)
+        logger.info("Loading dataFormat from: " + formatPath)
+        fformat = fileRead(formatPath, sparkContext=sparkContext)
 
         self.format_list = []
         self.comment_sign = ''
@@ -213,31 +205,29 @@ class DataPool():
         if self.format_list == []:
             raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
 
-        if self.hadoop == False:
-            fformat.close()
-
         # Load data
-        if self.hadoop == True:
+        if self.hadoop is True:
             self.dataPrep.loadHadoop()
         else:
             self.dataPrep.loadLocal()
 
         # Add data to data_list
         # If using yarn mode, local data will not be loaded
-        if self.hadoop == False:
+        if self.hadoop is False:
             for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
                 for file_name in fileList:
-                    file_path = "%s/%s" % ( str(dirName), str(file_name) )
+                    file_path = "%s/%s" % (str(dirName), str(file_name))
                     self.data_list += self.get_data_list(file_path)
         else:
             aRdd = sparkContext.textFile(self.dataPrep.hadoopPath()).cache()
             tmp  = aRdd.collect()
-            tmpStr = ''.join(str(e)+"\n" for e in tmp)
+            tmpStr = ''.join(str(e) + "\n" for e in tmp)
             self.load_stringtext(textString  = tmpStr,
                                 format_list  = self.format_list,
                                 comment_sign = self.comment_sign)
-        return
 
+        logger.info("Data loaded")
+        return
 
     def get_data_list(self, file_path):
         """

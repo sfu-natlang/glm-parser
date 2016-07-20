@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-import logging
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
-from weight import weight_vector
-from data import data_pool
+from __future__ import division
+from weight.weight_vector import WeightVector
 
-logging.basicConfig(filename='glm_parser.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+import debug.debug
+import time
+from learn import logger
+
 
 class Learner():
 
@@ -22,7 +18,7 @@ class Learner():
          Could be overridden by parameter max_iter in the method
         :return: None
         """
-        logging.debug("Initialize PerceptronLearner ... ")
+        logger.debug("Initialise PerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
 
@@ -31,26 +27,46 @@ class Learner():
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
             max_iter = self.max_iter
-
-        logging.debug("Starting sequantial train...")
-        for i in range(max_iter):
-            logging.debug("Iteration: %d" % i)
-            logging.debug("Data size: %d" % len(data_pool.data_list))
+        data_size = len(data_pool.data_list)
+        logger.debug("Starting sequantial train...")
+        for t in range(max_iter):
+            logger.debug("Iteration %d" % t)
+            sentence_count = 1
 
             while data_pool.has_next_data():
+                # Retrieve data
                 data_instance = data_pool.get_next_data()
-                #data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
                 gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
-                current_global_vector = f_argmax(self.w_vector, data_instance)
+
+                logger.info("Iteration %d, Sentence %d of %d, Length %d" % (
+                    t,
+                    sentence_count,
+                    data_size,
+                    len(data_instance.get_word_list()) - 1))
+                sentence_count += 1
+
+                # argmax
+                if debug.debug.time_accounting_flag is True:
+                    # with timer
+                    before_time = time.clock()
+                    current_global_vector = f_argmax(self.w_vector, data_instance)
+                    after_time = time.clock()
+                    time_usage = after_time - before_time
+                    argmax_time_total += time_usage
+                    logger.info("Sentence length: %d" % (len(data_instance.get_word_list()) - 1))
+                    logger.info("Time usage: %f" % (time_usage, ))
+                else:
+                    # without timer
+                    current_global_vector = f_argmax(self.w_vector, data_instance)
+
                 self.update_weight(current_global_vector, gold_global_vector)
 
             data_pool.reset_index()
 
             if d_filename is not None:
-                if i % dump_freq == 0 or i == max_iter - 1:
-                    self.w_vector.dump(d_filename + "_Iter_%d.db"%i)
+                if t % dump_freq == 0 or t == max_iter - 1:
+                    self.w_vector.dump(d_filename + "_Iter_%d.db" % i)
         return self.w_vector
-
 
     def update_weight(self, current_global_vector, gold_global_vector):
         # otherwise, the gold_global_vector will change because of the change in weights
@@ -59,11 +75,9 @@ class Learner():
         return
 
     def parallel_learn(self, dp, fv, f_argmax):
-        #dp = data_pool.DataPool(textString=textString[1],fgen=fgen,format_list=format)
-        w_vector = weight_vector.WeightVector()
+        w_vector = WeightVector()
         for key in fv.keys():
-            w_vector[key]=fv[key]
-        #print data_pool.get_sent_num
+            w_vector[key] = fv[key]
         while dp.has_next_data():
             data_instance = dp.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)

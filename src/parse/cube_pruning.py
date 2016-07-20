@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy, time
 from heapq import heappush, heappop
+from pos_tagger import PosTagger
 
 class EisnerHeap():
     def __init__(self, k, n):
