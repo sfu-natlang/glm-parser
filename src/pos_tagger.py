@@ -65,7 +65,7 @@ class PosTagger():
 
         if dump_data:
             logger.info("Dumping trained weight vector")
-            perc.dump_vector("fv", max_iter, self.w_vector)
+            learner.dump_vector("fv", max_iter, self.w_vector)
         return self.w_vector
 
     def evaluate(self, dataPool=None):
