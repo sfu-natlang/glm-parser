@@ -6,7 +6,6 @@ import copy
 import operator
 import optparse
 import logging
-import pos_features
 from collections import defaultdict
 
 gottenFile = inspect.getfile(inspect.currentframe())
@@ -54,25 +53,22 @@ class Viterbi():
         viterbi[0]['B_-2'] = (0.0, '')
         viterbi[1]['B_-1'] = (0.0, 'B_-2')
         # find the value of best_tag for each word i in the input
-        # feat_index = 0
-        pos_feat = pos_features.Pos_feat_gen(word_list)
         for i in range(2, N - 2):
             word = word_list[i]
             found_tag = False
             for tag in tagset:
                 prev_list = []
                 for prev_tag in viterbi[i - 1]:
-                    feats = []
                     (prev_value, prev_backpointer) = viterbi[i - 1][prev_tag]
-                    pos_feat.get_pos_feature(feats,
-                                             i,
-                                             prev_tag,
-                                             prev_backpointer)
+                    feats = sentence.get_pos_feature(index=i,
+                                                     prev_tag=prev_tag,
+                                                     prev_backpointer=prev_backpointer)
                     weight = 0.0
                     # sum up the weights for all features except the bigram
                     # features
                     for feat in feats:
                         if (feat, tag) in w_vector:
+                            # logger.debug(str(feat) + str(tag) + str(w_vector[feat, tag]))
                             weight += w_vector[feat, tag]
                     prev_tag_weight = weight
                     prev_list.append((prev_tag_weight + prev_value, prev_tag))

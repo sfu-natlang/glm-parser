@@ -4,7 +4,7 @@ import debug.debug
 
 import string
 import copy
-from collections import defaultdict
+from feature.feature_vector import FeatureVector
 
 
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
@@ -31,8 +31,8 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     def __contains_punc(self, s):
         return any(char in string.punctuation for char in s)
 
-    def get_local_vector(self, wordlist, index, prev_tag, prev_backpointer):
-        fv = defaultdict(int)
+    def get_pos_feature(self, wordlist, index, prev_tag, prev_backpointer):
+        fv = []
         word = wordlist[index].lower()
         fv.append((0, word))
         fv.append((1, wordlist[index - 1].lower()))
@@ -58,9 +58,10 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append((18, prev_backpointer))
         fv.append((19, wordlist[index - 1].lower()[-3:]))
         fv.append((20, wordlist[index + 1].lower()[-3:]))
+        return fv
 
-    def get_global_vector(self, wordlist, poslist):  # Computing Sentence Feature
-        fv = defaultdict(int)
+    def get_feature_vector(self, wordlist, poslist):  # Computing Sentence Feature
+        fv = FeatureVector()
         for i in range(3, len(wordlist) - 2):
             word = wordlist[i].lower()
             tag = poslist[i]
@@ -88,3 +89,4 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv[(18, poslist[i - 2]), tag] += 1
             fv[(19, wordlist[i - 1].lower()[-3:]), tag] += 1
             fv[(20, wordlist[i + 1].lower()[-3:]), tag] += 1
+        return fv

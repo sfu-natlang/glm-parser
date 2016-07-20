@@ -110,7 +110,7 @@ class Sentence():
 
     def load_fgen(self, fgen=None):
         if fgen is None:
-            raise ValueError("FGEN [ERROR]: Feature Generator for loading not specified")
+            raise ValueError("SENTENCE [ERROR]: Feature Generator for loading not specified")
         if inspect.isclass(fgen):
             fgen = fgen()
         if self.fgen is not None:
@@ -126,7 +126,7 @@ class Sentence():
                 del self.column_list["FORM"][0]
                 del self.column_list["POSTAG"][0]
             else:
-                raise ValueError("FGEN [ERROR]: Loaded feature generator invalid")
+                raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
 
         if fgen.name == "POSTaggerFeatureGenerator":
             self.column_list["FORM"].insert(0, '_B_-1')
@@ -142,12 +142,12 @@ class Sentence():
             if "FORM" in self.column_list:
                 self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
             else:
-                raise RuntimeError("'FORM' is needed in Sentence but it's not in format file")
+                raise RuntimeError("SENTENCE [ERROR]: 'FORM' is needed in Sentence but it's not in format file")
 
             if "POSTAG" in self.column_list:
                 self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
             else:
-                raise RuntimeError("'POSTAG' is needed in Sentence but it's not in format file")
+                raise RuntimeError("SENTENCE [ERROR]: 'POSTAG' is needed in Sentence but it's not in format file")
 
             # This will store the dict, len(dict)
             # into the instance
@@ -174,7 +174,7 @@ class Sentence():
 
             self.set_second_order_cache()
         else:
-            raise ValueError("FGEN [ERROR]: Loaded feature generator invalid")
+            raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
 
         return
 
@@ -186,9 +186,9 @@ class Sentence():
         """
 
         if "HEAD" not in self.column_list:
-            raise RuntimeError("'HEAD' is needed in Sentence but it's not in format file")
+            raise RuntimeError("SENTENCE [ERROR]: 'HEAD' is needed in Sentence but it's not in format file")
         if "DEPREL" not in self.column_list:
-            raise RuntimeError("'DEPREL' is needed in Sentence but it's not in format file")
+            raise RuntimeError("SENTENCE [ERROR]: 'DEPREL' is needed in Sentence but it's not in format file")
 
         self.column_list["edge_set"] = {}
 
@@ -218,7 +218,7 @@ class Sentence():
         if field_name in self.column_list:
             return self.column_list[field_name]
         else:
-            raise RuntimeError("'" + field_name + "' is needed in Sentence but it's not in format file")
+            raise RuntimeError("SENTENCE [ERROR]: '" + field_name + "' is needed in Sentence but it's not in format file")
 
     def set_current_global_vector(self, edge_list):
         """
@@ -256,6 +256,8 @@ class Sentence():
     # ~    return
 
     def convert_list_vector_to_dict(self, fv):
+        if isinstance(fv, FeatureVector):
+            return fv
         ret_fv = FeatureVector()
         for i in fv:
             ret_fv[i] += 1
@@ -279,10 +281,10 @@ class Sentence():
                 self.fgen.name == "EnglishSecondOrderFeatureGenerator":
             global_vector = self.fgen.recover_feature_from_edges(edge_list)
         elif self.fgen.name == "POSTaggerFeatureGenerator":
-            global_vector = self.fgen.get_global_vector(self.column_list["FORM"],
-                                                        self.column_list["POSTAG"])
+            global_vector = self.fgen.get_feature_vector(self.column_list["FORM"],
+                                                         self.column_list["POSTAG"])
         else:
-            raise ValueError("FGEN [ERROR]: Loaded feature generator invalid")
+            raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
 
         return global_vector
 
@@ -307,8 +309,8 @@ class Sentence():
 
         """
         if self.fgen.name == "POSTaggerFeatureGenerator":
-            lv = self.fgen.get_global_vector(wordlist=self.column_list["FORM"],
-                                             poslist=poslist)
+            lv = self.fgen.get_feature_vector(wordlist=self.column_list["FORM"],
+                                              poslist=poslist)
         else:
             lv = self.fgen.get_local_vector(head_index=head_index,
                                             dep_index=dep_index,
@@ -316,6 +318,17 @@ class Sentence():
                                             feature_type=feature_type)
 
         return lv
+
+    def get_pos_feature(self, index, prev_tag, prev_backpointer):
+        if self.fgen.name != "POSTaggerFeatureGenerator":
+            raise RuntimeError("SENTENCE [ERROR]: " +
+                "got_pos_feature() requires the feature generator for tagger," +
+                " but instead, we have " + self.fgen.name)
+
+        return self.fgen.get_pos_feature(wordlist=self.column_list["FORM"],
+                                         index=index,
+                                         prev_tag=prev_tag,
+                                         prev_backpointer=prev_backpointer)
 
     '''
     def get_second_order_local_vector(self, head_index, dep_index,

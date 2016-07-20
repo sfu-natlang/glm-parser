@@ -53,6 +53,9 @@ class Evaluator():
 
             cnum, gnum = sent_evaluate(output, sent.get_pos_list())
 
+            logger.debug("Output, " + str(output))
+            logger.debug("POSTAG, " + str(sent.get_pos_list()))
+
             self.correct_num += cnum
             self.gold_set_size += gnum
 
@@ -60,5 +63,5 @@ class Evaluator():
 
         acc = float(self.correct_num) / self.gold_set_size
         logger.info("Feature count: %d" % len(w_vector.keys()))
-        logger.info("Total Accraccy: %d" % acc)
+        logger.info("Total Accraccy: %.12f (%d, %d)" % acc, self.correct_num, self.gold_set_size)
         return acc
