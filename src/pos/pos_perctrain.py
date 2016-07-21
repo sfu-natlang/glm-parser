@@ -100,7 +100,8 @@ class PosPerceptron():
 
                             last_iter[i] = c
 
-            logger.info("Iteration completed, number of mistakes:", log_miss)
+            logger.info("Iteration completed, number of mistakes: %d"
+                        % log_miss)
         logger.debug("Finalising")
         for i in w_vec:
             if i in last_iter:
@@ -113,8 +114,8 @@ class PosPerceptron():
         return w_vec
 
     def dump_vector(self, filename, iteration, fv):
-        logger.info("Dumping weight_vec to ", filename,
-                    "_Iter_%d.db" % iteration)
+        logger.info("Dumping weight_vec to %s_Iter_%d.db"
+                    % (filename, iteration))
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
         w_vector.dump("file://" + filename + "_Iter_%d.db" % iteration)

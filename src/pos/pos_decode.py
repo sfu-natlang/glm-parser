@@ -39,5 +39,5 @@ class Decoder():
             correct_num += cnum
             gold_set_size += gnum
         acc = float(correct_num) / gold_set_size
-        logger.info("Total Accraccy: ", acc)
+        logger.info("Total Accraccy: %f" % acc)
         return acc

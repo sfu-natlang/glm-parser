@@ -57,9 +57,13 @@ class Viterbi():
         for i in range(2, N-2):
             word = labeled_list[i]
             found_tag = False
+
+            last_viterbi = viterbi[i-1].items()
+            last_viterbi.sort(key=lambda x:x[1][0], reverse=True)
+            logger.debug(last_viterbi[0: 5])
             for tag in tagset:
                 prev_list = []
-                for prev_tag in viterbi[i-1]:
+                for (prev_tag, val) in last_viterbi[0: 10]:
                     feats = []
                     (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
                     pos_feat.get_pos_feature(feats,
@@ -80,6 +84,9 @@ class Viterbi():
                 if best_weight != 0.0:
                     viterbi[i][tag] = (best_weight, backpointer)
                     found_tag = True
+
+            # logger.debug(viterbi[i])
+
             if found_tag is False:
                 viterbi[i][default_tag] = (0.0, default_tag)
 
