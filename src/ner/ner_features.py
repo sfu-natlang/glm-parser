@@ -2,15 +2,17 @@
 import string
 import copy
 
+# the NER feature generator 
 class Ner_feat_gen():
 
 	def __init__(self, wordlist):
 		self.wl = wordlist
 		self.per_list = self.loading_list('./ner/ned_PER_list.txt')
 		self.loc_list = self.loading_list('./ner/ned_LOC_list.txt')
-		
-	def contains_digits(self,s):
-		return any(char.isdigit() for char in s)
+	
+# function to check if the word contains a digit / dollar /exclamatory /hyphen	
+	def contains_digits(self,s): 
+		return any(char.isdigit() for char in s) 
 	def contains_dollar(self,s):
 	    return any(char =="$" for char in s)
 	def contains_exclamatory(self,s):
@@ -19,29 +21,31 @@ class Ner_feat_gen():
 	def contains_hyphen(self,s):
 		return any(char=="-" for char in s)
 
+# function to check if word contains upper case characters
 	def contains_upper(self,s):
 		return any(char.isupper() for char in s)
-
+# function to check if word contains any punctuations
 	def contains_punc(self,s):
 		return any(char in string.punctuation for char in s)
+# fucntion to check if word starts with capital letter
 	def starts_capital(self,s):
 	    if s[0].isupper():
 	       return 1
 	    else:
 	       return 0 
-              
+# function to check if word ends with a period              
 	def ends_with_period(self,s):
 	    if s[:-1] == '.':
 	       return 1
 	    else :
 	       return 0
-              
+# function to check is the word is in Upper case              
 	def all_upper(self,s):
 	    for k in s:
 	        if not k.isupper():
 	            return 0
 	    return 1
-	        
+# function tp check if the word has an internal period/apostrophe/amphasand	        
 	def contains_internal_period(self,s):
 	    return any(char=='.' for char in s)
             
@@ -54,13 +58,15 @@ class Ner_feat_gen():
 	def contains_amphasand(self,s):
 		return any(char=="&" for char in s)  
     
-    
+# function to check if word contains both upper and lower characters    
 	def contains_upper_lower(self,s):
 	    return (any(char.isupper() for char in s) and any(char.islower() for char in s))
         
+#function to check if the word is alphanumeric 
 	def contains_alphanumeric(self,s):
 	    return any(char.isalnum() for char in s)
 
+# this function checks is all word contains only digits
 	def contains_all_num(self,s):
 	    for x in s:
 	        if not x.isdigit():
@@ -70,6 +76,7 @@ class Ner_feat_gen():
 	def contains_digits(self,s):
 		return any(char.isdigit() for char in s)
 
+# checking if the word is of the formn .X where x is any alphabet
 	def containsPInitial(self,s):
 	    if len(s) == 2:
 	    	if s[0] == '.' and s[1].isalpha():
@@ -87,18 +94,23 @@ class Ner_feat_gen():
 	def contains_upper(self,s):
 	    return any(char.isupper() for char in s)
 
+# function to replace all digits in a word with 'D'
+
 	def lexical_f(self,s):
 	    for i in s:
 	        if i.isdigit():
 	            s = s.replace(i,"D")
 	    return s
+
 	def list_PER_isPresent(self,s):
 	    y = '\'s'
 	    if s != y:
 	        if s in self.per_list:
 	            return 1
 	    return 0
-	
+
+# function to generate ortho features	
+
 	def ortho_feature_alphanumeric(self,s):
 	    for i in s:
 	        if i.isdigit():
@@ -106,7 +118,8 @@ class Ner_feat_gen():
 	        elif i.isalpha():
 	            s = s.replace(i,"A")
 	    return s
-	    
+
+# function to check is all charcters are in lower case	    
 	def all_lower(self,s):
 	    for i in s:
 	        if not i.islower():
@@ -119,7 +132,7 @@ class Ner_feat_gen():
 		#print y
 		return 1
 	    return 0
-
+# function to perform binary search in a gazatteer
 	def binarySearch(self,item,alist):
 	    first = 0
 	    last = len(alist)-1
@@ -145,7 +158,8 @@ class Ner_feat_gen():
     	        alist.append(x[1])
 	    c.close()
 	    return alist
-	    
+
+# main function used to obtain the features of a word   
                	
 	def get_ner_feature(self,fv, i, pretag_1, pretag_2,pos_list,chunk_list):
 		word = self.wl[i]
@@ -227,6 +241,8 @@ class Ner_feat_gen():
 		'''
 		fv.append((36,pos_list[i-1],pos_list[i-2]))
 		'''
+
+# function to update those weights whose features match 
 	
 	def get_sent_feature(self, fv, nerlist,pos_list,chunk_list):
 		for i in range(3, len(self.wl)-2):

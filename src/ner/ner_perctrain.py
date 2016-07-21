@@ -1,5 +1,5 @@
-# This is the machine learning algorithm of the Part of Speech Tagger.
-# As of right now, we are using the average perceptron to do the training.
+# This is the machine learning algorithm of the Named Entity Recogniser Tagger.
+# This contains an implementation of both average perceptron method as well as perceptron method
 
 from __future__ import division
 import time,copy,logging
@@ -10,8 +10,6 @@ import ner_features, ner_viterbi, ner_tagset
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
-#from feature import english_1st_fgen
-#from data import data_pool
 from weight import weight_vector
 
 class NerPerceptron():
@@ -23,6 +21,8 @@ class NerPerceptron():
         self.tagset = ner_tagset.read_ner_tagset()
         print "NER [DEBUG]: Trainer Loaded"
 
+# function to perform average perceptron method
+
     def avg_perc_train(self, train_data):
         print "NER [INFO]: Training using the Average Perceptron Method"
         if len(self.tagset) <= 0:
@@ -32,7 +32,7 @@ class NerPerceptron():
         average_vec = defaultdict(float)
         last_iter = {}
         c = 0
-
+	# max_iter is the number of times the training happens on the train data
         for iteration in range(self.max_iter):
             print "NER [INFO]: Iteration number  %d"%iteration
             mistakes = 0
@@ -85,7 +85,7 @@ class NerPerceptron():
         print "NER [DEBUG]: Training is Completed"
         return weight_vec
 
-
+# function to perform perceptron method
 
     def perc_train(self,train_data):
         # insert your code here
@@ -117,13 +117,16 @@ class NerPerceptron():
                             feat_vec[item] += w_delta[item]
         print >>sys.stderr, "number of mistakes:", num_mistakes
         return feat_vec
-    
+
+# function to dump the features into a files after the complete training    
 
     def dump_vector(self, filename, iteration, fv):
         print "NER [INFO]: Dumping weight_vec to " + filename + "_Iter_%d.db"%iteration
         w_vector = weight_vector.WeightVector()
         w_vector.iadd(fv)
         w_vector.dump(filename + "_Iter_%d.db"%iteration)
+
+# function to dump features after evey loop through the training data
 
     def dump_vector_per_iter(self, filename, iteration, weight_vec, last_iter, avg_vec, num_updates):
         print "NER [INFO]: Dumping weight_vec to " + filename + "_Iter_%d.db"%iteration

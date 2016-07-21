@@ -1,7 +1,7 @@
-# These are the shared functions for the POS Tagger.
+
 import os,sys,inspect
 
-# read the valid output tags for the task
+# read the valid output tags for the NER tagging from the file
 def read_ner_tagset():
     file_path = "ner_tagset.txt"
     ner_tagset = []

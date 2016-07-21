@@ -2,6 +2,10 @@
 # Named Entity Recogniser
 # Simon Fraser University
 # NLP Lab
+# NER 
+
+# This is the main programme of the Part of the Named Entitiy Recognition System.
+# Individual modules of the tagger are located in src/ner/
 
 
 from ner import ner_decode, ner_perctrain, ner_features
@@ -34,9 +38,8 @@ class NerTagger():
         self.max_iter = max_iter
         self.default_tag = "O"
     
+# function to load the training and testing data  
     def loading_data(self, data_file):
-        #loc_list = gazateers.LOC_list_formation()
-        #per_list = gazateers.PER_list_formation()
 
         f = open(data_file, 'r')
         f.seek(0)
@@ -52,8 +55,8 @@ class NerTagger():
                 token = line.split()
                 word = token[0]
                 tag  = token[3]
-                p_tag = token[1]
-                ch_tag = token[2]
+                p_tag = token[1] # holds the pos tag
+                ch_tag = token[2] # holds the chunking tag
                 #appends the word at the end of the list
                 sentence.append(word)
                 #appends the tag at the end of the list
@@ -83,6 +86,7 @@ class NerTagger():
                 ner_feat = ner_features.Ner_feat_gen(sentence)
                 #print "tags"+str(tag)
                 gold_out_fv = defaultdict(int)
+		# getiing the gold features for the sentence
                 ner_feat.get_sent_feature(gold_out_fv,tags,pos_tag,chunking_tag)
 
                 data_list.append((sentence,pos_tag,chunking_tag,tags,gold_out_fv))
@@ -97,6 +101,8 @@ class NerTagger():
         print "NER [INFO]: Sentence Number: %d" % sentence_count
         f.close()
         return data_list
+
+# function to load the brown clusters
     
     def load_data(self,brown_file):
         f = open(brown_file,'r')
@@ -109,6 +115,8 @@ class NerTagger():
         f.close()
         return data_list
 
+# function to call the average perceptron algorith implemented in another file 
+ 
     def perc_train(self, dump_data=True):
         #loc_list = gazateers.LOC_list_formation()
         #per_list = gazateers.PER_list_formation()
@@ -117,6 +125,8 @@ class NerTagger():
         #self.w_vector = perc.perc_train(self.train_data)
         if dump_data:
             perc.dump_vector("NER",max_iter,self.w_vector)
+
+# function to calulate the accuracy
 
     def evaluate(self, fv_path=None):
         #loc_list = gazateers.LOC_list_formation()
