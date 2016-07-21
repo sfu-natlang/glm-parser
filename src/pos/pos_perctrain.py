@@ -23,6 +23,18 @@ sys.path.insert(0, parentdir)
 logger = logging.getLogger('LEARNER')
 
 
+def tagger_f_argmax(w_vector, sentence, tagset, default_tag):
+    tagger = pos_viterbi.Viterbi()
+    output = tagger.tag(sentence    = sentence,
+                        w_vector    = w_vector,
+                        tagset      = tagset,
+                        default_tag = default_tag)
+    print output
+    print sentence.get_pos_list()
+    current_global_vector = sentence.get_local_vector(poslist=output)
+    return current_global_vector
+
+
 class PosPerceptron():
 
     def __init__(self,
@@ -40,6 +52,11 @@ class PosPerceptron():
         logger.debug("Trainer Loaded")
 
     def sequential_learn(self, data_pool):
+        import functools
+        f_argmax = functools.partial(tagger_f_argmax,
+                                     tagset=self.tagset,
+                                     default_tag=self.default_tag)
+
         logger.info("Using Average Perceptron Trainer")
         if len(self.tagset) <= 0:
             raise valueError("LEARNER [ERRO]: Empty tagset")
@@ -69,16 +86,10 @@ class PosPerceptron():
 
                 c += 1
 
-                output = argmax.tag(sentence    = sentence,
-                                    w_vector    = w_vec,
-                                    tagset      = self.tagset,
-                                    default_tag = self.default_tag)
+                current_vector = f_argmax(w_vec, sentence)
 
-                if output != sentence.get_pos_list():
+                if current_vector != gold_vector:
                     log_miss += 1
-
-                    # Get current_vector
-                    current_vector = sentence.get_local_vector(poslist=output)
 
                     # Get Delta
                     delta_vector = gold_vector - current_vector
