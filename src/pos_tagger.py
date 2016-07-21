@@ -102,7 +102,7 @@ class PosTagger():
             if shardNum is None:
                 logger.warn("Number of shards not specified, using 1")
                 shardNum = 1
-            if sc is None:
+            if sparkContext is None:
                 raise RuntimeError('TAGGER [ERROR]: SparkContext not specified')
 
             parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
@@ -114,7 +114,7 @@ class PosTagger():
                 learner      = sequentialLearner,
                 d_filename   = weightVectorDumpPath,
                 shards       = shardNum,
-                sc           = sc,
+                sc           = sparkContext,
                 hadoop       = hadoop)
 
         end_time = time.time()

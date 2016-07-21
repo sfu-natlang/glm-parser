@@ -1,0 +1,18 @@
+2016-07-21 00:28:37,129 MAIN [INFO]: Reading configurations from file: config/pos_debug.config
+2016-07-21 00:28:37,131 TAGGER [INFO]: Initialising Tagger
+2016-07-21 00:28:37,131 TAGGER [INFO]: Tag File selected: file://tagset.txt
+2016-07-21 00:28:37,131 TAGGER [INFO]: Initialisation Complete
+2016-07-21 00:28:37,135 DATAPREP [INFO]: Preparing data for wsj_00[0-9][0-9].mrg.3.pa.gs.tab
+2016-07-21 00:28:37,135 DATAPREP [INFO]: Using data from path: file:///Users/jetic/Daten/glm-parser-data/penn-wsj-deps/
+2016-07-21 00:28:37,135 DATAPOOL [INFO]: Loading data...
+2016-07-21 00:28:37,135 DATAPOOL [INFO]: Loading dataFormat from: file://format/penn2malt.format
+2016-07-21 00:28:37,135 DATAPREP [INFO]: Partitioning Data locally
+2016-07-21 00:28:37,169 DATAPREP [INFO]: Copying data to local directory: data/prep/cc6d27b/
+2016-07-21 00:28:37,248 DATAPREP [INFO]: Partition complete
+2016-07-21 00:28:40,157 DATAPOOL [INFO]: Data loaded
+2016-07-21 00:28:40,162 LEARNER [DEBUG]: Initialise AveragePerceptronLearner ... 
+2016-07-21 00:28:40,162 TAGGER [INFO]: Using learner: AveragePerceptronLearner 
+2016-07-21 00:28:40,162 TAGGER [INFO]: Starting Training Process
+2016-07-21 00:28:40,163 TAGGER [INFO]: Using Parallel Training
+2016-07-21 00:28:40,167 LEARNER [DEBUG]: Initialize ParallelPerceptronLearner ... 
+2016-07-21 00:28:40,778 LEARNER [INFO]: Using Averaged Perceptron Learner

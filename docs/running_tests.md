@@ -134,7 +134,7 @@ before submitting a pull request to develop and master branch.
 ###Part 4. Processing The Log Files and Submitting results
 
 One is advised to include ones test environment and all the options involved in
-ones test report alongside the processed log. 
+ones test report alongside the processed log.
 
 And the test environment specs should include:
 
