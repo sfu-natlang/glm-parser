@@ -25,6 +25,8 @@ src/build
 src/*.egg
 src/data/prep
 
+scripts/tests/*.log
+
 *.swp
 *.bak
 *~

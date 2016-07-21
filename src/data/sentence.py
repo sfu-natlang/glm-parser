@@ -256,8 +256,6 @@ class Sentence():
     # ~    return
 
     def convert_list_vector_to_dict(self, fv):
-        if isinstance(fv, FeatureVector):
-            return fv
         ret_fv = FeatureVector()
         for i in fv:
             ret_fv[i] += 1
