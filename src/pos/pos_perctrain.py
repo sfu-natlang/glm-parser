@@ -96,7 +96,7 @@ class PosPerceptron():
 
                             last_iter[i] = c
 
-            logger.info("Iteration completed, number of mistakes:", log_miss)
+            logger.info("Iteration completed, number of mistakes: " + str(log_miss))
             data_pool.reset_index()
 
         logger.debug("Finalising")
@@ -115,7 +115,7 @@ class PosPerceptron():
                     "_Iter_%d.db" % iteration)
         w_vector = WeightVector()
         w_vector.iadd(fv)
-        w_vector.dump("file://" + filename + "_Iter_%d.db" % iteration)
+        w_vector.dump("file://" + filename + "_Iter_%d.db" % (iteration))
 
     def dump_vector_per_iter(self,
                              filename,
