@@ -71,6 +71,8 @@ class WeightVector(mydefaultdict):
 
         for line in f:
             line = line.split("    ")
+            # the key is suppose to be of str types
+            # do NOT change it
             self[line[0]] = float(line[1])
 
     def dump(self, filename, sparkContext=None):
