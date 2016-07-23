@@ -15,8 +15,8 @@ from data.data_pool import DataPool
 from weight.weight_vector import WeightVector
 from logger.loggers import logging, init_logger
 
-from pos import pos_decode, pos_viterbi
-from pos.pos_common import read_tagset
+from evaluate.tagger_evaluator import Evaluator
+from data.pos_tagset_reader import read_tagset
 
 import time
 import os
@@ -36,12 +36,16 @@ logger = logging.getLogger('TAGGER')
 class PosTagger():
     def __init__(self,
                  weightVectorLoadPath = None,
+                 tagger               = "viterbi",
                  tagFile              = "file://tagset.txt",
                  sparkContext         = None):
 
         logger.info("Initialising Tagger")
         self.w_vector = WeightVector(weightVectorLoadPath, sparkContext)
-        self.evaluator = pos_decode.Evaluator()
+        self.evaluator = Evaluator()
+
+        self.tagger = importlib.import_module('tagger.' + tagger).Tagger()
+        logger.info("Using tagger: %s" % (tagger))
 
         self.tagset = read_tagset(tagFile, sparkContext)
         logger.info("Tag File selected: %s" % tagFile)
@@ -76,15 +80,17 @@ class PosTagger():
         logger.info("Using learner: %s " % (sequentialLearner.name))
 
         # Prepare the suitable argmax
-        def tagger_f_argmax(w_vector, sentence, tagset, default_tag):
-            tagger = pos_viterbi.Viterbi()
+        def tagger_f_argmax(w_vector, sentence, tagger, tagset, default_tag):
             output = tagger.tag(sentence    = sentence,
                                 w_vector    = w_vector,
                                 tagset      = tagset,
                                 default_tag = default_tag)
             current_global_vector = sentence.convert_list_vector_to_dict(sentence.get_local_vector(poslist=output))
             return current_global_vector
-        f_argmax = functools.partial(tagger_f_argmax, tagset=self.tagset, default_tag=self.default_tag)
+        f_argmax = functools.partial(tagger_f_argmax,
+                                     tagger=self.tagger,
+                                     tagset=self.tagset,
+                                     default_tag=self.default_tag)
 
         # Start Training Process
         logger.info("Starting Training Process")
@@ -128,18 +134,20 @@ class PosTagger():
             raise ValueError("TAGGER [ERROR]: dataPool for evaluation is not an DataPool object")
         self.evaluator.evaluate(data_pool = dataPool,
                                 w_vector  = self.w_vector,
-                                tagset    = self.tagset)
+                                tagger    = self.tagger,
+                                tagset    = self.tagset,
+                                sc        = sparkContext,
+                                hadoop    = hadoop)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
     def getTags(self, sentence):
         import feature.pos_fgen
 
-        argmax = pos_viterbi.Viterbi()
         inital_fgen = sentence.fgen
 
         sentence.load_fgen(feature.pos_fgen.FeatureGenerator)
-        pos_list = argmax.tag(sentence, self.w_vector, self.tagset, "NN")
+        pos_list = self.tagger.tag(sentence, self.w_vector, self.tagset, "NN")
         sentence.load_fgen(inital_fgen)
 
         return pos_list[2:]
@@ -158,6 +166,7 @@ if __name__ == '__main__':
         'spark_shards':      1,
         'prep_path':         'data/prep',
         'learner':           'average_perceptron',
+        'tagger':            'viterbi',
         'feature_generator': 'english_1st_fgen',
         'format':            'format/penn2malt.format',
         'tag_file':          None
@@ -190,6 +199,15 @@ if __name__ == '__main__':
         arg_parser.add_argument('--learner',
             choices=['average_perceptron', 'perceptron'],
             help="""specify a learner for weight vector training""")
+        arg_parser.add_argument('--tagger',
+            choices=['viterbi'],
+            help="""specify the tagger using tagger module name (i.e. .py file
+            name without suffix).
+
+            Currently we only have one tagger: viterbi.
+
+            default "viterbi"
+            """)
         arg_parser.add_argument('--format', metavar='FORMAT_FILE',
             help="""specify the format file for the training and testing files.
             Officially supported format files are located in src/format/
@@ -286,7 +304,7 @@ if __name__ == '__main__':
             if config_parser.get('option', int_option) != '':
                 config[int_option] = config_parser.getint('option', int_option)
 
-        for option in ['learner', 'feature_generator']:
+        for option in ['learner', 'feature_generator', 'tagger']:
             if config_parser.get('core', option) != '':
                 config[option] = config_parser.get('core', option)
 
@@ -323,6 +341,7 @@ if __name__ == '__main__':
 
     # Initialise Tagger
     pt = PosTagger(weightVectorLoadPath = config['load_weight_from'],
+                   tagger               = config['tagger'],
                    tagFile              = config['tag_file'],
                    sparkContext         = sparkContext)
 

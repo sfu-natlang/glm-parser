@@ -15,7 +15,7 @@ from data.data_pool import DataPool
 from weight.weight_vector import WeightVector
 from logger.loggers import logging, init_logger
 
-from evaluate.evaluator import Evaluator
+from evaluate.parser_evaluator import Evaluator
 from pos_tagger import PosTagger
 
 import time

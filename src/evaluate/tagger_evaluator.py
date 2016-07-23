@@ -1,17 +1,5 @@
-import os
-import sys
-import inspect
-import time
-import pos_viterbi
-import logging
-from pos_common import read_tagset
-
-gottenFile = inspect.getfile(inspect.currentframe())
-currentdir = os.path.dirname(os.path.abspath(gottenFile))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
-logger = logging.getLogger('EVALUATOR')
+from evaluate import logger
+from data.pos_tagset_reader import read_tagset
 
 
 class Evaluator():
@@ -20,7 +8,7 @@ class Evaluator():
         self.gold_set_size = 0
         return
 
-    def evaluate(self, data_pool, w_vector, tagset):
+    def evaluate(self, data_pool, tagger, w_vector, tagset, sc=None, hadoop=None):
         self.correct_num = 0
         self.gold_set_size = 0
 
@@ -35,21 +23,20 @@ class Evaluator():
                     correct_num += 1
             return correct_num, len(gold_list)
 
-        argmax = pos_viterbi.Viterbi()
-
         logger.debug("Start evaluating ...")
         sentence_count = 1
         data_size = len(data_pool.data_list)
         while data_pool.has_next_data():
             sent = data_pool.get_next_data()
 
-            logger.info("Sentence %d of %d, Length %d" % (
-                sentence_count,
-                data_size,
-                len(sent.get_word_list()) - 1))
+            if not hadoop:
+                logger.info("Sentence %d of %d, Length %d" % (
+                    sentence_count,
+                    data_size,
+                    len(sent.get_word_list()) - 1))
             sentence_count += 1
 
-            output = argmax.tag(sent, w_vector, tagset, "NN")
+            output = tagger.tag(sent, w_vector, tagset, "NN")
 
             cnum, gnum = sent_evaluate(output, sent.get_pos_list())
 

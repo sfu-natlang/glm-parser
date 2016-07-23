@@ -1,22 +1,9 @@
 from __future__ import division
-import os
-import sys
-import inspect
-import copy
 import operator
-import optparse
-import logging
-from collections import defaultdict
-
-gottenFile = inspect.getfile(inspect.currentframe())
-currentdir = os.path.dirname(os.path.abspath(gottenFile))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
-logger = logging.getLogger('TAGGER')
+from tagger import logger
 
 
-class Viterbi():
+class Tagger():
     def __init__(self, w_vector=None):
         self.w_vector = w_vector
 
@@ -68,7 +55,6 @@ class Viterbi():
                     # features
                     for feat in feats:
                         if str(feat + (tag,)) in w_vector:
-                            # logger.debug(str(feat) + str(tag) + str(w_vector[feat, tag]))
                             weight += w_vector[str(feat + (tag,))]
                     prev_tag_weight = weight
                     prev_list.append((prev_tag_weight + prev_value, prev_tag))
