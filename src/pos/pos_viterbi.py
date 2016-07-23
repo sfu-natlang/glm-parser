@@ -67,9 +67,9 @@ class Viterbi():
                     # sum up the weights for all features except the bigram
                     # features
                     for feat in feats:
-                        if feat + (tag,) in w_vector:
+                        if str(feat + (tag,)) in w_vector:
                             # logger.debug(str(feat) + str(tag) + str(w_vector[feat, tag]))
-                            weight += w_vector[feat + (tag,)]
+                            weight += w_vector[str(feat + (tag,))]
                     prev_tag_weight = weight
                     prev_list.append((prev_tag_weight + prev_value, prev_tag))
                 (best_weight, backpointer) = sorted(prev_list,

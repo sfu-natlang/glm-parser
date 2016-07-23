@@ -10,6 +10,7 @@ rm -f ../docs/*.log
 rm -f ../docs/*.aux
 rm -f ../docs/*.pdf
 rm -f ../src/*.log
+rm -f ../src/*.log.bak
 rm -f ../src/feature/english_1st_fgen.c
 rm -f ../src/feature/english_2nd_fgen.c
 rm -f ../src/feature/feature_generator_base.c
