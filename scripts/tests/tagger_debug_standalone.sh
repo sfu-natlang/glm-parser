@@ -15,4 +15,4 @@ spark-submit --driver-memory 4g   \
 
 ../scripts/proc_log.sh pos_tagger.log
 
-mv pos_tagger.log ../scripts/tests/tagger_debug_standalone_perceptron.log
+mv pos_tagger.log ../scripts/tests/tagger_debug_standalone.log

@@ -82,6 +82,8 @@ class PosTagger():
                                 w_vector    = w_vector,
                                 tagset      = tagset,
                                 default_tag = default_tag)
+            print output
+            print sentence.get_pos_list()
             current_global_vector = sentence.convert_list_vector_to_dict(sentence.get_local_vector(poslist=output))
             return current_global_vector
         f_argmax = functools.partial(tagger_f_argmax, tagset=self.tagset, default_tag=self.default_tag)

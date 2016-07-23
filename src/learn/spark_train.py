@@ -126,10 +126,10 @@ class ParallelPerceptronLearner():
         if d_filename is not None:
             if hadoop is False:
                 logger.info("Dumping trained weight vector to local directory: " +
-                       os.path.abspath(os.path.expanduser(d_filename)))
-                self.w_vector.dump(os.path.abspath(os.path.expanduser(d_filename)) + "_Iter_%d.db" % max_iter)
+                       d_filename)
+                self.w_vector.dump(d_filename + "_Iter_%d.db" % max_iter)
             else:
-                logger.info("Dumping trained weight vector to HDFS")
+                logger.info("Dumping trained weight vector")
                 contents = []
                 for k, v in w_vector.iteritems():
                     contents.append(str(k) + "    " + str(v) + "\n")

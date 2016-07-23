@@ -137,7 +137,7 @@ class Learner(object):
     def dump_vector(self, d_filename, i):
         d_vector = WeightVector()
         self.avg_weight(d_vector, self.c - 1)
-        d_vector.dump(d_filename + "_Iter_%d.db" % i)
+        d_vector.dump(d_filename + "_Iter_%d.db" % (i + 1))
         d_vector.clear()
 
     def parallel_learn(self, dp, fv, f_argmax):
