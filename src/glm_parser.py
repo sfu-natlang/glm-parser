@@ -43,7 +43,7 @@ class GlmParser():
         self.w_vector = WeightVector(weightVectorLoadPath, sparkContext)
         self.evaluator = Evaluator()
 
-        self.parser = importlib.import_module('parse.' + parser).EisnerParser()
+        self.parser = importlib.import_module('parser.' + parser).EisnerParser()
         logger.info("Using parser: %s" % (parser))
 
         logger.info("Initialisation Complete")
@@ -69,9 +69,9 @@ class GlmParser():
             raise ValueError("PARSER [ERROR]: Learner not specified")
 
         if parallel:
-            sequentialLearner = importlib.import_module('learn.' + learner).Learner()
+            sequentialLearner = importlib.import_module('learner.' + learner).Learner()
         else:
-            sequentialLearner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
+            sequentialLearner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
         logger.info("Using learner: %s " % (sequentialLearner.name))
 
         # Prepare the suitable argmax
@@ -100,7 +100,7 @@ class GlmParser():
             if sparkContext is None:
                 raise RuntimeError('PARSER [ERROR]: SparkContext not specified')
 
-            parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
+            parallelLearnClass = importlib.import_module('learner.spark_train').ParallelPerceptronLearner
             parallelLearner = parallelLearnClass(self.w_vector, maxIteration)
             self.w_vector = parallelLearner.parallel_learn(
                 max_iter     = maxIteration,

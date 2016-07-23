@@ -74,9 +74,9 @@ class PosTagger():
 
         # Load Learner
         if parallel:
-            sequentialLearner = importlib.import_module('learn.' + learner).Learner()
+            sequentialLearner = importlib.import_module('learner.' + learner).Learner()
         else:
-            sequentialLearner = importlib.import_module('learn.' + learner).Learner(self.w_vector)
+            sequentialLearner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
         logger.info("Using learner: %s " % (sequentialLearner.name))
 
         # Prepare the suitable argmax
@@ -111,7 +111,7 @@ class PosTagger():
             if sparkContext is None:
                 raise RuntimeError('TAGGER [ERROR]: SparkContext not specified')
 
-            parallelLearnClass = importlib.import_module('learn.spark_train').ParallelPerceptronLearner
+            parallelLearnClass = importlib.import_module('learner.spark_train').ParallelPerceptronLearner
             parallelLearner = parallelLearnClass(self.w_vector, maxIteration)
             self.w_vector = parallelLearner.parallel_learn(
                 max_iter     = maxIteration,
@@ -200,13 +200,11 @@ if __name__ == '__main__':
             choices=['average_perceptron', 'perceptron'],
             help="""specify a learner for weight vector training""")
         arg_parser.add_argument('--tagger',
-            choices=['viterbi'],
+            choices=['viterbi', 'viterbi_pruning'],
             help="""specify the tagger using tagger module name (i.e. .py file
             name without suffix).
 
-            Currently we only have one tagger: viterbi.
-
-            default "viterbi"
+            default "viterbi"; alternative "viterbi_pruning"
             """)
         arg_parser.add_argument('--format', metavar='FORMAT_FILE',
             help="""specify the format file for the training and testing files.

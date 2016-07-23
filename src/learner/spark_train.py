@@ -11,7 +11,7 @@ import re
 import importlib
 from os.path import isfile, join, isdir
 from pyspark import SparkContext
-from learn import logger
+from learner import logger
 
 
 class ParallelPerceptronLearner():

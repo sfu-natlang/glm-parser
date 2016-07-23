@@ -4,7 +4,7 @@ from weight.weight_vector import WeightVector
 
 import debug.debug
 import time
-from learn import logger
+from learner import logger
 
 
 class Learner(object):
