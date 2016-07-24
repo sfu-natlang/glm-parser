@@ -74,10 +74,12 @@ class ParallelPerceptronLearner():
                                                  format       = format_list,
                                                  comment_sign = comment_sign)).cache()
 
+        fv = {}
+        total_sent = dp.map(get_sent_num).sum()
+        logger.info("Totel number of sentences: %d" % total_sent)
+
         if learner.name == "AveragePerceptronLearner":
             logger.info("Using Averaged Perceptron Learner")
-            fv = {}
-            total_sent = dp.map(get_sent_num).sum()
             c = total_sent * max_iter
             for iteration in range(max_iter):
                 logger.info("Starting Iteration %d" % iteration)
@@ -102,7 +104,6 @@ class ParallelPerceptronLearner():
 
         if learner.name == "PerceptronLearner":
             logger.info("Using Perceptron Learner")
-            fv = {}
             for iteration in range(max_iter):
                 logger.info("Starting Iteration %d" % iteration)
                 logger.info("Initial Number of Keys: %d" % len(fv.keys()))
