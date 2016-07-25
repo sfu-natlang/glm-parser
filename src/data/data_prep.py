@@ -173,10 +173,12 @@ class DataPrep():
         '''
         if self.sc is None:
             raise RuntimeError('DATAPREP [ERROR]: SparkContext not initialised')
-        tmp = self.dataURI + "*/" + self.dataRegex
+        dataList = re.split("\||,|\s+", self.dataRegex)
+        for i in range(len(dataList)):
+            dataList[i] = self.dataURI + "*/" + dataList[i]
         if self.debug:
-            logger.info("Using regular expression for files: " + tmp)
-        aRdd = self.sc.textFile(tmp).cache()
+            logger.info("Using regular expression for files: " + str(dataList))
+        aRdd = self.sc.textFile(','.join(dataList)).cache()
 
         hashCode = hashlib.md5(self.dataURI + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
