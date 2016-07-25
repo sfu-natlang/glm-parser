@@ -396,8 +396,12 @@ if __name__ == "__main__":
     else:
         tagger = None
 
+    logger.info("Using feature generator: %s " % config['feature_generator'])
+    logger.info("Using data from: %s " % config['data_path'])
+
     # Run training
     if config['train']:
+        logger.info("Training data sections: %s" % config['train'])
         trainDataPool = DataPool(section_regex = config['train'],
                                  data_path     = config['data_path'],
                                  fgen          = config['feature_generator'],
@@ -406,6 +410,7 @@ if __name__ == "__main__":
                                  sc            = sparkContext,
                                  hadoop        = yarn_mode)
 
+        logger.info("Total training iterations: %d" % config['iterations'])
         gp.train(dataPool             = trainDataPool,
                  maxIteration         = config['iterations'],
                  weightVectorDumpPath = config['dump_weight_to'],
@@ -417,6 +422,7 @@ if __name__ == "__main__":
 
     # Run evaluation
     if config['test']:
+        logger.info("Testing data sections: %s" % config['test'])
         testDataPool = DataPool(section_regex = config['test'],
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],
