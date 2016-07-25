@@ -17,4 +17,4 @@ cd hvector
 python setup.py install --install-lib .
 
 cd ..
-spark-submit --driver-memory 4g --executor-memory 4g --master 'local[*]' glm_parser.py -s 4 -i 1 --tagger-w-vector ~/ownCloud/Daten/fv_Iter_5.db config/default.config
+spark-submit --driver-memory 4g --executor-memory 4g --master 'local[*]' glm_parser.py -s 4 -i 1 config/default.config

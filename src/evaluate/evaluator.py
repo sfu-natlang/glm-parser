@@ -2,7 +2,8 @@ from __future__ import division
 from pos_tagger import PosTagger
 import logging
 
-logger = logging.getLogger('PARSER')
+logger = logging.getLogger('EVALUATOR')
+
 
 class Evaluator():
     def __init__(self):
@@ -37,13 +38,19 @@ class Evaluator():
 
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, w_vector, tagger=None):
+    def evaluate(self, data_pool, parser, w_vector, tagger=None, sc=None, hadoop=None):
         logger.debug("Start evaluating ...")
         sentence_count = 1
+        data_size = len(data_pool.data_list)
         while data_pool.has_next_data():
-            # print "Processing Sentence " + str(sentence_count)
-            sentence_count += 1
             sent = data_pool.get_next_data()
+
+            if not hadoop:
+                logger.info("Sentence %d of %d, Length %d" % (
+                    sentence_count,
+                    data_size,
+                    len(sent.get_word_list()) - 1))
+            sentence_count += 1
 
             logger.debug("data instance: ")
             logger.debug(sent.get_word_list())

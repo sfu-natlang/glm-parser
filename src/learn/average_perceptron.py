@@ -4,9 +4,7 @@ from weight.weight_vector import WeightVector
 
 import debug.debug
 import time
-import logging
-
-logger = logging.getLogger('PARSER')
+from learn import logger
 
 
 class Learner(object):
@@ -21,7 +19,7 @@ class Learner(object):
          Could be overridden by parameter max_iter in the method
         :return: None
         """
-        logger.debug("Initialize AveragePerceptronLearner ... ")
+        logger.debug("Initialise AveragePerceptronLearner ... ")
         self.w_vector = w_vector
         self.max_iter = max_iter
 
@@ -34,8 +32,8 @@ class Learner(object):
     def sequential_learn(self, f_argmax, data_pool=None, max_iter=-1, d_filename=None, dump_freq = 1):
         if max_iter <= 0:
             max_iter = self.max_iter
-
-        logger.info("Starting sequential train ... ")
+        data_size = len(data_pool.data_list)
+        logger.debug("Starting sequential train ... ")
 
         # sigma_s
         self.weight_sum_dict.clear()
@@ -44,20 +42,26 @@ class Learner(object):
 
         # for t = 1 ... T
         for t in range(max_iter):
-            logger.info("Iteration: %d" % t)
-            logger.debug("Data size: %d" % len(data_pool.data_list))
+            logger.debug("Iteration %d" % t)
             sentence_count = 1
             argmax_time_total = 0.0
 
             # for i = 1 ... m
             while data_pool.has_next_data():
-                logger.info("Iteration: %d, Sentence %d" % (t, sentence_count))
-                sentence_count += 1
-                # Calculate yi' = argmax
+                # Retrieve data
                 data_instance = data_pool.get_next_data()
                 gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
 
+                logger.info("Iteration %d, Sentence %d of %d, Length %d" % (
+                    t,
+                    sentence_count,
+                    data_size,
+                    len(data_instance.get_word_list()) - 1))
+                sentence_count += 1
+
+                # argmax
                 if debug.debug.time_accounting_flag is True:
+                    # with timer
                     before_time = time.clock()
                     current_global_vector = f_argmax(self.w_vector, data_instance)
                     after_time = time.clock()
@@ -65,9 +69,8 @@ class Learner(object):
                     argmax_time_total += time_usage
                     logger.info("Sentence length: %d" % (len(data_instance.get_word_list()) - 1))
                     logger.info("Time usage: %f" % (time_usage, ))
-                    logger.info("Time usage %f" % (time_usage, ))
                 else:
-                    # Just run the procedure without any interference
+                    # without timer
                     current_global_vector = f_argmax(self.w_vector, data_instance)
 
                 delta_global_vector = gold_global_vector - current_global_vector
@@ -102,7 +105,7 @@ class Learner(object):
                 # If exceeds the value set in debug config file, just stop and exit
                 # immediately
                 if sentence_count > debug.debug.run_first_num > 0:
-                    logger.debug("Average time for each sentence: %f" % (argmax_time_total / debug.debug.run_first_num))
+                    logger.info("Average time for each sentence: %f" % (argmax_time_total / debug.debug.run_first_num))
                     data_pool.reset_index()
                     sentence_count = 1
                     argmax_time_total = 0.0

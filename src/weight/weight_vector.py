@@ -10,7 +10,7 @@
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
 from ast import literal_eval
-from data.file_io import *
+from data.file_io import fileRead, fileWrite
 import logging
 
 logger = logging.getLogger('WEIGHTVECTOR')
@@ -65,7 +65,7 @@ class WeightVector(mydefaultdict):
 
         Parameter is the same as constructor (__init__).
         """
-        logger.debug("Loading Weight Vector from %s " % filename)
+        logger.info("Loading Weight Vector from %s " % filename)
 
         f = fileRead(filename, sparkContext)
 
@@ -81,11 +81,9 @@ class WeightVector(mydefaultdict):
         if filename is None:
             logger.info("Skipping dump ...")
             return
-
-        logger.debug("Dumping Weight Vector to %s " % filename)
-        logger.debug("Total Feature Num: %d " % len(self))
-
         f = []
         for k, v in self.iteritems():
             f.append(str(k) + "    " + str(v))
-        fileWrite(filename, f, sparkContext)
+
+        logger.info("Dumping Weight Vector to %s " % fileWrite(filename, f, sparkContext))
+        logger.info("Total Feature Num: %d " % len(self))
