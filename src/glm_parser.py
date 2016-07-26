@@ -75,6 +75,26 @@ class GlmParser():
                         self.pos_dict[word] += [pos_list[index]]
         data_pool.reset_index()
 
+    def multi_tag(self, data_pool=None, tagger=None):
+        if data_pool is None:
+            return
+        if tagger is None:
+            return
+        while data_pool.has_next_data():
+            sent = data_pool.get_next_data()
+            word_list = sent.get_word_list()
+            new_pos_list = []
+            tagger_prediction = []
+            for index, word in enumerate(word_list):
+                if word in self.pos_dict:
+                    new_pos_list.append(self.pos_dict[word])
+                else:
+                    if tagger_prediction == []:
+                        tagger_prediction = tagger.getTags(
+                                ['_B_-2', '_B_-1'] + sent.get_word_list()[1:] +
+                                ['_B_+1', '_B_+2'])
+                    new_pos_list.append([tagger_prediction[index]])
+                    sent.set_pos_list(new_pos_list)
 
     def train(self,
               dataPool             = None,
@@ -423,6 +443,10 @@ if __name__ == "__main__":
                                  sc            = sparkContext,
                                  hadoop        = yarn_mode)
 
+        if tagger is not None:
+            gp.init_pos_dict(trainDataPool)
+            gp.multi_tag(trainDataPool, tagger)
+
         gp.train(dataPool             = trainDataPool,
                  maxIteration         = config['iterations'],
                  weightVectorDumpPath = config['dump_weight_to'],
@@ -440,6 +464,9 @@ if __name__ == "__main__":
                                 format_path   = config['format'],
                                 sc            = sparkContext,
                                 hadoop        = yarn_mode)
+
+        if tagger is not None:
+            gp.multi_tag(testDataPool, tagger)
 
         gp.evaluate(dataPool = testDataPool,
                     tagger   = tagger,
