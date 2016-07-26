@@ -1,4 +1,6 @@
 import logging
+import os.path
+from data.data_pool import DataPool
 from weight.weight_vector import WeightVector
 logger = logging.getLogger('EVALUATOR')
 
@@ -42,9 +44,10 @@ class EvaluatorBase:
         w_vector = WeightVector()
         for key in weight_vector:
             w_vector[key] = weight_vector[key]
-
-        unlabeled_correct_num = 0
-        unlabeled_gold_set_size = 0
+        val = {
+            'unlabeled_correct_num': 0,
+            'unlabeled_gold_set_size': 0
+        }
 
         sentence_count = 1
         data_size = data_pool.get_sent_num()
@@ -62,11 +65,11 @@ class EvaluatorBase:
             correct_num, gold_set_size = \
                 sentence_evaluator(sent, w_vector)
 
-            unlabeled_correct_num += correct_num
-            unlabeled_gold_set_size += gold_set_size
-            print correct_num, gold_set_size, unlabeled_correct_num, unlabeled_gold_set_size
+            val['unlabeled_correct_num'] += correct_num
+            val['unlabeled_gold_set_size'] += gold_set_size
+
         data_pool.reset_index()
-        return unlabeled_correct_num, unlabeled_gold_set_size
+        return val.items()
 
     def sequentialEvaluate(self,
                            data_pool,
@@ -82,12 +85,12 @@ class EvaluatorBase:
         for key in w_vector.keys():
             wv[key] = w_vector[key]
 
-        self.unlabeled_correct_num, self.unlabeled_gold_set_size =\
-            self.__datapool_evaluator(data_pool=data_pool,
-                                      weight_vector=wv,
-                                      sentence_evaluator=sentence_evaluator,
-                                      hadoop=hadoop)
-
+        val = self.__datapool_evaluator(data_pool=data_pool,
+                                        weight_vector=wv,
+                                        sentence_evaluator=sentence_evaluator,
+                                        hadoop=hadoop)
+        self.unlabeled_correct_num = val[0][1]
+        self.unlabeled_gold_set_size = val[1][1]
         self.__print_result(w_vector, data_pool)
         return
 
@@ -110,10 +113,10 @@ class EvaluatorBase:
 
         logger.debug("Start evaluating ...")
 
-        dir_name     = dataPool.loadedPath()
-        format_list  = dataPool.format_list
-        comment_sign = dataPool.comment_sign
-        fgen         = dataPool.fgen
+        dir_name     = data_pool.loadedPath()
+        format_list  = data_pool.format_list
+        comment_sign = data_pool.comment_sign
+        fgen         = data_pool.fgen
 
         sc = sparkContext
 
@@ -123,10 +126,10 @@ class EvaluatorBase:
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
             test_files = sc.wholeTextFiles("file://" + dir_name, minPartitions=10).cache()
 
-        dp = test_files.map(lambda t: data_pool.DataPool(textString   = t[1],
-                                                         fgen         = fgen,
-                                                         format       = format_list,
-                                                         comment_sign = comment_sign)).cache()
+        dp = test_files.map(lambda t: DataPool(textString   = t[1],
+                                               fgen         = fgen,
+                                               format_list  = format_list,
+                                               comment_sign = comment_sign)).cache()
         wv = {}
         for key in w_vector.keys():
             wv[key] = w_vector[key]
@@ -137,7 +140,14 @@ class EvaluatorBase:
                                                             weight_vector      = wv,
                                                             sentence_evaluator = sentence_evaluator))
 
-        self.unlabeled_correct_num, self.unlabeled_gold_set_size = \
-            dp.reduce(lambda a, b: (a[0] + b[0], a[1] + b[1])).collect()
+        val = dp.combineByKey(
+            lambda value: (value, 1),
+            lambda x, value: (x[0] + value, x[1] + 1),
+            lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
 
+        for (a, (b, c)) in val:
+            if a == "unlabeled_correct_num":
+                self.unlabeled_correct_num = b
+            else:
+                self.unlabeled_gold_set_size = b
         self.__print_result(w_vector, data_pool)
