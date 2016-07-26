@@ -9,35 +9,15 @@ class Evaluator():
         self.unlabeled_gold_set_size = 0
         return
 
-    def get_statistics(self):
-        return self.unlabeled_correct_num, self.unlabeled_gold_set_size
+    def __evaluate_on_datapool(data_pool, weight_vector, parser, tagger, hadoop=None):
+        w_vector = WeightVector()
+        for key in weight_vector.keys():
+            w_vector[key] = weight_vector[key]
 
-    def _sent_unlabeled_accuracy(self, result_edge_set, gold_edge_set):
-        if isinstance(result_edge_set, list):
-            result_edge_set = set(result_edge_set)
+        unlabeled_correct_num = 0
+        unlabeled_gold_set_size = 0
 
-        if isinstance(gold_edge_set, list):
-            gold_edge_set = set(gold_edge_set)
-
-        intersect_set = result_edge_set.intersection(gold_edge_set)
-        correct_num = len(intersect_set)
-        gold_set_size = len(gold_edge_set)
-
-        logger.debug("result edge set: ")
-        logger.debug(result_edge_set)
-        logger.debug("gold edge set: ")
-        logger.debug(gold_edge_set)
-        logger.debug("##############")
-
-        return correct_num, gold_set_size
-
-    def evaluate(self, data_pool, parser, w_vector, tagger=None, sc=None, hadoop=None):
-        self.unlabeled_correct_num = 0
-        self.unlabeled_gold_set_size = 0
-
-        logger.debug("Start evaluating ...")
         sentence_count = 1
-        data_size = len(data_pool.data_list)
         while data_pool.has_next_data():
             sent = data_pool.get_next_data()
 
@@ -48,10 +28,6 @@ class Evaluator():
                     len(sent.get_word_list()) - 1))
             sentence_count += 1
 
-            logger.debug("data instance: ")
-            logger.debug(sent.get_word_list())
-            logger.debug(sent.get_edge_list())
-
             gold_edge_set = \
                 set([(head_index, dep_index) for head_index, dep_index, _ in sent.get_edge_list()])
 
@@ -59,55 +35,116 @@ class Evaluator():
             test_edge_set = \
                 parser.parse(sent, w_vector.get_vector_score, tagger)
 
-            self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
+            if isinstance(test_edge_set, list):
+                test_edge_set = set(test_edge_set)
+
+            if isinstance(gold_edge_set, list):
+                gold_edge_set = set(gold_edge_set)
+
+            intersect_set = test_edge_set.intersection(gold_edge_set)
+            correct_num = len(intersect_set)
+            gold_set_size = len(gold_edge_set)
+
+            unlabeled_correct_num += correct_num
+            unlabeled_gold_set_size += gold_set_size
         data_pool.reset_index()
+        return unlabeled_correct_num, unlabeled_gold_set_size
 
+    def __print_result(w_vector, data_pool):
         logger.info("Feature count: %d" % len(w_vector.keys()))
-        logger.info("Unlabeled accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
-        self.unlabeled_attachment_accuracy(data_pool.get_sent_num())
-        logger.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (self.get_acc_unlabeled_accuracy(), self.unlabeled_correct_num, self.unlabeled_gold_set_size))
+        logger.info("Unlabeled accuracy: %.12f (%d, %d)" % (
+            self.unlabeled_correct_num / self.unlabeled_gold_set_size,
+            self.unlabeled_correct_num,
+            self.unlabeled_gold_set_size))
 
-    def unlabeled_accuracy(self, result_edge_set, gold_edge_set, accumulate=False):
-        """
-        calculate unlabeled accuracy of the glm-parser
-        unlabeled accuracy = # of corrected edges in result / # of all corrected edges
-
-        :param result_edge_set: the edge set that needs to be evaluated
-        :type result_edge_set: list/set
-
-        :param gold_edge_set: the gold edge set used for evaluating
-        :type gold_edge_set: list/set
-
-        :param accumulate:  True -- if evaluation result needs to be remembered
-                            False (default) -- if result does not needs to be remembered
-        :type accumulate: boolean
-
-        :return: the unlabeled accuracy
-        :rtype: float
-        """
-        correct_num, gold_set_size =\
-            self._sent_unlabeled_accuracy(result_edge_set, gold_edge_set)
-
-        if accumulate is True:
-            self.unlabeled_correct_num += correct_num
-            self.unlabeled_gold_set_size += gold_set_size
-            logger.debug("Correct_num: %d, Gold set size: %d, Unlabeled correct: %d, Unlabeled gold set size: %d" % (correct_num, gold_set_size, self.unlabeled_correct_num, self.unlabeled_gold_set_size))
-
-        # WARNING: this function returns a value but the caller does not use it!
-        return correct_num / gold_set_size
-
-    def get_acc_unlabeled_accuracy(self):
-        return self.unlabeled_correct_num / self.unlabeled_gold_set_size
-
-    def unlabeled_attachment_accuracy(self, sent_num):
-        """
-        calculate unlabled attachment accuracy of glm-parser
+        """  calculate unlabled attachment accuracy of glm-parser
         unlabeled attachment accuracy = # of corrected tokens in result / # of all corrected tokens
         # of corrected tokens in result = # of corrected edges in result + # of sentences in data set
         # of all corrected tokens = # of all corrected edges + # of sentences in data set
         """
+        self.unlabeled_correct_num += data_pool.get_sent_num()
+        self.unlabeled_gold_set_size += data_pool.get_sent_num()
 
-        self.unlabeled_correct_num += sent_num
-        self.unlabeled_gold_set_size += sent_num
-
+        logger.info("Unlabeled attachment accuracy: %.12f (%d, %d)" % (
+            self.unlabeled_correct_num / self.unlabeled_gold_set_size,
+            self.unlabeled_correct_num,
+            self.unlabeled_gold_set_size))
         return
+
+    def sequentialEvaluate(self,
+                           data_pool,
+                           parser,
+                           w_vector,
+                           tagger=None,
+                           sparkContext=None,
+                           hadoop=None):
+
+        self.unlabeled_correct_num = 0
+        self.unlabeled_gold_set_size = 0
+
+        logger.debug("Start evaluating ...")
+        wv = {}
+        for key in w_vector.keys():
+            wv[key] = w_vector[key]
+
+        self.unlabeled_correct_num, self.unlabeled_gold_set_size =\
+            __evaluate_on_datapool(data_pool=data_pool,
+                                   weight_vector=wv,
+                                   parser=parser,
+                                   tagger=tagger,
+                                   hadoop=hadoop)
+
+        self.__print_result(w_vector, data_pool)
+
+    def parallelEvaluate(self,
+                         data_pool,
+                         parser,
+                         w_vector,
+                         tagger=None,
+                         sparkContext=None,
+                         hadoop=None):
+
+        def create_dp(textString, fgen, format, comment_sign):
+            dp = data_pool.DataPool(textString   = textString[1],
+                                    fgen         = fgen,
+                                    format_list  = format,
+                                    comment_sign = comment_sign)
+            return dp
+
+        self.unlabeled_correct_num = 0
+        self.unlabeled_gold_set_size = 0
+
+        logger.debug("Start evaluating ...")
+
+        dir_name     = dataPool.loadedPath()
+        format_list  = dataPool.format_list
+        comment_sign = dataPool.comment_sign
+        fgen         = dataPool.fgen
+
+        sc = sparkContext
+
+        if hadoop is True:
+            test_files = sc.wholeTextFiles(dir_name, minPartitions=10).cache()
+        else:
+            dir_name = os.path.abspath(os.path.expanduser(dir_name))
+            test_files = sc.wholeTextFiles("file://" + dir_name, minPartitions=10).cache()
+
+        dp = test_files.map(lambda t: data_pool.DataPool(textString   = t[1],
+                                                         fgen         = fgen,
+                                                         format       = format_list,
+                                                         comment_sign = comment_sign)).cache()
+        wv = {}
+        for key in w_vector.keys():
+            wv[key] = w_vector[key]
+
+        total_sent = dp.map(lambda dp: dp.get_sent_num()).sum()
+        logger.info("Totel number of sentences: %d" % total_sent)
+        dp = dp.flatMap(lambda t: __evaluate_on_datapool(data_pool     = t,
+                                                         weight_vector = wv,
+                                                         parser        = parser,
+                                                         tagger        = tagger))
+
+        self.unlabeled_correct_num, self.unlabeled_gold_set_size = \
+            dp.reduce(lambda a, b: (a[0] + b[0], a[1] + b[1])).collect()
+
+        self.__print_result(w_vector, data_pool)

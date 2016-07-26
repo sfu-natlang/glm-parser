@@ -116,17 +116,28 @@ class GlmParser():
         logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
         return
 
-    def evaluate(self, dataPool=None, tagger=None, sparkContext=None, hadoop=None):
+    def evaluate(self, dataPool=None, tagger=None, parallel=False, sparkContext=None, hadoop=None):
         logger.info("Starting evaluation process")
         start_time = time.time()
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for evaluation is not an DataPool object")
-        self.evaluator.evaluate(data_pool = dataPool,
-                                parser    = self.parser,
-                                w_vector  = self.w_vector,
-                                tagger    = tagger,
-                                sc        = sparkContext,
-                                hadoop    = hadoop)
+
+        if not parallel:
+            self.evaluator.sequentialEvaluate(
+                data_pool     = dataPool,
+                parser        = self.parser,
+                w_vector      = self.w_vector,
+                tagger        = tagger,
+                sparkContext  = sparkContext,
+                hadoop        = hadoop)
+        else:
+            self.evaluator.parallelEvaluate(
+                data_pool     = dataPool,
+                parser        = self.parser,
+                w_vector      = self.w_vector,
+                tagger        = tagger,
+                sparkContext  = sparkContext,
+                hadoop        = hadoop)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
@@ -405,11 +416,13 @@ if __name__ == "__main__":
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],
                                 format_path   = config['format'],
+                                shardNum      = config['spark_shards'],
                                 sc            = sparkContext,
                                 hadoop        = yarn_mode)
 
         gp.evaluate(dataPool      = testDataPool,
                     tagger        = tagger,
+                    parallel      = spark_mode,
                     sparkContext  = sparkContext,
                     hadoop        = yarn_mode)
 
