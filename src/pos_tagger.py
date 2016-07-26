@@ -42,7 +42,7 @@ class PosTagger():
 
         logger.info("Initialising Tagger")
         self.w_vector = WeightVector(weightVectorLoadPath, sparkContext)
-        self.evaluator = Evaluator()
+        self.evaluator = Evaluator
 
         self.tagger = importlib.import_module('tagger.' + tagger).Tagger()
         logger.info("Using tagger: %s" % (tagger))
@@ -63,6 +63,7 @@ class PosTagger():
               parallel             = False,
               sparkContext         = None,
               hadoop               = False):
+
         # Check values
         if not isinstance(dataPool, DataPool):
             raise ValueError("TAGGER [ERROR]: dataPool for training is not an DataPool object")
@@ -127,17 +128,30 @@ class PosTagger():
         logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
         return
 
-    def evaluate(self, dataPool=None, sparkContext=None, hadoop=None):
+    def evaluate(self,
+                 dataPool=None,
+                 parallel=False,
+                 sparkContext=None,
+                 hadoop=None):
+
         logger.info("Starting evaluation process")
-        start_time = time.time()
         if not isinstance(dataPool, DataPool):
             raise ValueError("TAGGER [ERROR]: dataPool for evaluation is not an DataPool object")
-        self.evaluator.evaluate(data_pool = dataPool,
-                                w_vector  = self.w_vector,
-                                tagger    = self.tagger,
-                                tagset    = self.tagset,
-                                sc        = sparkContext,
-                                hadoop    = hadoop)
+
+        start_time = time.time()
+        evaluator = self.evaluator(self.tagger, self.tagset)
+        if not parallel:
+            evaluator.sequentialEvaluate(
+                data_pool     = dataPool,
+                w_vector      = self.w_vector,
+                sparkContext  = sparkContext,
+                hadoop        = hadoop)
+        else:
+            evaluator.parallelEvaluate(
+                data_pool     = dataPool,
+                w_vector      = self.w_vector,
+                sparkContext  = sparkContext,
+                hadoop        = hadoop)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 

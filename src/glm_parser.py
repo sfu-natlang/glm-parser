@@ -41,7 +41,7 @@ class GlmParser():
 
         logger.info("Initialising Parser")
         self.w_vector = WeightVector(weightVectorLoadPath, sparkContext)
-        self.evaluator = Evaluator()
+        self.evaluator = Evaluator
 
         self.parser = importlib.import_module('parser.' + parser).EisnerParser()
         logger.info("Using parser: %s" % (parser))
@@ -59,6 +59,7 @@ class GlmParser():
               parallel             = False,
               sparkContext         = None,
               hadoop               = False):
+
         # Check values
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for training is not an DataPool object")
@@ -116,26 +117,29 @@ class GlmParser():
         logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
         return
 
-    def evaluate(self, dataPool=None, tagger=None, parallel=False, sparkContext=None, hadoop=None):
+    def evaluate(self,
+                 dataPool=None,
+                 tagger=None,
+                 parallel=False,
+                 sparkContext=None,
+                 hadoop=None):
+
         logger.info("Starting evaluation process")
-        start_time = time.time()
         if not isinstance(dataPool, DataPool):
             raise ValueError("PARSER [ERROR]: dataPool for evaluation is not an DataPool object")
 
+        start_time = time.time()
+        evaluator = self.evaluator(self.parser, tagger)
         if not parallel:
-            self.evaluator.sequentialEvaluate(
+            evaluator.sequentialEvaluate(
                 data_pool     = dataPool,
-                parser        = self.parser,
                 w_vector      = self.w_vector,
-                tagger        = tagger,
                 sparkContext  = sparkContext,
                 hadoop        = hadoop)
         else:
-            self.evaluator.parallelEvaluate(
+            evaluator.parallelEvaluate(
                 data_pool     = dataPool,
-                parser        = self.parser,
                 w_vector      = self.w_vector,
-                tagger        = tagger,
                 sparkContext  = sparkContext,
                 hadoop        = hadoop)
         end_time = time.time()
