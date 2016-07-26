@@ -383,10 +383,12 @@ if __name__ == '__main__':
                                 data_path     = config['data_path'],
                                 fgen          = config['feature_generator'],
                                 format_path   = config['format'],
+                                shardNum      = config['spark_shards'],
                                 sc            = sparkContext,
                                 hadoop        = yarn_mode)
 
         pt.evaluate(dataPool      = testDataPool,
+                    parallel      = spark_mode,
                     sparkContext  = sparkContext,
                     hadoop        = yarn_mode)
 
