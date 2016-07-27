@@ -80,7 +80,7 @@ class EvaluatorBase:
         self.correct_num = 0
         self.gold_set_size = 0
 
-        logger.debug("Start evaluating ...")
+        logger.debug("Start sequential evaluation")
         wv = {}
         for key in w_vector.keys():
             wv[key] = w_vector[key]
@@ -111,7 +111,7 @@ class EvaluatorBase:
         self.unlabeled_correct_num = 0
         self.unlabeled_gold_set_size = 0
 
-        logger.debug("Start evaluating ...")
+        logger.debug("Start parallel evaluation")
 
         dir_name     = data_pool.loadedPath()
         format_list  = data_pool.format_list
