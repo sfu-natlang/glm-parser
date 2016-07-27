@@ -6,6 +6,12 @@ class Evaluator(EvaluatorBase):
         EvaluatorBase.__init__(self)
         self.parser = parser
         self.tagger = tagger
+        # This is to avoid problem in spark mode
+        if tagger is not None:
+            wv = {}
+            for key in self.tagger.w_vector:
+                wv[key] = self.tagger.w_vector[key]
+            self.tagger.w_vector = wv
         return
 
     def __sentence_evaluator(self, sent, w_vector):
