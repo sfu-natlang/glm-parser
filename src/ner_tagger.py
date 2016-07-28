@@ -24,7 +24,7 @@ from collections import defaultdict
 
 class NerTagger():
 
-    def __init__(self,tag_file="ner_tagset.txt",max_iter=10):
+    def __init__(self,tag_file="ner_tagset.txt",max_iter=20):
         #self.brown_data_file = "./ner/brown_cluster.txt"
         #self.brown_data = self.load_data(self.brown_data_file)
         print "NER [INFO]: Loading Training Data"
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     import getopt, sys
 
    
-    max_iter = 10
+    max_iter = 20
     tag_file = 'ner_tagset.txt'
 
 
