@@ -59,7 +59,8 @@ class Learner():
                     # without timer
                     current_global_vector = f_argmax(self.w_vector, data_instance)
 
-                self.update_weight(current_global_vector, gold_global_vector)
+                self.w_vector.iadd(gold_global_vector.feature_dict)
+                self.w_vector.iaddc(current_global_vector.feature_dict, -1)
 
             data_pool.reset_index()
 
@@ -67,12 +68,6 @@ class Learner():
                 if t % dump_freq == 0 or t == max_iter - 1:
                     self.w_vector.dump(d_filename + "_Iter_%d.db" % (t + 1))
         return self.w_vector
-
-    def update_weight(self, current_global_vector, gold_global_vector):
-        # otherwise, the gold_global_vector will change because of the change in weights
-        self.w_vector.iadd(gold_global_vector.feature_dict)
-        self.w_vector.iaddc(current_global_vector.feature_dict, -1)
-        return
 
     def parallel_learn(self, dp, fv, f_argmax):
         w_vector = WeightVector()

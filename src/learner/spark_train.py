@@ -123,9 +123,11 @@ class ParallelPerceptronLearner():
                 fv = {}
                 for (feat, (a, b)) in feat_vec_list:
                     fv[feat] = float(a) / float(b)
-                logger.info("Iteration complete")
+                logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
+
             self.w_vector.clear()
-            self.w_vector.iadd(fv)
+            for feat in fv.keys():
+                self.w_vector[feat] = fv[feat]
 
         if d_filename is not None:
             logger.info("Dumping trained weight vector")
