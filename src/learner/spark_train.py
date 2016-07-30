@@ -89,8 +89,8 @@ class ParallelPerceptronLearner():
                                                                             f_argmax=f_argmax))
                 # reducer: combine the weight vectors from each shard
                 # value is the tuple returned by parallel_learn
-                # value[0] is w_vector
-                # value[1] is weight_sum_dict
+                # value[0] is w_vector[key]
+                # value[1] is weight_sum_dict[key]
                 feat_vec_list = feat_vec_list.combineByKey(
                     lambda value: (value[0], 1, value[1]),
                     lambda x, value: (x[0] + value[0], x[1] + 1, x[2] + value[1]),
@@ -130,4 +130,4 @@ class ParallelPerceptronLearner():
         if d_filename is not None:
             logger.info("Dumping trained weight vector")
             self.w_vector.dump(d_filename + "_Iter_%d.db" % max_iter, sc)
-            return self.w_vector
+        return self.w_vector
