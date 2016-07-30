@@ -88,14 +88,17 @@ class ParallelPerceptronLearner():
                                                                             fv=fv,
                                                                             f_argmax=f_argmax))
                 # reducer: combine the weight vectors from each shard
+                # value is the tuple returned by parallel_learn
+                # value[0] is w_vector
+                # value[1] is weight_sum_dict
                 feat_vec_list = feat_vec_list.combineByKey(
-                    lambda value: (value[0], value[1], 1),
-                    lambda x, value: (x[0] + value[0], x[1] + value[1], x[2] + 1),
+                    lambda value: (value[0], 1, value[1]),
+                    lambda x, value: (x[0] + value[0], x[1] + 1, x[2] + value[1]),
                     lambda x, y: (x[0] + y[0], x[1] + y[1], x[2] + y[2])).collect()
 
                 fv = {}
-                for (feat, (a, b, c)) in feat_vec_list:
-                    fv[feat] = (float(a) / float(c), b)
+                for (feat, (weight, count, weight_sum)) in feat_vec_list:
+                    fv[feat] = (float(weight) / float(count), weight_sum)
                 logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
 
             self.w_vector.clear()

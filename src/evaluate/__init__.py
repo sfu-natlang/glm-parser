@@ -131,7 +131,7 @@ class EvaluatorBase:
                                                format_list  = format_list,
                                                comment_sign = comment_sign)).cache()
         wv = {}
-        for key in w_vector.keys():
+        for key in w_vector:
             wv[key] = w_vector[key]
 
         total_sent = dp.map(lambda dp: dp.get_sent_num()).sum()

@@ -15,4 +15,4 @@ spark-submit --driver-memory 4g   \
 
 ../scripts/proc_log.sh glm_parser.log
 
-mv glm_parser.log ../scripts/tests/debug_standalone_tagger.log
+mv glm_parser.log ../scripts/tests/default_standalone_tagger.log

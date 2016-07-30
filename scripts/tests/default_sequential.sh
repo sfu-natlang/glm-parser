@@ -12,4 +12,4 @@ python glm_parser.py config/default.config
 
 ../scripts/proc_log.sh glm_parser.log
 
-mv glm_parser.log ../scripts/tests/debug_sequential.log
+mv glm_parser.log ../scripts/tests/default_sequential.log
