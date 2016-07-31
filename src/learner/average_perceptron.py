@@ -86,15 +86,14 @@ class Learner(object):
 
         return self.w_vector
 
-    def parallel_learn(self, dp, fv, f_argmax):
+    def parallel_learn(self, data_pool, init_w_vector, f_argmax):
         w_vector = WeightVector()
         weight_sum_dict = WeightVector()
-        for key in fv.keys():
-            w_vector[key] = fv[key][0]
-            weight_sum_dict[key] = fv[key][1]
+        for key in init_w_vector.keys():
+            w_vector[key] = init_w_vector[key]
 
-        while dp.has_next_data():
-            data_instance = dp.get_next_data()
+        while data_pool.has_next_data():
+            data_instance = data_pool.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
             current_global_vector = f_argmax(w_vector, data_instance)
 
@@ -102,7 +101,7 @@ class Learner(object):
             w_vector.iaddc(current_global_vector.feature_dict, -1)
 
             weight_sum_dict.iadd(w_vector)
-        dp.reset_index()
+        data_pool.reset_index()
 
         vector_list = {}
         for key in weight_sum_dict.keys():

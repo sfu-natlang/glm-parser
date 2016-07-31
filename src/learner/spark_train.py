@@ -1,6 +1,6 @@
 from hvector._mycollections import mydefaultdict
 from hvector.mydouble import mydouble
-from weight import weight_vector
+from weight.weight_vector import WeightVector
 from data import data_pool
 import perceptron
 import debug.debug
@@ -81,29 +81,37 @@ class ParallelPerceptronLearner():
         if learner.name == "AveragePerceptronLearner":
             logger.info("Using Averaged Perceptron Learner")
             c = total_sent * max_iter
+
+            weight_sum_dict = WeightVector()
+            tmp = WeightVector()
+
             for iteration in range(max_iter):
                 logger.info("Starting Iteration %d" % iteration)
+                logger.info("Initial Number of Keys: %d" % len(fv.keys()))
                 # mapper: computer the weight vector in each shard using parallel_learn
-                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(dp=t,
-                                                                            fv=fv,
+                w_vector_list = dp.flatMap(lambda t: learner.parallel_learn(data_pool=t,
+                                                                            init_w_vector=fv,
                                                                             f_argmax=f_argmax))
                 # reducer: combine the weight vectors from each shard
                 # value is the tuple returned by parallel_learn
                 # value[0] is w_vector[key]
                 # value[1] is weight_sum_dict[key]
-                feat_vec_list = feat_vec_list.combineByKey(
+                w_vector_list = w_vector_list.combineByKey(
                     lambda value: (value[0], 1, value[1]),
                     lambda x, value: (x[0] + value[0], x[1] + 1, x[2] + value[1]),
                     lambda x, y: (x[0] + y[0], x[1] + y[1], x[2] + y[2])).collect()
 
                 fv = {}
-                for (feat, (weight, count, weight_sum)) in feat_vec_list:
-                    fv[feat] = (float(weight) / float(count), weight_sum)
+                tmp.clear()
+                for (feat, (weight, count, weight_sum)) in w_vector_list:
+                    fv[feat] = float(weight) / float(count)
+                    tmp[feat] = weight_sum
+                weight_sum_dict.iadd(tmp)
                 logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
 
             self.w_vector.clear()
-            for feat in fv.keys():
-                self.w_vector[feat] = fv[feat][1] / c
+            for feat in weight_sum_dict.keys():
+                self.w_vector[feat] = weight_sum_dict[feat] / c
 
         if learner.name == "PerceptronLearner":
             logger.info("Using Perceptron Learner")
@@ -111,17 +119,17 @@ class ParallelPerceptronLearner():
                 logger.info("Starting Iteration %d" % iteration)
                 logger.info("Initial Number of Keys: %d" % len(fv.keys()))
                 # mapper: computer the weight vector in each shard using parallel_learn
-                feat_vec_list = dp.flatMap(lambda t: learner.parallel_learn(dp=t,
-                                                                            fv=fv,
+                w_vector_list = dp.flatMap(lambda t: learner.parallel_learn(data_pool=t,
+                                                                            init_w_vector=fv,
                                                                             f_argmax=f_argmax))
                 # reducer: combine the weight vectors from each shard
-                feat_vec_list = feat_vec_list.combineByKey(
+                w_vector_list = w_vector_list.combineByKey(
                     lambda value: (value, 1),
                     lambda x, value: (x[0] + value, x[1] + 1),
                     lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
 
                 fv = {}
-                for (feat, (a, b)) in feat_vec_list:
+                for (feat, (a, b)) in w_vector_list:
                     fv[feat] = float(a) / float(b)
                 logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
 

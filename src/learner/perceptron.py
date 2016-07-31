@@ -69,19 +69,19 @@ class Learner():
                     self.w_vector.dump(d_filename + "_Iter_%d.db" % (t + 1))
         return self.w_vector
 
-    def parallel_learn(self, dp, fv, f_argmax):
+    def parallel_learn(self, data_pool, init_w_vector, f_argmax):
         w_vector = WeightVector()
-        for key in fv.keys():
-            w_vector[key] = fv[key]
-        while dp.has_next_data():
-            data_instance = dp.get_next_data()
+        for key in init_w_vector.keys():
+            w_vector[key] = init_w_vector[key]
+        while data_pool.has_next_data():
+            data_instance = data_pool.get_next_data()
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
             current_global_vector = f_argmax(w_vector, data_instance)
 
             w_vector.iadd(gold_global_vector.feature_dict)
             w_vector.iaddc(current_global_vector.feature_dict, -1)
 
-        dp.reset_index()
+        data_pool.reset_index()
 
         vector_list = {}
         for key in w_vector.keys():
