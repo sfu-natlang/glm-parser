@@ -47,7 +47,7 @@ class EisnerParser():
         self.edge_set = parsed_result[1]
         return
 
-    def parse(self, n, arc_weight, sentence=None, tagger=None):
+    def parse(self, sent, arc_weight, tagger=None):
         """
         Implementation of Eisner Algorithm using dynamic programming table
 
@@ -61,6 +61,7 @@ class EisnerParser():
         """
         if (tagger is not None):
             sent.set_pos_list(tagger.getTags(sent))
+        n = len(sent.get_word_list())
         # tt = 0;
         e = self.init_eisner_matrix(n)
         for m in range(1, n):
@@ -69,7 +70,7 @@ class EisnerParser():
                 if t >= n:
                     break
                 # t1 = time.clock()
-                weight = arc_weight(t, s)
+                weight = arc_weight(sent.get_local_vector(head_index=t, dep_index=s))
                 # tt += (time.clock() - t1)
                 e[s][t][0][1][0], q_max = max(
                     [(e[s][q][1][0][0] + e[q + 1][t][0][0][0] + weight, q)
@@ -79,7 +80,7 @@ class EisnerParser():
                     e[s][q_max][1][0][1] + e[q_max + 1][t][0][0][1] + [(t, s)]
 
                 # t1 = time.clock()
-                weight = arc_weight(s, t)
+                weight = arc_weight(sent.get_local_vector(head_index=s, dep_index=t))
                 # tt += (time.clock() - t1)
                 e[s][t][1][1][0], q_max = max(
                     [(e[s][q][1][0][0] + e[q + 1][t][0][0][0] + weight, q)

@@ -195,7 +195,7 @@ if __name__ == "__main__":
             help="""specify a learner for weight vector training
             """)
         arg_parser.add_argument('--parser',
-            choices=['ceisner', 'ceisner3'],
+            choices=['ceisner', 'ceisner3', 'eisner'],
             help="""specify the parser using parser module name (i.e. .py file name without suffix).
             The recognition rule is the same as --fgen switch. A valid parser object
             must possess "parse" attribute in order to be recognised as a parser
