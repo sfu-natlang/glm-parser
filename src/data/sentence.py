@@ -3,15 +3,23 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Kingston Chen, Jetic Gu
 # (Please add on your name if you have authored this file)
 #
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
+import os
+import sys
+import inspect
+import logging
+
 import copy
 from feature.feature_vector import FeatureVector
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+logger = logging.getLogger('SENTENCE')
+
 
 """
 Some basic comcepts are depicted here:
@@ -58,6 +66,7 @@ argmax |            | feature generator
 (How argmax query features from fgen)
 """
 
+
 class Sentence():
     """
     A data structure that represents the result of a dependency parser.
@@ -96,40 +105,77 @@ class Sentence():
         self.field_name_list = field_name_list
 
         self.cache_key_func = hash
+        self.fgen = None
+        self.load_fgen(fgen)
 
-        # add ROOT to FORM and POSTAG
-        edge_list = self.construct_edge_set()
-        if "FORM" in self.column_list.keys():
-            self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+    def load_fgen(self, fgen=None):
+        if fgen is None:
+            raise ValueError("SENTENCE [ERROR]: Feature Generator for loading not specified")
+        if inspect.isclass(fgen):
+            fgen = fgen()
+        if self.fgen is not None:
+            if self.fgen.name == "POSTaggerFeatureGenerator":
+                del self.column_list["FORM"][0]
+                del self.column_list["FORM"][0]
+                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
+                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
+                del self.column_list["POSTAG"][0]
+                del self.column_list["POSTAG"][0]
+            elif self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
+                    self.fgen.name == "EnglishSecondOrderFeatureGenerator":
+                del self.column_list["FORM"][0]
+                del self.column_list["POSTAG"][0]
+            else:
+                raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
+
+        if fgen.name == "POSTaggerFeatureGenerator":
+            self.column_list["FORM"].insert(0, '_B_-1')
+            self.column_list["FORM"].insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
+            self.column_list["FORM"].append('_B_+1')
+            self.column_list["FORM"].append('_B_+2')     # last two 'words' are B_+1 B_+2
+
+            self.column_list["POSTAG"].insert(0, 'B_-1')
+            self.column_list["POSTAG"].insert(0, 'B_-2')
         else:
-            sys.exit("'FORM' is needed in Sentence but it's not in format file")
+            # add ROOT to FORM and POSTAG
+            edge_list = self.construct_edge_set()
+            if "FORM" in self.column_list:
+                self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
+            else:
+                raise RuntimeError("SENTENCE [ERROR]: 'FORM' is needed in Sentence but it's not in format file")
 
-        if "POSTAG" in self.column_list.keys():
-            self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
-        else:
-            sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
+            if "POSTAG" in self.column_list:
+                self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+            else:
+                raise RuntimeError("SENTENCE [ERROR]: 'POSTAG' is needed in Sentence but it's not in format file")
 
-        # This will store the dict, dict.keys() and len(dict.keys())
-        # into the instance
-        self.set_edge_list(edge_list)
+            # This will store the dict, len(dict)
+            # into the instance
+            self.set_edge_list(edge_list)
 
         # Each sentence instance has a exclusive fgen instance
         # we could store some data inside fgen instance, such as cache
         # THIS MUST BE PUT AFTER set_edge_list()
-        if fgen is not None:
-            self.f_gen = fgen()
-            rsc_list = []
-            for field_name in self.f_gen.care_list:
-                rsc_list.append(self.fetch_column(field_name))
+        self.fgen = fgen
+        rsc_list = []
+        for field_name in self.fgen.care_list:
+            rsc_list.append(self.fetch_column(field_name))
 
-            self.f_gen.init_resources(rsc_list)
+        self.fgen.init_resources(rsc_list)
 
-            # Pre-compute the set of gold features
+        # Pre-compute the set of gold features
+        if self.fgen.name == "POSTaggerFeatureGenerator":
+            self.gold_global_vector = self.get_global_vector()
+        elif self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
+                self.fgen.name == "EnglishSecondOrderFeatureGenerator":
             self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
             # During initialization is has not been known yet. We will fill this later
             # self.current_global_vector = None
 
             self.set_second_order_cache()
+        else:
+            raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
+
         return
 
     def construct_edge_set(self):
@@ -139,10 +185,10 @@ class Sentence():
         in self.field_name_list, and returns edge_set dict
         """
 
-        if not "HEAD" in self.column_list.keys():
-            sys.exit("'HEAD' is needed in Sentence but it's not in format file")
-        if not "DEPREL" in self.column_list.keys():
-            sys.exit("'DEPREL' is needed in Sentence but it's not in format file")
+        if "HEAD" not in self.column_list:
+            raise RuntimeError("SENTENCE [ERROR]: 'HEAD' is needed in Sentence but it's not in format file")
+        if "DEPREL" not in self.column_list:
+            raise RuntimeError("SENTENCE [ERROR]: 'DEPREL' is needed in Sentence but it's not in format file")
 
         self.column_list["edge_set"] = {}
 
@@ -169,10 +215,10 @@ class Sentence():
         :type field_name: str
         """
 
-        if field_name in self.column_list.keys():
+        if field_name in self.column_list:
             return self.column_list[field_name]
         else:
-            sys.exit("'" + field_name + "' is needed in Sentence but it's not in format file")
+            raise RuntimeError("SENTENCE [ERROR]: '" + field_name + "' is needed in Sentence but it's not in format file")
 
     def set_current_global_vector(self, edge_list):
         """
@@ -188,8 +234,8 @@ class Sentence():
         :return: None
         """
 
-        #self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
-        #~self.cache_feature_for_edge_list(edge_list)
+        # self.current_global_vector = self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
+        # ~self.cache_feature_for_edge_list(edge_list)
 
         return self.convert_list_vector_to_dict(self.get_global_vector(edge_list))
 
@@ -197,18 +243,17 @@ class Sentence():
         self.second_order_cache = {}
         return
 
-
     def dump_feature_request(self, suffix):
         """
         See the same function in class FeatureGeneratorBase
         """
-        self.f_gen.dump_feature_request(suffix)
+        self.fgen.dump_feature_request(suffix)
         return
 
-    #~def cache_feature_for_edge_list(self, edge_list):
-    #~    # Compute cached feature for a given edge list
-    #~    self.f_gen.cache_feature_for_edge_list(edge_list)
-    #~    return
+    # ~def cache_feature_for_edge_list(self, edge_list):
+    # ~    # Compute cached feature for a given edge list
+    # ~    self.fgen.cache_feature_for_edge_list(edge_list)
+    # ~    return
 
     def convert_list_vector_to_dict(self, fv):
         ret_fv = FeatureVector()
@@ -216,9 +261,8 @@ class Sentence():
             ret_fv[i] += 1
         return ret_fv
 
-
     # Both 1st and 2nd order
-    def get_global_vector(self, edge_list):
+    def get_global_vector(self, edge_list=None):
         """
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
@@ -231,17 +275,23 @@ class Sentence():
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
-        global_vector = self.f_gen.recover_feature_from_edges(edge_list)
+        if self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
+                self.fgen.name == "EnglishSecondOrderFeatureGenerator":
+            global_vector = self.fgen.recover_feature_from_edges(edge_list)
+        elif self.fgen.name == "POSTaggerFeatureGenerator":
+            global_vector = self.fgen.get_feature_vector(self.column_list["FORM"],
+                                                         self.column_list["POSTAG"])
+        else:
+            raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
 
-        #return self.convert_list_vector_to_dict(global_vector)
         return global_vector
 
-
     def get_local_vector(self,
-                         head_index,
-                         dep_index,
-                         another_index_list = [],
-                         feature_type = 0):
+                         head_index=None,
+                         dep_index=None,
+                         another_index_list=[],
+                         poslist=None,
+                         feature_type=0):
         """
         Return local vector from fgen
 
@@ -256,15 +306,27 @@ class Sentence():
         FeatureGenerator.get_second_order_local_vector() doc string.
 
         """
-
-
-        lv = self.f_gen.get_local_vector(head_index,
-                                         dep_index,
-                                         another_index_list,
-                                         feature_type)
+        if self.fgen.name == "POSTaggerFeatureGenerator":
+            lv = self.fgen.get_feature_vector(wordlist=self.column_list["FORM"],
+                                              poslist=poslist)
+        else:
+            lv = self.fgen.get_local_vector(head_index=head_index,
+                                            dep_index=dep_index,
+                                            other_index_list=another_index_list,
+                                            feature_type=feature_type)
 
         return lv
 
+    def get_pos_feature(self, index, prev_tag, prev_backpointer):
+        if self.fgen.name != "POSTaggerFeatureGenerator":
+            raise RuntimeError("SENTENCE [ERROR]: " +
+                "got_pos_feature() requires the feature generator for tagger," +
+                " but instead, we have " + self.fgen.name)
+
+        return self.fgen.get_pos_feature(wordlist=self.column_list["FORM"],
+                                         index=index,
+                                         prev_tag=prev_tag,
+                                         prev_backpointer=prev_backpointer)
 
     '''
     def get_second_order_local_vector(self, head_index, dep_index,
@@ -285,7 +347,7 @@ class Sentence():
         #if key in self.second_order_cache:
         #    return self.second_order_cache[key]
 
-        second_order_fv = self.f_gen.get_local_vector(head_index,
+        second_order_fv = self.fgen.get_local_vector(head_index,
                                                       dep_index,
                                                       [another_index],
                                                       feature_type)
@@ -306,8 +368,7 @@ class Sentence():
         return
     '''
 
-    '''
-    def set_pos_list(self,pos_list):
+    def set_pos_list(self, pos_list):
         """
         Set the POS array in bulk. All data in pos_list will be copied, so
         users do not need to worry about data reference problems.
@@ -315,11 +376,14 @@ class Sentence():
         :param pos_list: A list that holds POS tags for all words in word_list
         :type pos_list: list(str)
         """
-        self.pos_list = ['ROOT'] + pos_list
+        if "POSTAG" in self.column_list:
+            self.column_list["POSTAG"] = ["ROOT"] + pos_list
+        else:
+            raise RuntimeError("'POSTAG' is needed in Sentence but it's not in format file")
+        self.fgen.reTag(self.column_list["POSTAG"])
         return
-    '''
 
-    def set_edge_list(self,edge_list):
+    def set_edge_list(self, edge_list):
         """
         Initialize the edge_list using a dictionary which contains edges.
 
@@ -329,7 +393,7 @@ class Sentence():
         """
         self.edge_list = edge_list
         # Let's do it this way. SHOULD be refeactored later
-        self.edge_list_index_only = edge_list.keys()
+        self.edge_list_index_only = edge_list
         self.edge_list_len = len(self.edge_list_index_only)
         return
 
@@ -338,7 +402,7 @@ class Sentence():
         Return the length of the edge list
 
         Basically the return value is equivalent to the length
-        of self.edge_list.keys(), or, the length of self.edge_list_index_only
+        of self.edge_list, or, the length of self.edge_list_index_only
         """
         return self.edge_list_len
 
@@ -373,7 +437,7 @@ class Sentence():
             dependent index, and the last element is edge type
         :rtype: tuple(integer,integer,str)
         """
-        return [(i[0],i[1],self.edge_list[i]) for i in self.edge_list.keys()]
+        return [(i[0], i[1], self.edge_list[i]) for i in self.edge_list]
 
     def get_edge_list_index_only(self):
         """
@@ -392,7 +456,7 @@ class Sentence():
 
 # Unit test
 def test():
-    lines = ['Rudolph   NNP 2   NMOD','Agnew    NNP 16  SUB','.  .   16  P', '']
+    lines = ['Rudolph   NNP 2   NMOD', 'Agnew    NNP 16  SUB', '.  .   16  P', '']
     format_list = ['FORM', 'POSTAG', 'HEAD', 'DEPREL', '2', '3']
     column_list = {}
     for field in format_list:
@@ -416,7 +480,6 @@ def test():
             for field in format_list:
                 if not (field.isdigit()):
                     column_list[field] = []
-
 
 
 if __name__ == '__main__':

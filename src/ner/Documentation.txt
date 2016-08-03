@@ -5,8 +5,7 @@ Conll2003: http://www.cnts.ua.ac.be/conll2003/ner/
 English: /cs/natlang-data/CoNLL/CoNLL-2003/eng.*
 German: /cs/natlang-data/CoNLL/CoNLL-2003/deu.*
 
-2. train: python ner_perctrain.py [training_data]
+2. train: python ner_tagger.py ./ner/DATA/eng.train
 
-3. decode: python ner_evaluate.py [test_file] [weight_file]
-
-4. evaluate: perl conlleval.pl < test.out
+3.to run the perl script
+  perl conlleval.pl < out_file.txt
