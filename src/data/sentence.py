@@ -134,7 +134,11 @@ class Sentence():
             self.f_gen.init_resources(rsc_list)
 
             # Pre-compute the set of gold features
+            #if 'multitag' in fgen.__class__.__name__:
             self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+            #else:
+            #    self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
+
             # During initialization is has not been known yet. We will fill this later
             # self.current_global_vector = None
 
@@ -225,7 +229,7 @@ class Sentence():
         return ret_fv
 
     # Both 1st and 2nd order
-    def get_global_vector(self, edge_list):
+    def get_global_vector(self, edge_list, pos_list=None):
         """
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
@@ -238,7 +242,11 @@ class Sentence():
         :return: The global vector of the sentence with the current weight
         :rtype: list
         """
-        global_vector = self.f_gen.recover_feature_from_edges(edge_list)
+
+        if (pos_list):
+            global_vector = self.f_gen.recover_feature_from_edges(edge_list, pos_list)
+        else:
+            global_vector = self.f_gen.recover_feature_from_edges(edge_list)
 
         # return self.convert_list_vector_to_dict(global_vector)
         return global_vector
@@ -246,6 +254,8 @@ class Sentence():
     def get_local_vector(self,
                          head_index,
                          dep_index,
+                         head_pos=None,
+                         dep_pos=None,
                          another_index_list = [],
                          feature_type = 0):
         """
@@ -262,11 +272,18 @@ class Sentence():
         FeatureGenerator.get_second_order_local_vector() doc string.
 
         """
-
-        lv = self.f_gen.get_local_vector(head_index,
-                                         dep_index,
-                                         another_index_list,
-                                         feature_type)
+        if (head_pos == None):
+            lv = self.f_gen.get_local_vector(head_index,
+                                             dep_index,
+                                             another_index_list,
+                                             feature_type)
+        else:
+            lv = self.f_gen.get_local_vector(head_index,
+                                             dep_index,
+                                             head_pos,
+                                             dep_pos,
+                                             another_index_list,
+                                             feature_type)
 
         return lv
 
@@ -319,11 +336,23 @@ class Sentence():
         :type pos_list: list(str)
         """
         if "POSTAG" in self.column_list.keys():
-            self.column_list["POSTAG"] = ["ROOT"] + pos_list
+            self.column_list["POSTAG"] = pos_list
         else:
             sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
         self.f_gen.reTag(self.column_list["POSTAG"])
-        return
+
+    def multi_tag(self, pos_dict, tagger):
+        new_pos_list = []
+        self.predict_pos_list = tagger.getTags(['_B_-2', '_B_-1'] +
+                                          self.column_list['FORM'][1:] +
+                                          ['_B_+1', '_B_+2'])
+        for index, word in enumerate(self.column_list['FORM']):
+            if word in pos_dict:
+                new_pos_list.append(pos_dict[word])
+            else:
+                new_pos_list.append([self.predict_pos_list[index]])
+        self.set_pos_list(new_pos_list)
+        self.f_gen.set_pos_prediction(self.predict_pos_list)
 
     def set_edge_list(self, edge_list):
         """

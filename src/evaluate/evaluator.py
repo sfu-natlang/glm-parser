@@ -1,5 +1,4 @@
 from __future__ import division
-from pos_tagger import PosTagger
 import logging
 
 logger = logging.getLogger('EVALUATOR')
@@ -38,7 +37,7 @@ class Evaluator():
 
         return correct_num, gold_set_size
 
-    def evaluate(self, data_pool, parser, w_vector, tagger=None, sc=None, hadoop=None):
+    def evaluate(self, data_pool, parser, w_vector, sc=None, hadoop=None):
         logger.debug("Start evaluating ...")
         sentence_count = 1
         data_size = len(data_pool.data_list)
@@ -60,8 +59,12 @@ class Evaluator():
                 set([(head_index, dep_index) for head_index, dep_index, _ in sent.get_edge_list()])
 
             sent_len = len(sent.get_word_list())
-            test_edge_set = \
-                parser.parse(sent, w_vector.get_vector_score, tagger)
+            if ('multitag' in parser.__class__.__name__):
+                test_edge_set = \
+                    parser.parse(sent, w_vector.get_vector_score)[0]
+            else:
+                test_edge_set = \
+                    parser.parse(sent, w_vector.get_vector_score)
 
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
 

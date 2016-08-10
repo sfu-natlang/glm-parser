@@ -14,6 +14,7 @@ extentions = [
     Extension('feature.feature_generator_base', ["feature/feature_generator_base.pyx"]),
     Extension('feature.english_1st_fgen', ["feature/english_1st_fgen.pyx"]),
     Extension('feature.english_2nd_fgen', ["feature/english_2nd_fgen.pyx"]),
+    Extension('feature.english_1st_fgen_multitag', ["feature/english_1st_fgen_multitag.pyx"]),
     Extension('feature.feature_vector', ["feature/feature_vector.pyx"]),
 ]
 

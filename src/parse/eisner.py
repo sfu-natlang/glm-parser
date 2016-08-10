@@ -20,7 +20,7 @@ class EisnerParser():
         :return: An initialized table with all chart entries being (0,[])
         :rtype: Multi-dimensional list
         """
-        # CAUTION: Must use deepcopy() here, since Python uses the object
+        # CAUTION: Must use deepcopy() here, since Pythown uses the object
         # reference model, which will cause trouble if we use shared object
         # in the chart
         # The last dimenison of the table. It uses a tuple to store score

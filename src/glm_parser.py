@@ -62,6 +62,7 @@ class GlmParser():
 
     def init_pos_dict(self, data_pool):
         self.pos_dict = {}
+        self.pos_dict['__ROOT__'] = ['ROOT']
         while data_pool.has_next_data():
             sent = data_pool.get_next_data()
             word_list = sent.get_word_list()
@@ -75,26 +76,11 @@ class GlmParser():
                         self.pos_dict[word] += [pos_list[index]]
         data_pool.reset_index()
 
-    def multi_tag(self, data_pool=None, tagger=None):
-        if data_pool is None:
-            return
-        if tagger is None:
-            return
+    def multi_tag(self, data_pool, tagger):
         while data_pool.has_next_data():
             sent = data_pool.get_next_data()
-            word_list = sent.get_word_list()
-            new_pos_list = []
-            tagger_prediction = []
-            for index, word in enumerate(word_list):
-                if word in self.pos_dict:
-                    new_pos_list.append(self.pos_dict[word])
-                else:
-                    if tagger_prediction == []:
-                        tagger_prediction = tagger.getTags(
-                                ['_B_-2', '_B_-1'] + sent.get_word_list()[1:] +
-                                ['_B_+1', '_B_+2'])
-                    new_pos_list.append([tagger_prediction[index]])
-                    sent.set_pos_list(new_pos_list)
+            sent.multi_tag(self.pos_dict, tagger)
+        data_pool.reset_index()
 
     def train(self,
               dataPool             = None,
@@ -114,7 +100,11 @@ class GlmParser():
 
         # Prepare the suitable argmax
         def parser_f_argmax(w_vector, sentence, parser):
-            current_edge_set = parser.parse(sentence, w_vector.get_vector_score)
+            if ('multitag' in parser.__class__.__name__):
+                current_edge_set, pos_list = parser.parse(sentence, w_vector.get_vector_score)
+                sentence.set_pos_list(pos_list)
+            else:
+                current_edge_set = parser.parse(sentence, w_vector.get_vector_score)
             current_global_vector = sentence.set_current_global_vector(current_edge_set)
             return current_global_vector
         f_argmax = functools.partial(parser_f_argmax, parser=self.parser)
@@ -162,7 +152,6 @@ class GlmParser():
         self.evaluator.evaluate(data_pool = dataPool,
                                 parser    = self.parser,
                                 w_vector  = self.w_vector,
-                                tagger    = tagger,
                                 sc        = sc,
                                 hadoop    = hadoop)
         end_time = time.time()

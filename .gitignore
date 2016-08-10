@@ -10,6 +10,7 @@ src/build/*
 src/hvector/build/*
 src/feature/english_1st_fgen.c
 src/feature/english_2nd_fgen.c
+src/feature/english_1st_fgen_multitag.c
 src/feature/feature_generator_base.c
 src/feature/feature_vector.c
 src/parse/ceisner.cpp
@@ -30,3 +31,4 @@ src/data/prep
 *.swp
 *.bak
 *~
+.idea/*
