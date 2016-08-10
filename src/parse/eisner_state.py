@@ -2,6 +2,7 @@
 from pos_tagger import PosTagger
 import copy
 import time
+from numpy import inf
 import logging
 # from data.sentence import Sentence
 
@@ -33,7 +34,7 @@ class EisnerState:
         for pos_head in pos_list[state_id[head]]:
             for pos_tail in pos_list[state_id[tail]]:
                 if state_id[head] != state_id[tail] or pos_head == pos_tail:
-                    self.pos_dict[(pos_head, pos_tail)] = (0, state_id[head])
+                    self.pos_dict[(pos_head, pos_tail)] = (0, state_id[head], (pos_head, pos_head), (pos_head, pos_tail))
                     self.pos_keys.append((pos_head, pos_tail))
 
     def pos_has_next_key(self):
@@ -58,17 +59,17 @@ class EisnerState:
 
     def pos_update_score(self, shape, key_head, key_dep, val):
         if shape == 1:
-            if (self.pos_dict[(key_head[0], key_dep[0])][0] < val[0]):
+            if (self.pos_dict[(key_head[0], key_dep[0])][0] <= val[0]):
                 self.pos_dict[(key_head[0], key_dep[0])] = val
         else:
-             if (self.pos_dict[(key_head[0], key_dep[1])][0] < val[0]):
+             if (self.pos_dict[(key_head[0], key_dep[1])][0] <= val[0]):
                 self.pos_dict[(key_head[0], key_dep[1])] = val
 
     def pos_reset_iter(self):
-        self.pos_iter = 0
+        self.pos_iter = -1
 
     def pos_set_score(self, key, val):
-        if val[0] > self.pos_dict[key][0]:
+        if val[0] >= self.pos_dict[key][0]:
             self.pos_dict[key] = val
 
     def pos_is_combinable(self, key):

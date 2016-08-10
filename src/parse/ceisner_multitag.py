@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+from numpy import inf
 import copy, time
 from pos_tagger import PosTagger
 from eisner_state import EisnerState
@@ -57,13 +59,6 @@ class EisnerParser:
             key0 = self.e[s][q][1][0].pos_get_next_key()
             while self.e[q+1][t][0][0].pos_has_next_key():
                 key1 = self.e[q+1][t][0][0].pos_get_next_key()
-                print sent.get_local_vector(
-                        t,
-                        s,
-                        self.e[q+1][t][0][0].pos_get_head_pos(),
-                        self.e[s][q][1][0].pos_get_head_pos()
-                    )
-                print ''
 
                 #import pudb; pu.db
                 edge_score = arc_weight(
@@ -77,6 +72,8 @@ class EisnerParser:
                 score = self.e[s][q][1][0].pos_get_score(key0) + \
                         self.e[q+1][t][0][0].pos_get_score(key1) + \
                         edge_score
+                if s == 0 and t == 26:
+                    print score
                 self.e[s][t][0][1].pos_update_score(1, key1, key0,
                                                     (score, q, key0, key1))
             self.e[q+1][t][0][0].pos_reset_iter()
@@ -149,7 +146,7 @@ class EisnerParser:
         """
         :return:
         """
-        max_score = 0
+        max_score = -inf
         max_key = None
         self.edge_list = []
         self.pos_list = ['ROOT']
@@ -157,6 +154,7 @@ class EisnerParser:
         for i in range(1, self.n):
             self.pos_list.append('NN')
 
+        print 0, self.n-1
         print self.e[0][self.n-1][1][0].pos_dict
         while self.e[0][self.n - 1][1][0].pos_has_next_key():
             key = self.e[0][self.n - 1][1][0].pos_get_next_key()
@@ -167,6 +165,7 @@ class EisnerParser:
 
         queue.append((0, self.n-1, 1, 0, max_key))
         while queue:
+            print queue
             node = queue.pop(0)
 
             if node[2] == 0:
@@ -182,9 +181,9 @@ class EisnerParser:
 
             node_left, node_right = self.e[node[0]][node[1]][node[2]][node[3]].pos_split(node[4])
 
-            if node_left.s != node_left.t:
+            if node_left[0] != node_left[1]:
                 queue.append(node_left)
-            if node_right.s != node_right.t:
+            if node_right[0] != node_right[1]:
                 queue.append(node_right)
 
     def store_parsed_result(self,parsed_result):
@@ -210,6 +209,8 @@ class EisnerParser:
                 t = s + m
                 if t >= self.n:
                     break
+
+                print s, t
                 self.e[s][t][0][1].pos_init((s, t, 0, 1), sent.get_pos_list())
                 self.e[s][t][1][1].pos_init((s, t, 1, 1), sent.get_pos_list())
                 self.e[s][t][0][0].pos_init((s, t, 0, 0), sent.get_pos_list())
@@ -219,7 +220,7 @@ class EisnerParser:
                     self.combine_left_trapezoid(s, t, q, arc_weight, sent)
                     self.combine_right_trapezoid(s, t, q, arc_weight, sent)
                     self.combine_left_triangle(s, t, q, arc_weight, sent)
-                    self.combine_right_triangle(s, t, q, arc_weight, sent)
+                    self.combine_right_triangle(s, t, q+1, arc_weight, sent)
 
         self.get_edge_list()
 
