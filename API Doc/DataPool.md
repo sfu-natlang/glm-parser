@@ -13,58 +13,48 @@
 
 	from data.data_pool import DataPool
 
-### 2. Declaration
-There are two ways of declaring a `DataPool` object, you can either create from specific file or from text.
+### 2. Parameters and Declaration
 
-#### 2.1 Create from file
-
-You can create a `DataPool` which reads all its data from files. The file could be located in HDFS(Hadoop File System) or a local directory.
-
-##### 2.1.1 Example
-
-	dp = DataPool(section_regex = 'dataFile[0-9].conll|dataFile1[0-9].conll',
-                  data_path     = 'file:///natlang-data/',
-                  fgen          = 'english_1st_fgen',
-                  format_path   = 'format/conllx.format')
-
-
-##### 2.1.2 Parameters
+##### 2.1 Parameters
 
 Parameter		|	Type				|	Default Value	|	Description	|	Examples
 ----------------|-----------------------|-------------------|---------------|------------
-section\_regex	| `str`					|	""				|	Specify the name of the data file you wish to load from	| "wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab"
+data\_regex		| `str`					|	""				|	Specify the name of the data file you wish to load from	| "wsj_0[0-2][0-9][0-9].mrg.3.pa.gs.tab"
 data\_path		| `str`					| "./penn-wsj-deps/"| Specify the location of the data file you wish to load. If the data path refers to a local directory, the directory and its subdirectories will be searched from the data file, in Hadoop only the subdirectories will be scanned. The default URI prefix is "hdfs://" 	| "file:///natlang-data/"; "hdfs://data/natlang-data/"
-fgen			| `str` or `classobj`	| None				| Specify the feature generator for the `DataPool`. If the given object is an instance of `str`, `DataPool` will search `feature` folder for a file that matches, and use the `FeatureGenerator` class inside. If the given object is an instance of `classobj`, it will use that class as feature generator. To write a customised feature generator, refer to the feature generator API.	| "english\_1st\_fgen"; "pos\_fgen"; feature.pos\_fgen.FeatureGenerator
-format_path.	| `str`					| None				| Specify the format file. For specifications of a format file, refer to Format Specs. | "format/conllu.format"; "format/conllx.format"; "format/penn2malt.format"
+fgen			| `str` or `classobj`	|  					| Specify the feature generator for the `DataPool`. If the given object is an instance of `str`, `DataPool` will search `feature` folder for a file that matches, and use the `FeatureGenerator` class inside. If the given object is an instance of `classobj`, it will use that class as feature generator. To write a customised feature generator, refer to the feature generator API.	| "english\_1st\_fgen"; "pos\_fgen"; feature.pos\_fgen.FeatureGenerator
+format_list.	| `str` or `list`		|  					| Specify the format file or format list. If the given object is of `str` type it will be treated as a file URI. For specifications of a format file, refer to Format Specs. | "format/conllu.format"; "format/conllx.format"; "format/penn2malt.format"; ["ID", "FORM", "LEMMA"]
 prep_path		| `str`					| "data/prep/"		| Specify the path which the temp files will be created. The default URI prefix is "hdfs://" | "/tmp/nlp-toolkit"
-shardNum		| `int`					| 1					| Specify the number of shards. This option is often used when you want to use the data in parallel training or evaluation. | 8
-sc				| `pyspark.context.SparkContext` | None		| Specify the SparkContext object. If data pool somehow acquire access to HDFS, this option will be mandatory.	| sc
+shards			| `int`					| 1					| Specify the number of shards. This option is often used when you want to use the data in parallel training or evaluation. | 8
+sparkContext	| `pyspark.context.SparkContext` | None		| Specify the SparkContext object. If data pool somehow acquire access to HDFS, this option will be mandatory.	| sc
 hadoop			| `bool`				| `False`			| If the value is `True`, the temp data will be created in HDFS, if not it will be created in local directory.	| `True`; `False`
+comment_sign	| `str`					| None				| Sign of comment in the text. If the comment_sign matches the first word of the line, the line will be ignored. If the comment sign is specified in the format file the comment sign here will be ignored.	| "##"; ""
+textString		| `unicode`				| None				| The text which contains the data. For format refer to Format Specs.	| sc.textFile("example.txt").first()
 
+##### 2.2 Declaration
 
+There are two ways of declaring a `DataPool` object, you can either create from specific file or from text.
 
-#### 2.2 Create from text:
+#### 2.2.1 Create from file
 
-You can create a `DataPool` from existing text. The text will have to follow the format of a supported data format. See Format Specs for more information
+You can create a `DataPool` which reads all its data from files. The file could be located in HDFS(Hadoop File System) or a local directory.
 
-##### 2.2.1 Example
+	dp = DataPool(fgen        = 'english_1st_fgen',
+                  format_list = 'format/conllx.format',
+                  data_regex  = 'dataFile[0-9].conll|dataFile1[0-9].conll',
+                  data_path   = 'file:///natlang-data/')
 
-	dp = DataPool(textString   = text,
-                  fgen         = 'english_1st_fgen',
-                  format       = format_list,
+#### 2.2.2 Create from text:
+
+You can create a `DataPool` from existing text.
+
+	dp = DataPool(fgen         = 'english_1st_fgen',
+                  format_list  = format_list,
+                  textString   = text,
                   comment_sign = comment_sign)
 
-##### 2.2.2 Parameters
+### 3. Package Attributes
 
-Parameter			|	Type				|	Default Value	|	Description	|	Examples
---------------------|-----------------------|-------------------|---------------|--------
-textString			| `unicode`				| None				| The text which contains the data. For format refer to Format Specs.	| sc.textFile("example.txt").first()
-format_list.		| `list`					| None				| A list of all the names of columns. See Format Specs for more information | ["ID", "FORM", "LEMMA"]
-comment_sign		| `str`					| None				| Sign of comment in the text. If the comment_sign matches the first word of each line in `textString`, the line will be ignored.	| "##"; ""
-
-### 3. Class Attributes
-
-##### DataPool.\_\_version\_\_
+##### data\_pool.\_\_version\_\_
 The version of DataPool API
 
 ### 4. Instance Attributes
@@ -123,10 +113,10 @@ The version of DataPool API
 
 In this case, assume the actual file is `example.txt` located under `/data/natlang-data/example/`. We are going to use first order feature generator for English in this example (`feature/english_1st_fgen.py`)
 
-	dp = DataPool(section_regex = 'example.txt',
-                  data_path     = 'file:///data/natlang-data/example/',
-                  fgen          = 'english_1st_fgen',
-                  format_path   = 'format/conllx.format')
+	dp = DataPool(fgen        = 'english_1st_fgen',
+                  format_list = 'format/conllx.format',
+                  data_regex  = 'example.txt',
+                  data_path   = 'file:///data/natlang-data/example/',)
 
     while dp.has_next_data():
         sentence = dp.get_next_data()
@@ -141,19 +131,19 @@ Assume the actual file is `example.txt` located under `hdfs://master:2333/data/n
 
 To support parallel operation, we are going to use more than 1 shard, say 8 shards. After creating the `DataPool` instance, it cannot be used in spark yet. We'll need to load it with RDD.
 
-	dp = DataPool(section_regex = 'example.txt',
-                  data_path     = 'hdfs://master:2333/data/natlang-data/', # Notice in HDFS, DataPool only scans
+	dp = DataPool(fgen         = 'english_1st_fgen',
+                  format_list  = 'format/conllx.format',
+                  data_regex   = 'example.txt',
+                  data_path    = 'hdfs://master:2333/data/natlang-data/', # Notice in HDFS, DataPool only scans
                                                                            # subdirectories
-                  fgen          = 'english_1st_fgen',
-                  format_path   = 'format/conllx.format',
-                  shardNum      = 8,
-                  sc            = mySparkContext,
-                  hadoop        = True)
+                  shardNum     = 8,
+                  sparkContext = sc,
+                  hadoop       = True)
 
     def create_dp(textString, fgen, format, comment_sign):
-        return DataPool(textString   = textString[1],
-                        fgen         = fgen,
+        return DataPool(fgen         = fgen,
                         format_list  = format,
+                        textString   = textString[1],
                         comment_sign = comment_sign)
 
     spark_dp = sc.wholeTextFiles(dp.loadedPath(), minPartitions=dp.shardNum).cache()

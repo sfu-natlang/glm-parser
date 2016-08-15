@@ -47,9 +47,9 @@ class ParallelPerceptronLearner():
         '''
 
         def create_dp(textString, fgen, format, comment_sign):
-            dp = data_pool.DataPool(textString   = textString[1],
-                                    fgen         = fgen,
+            dp = data_pool.DataPool(fgen         = fgen,
                                     format_list  = format,
+                                    textString   = textString[1],
                                     comment_sign = comment_sign)
             return dp
 

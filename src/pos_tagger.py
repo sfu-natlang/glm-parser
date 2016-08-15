@@ -359,13 +359,13 @@ if __name__ == '__main__':
 
     # Run training
     if config['train']:
-        trainDataPool = DataPool(section_regex = config['train'],
-                                 data_path     = config['data_path'],
-                                 fgen          = config['feature_generator'],
-                                 format_path   = config['format'],
-                                 shardNum      = config['spark_shards'],
-                                 sc            = sparkContext,
-                                 hadoop        = yarn_mode)
+        trainDataPool = DataPool(fgen         = config['feature_generator'],
+                                 format_list  = config['format'],
+                                 data_regex   = config['train'],
+                                 data_path    = config['data_path'],
+                                 shards     = config['spark_shards'],
+                                 sparkContext = sparkContext,
+                                 hadoop       = yarn_mode)
 
         pt.train(dataPool             = trainDataPool,
                  maxIteration         = config['iterations'],
@@ -379,13 +379,13 @@ if __name__ == '__main__':
 
     # Run evaluation
     if config['test']:
-        testDataPool = DataPool(section_regex = config['test'],
-                                data_path     = config['data_path'],
-                                fgen          = config['feature_generator'],
-                                format_path   = config['format'],
-                                shardNum      = config['spark_shards'],
-                                sc            = sparkContext,
-                                hadoop        = yarn_mode)
+        testDataPool = DataPool(fgen         = config['feature_generator'],
+                                format_list  = config['format'],
+                                data_regex   = config['test'],
+                                data_path    = config['data_path'],
+                                shards       = config['spark_shards'],
+                                sparkContext = sparkContext,
+                                hadoop       = yarn_mode)
 
         pt.evaluate(dataPool      = testDataPool,
                     parallel      = spark_mode,
