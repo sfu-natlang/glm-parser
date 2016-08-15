@@ -8,6 +8,7 @@ from sentence import Sentence
 from data_prep import DataPrep
 from file_io import fileRead, fileWrite
 
+__version__ = '1.0.0'
 logger = logging.getLogger('DATAPOOL')
 
 
