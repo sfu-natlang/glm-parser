@@ -81,23 +81,28 @@ class EisnerState:
         else:
             return key[0]
 
+    def pos_get_tail_pos(self, key=None):
+        if (key == None):
+            return self.pos_keys[self.pos_iter][1]
+        else:
+            return key[1]
+
     def pos_get_score(self, key):
         return self.pos_dict[key][0]
 
     def pos_update_score(self, shape, key_head, key_dep, val):
         if shape == 1:
-            if (self.pos_dict[(key_head[0], key_dep[0])][0] <= val[0]):
-                self.pos_dict[(key_head[0], key_dep[0])] = val
+            if self.pos_dict[(key_head[0], key_dep[0])][0] == 0 or self.pos_dict[(key_head[0], key_dep[0])][0] < val[0]:
+                self.pos_set_score((key_head[0], key_dep[0]), val)
         else:
-             if (self.pos_dict[(key_head[0], key_dep[1])][0] <= val[0]):
-                self.pos_dict[(key_head[0], key_dep[1])] = val
+            if self.pos_dict[(key_head[0], key_dep[1])][0] == 0 or self.pos_dict[(key_head[0], key_dep[1])][0] < val[0]:
+                self.pos_set_score((key_head[0], key_dep[1]), val)
 
     def pos_reset_iter(self):
         self.pos_iter = -1
 
     def pos_set_score(self, key, val):
-        if val[0] >= self.pos_dict[key][0]:
-            self.pos_dict[key] = val
+        self.pos_dict[key] = val
 
     def pos_is_combinable(self, key):
         return self.pos_keys[self.pos_iter][1] == key[0]

@@ -151,7 +151,7 @@ class EisnerParser:
         self.pos_list = ['ROOT']
         queue = []
         for i in range(1, self.n):
-            self.pos_list.append('NN')
+            self.pos_list.append('TBD')
 
         while self.e[0][self.n - 1][1][0].pos_has_next_key():
             key = self.e[0][self.n - 1][1][0].pos_get_next_key()
@@ -162,13 +162,12 @@ class EisnerParser:
 
         queue.append((0, self.n-1, 1, 0, max_key))
         while queue:
-            print queue
             node = queue.pop(0)
 
             if node[2] == 0:
-                self.pos_list[node[1]] = self.e[node[0]][node[1]][node[2]][node[3]].pos_get_head_pos(node[4])
+                self.pos_list[node[0]] = self.e[node[0]][node[1]][node[2]][node[3]].pos_get_tail_pos(node[4])
             else:
-                self.pos_list[node[0]] = self.e[node[0]][node[1]][node[2]][node[3]].pos_get_head_pos(node[4])
+                self.pos_list[node[1]] = self.e[node[0]][node[1]][node[2]][node[3]].pos_get_tail_pos(node[4])
 
             if node[3] == 1:
                 if node[2] == 0:
@@ -199,6 +198,13 @@ class EisnerParser:
         self.n = len(sent.get_word_list())
         self.init_eisner_matrix(sent.get_pos_list())
 
+        print sent.get_word_list()
+        print ''
+        print sent.get_pos_list()
+        print ''
+        print sent.get_pos_pred()
+        print ''
+
         #TODO: try for m in range(1,self.n)
         for m in range(1, self.n):
             for s in range(0, self.n-1):
@@ -219,4 +225,7 @@ class EisnerParser:
 
         self.get_edge_list()
 
+        print self.edge_list
+        print ''
+        print self.pos_list
         return self.edge_list, self.pos_list

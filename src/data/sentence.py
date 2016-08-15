@@ -134,10 +134,7 @@ class Sentence():
             self.f_gen.init_resources(rsc_list)
 
             # Pre-compute the set of gold features
-            #if 'Multitag' in fgen.__class__.__name__:
             self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
-            #else:
-            #    self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
 
             # During initialization is has not been known yet. We will fill this later
             # self.current_global_vector = None
