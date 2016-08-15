@@ -31,11 +31,38 @@ class EisnerState:
         else:
             head, tail = 0, 1
 
-        for pos_head in pos_list[state_id[head]]:
-            for pos_tail in pos_list[state_id[tail]]:
-                if state_id[head] != state_id[tail] or pos_head == pos_tail:
-                    self.pos_dict[(pos_head, pos_tail)] = (0, state_id[head], (pos_head, pos_head), (pos_head, pos_tail))
-                    self.pos_keys.append((pos_head, pos_tail))
+        for pos_left in pos_list[state_id[0]]:
+            for pos_right in pos_list[state_id[1]]:
+                if state_id[0] == state_id[1] and pos_left != pos_right:
+                    continue
+
+                if state_id[2] == 0 and state_id[3] == 0:
+                    self.pos_dict[(pos_right, pos_left)] = (0, state_id[0],
+                                                            (pos_left, pos_left),
+                                                            (pos_right, pos_left))
+                    self.pos_keys.append((pos_right, pos_left))
+
+                if state_id[2] == 1 and state_id[3] == 0:
+                    self.pos_dict[(pos_left, pos_right)] = (0, state_id[1],
+                                                            (pos_left, pos_right),
+                                                            (pos_right, pos_right))
+                    self.pos_keys.append((pos_left, pos_right))
+
+                if state_id[0] == state_id[1]:
+                    continue
+
+                if state_id[2] == 0 and state_id[3] == 1:
+                    self.pos_dict[(pos_right, pos_left)] = (0, state_id[0],
+                                                            (pos_left, pos_left),
+                                                            (pos_right, pos_list[state_id[0]+1][0]))
+                    self.pos_keys.append((pos_right, pos_left))
+
+                if state_id[2] == 1 and state_id[3] == 1:
+                    self.pos_dict[(pos_left, pos_right)] = (0, state_id[0],
+                                                            (pos_left, pos_left),
+                                                            (pos_right, pos_list[state_id[0]+1][0]))
+                    self.pos_keys.append((pos_left, pos_right))
+
 
     def pos_has_next_key(self):
         return self.pos_iter < len(self.pos_keys) - 1

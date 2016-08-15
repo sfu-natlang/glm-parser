@@ -100,12 +100,13 @@ class GlmParser():
 
         # Prepare the suitable argmax
         def parser_f_argmax(w_vector, sentence, parser):
-            if ('multitag' in parser.__class__.__name__):
-                current_edge_set, pos_list = parser.parse(sentence, w_vector.get_vector_score)
+            current_edge_set = parser.parse(sentence, w_vector.get_vector_score)
+            if type(current_edge_set) == tuple:
+                pos_list = current_edge_set[1]
+                current_edge_set = current_edge_set[0]
                 sentence.set_pos_list(pos_list)
-            else:
-                current_edge_set = parser.parse(sentence, w_vector.get_vector_score)
             current_global_vector = sentence.set_current_global_vector(current_edge_set)
+
             return current_global_vector
         f_argmax = functools.partial(parser_f_argmax, parser=self.parser)
 

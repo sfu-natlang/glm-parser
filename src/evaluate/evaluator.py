@@ -59,12 +59,9 @@ class Evaluator():
                 set([(head_index, dep_index) for head_index, dep_index, _ in sent.get_edge_list()])
 
             sent_len = len(sent.get_word_list())
-            if ('multitag' in parser.__class__.__name__):
-                test_edge_set = \
-                    parser.parse(sent, w_vector.get_vector_score)[0]
-            else:
-                test_edge_set = \
-                    parser.parse(sent, w_vector.get_vector_score)
+            test_edge_set = parser.parse(sent, w_vector.get_vector_score)
+            if type(test_edge_set) == tuple:
+                test_edge_set = test_edge_set[0]
 
             self.unlabeled_accuracy(test_edge_set, gold_edge_set, True)
 

@@ -134,7 +134,7 @@ class Sentence():
             self.f_gen.init_resources(rsc_list)
 
             # Pre-compute the set of gold features
-            #if 'multitag' in fgen.__class__.__name__:
+            #if 'Multitag' in fgen.__class__.__name__:
             self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
             #else:
             #    self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
@@ -343,7 +343,7 @@ class Sentence():
 
     def multi_tag(self, pos_dict, tagger):
         new_pos_list = []
-        self.predict_pos_list = tagger.getTags(['_B_-2', '_B_-1'] +
+        self.predict_pos_list = ['ROOT'] + tagger.getTags(['_B_-2', '_B_-1'] +
                                           self.column_list['FORM'][1:] +
                                           ['_B_+1', '_B_+2'])
         for index, word in enumerate(self.column_list['FORM']):
@@ -392,10 +392,24 @@ class Sentence():
         Return the POS tag list. The return value is a new copy so users could
         modify that without worrying about changing the internal data structure
 
+        :return: A list of POS tag lists
+        :rtype: list(list(str))
+        """
+        return self.fetch_column("POSTAG")
+
+    def get_pos_pred(self):
+        """
+        Return the predicted POS tag list. The return value is a new copy so users
+        could modify that without worrying about changing the internal data structure
+
         :return: A list of POS tags
         :rtype: list(str)
         """
-        return self.fetch_column("POSTAG")
+
+        if hasattr(self, 'predict_pos_list'):
+            return self.predict_pos_list
+        else:
+            return []
 
     def get_edge_list(self):
         """

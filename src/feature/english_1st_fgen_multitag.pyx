@@ -14,7 +14,7 @@ import debug.debug
 import sys
 
 
-class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
+class MultitagFeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """
     First order feature generator for english
     """

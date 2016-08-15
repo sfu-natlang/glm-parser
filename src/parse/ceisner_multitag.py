@@ -72,8 +72,7 @@ class EisnerParser:
                 score = self.e[s][q][1][0].pos_get_score(key0) + \
                         self.e[q+1][t][0][0].pos_get_score(key1) + \
                         edge_score
-                if s == 0 and t == 26:
-                    print score
+
                 self.e[s][t][0][1].pos_update_score(1, key1, key0,
                                                     (score, q, key0, key1))
             self.e[q+1][t][0][0].pos_reset_iter()
@@ -154,8 +153,6 @@ class EisnerParser:
         for i in range(1, self.n):
             self.pos_list.append('NN')
 
-        print 0, self.n-1
-        print self.e[0][self.n-1][1][0].pos_dict
         while self.e[0][self.n - 1][1][0].pos_has_next_key():
             key = self.e[0][self.n - 1][1][0].pos_get_next_key()
             if self.e[0][self.n - 1][1][0].pos_get_score(key) > max_score:
@@ -202,7 +199,6 @@ class EisnerParser:
         self.n = len(sent.get_word_list())
         self.init_eisner_matrix(sent.get_pos_list())
 
-        print sent.gold_global_vector
         #TODO: try for m in range(1,self.n)
         for m in range(1, self.n):
             for s in range(0, self.n-1):
@@ -210,7 +206,6 @@ class EisnerParser:
                 if t >= self.n:
                     break
 
-                print s, t
                 self.e[s][t][0][1].pos_init((s, t, 0, 1), sent.get_pos_list())
                 self.e[s][t][1][1].pos_init((s, t, 1, 1), sent.get_pos_list())
                 self.e[s][t][0][0].pos_init((s, t, 0, 0), sent.get_pos_list())
