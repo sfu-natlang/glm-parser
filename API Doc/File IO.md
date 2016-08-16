@@ -1,7 +1,7 @@
 # File IO
 
 ###### API Version: 1.0.0
-###### Edit: 2016-08-01 14:31, Jetic Gu
+###### Edit: 2016-08-16 19:24, Jetic Gu
 
 ### 1. Description
 
@@ -74,7 +74,7 @@ Code:
 
 	print "Writing to local:"
 	print fileWrite("file://example.txt", contents, None)
-	
+
 	print "Writing to HDFS:"
 	print fileWrite("hdfs://example.txt", contents, sc)
 

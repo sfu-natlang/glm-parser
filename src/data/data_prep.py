@@ -23,22 +23,27 @@ import os.path
 import hashlib
 import logging
 
+__version__ = '1.0.0'
 logger = logging.getLogger('DATAPREP')
 
 
 class DataPrep():
-    def __init__(self, dataURI, dataRegex, shardNum, targetPath, sparkContext=None, debug=True):
-        self.dataURI   = dataURI + "/" if dataURI[len(dataURI) - 1] != "/" else dataURI
+    def __init__(self,
+                 dataURI,
+                 dataRegex,
+                 shardNum,
+                 targetPath,
+                 sparkContext=None):
+
+        self.dataURI    = dataURI + "/" if dataURI[len(dataURI) - 1] != "/" else dataURI
         self.dataRegex  = dataRegex
         self.shardNum   = shardNum
         # Avoid error. We do not know whether the user has got a / at the end of the string or not,
         # which could be problematic in the future
         self.targetPath = targetPath + "/" if targetPath[len(targetPath) - 1] != "/" else targetPath
-        self.debug      = debug
         self.sc         = sparkContext
 
-        if self.debug:
-            logger.info("Preparing data for " + dataRegex)
+        logger.debug("Preparing data for " + dataRegex)
 
         # Check param validity
         if (not isinstance(shardNum, int)) or int(shardNum) <= 0:
@@ -47,13 +52,12 @@ class DataPrep():
             raise ValueError("DATAPREP [ERROR]: dataRegex not specified")
         if targetPath == "":
             raise ValueError("DATAPREP [ERROR]: targetPath not specified")
-        if self.debug:
-            logger.info("Using data from path: " + self.dataURI)
+        logger.debug("Using data from path: " + self.dataURI)
         return
 
     def localPath(self):
         '''
-        Return the path of the present data.
+        Return the local path of the present data.
         '''
         if self.path:
             return self.path
@@ -73,7 +77,7 @@ class DataPrep():
 
     def hadoopPath(self):
         '''
-        Return the path of the present data.
+        Return the path on HDFS of the present data.
         '''
         if self.hdfsPath:
             return self.hdfsPath
@@ -82,9 +86,7 @@ class DataPrep():
 
     def loadLocal(self):
         '''
-        :param dataURI: the input directory storing training data_pool
-        :param shardNum: the number of partisions of data_pool
-        :param targetPath: the output directory storing the sharded data_pool
+        Load the data and create tmp files in local directory
         '''
         def sentCount(dataURI, dataRegex):
             '''
@@ -110,8 +112,7 @@ class DataPrep():
             raise ValueError("DATAPREP [ERROR]: Shouldn't use none local path for loading data locally: " + self.dataURI)
         if not os.path.isdir(self.dataURI[7:]):
             raise ValueError("DATAPREP [ERROR]: source directory do not exist")
-        if self.debug:
-            logger.info("Partitioning Data locally")
+        logger.debug("Partitioning Data locally")
         if not os.path.exists(self.targetPath):
             os.makedirs(self.targetPath)
 
@@ -130,8 +131,7 @@ class DataPrep():
         self.path = self.targetPath + hashCode + '/'
 
         if not os.path.exists(self.path):
-            if self.debug:
-                logger.info("Copying data to local directory: " + self.path)
+            logger.debug("Copying data to local directory: " + self.path)
             os.makedirs(self.path)
 
             fid = self.shardNum - 1
@@ -161,10 +161,8 @@ class DataPrep():
 
             fout.close()
         else:
-            if self.debug:
-                logger.info("local directory: " + self.path + " already exists, will not proceed to copy")
-        if self.debug:
-            logger.info("Partition complete")
+            logger.debug("local directory: " + self.path + " already exists, will not proceed to copy")
+        logger.debug("Partition complete")
         return self.path
 
     def loadHadoop(self):
@@ -176,22 +174,19 @@ class DataPrep():
         dataList = re.split("\||,|\s+", self.dataRegex)
         for i in range(len(dataList)):
             dataList[i] = self.dataURI + "*/" + dataList[i]
-        if self.debug:
-            logger.info("Using regular expression for files: " + str(dataList))
+        logger.debug("Using regular expression for files: " + str(dataList))
         aRdd = self.sc.textFile(','.join(dataList)).cache()
 
         hashCode = hashlib.md5(self.dataURI + self.dataRegex + str(self.shardNum)).hexdigest()[:7]
         self.hdfsPath = self.targetPath + str(self.sc._jsc.sc().applicationId()) + '/' + hashCode + '/'
-        if self.debug:
-            logger.info("Uploading data to HDFS")
-            logger.info("Uploading to target directory " + self.hdfsPath)
+        logger.debug("Uploading data to HDFS")
+        logger.debug("Uploading to target directory " + self.hdfsPath)
 
         aRdd.coalesce(self.shardNum, True).cache()
         aRdd.saveAsTextFile(self.hdfsPath)
         aRdd.unpersist()
         aRdd = None
-        if self.debug:
-            logger.info("Upload complete")
+        logger.debug("Upload complete")
         return self.hdfsPath
 
 # Uncomment the following code for tests
