@@ -60,7 +60,6 @@ class EisnerParser:
             while self.e[q+1][t][0][0].pos_has_next_key():
                 key1 = self.e[q+1][t][0][0].pos_get_next_key()
 
-                #import pudb; pu.db
                 edge_score = arc_weight(
                     sent.get_local_vector(
                         t,
@@ -197,13 +196,6 @@ class EisnerParser:
     def parse(self, sent, arc_weight):
         self.n = len(sent.get_word_list())
         self.init_eisner_matrix(sent.get_pos_list())
-
-        print sent.get_word_list()
-        print ''
-        print sent.get_pos_list()
-        print ''
-        print sent.get_pos_pred()
-        print ''
 
         #TODO: try for m in range(1,self.n)
         for m in range(1, self.n):

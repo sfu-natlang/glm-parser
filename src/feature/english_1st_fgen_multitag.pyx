@@ -37,6 +37,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                             dep_index,
                             direction,
                             dist,
+                            pos_list,
                             head_pos=None,
                             dep_pos=None):
         """
@@ -72,19 +73,16 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         if not hasattr(self, 'FORM'):
             sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
-        if not hasattr(self, 'POSTAG'):
-            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
-
         xi_word = self.FORM[head_index]
         xj_word = self.FORM[dep_index]
 
         if head_pos == None:
-            xi_pos = self.POSTAG[head_index]
+            xi_pos = pos_list[head_index]
         else:
             xi_pos = head_pos
 
         if dep_pos == None:
-            xj_pos = self.POSTAG[dep_index]
+            xj_pos = pos_list[dep_index]
         else:
             xj_pos = dep_pos
 
@@ -118,6 +116,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                            dep_index,
                            direction,
                            dist,
+                           pos_list,
                            head_pos=None,
                            dep_pos=None
                            ):
@@ -162,12 +161,12 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         xj_word = self.FORM[dep_index]
 
         if head_pos == None:
-            xi_pos = self.POSTAG[head_index]
+            xi_pos = pos_list[head_index]
         else:
             xi_pos = head_pos
 
         if dep_pos == None:
-            xj_pos = self.POSTAG[dep_index]
+            xj_pos = pos_list[dep_index]
         else:
             xj_pos = dep_pos
 
@@ -203,6 +202,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                                dep_index,
                                direction,
                                dist,
+                               pos_list,
                                head_pos=None,
                                dep_pos=None):
         """
@@ -235,12 +235,12 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             return []
 
         if head_pos == None:
-            xi_pos = self.POSTAG[head_index]
+            xi_pos = pos_list[head_index]
         else:
             xi_pos = head_pos
 
         if dep_pos == None:
-            xj_pos = self.POSTAG[dep_index]
+            xj_pos = pos_list[dep_index]
         else:
             xj_pos = dep_pos
 
@@ -248,10 +248,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         # Iterate through [start_index + 1,end_index - 1]
         for between_index in range(start_index + 1, end_index):
-            if hasattr(self, 'pos_prediction'):
-                xb_pos = self.pos_prediction[between_index]
-            else:
-                xb_pos = self.POSTAG[between_index]
+            xb_pos = pos_list[between_index]
             # Add all words between head and dep into the feature
             local_fv.add( (2, 0, xi_pos, xb_pos, xj_pos) )
 
@@ -264,6 +261,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                                 dep_index,
                                 direction,
                                 dist,
+                                pos_list,
                                 head_pos=None,
                                 dep_pos=None):
         """
@@ -297,12 +295,12 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         len_word_list = len(self.FORM)
 
         if head_pos == None:
-            xi_pos = self.POSTAG[head_index]
+            xi_pos = pos_list[head_index]
         else:
             xi_pos = head_pos
 
         if dep_pos == None:
-            xj_pos = self.POSTAG[dep_index]
+            xj_pos = pos_list[dep_index]
         else:
             xj_pos = dep_pos
 
@@ -310,37 +308,25 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         if head_index + 1 == len_word_list:
             xiplus_pos = None
         else:
-            if hasattr(self, 'pos_prediction'):
-                xiplus_pos = self.pos_prediction[head_index + 1]
-            else:
-                xiplus_pos = self.POSTAG[head_index + 1]
+            xiplus_pos = pos_list[head_index + 1]
 
         # xi-1_pos
         if head_index == 0:
             ximinus_pos = None
         else:
-            if hasattr(self, 'pos_prediction'):
-                ximinus_pos = self.pos_prediction[head_index - 1]
-            else:
-                ximinus_pos = self.POSTAG[head_index - 1]
+            ximinus_pos = pos_list[head_index - 1]
 
         # xj+1_pos
         if dep_index + 1 == len_word_list:
             xjplus_pos = None
         else:
-            if hasattr(self, 'pos_prediction'):
-                xjplus_pos = self.pos_prediction[dep_index + 1]
-            else:
-                xjplus_pos = self.POSTAG[dep_index + 1]
+            xjplus_pos = pos_list[dep_index + 1]
 
         # xj-1_pos
         if dep_index == 0:
             xjminus_pos = None
         else:
-            if hasattr(self, 'pos_prediction'):
-                xjminus_pos = self.pos_prediction[dep_index - 1]
-            else:
-                xjminus_pos = self.POSTAG[dep_index - 1]
+            xjminus_pos = pos_list[dep_index - 1]
 
         local_fv = []
 
@@ -376,7 +362,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             dir_dist_fv.append( new_prefix + feature[2:] + new_suffix )
         return dir_dist_fv
 
-    def get_local_vector(self, head_index, dep_index,
+    def get_local_vector(self, head_index, dep_index, pos_list,
                          head_pos=None,
                          dep_pos=None,
                          other_index_list=None, feature_type=None):
@@ -395,17 +381,17 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         fv = []
         # Get Unigram features
-        fv += self.get_unigram_feature(head_index, dep_index,
-                                       direction, dist, head_pos, dep_pos)
+        fv += self.get_unigram_feature(head_index, dep_index, direction,
+                                       dist, pos_list, head_pos, dep_pos)
         # Get bigram features
-        fv += self.get_bigram_feature(head_index, dep_index,
-                                      direction, dist, head_pos, dep_pos)
+        fv += self.get_bigram_feature(head_index, dep_index, direction,
+                                      dist, pos_list, head_pos, dep_pos)
         # Get in-between features
-        fv += self.get_in_between_feature(head_index, dep_index,
-                                          direction, dist, head_pos, dep_pos)
+        fv += self.get_in_between_feature(head_index, dep_index, direction,
+                                          dist, pos_list, head_pos, dep_pos)
         # Get surrounding feature
-        #fv += self.get_surrounding_feature(head_index, dep_index,
-        #                                   direction, dist, head_pos, dep_pos)
+        fv += self.get_surrounding_feature(head_index, dep_index, direction,
+                                           dist, pos_list, head_pos, dep_pos)
 
         if False:
             # debug if there are duplicates
@@ -416,18 +402,25 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         return map(str, fv)
 
-    def recover_feature_from_edges(self, edge_list, pos_list=None):
+    def recover_feature_from_edges(self, edge_list, pos_list, parser_predict=None):
         """
         Return a feature vector instance containing the features
         implied by edge list
+
+        :param edge_list: The edge set from which features are recovered
+        :type edge_list: list of tuples
+        :param pos_list: The POS tags for each word
+        :type pos_list: list of strings
+        :param : The POS tags for each word
+        :type : list of strings
         """
         fv = []
 
-        if pos_list:
+        if parser_predict:
             for head, dep in edge_list:
-                fv += self.get_local_vector(head, dep, pos_list[head], pos_list[dep])
+                fv += self.get_local_vector(head, dep, pos_list, parser_predict[head], parser_predict[dep])
         else:
             for head, dep in edge_list:
-                fv += self.get_local_vector(head, dep)
+                fv += self.get_local_vector(head, dep, pos_list)
 
         return fv

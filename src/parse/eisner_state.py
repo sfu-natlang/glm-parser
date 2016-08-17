@@ -26,11 +26,6 @@ class EisnerState:
         if not hasattr(self, 'id'):
             self.init_id(state_id)
 
-        if state_id[2] == 0:
-            head, tail = 1, 0
-        else:
-            head, tail = 0, 1
-
         for pos_left in pos_list[state_id[0]]:
             for pos_right in pos_list[state_id[1]]:
                 if state_id[0] == state_id[1] and pos_left != pos_right:

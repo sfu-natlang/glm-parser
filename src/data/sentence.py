@@ -115,6 +115,7 @@ class Sentence():
 
         if "POSTAG" in self.column_list:
             self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
+            self.column_list["GOLDPOS"] = self.column_list["POSTAG"]
         else:
             sys.exit("'POSTAG' is needed in Sentence but it's not in format file")
 
@@ -226,7 +227,7 @@ class Sentence():
         return ret_fv
 
     # Both 1st and 2nd order
-    def get_global_vector(self, edge_list, pos_list=None):
+    def get_global_vector(self, edge_list):
         """
         Calculate the global vector with the current weight, the order of the feature
         score is the same order as the feature set
@@ -240,10 +241,7 @@ class Sentence():
         :rtype: list
         """
 
-        if (pos_list):
-            global_vector = self.f_gen.recover_feature_from_edges(edge_list, pos_list)
-        else:
-            global_vector = self.f_gen.recover_feature_from_edges(edge_list)
+        global_vector = self.f_gen.recover_feature_from_edges(edge_list, self.column_list["GOLDPOS"])
 
         # return self.convert_list_vector_to_dict(global_vector)
         return global_vector
@@ -272,11 +270,13 @@ class Sentence():
         if (head_pos == None):
             lv = self.f_gen.get_local_vector(head_index,
                                              dep_index,
-                                             another_index_list,
-                                             feature_type)
+                                             pos_list=self.column_list["POSTAG"],
+                                             other_index_list=another_index_list,
+                                             feature_type=feature_type)
         else:
             lv = self.f_gen.get_local_vector(head_index,
                                              dep_index,
+                                             self.predict_pos_list,
                                              head_pos,
                                              dep_pos,
                                              another_index_list,
