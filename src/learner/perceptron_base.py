@@ -1,8 +1,7 @@
 from weight.weight_vector import WeightVector
 from data.data_pool import DataPool
 
-import debug.debug
-import time
+import os
 from learner import logger
 
 __version__ = '1.0.0'
@@ -14,23 +13,14 @@ class PerceptronLearnerBase:
 
     def __init__(self, w_vector):
         self.w_vector = {}
+        if w_vector is None:
+            return
+        if not isinstance(w_vector, WeightVector):
+            raise ValueError(
+                "LEARNER [ERROR]: w_vector is not an instance of WeightVector")
         for key in w_vector.keys():
             self.w_vector[key] = w_vector[key]
         return
-
-    def __iteration_learn(self,
-                          data_pool,
-                          init_w_vector,
-                          f_argmax,
-                          log=False,
-                          info=""):
-        raise NotImplemented
-
-    def __iteration_proc(self):
-        raise NotImplemented
-
-    def export():
-        raise NotImplemented
 
     def sequential_learn(self,
                          f_argmax,
@@ -49,13 +39,13 @@ class PerceptronLearnerBase:
             logger.info("Starting Iteration %d" % t)
             logger.info("Initial Number of Keys: %d" % len(self.w_vector.keys()))
 
-            vector_list = self.__iteration_learn(data_pool=data_pool,
-                                                 init_w_vector=self.w_vector,
-                                                 f_argmax=f_argmax,
-                                                 log=True,
-                                                 info="Iteration %d, " % t)
+            vector_list = self._iteration_learn(data_pool=data_pool,
+                                                init_w_vector=self.w_vector,
+                                                f_argmax=f_argmax,
+                                                log=True,
+                                                info="Iteration %d, " % t)
 
-            self.w_vector = self.__iteration_proc(vector_list)
+            self.w_vector = self._iteration_proc(vector_list)
             logger.info("Iteration complete, total number of keys: %d" % len(self.w_vector.keys()))
 
             if d_filename is not None:
@@ -68,28 +58,31 @@ class PerceptronLearnerBase:
     def parallel_learn(self,
                        f_argmax,
                        data_pool,
-                       iteration=1,
+                       iterations=1,
                        d_filename=None,
                        dump_freq=1,
-                       sparkContext=None
+                       sparkContext=None,
                        hadoop=False):
 
         def create_dp(textString, fgen, format, comment_sign):
-            dp = data_pool.DataPool(fgen         = fgen,
-                                    format_list  = format,
-                                    textString   = textString[1],
-                                    comment_sign = comment_sign)
+            dp = DataPool(fgen         = fgen,
+                          format_list  = format,
+                          textString   = textString[1],
+                          comment_sign = comment_sign)
             return dp
 
         def get_sent_num(dp):
             return dp.get_sent_num()
 
+        logger.info("Starting parallel train")
+        logger.info("Using Learner: " + self.name)
+
         sc = sparkContext
 
-        dir_name     = dataPool.loadedPath()
-        format_list  = dataPool.format_list
-        comment_sign = dataPool.comment_sign
-        fgen         = dataPool.fgen
+        dir_name     = data_pool.loadedPath()
+        format_list  = data_pool.format_list
+        comment_sign = data_pool.comment_sign
+        fgen         = data_pool.fgen
 
         # By default, when the hdfs is configured for spark, even in local mode it will
         # still try to load from hdfs. The following code is to resolve this confusion.
@@ -105,23 +98,24 @@ class PerceptronLearnerBase:
                                                  comment_sign = comment_sign)).cache()
 
         self.w_vector = {}
-        logger.info("Totel number of sentences: %d" % dp.map(get_sent_num).sum())
+        tmp = dp.map(get_sent_num).sum()
+        logger.info("Totel number of sentences: %d" % tmp)
 
         for t in range(iterations):
-            logger.info("Starting Iteration %d" % iteration)
+            logger.info("Starting Iteration %d" % t)
             logger.info("Initial Number of Keys: %d" % len(self.w_vector.keys()))
 
             w_vector_list = dp.flatMap(
-                lambda t: self.__iteration_learn(data_pool=t,
-                                                 init_w_vector=self.w_vector,
-                                                 f_argmax=f_argmax))
+                lambda t: self._iteration_learn(data_pool=t,
+                                                init_w_vector=self.w_vector,
+                                                f_argmax=f_argmax))
 
             w_vector_list = w_vector_list.combineByKey(
                 lambda value: value,
                 lambda x, value: tuple(map(sum, zip(x, value))),
                 lambda x, y: tuple(map(sum, zip(x, y)))).collect()
 
-            self.w_vector = self.__iteration_proc(w_vector_list)
+            self.w_vector = self._iteration_proc(w_vector_list)
             logger.info("Iteration complete, total number of keys: %d" % len(self.w_vector.keys()))
 
             if d_filename is not None:

@@ -74,11 +74,7 @@ class PosTagger():
             raise ValueError("TAGGER [ERROR]: Learner not specified")
 
         # Load Learner
-        if parallel:
-            sequentialLearner = importlib.import_module('learner.' + learner).Learner()
-        else:
-            sequentialLearner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
-        logger.info("Using learner: %s " % (sequentialLearner.name))
+        learner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
 
         # Prepare the suitable argmax
         def tagger_f_argmax(w_vector, sentence, tagger, tagset, default_tag):
@@ -97,31 +93,20 @@ class PosTagger():
         logger.info("Starting Training Process")
         start_time = time.time()
         if not parallel:  # using sequential training
-            logger.info("Using Sequential Training")
-            self.w_vector = sequentialLearner.sequential_learn(
-                max_iter   = maxIteration,
-                data_pool  = dataPool,
+            self.w_vector = learner.sequential_learn(
                 f_argmax   = f_argmax,
+                data_pool  = dataPool,
+                iterations = maxIteration,
                 d_filename = weightVectorDumpPath,
                 dump_freq  = dumpFrequency)
         else:  # using parallel training
-            logger.info("Using Parallel Training")
-            if shardNum is None:
-                logger.warn("Number of shards not specified, using 1")
-                shardNum = 1
-            if sparkContext is None:
-                raise RuntimeError('TAGGER [ERROR]: SparkContext not specified')
-
-            parallelLearnClass = importlib.import_module('learner.spark_train').ParallelPerceptronLearner
-            parallelLearner = parallelLearnClass(self.w_vector, maxIteration)
-            self.w_vector = parallelLearner.parallel_learn(
-                max_iter     = maxIteration,
-                dataPool     = dataPool,
+            self.w_vector = learner.parallel_learn(
                 f_argmax     = f_argmax,
-                learner      = sequentialLearner,
+                data_pool    = dataPool,
+                iterations   = maxIteration,
                 d_filename   = weightVectorDumpPath,
-                shards       = shardNum,
-                sc           = sparkContext,
+                dump_freq    = dumpFrequency,
+                sparkContext = sparkContext,
                 hadoop       = hadoop)
 
         end_time = time.time()
