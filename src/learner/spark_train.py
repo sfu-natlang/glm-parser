@@ -1,16 +1,6 @@
-from hvector._mycollections import mydefaultdict
-from hvector.mydouble import mydouble
+import os
 from weight.weight_vector import WeightVector
 from data import data_pool
-import perceptron
-import debug.debug
-import sys
-import os
-import shutil
-import re
-import importlib
-from os.path import isfile, join, isdir
-from pyspark import SparkContext
 from learner import logger
 
 
@@ -78,64 +68,26 @@ class ParallelPerceptronLearner():
         total_sent = dp.map(get_sent_num).sum()
         logger.info("Totel number of sentences: %d" % total_sent)
 
-        if learner.name == "AveragePerceptronLearner":
-            logger.info("Using Averaged Perceptron Learner")
-            c = total_sent * max_iter
+        for iteration in range(max_iter):
+            logger.info("Starting Iteration %d" % iteration)
+            logger.info("Initial Number of Keys: %d" % len(fv.keys()))
+            # mapper: computer the weight vector in each shard using parallel_learn
+            w_vector_list = dp.flatMap(lambda t: learner.parallel_learn(data_pool=t,
+                                                                        init_w_vector=fv,
+                                                                        f_argmax=f_argmax))
+            # reducer: combine the weight vectors from each shard
+            # value is the tuple returned by parallel_learn
+            # value[0] is w_vector[key]
+            # value[1] is weight_sum_dict[key]
+            w_vector_list = w_vector_list.combineByKey(
+                lambda value: value,
+                lambda x, value: tuple(map(sum, zip(x, value))),
+                lambda x, y: tuple(map(sum, zip(x, y)))).collect()
 
-            weight_sum_dict = WeightVector()
-            tmp = WeightVector()
+            fv = learner.iteration_proc(w_vector_list)
+            logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
 
-            for iteration in range(max_iter):
-                logger.info("Starting Iteration %d" % iteration)
-                logger.info("Initial Number of Keys: %d" % len(fv.keys()))
-                # mapper: computer the weight vector in each shard using parallel_learn
-                w_vector_list = dp.flatMap(lambda t: learner.parallel_learn(data_pool=t,
-                                                                            init_w_vector=fv,
-                                                                            f_argmax=f_argmax))
-                # reducer: combine the weight vectors from each shard
-                # value is the tuple returned by parallel_learn
-                # value[0] is w_vector[key]
-                # value[1] is weight_sum_dict[key]
-                w_vector_list = w_vector_list.combineByKey(
-                    lambda value: (value[0], 1, value[1]),
-                    lambda x, value: (x[0] + value[0], x[1] + 1, x[2] + value[1]),
-                    lambda x, y: (x[0] + y[0], x[1] + y[1], x[2] + y[2])).collect()
-
-                fv = {}
-                tmp.clear()
-                for (feat, (weight, count, weight_sum)) in w_vector_list:
-                    fv[feat] = float(weight) / float(count)
-                    tmp[feat] = weight_sum
-                weight_sum_dict.iadd(tmp)
-                logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
-
-            self.w_vector.clear()
-            for feat in weight_sum_dict.keys():
-                self.w_vector[feat] = weight_sum_dict[feat] / c
-
-        if learner.name == "PerceptronLearner":
-            logger.info("Using Perceptron Learner")
-            for iteration in range(max_iter):
-                logger.info("Starting Iteration %d" % iteration)
-                logger.info("Initial Number of Keys: %d" % len(fv.keys()))
-                # mapper: computer the weight vector in each shard using parallel_learn
-                w_vector_list = dp.flatMap(lambda t: learner.parallel_learn(data_pool=t,
-                                                                            init_w_vector=fv,
-                                                                            f_argmax=f_argmax))
-                # reducer: combine the weight vectors from each shard
-                w_vector_list = w_vector_list.combineByKey(
-                    lambda value: (value, 1),
-                    lambda x, value: (x[0] + value, x[1] + 1),
-                    lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
-
-                fv = {}
-                for (feat, (a, b)) in w_vector_list:
-                    fv[feat] = float(a) / float(b)
-                logger.info("Iteration complete, total number of keys: %d" % len(fv.keys()))
-
-            self.w_vector.clear()
-            for feat in fv.keys():
-                self.w_vector[feat] = fv[feat]
+        self.w_vector = learner.export()
 
         if d_filename is not None:
             logger.info("Dumping trained weight vector")
