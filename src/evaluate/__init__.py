@@ -38,7 +38,6 @@ class EvaluatorBase:
     def __datapool_evaluator(self,
                              data_pool,
                              weight_vector,
-                             sentence_evaluator,
                              hadoop=None):
 
         w_vector = WeightVector()
@@ -63,7 +62,7 @@ class EvaluatorBase:
             sentence_count += 1
 
             correct_num, gold_set_size = \
-                sentence_evaluator(sent, w_vector)
+                self.sentence_evaluator(sent, w_vector)
 
             val['correct_num'] += correct_num
             val['gold_set_size'] += gold_set_size
@@ -74,7 +73,6 @@ class EvaluatorBase:
     def sequentialEvaluate(self,
                            data_pool,
                            w_vector,
-                           sentence_evaluator,
                            sparkContext=None,
                            hadoop=None):
         self.correct_num = 0
@@ -87,7 +85,6 @@ class EvaluatorBase:
 
         val = self.__datapool_evaluator(data_pool=data_pool,
                                         weight_vector=wv,
-                                        sentence_evaluator=sentence_evaluator,
                                         hadoop=hadoop)
         self.correct_num = val[0][1]
         self.gold_set_size = val[1][1]
@@ -97,7 +94,6 @@ class EvaluatorBase:
     def parallelEvaluate(self,
                          data_pool,
                          w_vector,
-                         sentence_evaluator,
                          sparkContext=None,
                          hadoop=None):
 
@@ -137,8 +133,7 @@ class EvaluatorBase:
         total_sent = dp.map(lambda dp: dp.get_sent_num()).sum()
         logger.info("Totel number of sentences: %d" % total_sent)
         dp = dp.flatMap(lambda t: self.__datapool_evaluator(data_pool          = t,
-                                                            weight_vector      = wv,
-                                                            sentence_evaluator = sentence_evaluator))
+                                                            weight_vector      = wv))
 
         val = dp.combineByKey(
             lambda value: (value, 1),

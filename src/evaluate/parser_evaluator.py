@@ -14,7 +14,7 @@ class Evaluator(EvaluatorBase):
             self.tagger.w_vector = wv
         return
 
-    def __sentence_evaluator(self, sent, w_vector):
+    def sentence_evaluator(self, sent, w_vector):
         gold_edge_set = \
             set([(head_index, dep_index)
                 for head_index, dep_index, _ in sent.get_edge_list()])
@@ -33,29 +33,3 @@ class Evaluator(EvaluatorBase):
         correct_num = len(intersect_set)
         gold_set_size = len(gold_edge_set)
         return correct_num, gold_set_size
-
-    def sequentialEvaluate(self,
-                           data_pool,
-                           w_vector,
-                           sparkContext=None,
-                           hadoop=None):
-
-        return EvaluatorBase.sequentialEvaluate(self,
-                                                data_pool,
-                                                w_vector,
-                                                self.__sentence_evaluator,
-                                                sparkContext,
-                                                hadoop)
-
-    def parallelEvaluate(self,
-                         data_pool,
-                         w_vector,
-                         sparkContext,
-                         hadoop):
-
-        return EvaluatorBase.parallelEvaluate(self,
-                                              data_pool,
-                                              w_vector,
-                                              self.__sentence_evaluator,
-                                              sparkContext,
-                                              hadoop)
