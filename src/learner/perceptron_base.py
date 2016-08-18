@@ -1,5 +1,6 @@
 from weight.weight_vector import WeightVector
 from data.data_pool import DataPool
+from pyspark import SparkContext
 
 import os
 from learner import logger
@@ -11,7 +12,7 @@ class PerceptronLearnerBase:
 
     name = "PerceptronLearnerBase"
 
-    def __init__(self, w_vector):
+    def __init__(self, w_vector=None):
         self.w_vector = {}
         if w_vector is None:
             return
@@ -28,6 +29,18 @@ class PerceptronLearnerBase:
                          iterations=1,
                          d_filename=None,
                          dump_freq=1):
+
+        # check values
+        if not isinstance(data_pool, DataPool):
+            raise ValueError("LEARNER [ERROR]: data_pool not of DataPool type")
+        if not isinstance(iterations, int):
+            raise ValueError("LEARNER [ERROR]: iterations not of int type")
+        if iterations < 1:
+            raise ValueError("LEARNER [ERROR]: iterations needs to be positive integer")
+        if d_filename is not None and not isinstance(d_filename, str):
+            raise ValueError("LEARNER [ERROR]: d_filename needs to be str or None")
+        if not isinstance(dump_freq, int):
+            raise ValueError("LEARNER [ERROR]: dump_freq needs to be int")
 
         logger.info("Starting sequential train")
         logger.info("Using Learner: " + self.name)
@@ -74,10 +87,25 @@ class PerceptronLearnerBase:
         def get_sent_num(dp):
             return dp.get_sent_num()
 
+        # check values
+        sc = sparkContext
+        if sparkContext is None:
+            raise ValueError("LEARNER [ERROR]: sparkContext not specified")
+        if not isinstance(sc, SparkContext):
+            raise ValueError("LEARNER [ERROR]: sparkContext not of pyspark.context.SparkContext type")
+        if not isinstance(data_pool, DataPool):
+            raise ValueError("LEARNER [ERROR]: data_pool not of DataPool type")
+        if not isinstance(iterations, int):
+            raise ValueError("LEARNER [ERROR]: iterations not of int type")
+        if iterations < 1:
+            raise ValueError("LEARNER [ERROR]: iterations needs to be positive integer")
+        if d_filename is not None and not isinstance(d_filename, str):
+            raise ValueError("LEARNER [ERROR]: d_filename needs to be str or None")
+        if not isinstance(dump_freq, int):
+            raise ValueError("LEARNER [ERROR]: dump_freq needs to be int")
+
         logger.info("Starting parallel train")
         logger.info("Using Learner: " + self.name)
-
-        sc = sparkContext
 
         dir_name     = data_pool.loadedPath()
         format_list  = data_pool.format_list

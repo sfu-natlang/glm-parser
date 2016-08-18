@@ -4,6 +4,8 @@ from learner.perceptron_base import PerceptronLearnerBase
 
 from learner import logger
 
+__version__ = '1.0.0'
+
 
 class Learner(PerceptronLearnerBase):
 
