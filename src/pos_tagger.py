@@ -54,12 +54,11 @@ class PosTagger():
         return
 
     def train(self,
-              dataPool             = None,
-              maxIteration         = None,
-              learner              = None,
+              dataPool,
+              maxIteration         = 1,
+              learner              = 'average_perceptron',
               weightVectorDumpPath = None,
               dumpFrequency        = 1,
-              shardNum             = None,
               parallel             = False,
               sparkContext         = None,
               hadoop               = False):
@@ -114,7 +113,7 @@ class PosTagger():
         return
 
     def evaluate(self,
-                 dataPool=None,
+                 dataPool,
                  parallel=False,
                  sparkContext=None,
                  hadoop=None):
@@ -348,7 +347,7 @@ if __name__ == '__main__':
                                  format_list  = config['format'],
                                  data_regex   = config['train'],
                                  data_path    = config['data_path'],
-                                 shards     = config['spark_shards'],
+                                 shards       = config['spark_shards'],
                                  sparkContext = sparkContext,
                                  hadoop       = yarn_mode)
 
@@ -357,7 +356,6 @@ if __name__ == '__main__':
                  learner              = config['learner'],
                  weightVectorDumpPath = config['dump_weight_to'],
                  dumpFrequency        = config['dump_frequency'],
-                 shardNum             = config['spark_shards'],
                  parallel             = spark_mode,
                  sparkContext         = sparkContext,
                  hadoop               = yarn_mode)

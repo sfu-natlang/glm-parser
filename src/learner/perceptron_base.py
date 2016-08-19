@@ -1,6 +1,5 @@
 from weight.weight_vector import WeightVector
 from data.data_pool import DataPool
-from pyspark import SparkContext
 
 import os
 from learner import logger
@@ -88,6 +87,7 @@ class PerceptronLearnerBase:
             return dp.get_sent_num()
 
         # check values
+        from pyspark import SparkContext
         sc = sparkContext
         if sparkContext is None:
             raise ValueError("LEARNER [ERROR]: sparkContext not specified")
