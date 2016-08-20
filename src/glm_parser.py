@@ -36,7 +36,7 @@ logger = logging.getLogger('PARSER')
 class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
-                 parser               = None,
+                 parser               = "ceisner",
                  sparkContext         = None):
 
         logger.info("Initialising Parser")
@@ -50,12 +50,11 @@ class GlmParser():
         return
 
     def train(self,
-              dataPool             = None,
-              maxIteration         = None,
-              learner              = None,
+              dataPool,
+              maxIteration         = 1,
+              learner              = 'average_perceptron',
               weightVectorDumpPath = None,
               dumpFrequency        = 1,
-              shardNum             = None,
               parallel             = False,
               sparkContext         = None,
               hadoop               = False):
@@ -102,7 +101,7 @@ class GlmParser():
         return
 
     def evaluate(self,
-                 dataPool=None,
+                 dataPool,
                  tagger=None,
                  parallel=False,
                  sparkContext=None,
@@ -128,6 +127,17 @@ class GlmParser():
                 hadoop        = hadoop)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
+
+    def getEdgeSet(self, sentence):
+        import feature.english_1st_fgen
+
+        inital_fgen = sentence.fgen
+
+        sentence.load_fgen(feature.english_1st_fgen.FeatureGenerator)
+        current_edge_set = parser.parse(sentence, self.w_vector.get_vector_score)
+        sentence.load_fgen(inital_fgen)
+
+        return current_edge_set[1:]
 
 if __name__ == "__main__":
     __logger = logging.getLogger('MAIN')
@@ -393,7 +403,6 @@ if __name__ == "__main__":
                  learner              = config['learner'],
                  weightVectorDumpPath = config['dump_weight_to'],
                  dumpFrequency        = config['dump_frequency'],
-                 shardNum             = config['spark_shards'],
                  parallel             = spark_mode,
                  sparkContext         = sparkContext,
                  hadoop               = yarn_mode)
