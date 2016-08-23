@@ -2,12 +2,13 @@
 
 from numpy import inf
 import copy, time
-from pos_tagger import PosTagger
 from eisner_state import EisnerState
+from collections import namedtuple
 import logging
 
 logger = logging.getLogger('PARSER')
 
+EisnerQueueNode = namedtuple("EisnerQueueNode", "s t d c key")
 
 class EisnerParser:
     """
@@ -73,7 +74,8 @@ class EisnerParser:
                         edge_score
 
                 self.e[s][t][0][1].pos_update_score(1, key1, key0,
-                                                    (score, q, key0, key1))
+                                                    (score, q, key0, key1),
+                                                    s == q)
             self.e[q+1][t][0][0].pos_reset_iter()
         self.e[s][q][1][0].pos_reset_iter()
 
@@ -94,7 +96,8 @@ class EisnerParser:
                         self.e[q+1][t][0][0].pos_get_score(key1) + \
                         edge_score
                 self.e[s][t][1][1].pos_update_score(1, key0, key1,
-                                                    (score, q, key0, key1))
+                                                    (score, q, key0, key1),
+                                                    s == q)
             self.e[q+1][t][0][0].pos_reset_iter()
         self.e[s][q][1][0].pos_reset_iter()
 
@@ -108,7 +111,8 @@ class EisnerParser:
                 score = self.e[s][q][0][0].pos_get_score(key0) + \
                         self.e[q][t][0][1].pos_get_score(key1)
                 self.e[s][t][0][0].pos_update_score(0, key1, key0,
-                                                    (score, q, key0, key1))
+                                                    (score, q, key0, key1),
+                                                    s == q)
             self.e[q][t][0][1].pos_reset_iter()
         self.e[s][q][0][0].pos_reset_iter()
 
@@ -122,7 +126,8 @@ class EisnerParser:
                 score = self.e[s][q][1][1].pos_get_score(key0) + \
                         self.e[q][t][1][0].pos_get_score(key1)
                 self.e[s][t][1][0].pos_update_score(0, key0, key1,
-                                                    (score, q, key0, key1))
+                                                    (score, q, key0, key1),
+                                                    s == q-1)
             self.e[q][t][1][0].pos_reset_iter()
         self.e[s][q][1][1].pos_reset_iter()
 
@@ -159,22 +164,22 @@ class EisnerParser:
                 max_key = key
         self.e[0][self.n - 1][1][0].pos_reset_iter()
 
-        queue.append((0, self.n-1, 1, 0, max_key))
+        queue.append(EisnerQueueNode(0, self.n-1, 1, 0, max_key))
         while queue:
             node = queue.pop(0)
 
-            if node[2] == 0:
-                self.pos_list[node[0]] = self.e[node[0]][node[1]][node[2]][node[3]].pos_get_tail_pos(node[4])
+            if node.d == 0:
+                self.pos_list[node.s] = self.e[node.s][node.t][node.d][node.c].pos_get_tail_pos(node.key)
             else:
-                self.pos_list[node[1]] = self.e[node[0]][node[1]][node[2]][node[3]].pos_get_tail_pos(node[4])
+                self.pos_list[node.t] = self.e[node.s][node.t][node.d][node.c].pos_get_tail_pos(node.key)
 
-            if node[3] == 1:
-                if node[2] == 0:
-                    self.edge_list.append((node[1], node[0]))
+            if node.c == 1:
+                if node.d == 0:
+                    self.edge_list.append((node.t, node.s))
                 else:
-                    self.edge_list.append((node[0], node[1]))
+                    self.edge_list.append((node.s, node.t))
 
-            node_left, node_right = self.e[node[0]][node[1]][node[2]][node[3]].pos_split(node[4])
+            node_left, node_right = self.e[node.s][node.t][node.d][node.c].pos_split(node.key)
 
             if node_left[0] != node_left[1]:
                 queue.append(node_left)
@@ -217,7 +222,4 @@ class EisnerParser:
 
         self.get_edge_list()
 
-        print self.edge_list
-        print ''
-        print self.pos_list
         return self.edge_list, self.pos_list

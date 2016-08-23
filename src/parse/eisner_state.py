@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
-from pos_tagger import PosTagger
-import copy
-import time
-from numpy import inf
 import logging
-# from data.sentence import Sentence
+from collections import namedtuple
 
 logger = logging.getLogger('PARSER')
 
+EisnerQueueNode = namedtuple("EisnerQueueNode", "s t d c key")
 
 class EisnerState:
     """
-    An Eisner parsing algorithm implementation
+    An Eisner State implementation, including multi keys:
+
+    pos: POS pair (pos1, pos2), where pos1 is the POS tag of the head,
+         and pos2 is the POS tag of the dependent
+
+    pos_dict: a dictionary of key and its value {key: val, key val, ...}
+              where key is a pos key (pos1, pos2) and val is a tuple:
+              (score, q, key_s2q, key_q2t)
     """
 
     def __init__(self):
@@ -20,42 +24,55 @@ class EisnerState:
         self.pos_keys = []
 
     def init_id(self, state_id):
-        self.id = state_id
+        """
+        self.s: start index
+        self.t: end index
+        self.d: direction
+                0: <--
+                1: -->
+        self.c: completeness (shape)
+                0: triangle
+                1: trapezoidal
+        """
+        self.s = state_id[0]
+        self.t = state_id[1]
+        self.d = state_id[2]
+        self.c = state_id[3]
 
     def pos_init(self, state_id, pos_list):
         if not hasattr(self, 'id'):
             self.init_id(state_id)
 
-        for pos_left in pos_list[state_id[0]]:
-            for pos_right in pos_list[state_id[1]]:
-                if state_id[0] == state_id[1] and pos_left != pos_right:
+        for pos_left in pos_list[self.s]:
+            for pos_right in pos_list[self.t]:
+                if self.s == self.t and pos_left != pos_right:
                     continue
 
-                if state_id[2] == 0 and state_id[3] == 0:
-                    self.pos_dict[(pos_right, pos_left)] = (0, state_id[0],
+                if self.d == 0 and self.c == 0:
+                    self.pos_dict[(pos_right, pos_left)] = (0, self.s,
                                                             (pos_left, pos_left),
                                                             (pos_right, pos_left))
                     self.pos_keys.append((pos_right, pos_left))
 
-                if state_id[2] == 1 and state_id[3] == 0:
-                    self.pos_dict[(pos_left, pos_right)] = (0, state_id[1],
+                if self.d == 1 and self.c == 0:
+                    self.pos_dict[(pos_left, pos_right)] = (0, self.t,
                                                             (pos_left, pos_right),
                                                             (pos_right, pos_right))
                     self.pos_keys.append((pos_left, pos_right))
 
-                if state_id[0] == state_id[1]:
+                if self.s == self.t:
                     continue
 
-                if state_id[2] == 0 and state_id[3] == 1:
-                    self.pos_dict[(pos_right, pos_left)] = (0, state_id[0],
+                if self.d == 0 and self.c == 1:
+                    self.pos_dict[(pos_right, pos_left)] = (0, self.s,
                                                             (pos_left, pos_left),
-                                                            (pos_right, pos_list[state_id[0]+1][0]))
+                                                            (pos_right, pos_list[self.s+1][0]))
                     self.pos_keys.append((pos_right, pos_left))
 
-                if state_id[2] == 1 and state_id[3] == 1:
-                    self.pos_dict[(pos_left, pos_right)] = (0, state_id[0],
+                if self.d == 1 and self.c == 1:
+                    self.pos_dict[(pos_left, pos_right)] = (0, self.s,
                                                             (pos_left, pos_left),
-                                                            (pos_right, pos_list[state_id[0]+1][0]))
+                                                            (pos_right, pos_list[self.s+1][0]))
                     self.pos_keys.append((pos_left, pos_right))
 
 
@@ -85,12 +102,12 @@ class EisnerState:
     def pos_get_score(self, key):
         return self.pos_dict[key][0]
 
-    def pos_update_score(self, shape, key_head, key_dep, val):
+    def pos_update_score(self, shape, key_head, key_dep, val, init=False):
         if shape == 1:
-            if self.pos_dict[(key_head[0], key_dep[0])][0] == 0 or self.pos_dict[(key_head[0], key_dep[0])][0] < val[0]:
+            if (self.pos_dict[(key_head[0], key_dep[0])][0] == 0 and init) or self.pos_dict[(key_head[0], key_dep[0])][0] < val[0]:
                 self.pos_set_score((key_head[0], key_dep[0]), val)
         else:
-            if self.pos_dict[(key_head[0], key_dep[1])][0] == 0 or self.pos_dict[(key_head[0], key_dep[1])][0] < val[0]:
+            if (self.pos_dict[(key_head[0], key_dep[1])][0] == 0 and init) or self.pos_dict[(key_head[0], key_dep[1])][0] < val[0]:
                 self.pos_set_score((key_head[0], key_dep[1]), val)
 
     def pos_reset_iter(self):
@@ -103,15 +120,15 @@ class EisnerState:
         return self.pos_keys[self.pos_iter][1] == key[0]
 
     def pos_split(self, key):
-        if self.id[2] == 0 and self.id[3] == 0:
-            return (self.id[0], self.pos_dict[key][1], 0, 0, self.pos_dict[key][2]), \
-                   (self.pos_dict[key][1], self.id[1], 0, 1, self.pos_dict[key][3])
-        if self.id[2] == 1 and self.id[3] == 0:
-            return (self.id[0], self.pos_dict[key][1], 1, 1, self.pos_dict[key][2]), \
-                   (self.pos_dict[key][1], self.id[1], 1, 0, self.pos_dict[key][3])
-        if self.id[3] == 1:
-            return (self.id[0], self.pos_dict[key][1], 1, 0, self.pos_dict[key][2]), \
-                   (self.pos_dict[key][1] + 1, self.id[1], 0, 0, self.pos_dict[key][3])
+        if self.d == 0 and self.c == 0:
+            return EisnerQueueNode(self.s, self.pos_dict[key][1], 0, 0, self.pos_dict[key][2]), \
+                   EisnerQueueNode(self.pos_dict[key][1], self.t, 0, 1, self.pos_dict[key][3])
+        if self.d == 1 and self.c == 0:
+            return EisnerQueueNode(self.s, self.pos_dict[key][1], 1, 1, self.pos_dict[key][2]), \
+                   EisnerQueueNode(self.pos_dict[key][1], self.t, 1, 0, self.pos_dict[key][3])
+        if self.c == 1:
+            return EisnerQueueNode(self.s, self.pos_dict[key][1], 1, 0, self.pos_dict[key][2]), \
+                   EisnerQueueNode(self.pos_dict[key][1] + 1, self.t, 0, 0, self.pos_dict[key][3])
 
 
 #    def init_eisner_matrix(self,n):
