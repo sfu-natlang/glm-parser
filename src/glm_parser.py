@@ -327,8 +327,7 @@ if __name__ == "__main__":
         config_parser.readfp(stringIOContent)
 
         # Process the contents of config file
-        for option in ['train', 'test', 'data_path',
-                       'prep_path', 'format', 'tag_file']:
+        for option in ['train', 'test', 'prep_path', 'format', 'tag_file']:
             if config_parser.get('data', option) != '':
                 config[option] = config_parser.get('data', option)
 
@@ -345,7 +344,7 @@ if __name__ == "__main__":
                 config[option] = config_parser.get('core', option)
 
         try:
-            config['data_path'] = cf.get('data', 'data_path')
+            config['data_path'] = config_parser.get('data', 'data_path')
         except:
             __logger.warn("Encountered exception while attempting to read " +
                           "data_path from config file. It could be caused by the " +
