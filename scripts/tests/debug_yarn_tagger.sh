@@ -15,4 +15,4 @@ spark-submit --master yarn-cluster \
 			 --executor-memory 7g  \
 			 --executor-cores 3    \
 			 --py-files module.egg \
-			 glm_parser.py -s 8 --hadoop --tagger-w-vector=Daten/pos-tagger-vector/fv_Iter_5.db config/debug.config
+			 glm_parser.py -s 8 --hadoop --tagger-w-vector=Daten/pos-tagger-vector/penn2malt_tagger_Iter_1.db config/debug.config

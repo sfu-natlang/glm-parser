@@ -36,7 +36,7 @@ logger = logging.getLogger('PARSER')
 class GlmParser():
     def __init__(self,
                  weightVectorLoadPath = None,
-                 parser               = None,
+                 parser               = "ceisner",
                  sparkContext         = None):
 
         logger.info("Initialising Parser")
@@ -50,12 +50,11 @@ class GlmParser():
         return
 
     def train(self,
-              dataPool             = None,
-              maxIteration         = None,
-              learner              = None,
+              dataPool,
+              maxIteration         = 1,
+              learner              = 'average_perceptron',
               weightVectorDumpPath = None,
               dumpFrequency        = 1,
-              shardNum             = None,
               parallel             = False,
               sparkContext         = None,
               hadoop               = False):
@@ -69,11 +68,7 @@ class GlmParser():
         if learner is None:
             raise ValueError("PARSER [ERROR]: Learner not specified")
 
-        if parallel:
-            sequentialLearner = importlib.import_module('learner.' + learner).Learner()
-        else:
-            sequentialLearner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
-        logger.info("Using learner: %s " % (sequentialLearner.name))
+        learner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
 
         # Prepare the suitable argmax
         def parser_f_argmax(w_vector, sentence, parser):
@@ -83,34 +78,22 @@ class GlmParser():
         f_argmax = functools.partial(parser_f_argmax, parser=self.parser)
 
         # Start Training Process
-        logger.info("Starting Training Process")
         start_time = time.time()
         if not parallel:  # using sequential training
-            logger.info("Using Sequential Training")
-            self.w_vector = sequentialLearner.sequential_learn(
-                max_iter   = maxIteration,
-                data_pool  = dataPool,
+            self.w_vector = learner.sequential_learn(
                 f_argmax   = f_argmax,
+                data_pool  = dataPool,
+                iterations = maxIteration,
                 d_filename = weightVectorDumpPath,
                 dump_freq  = dumpFrequency)
         else:  # using parallel training
-            logger.info("Using Parallel Training")
-            if shardNum is None:
-                logger.warn("Number of shards not specified, using 1")
-                shardNum = 1
-            if sparkContext is None:
-                raise RuntimeError('PARSER [ERROR]: SparkContext not specified')
-
-            parallelLearnClass = importlib.import_module('learner.spark_train').ParallelPerceptronLearner
-            parallelLearner = parallelLearnClass(self.w_vector, maxIteration)
-            self.w_vector = parallelLearner.parallel_learn(
-                max_iter     = maxIteration,
-                dataPool     = dataPool,
+            self.w_vector = learner.parallel_learn(
                 f_argmax     = f_argmax,
-                learner      = sequentialLearner,
+                data_pool    = dataPool,
+                iterations   = maxIteration,
                 d_filename   = weightVectorDumpPath,
-                shards       = shardNum,
-                sc           = sparkContext,
+                dump_freq    = dumpFrequency,
+                sparkContext = sparkContext,
                 hadoop       = hadoop)
 
         end_time = time.time()
@@ -118,7 +101,7 @@ class GlmParser():
         return
 
     def evaluate(self,
-                 dataPool=None,
+                 dataPool,
                  tagger=None,
                  parallel=False,
                  sparkContext=None,
@@ -144,6 +127,17 @@ class GlmParser():
                 hadoop        = hadoop)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
+
+    def getEdgeSet(self, sentence):
+        import feature.english_1st_fgen
+
+        inital_fgen = sentence.fgen
+
+        sentence.load_fgen(feature.english_1st_fgen.FeatureGenerator)
+        current_edge_set = parser.parse(sentence, self.w_vector.get_vector_score)
+        sentence.load_fgen(inital_fgen)
+
+        return current_edge_set[1:]
 
 if __name__ == "__main__":
     __logger = logging.getLogger('MAIN')
@@ -395,33 +389,32 @@ if __name__ == "__main__":
 
     # Run training
     if config['train']:
-        trainDataPool = DataPool(section_regex = config['train'],
-                                 data_path     = config['data_path'],
-                                 fgen          = config['feature_generator'],
-                                 format_path   = config['format'],
-                                 shardNum      = config['spark_shards'],
-                                 sc            = sparkContext,
-                                 hadoop        = yarn_mode)
+        trainDataPool = DataPool(fgen         = config['feature_generator'],
+                                 format_list  = config['format'],
+                                 data_regex   = config['train'],
+                                 data_path    = config['data_path'],
+                                 shards       = config['spark_shards'],
+                                 sparkContext = sparkContext,
+                                 hadoop       = yarn_mode)
 
         gp.train(dataPool             = trainDataPool,
                  maxIteration         = config['iterations'],
                  learner              = config['learner'],
                  weightVectorDumpPath = config['dump_weight_to'],
                  dumpFrequency        = config['dump_frequency'],
-                 shardNum             = config['spark_shards'],
                  parallel             = spark_mode,
                  sparkContext         = sparkContext,
                  hadoop               = yarn_mode)
 
     # Run evaluation
     if config['test']:
-        testDataPool = DataPool(section_regex = config['test'],
-                                data_path     = config['data_path'],
-                                fgen          = config['feature_generator'],
-                                format_path   = config['format'],
-                                shardNum      = config['spark_shards'],
-                                sc            = sparkContext,
-                                hadoop        = yarn_mode)
+        testDataPool = DataPool(fgen         = config['feature_generator'],
+                                format_list  = config['format'],
+                                data_regex   = config['test'],
+                                data_path    = config['data_path'],
+                                shards       = config['spark_shards'],
+                                sparkContext = sparkContext,
+                                hadoop       = yarn_mode)
 
         gp.evaluate(dataPool      = testDataPool,
                     tagger        = tagger,

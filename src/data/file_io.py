@@ -2,6 +2,8 @@ import sys
 import re
 import os.path
 
+__version__ = '1.0.0'
+
 
 def __fileReadHDFS(fileURI, sparkContext=None):
     if fileURI is None:

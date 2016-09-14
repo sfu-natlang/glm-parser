@@ -54,12 +54,11 @@ class PosTagger():
         return
 
     def train(self,
-              dataPool             = None,
-              maxIteration         = None,
-              learner              = None,
+              dataPool,
+              maxIteration         = 1,
+              learner              = 'average_perceptron',
               weightVectorDumpPath = None,
               dumpFrequency        = 1,
-              shardNum             = None,
               parallel             = False,
               sparkContext         = None,
               hadoop               = False):
@@ -74,11 +73,7 @@ class PosTagger():
             raise ValueError("TAGGER [ERROR]: Learner not specified")
 
         # Load Learner
-        if parallel:
-            sequentialLearner = importlib.import_module('learner.' + learner).Learner()
-        else:
-            sequentialLearner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
-        logger.info("Using learner: %s " % (sequentialLearner.name))
+        learner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
 
         # Prepare the suitable argmax
         def tagger_f_argmax(w_vector, sentence, tagger, tagset, default_tag):
@@ -97,31 +92,20 @@ class PosTagger():
         logger.info("Starting Training Process")
         start_time = time.time()
         if not parallel:  # using sequential training
-            logger.info("Using Sequential Training")
-            self.w_vector = sequentialLearner.sequential_learn(
-                max_iter   = maxIteration,
-                data_pool  = dataPool,
+            self.w_vector = learner.sequential_learn(
                 f_argmax   = f_argmax,
+                data_pool  = dataPool,
+                iterations = maxIteration,
                 d_filename = weightVectorDumpPath,
                 dump_freq  = dumpFrequency)
         else:  # using parallel training
-            logger.info("Using Parallel Training")
-            if shardNum is None:
-                logger.warn("Number of shards not specified, using 1")
-                shardNum = 1
-            if sparkContext is None:
-                raise RuntimeError('TAGGER [ERROR]: SparkContext not specified')
-
-            parallelLearnClass = importlib.import_module('learner.spark_train').ParallelPerceptronLearner
-            parallelLearner = parallelLearnClass(self.w_vector, maxIteration)
-            self.w_vector = parallelLearner.parallel_learn(
-                max_iter     = maxIteration,
-                dataPool     = dataPool,
+            self.w_vector = learner.parallel_learn(
                 f_argmax     = f_argmax,
-                learner      = sequentialLearner,
+                data_pool    = dataPool,
+                iterations   = maxIteration,
                 d_filename   = weightVectorDumpPath,
-                shards       = shardNum,
-                sc           = sparkContext,
+                dump_freq    = dumpFrequency,
+                sparkContext = sparkContext,
                 hadoop       = hadoop)
 
         end_time = time.time()
@@ -129,7 +113,7 @@ class PosTagger():
         return
 
     def evaluate(self,
-                 dataPool=None,
+                 dataPool,
                  parallel=False,
                  sparkContext=None,
                  hadoop=None):
@@ -359,33 +343,32 @@ if __name__ == '__main__':
 
     # Run training
     if config['train']:
-        trainDataPool = DataPool(section_regex = config['train'],
-                                 data_path     = config['data_path'],
-                                 fgen          = config['feature_generator'],
-                                 format_path   = config['format'],
-                                 shardNum      = config['spark_shards'],
-                                 sc            = sparkContext,
-                                 hadoop        = yarn_mode)
+        trainDataPool = DataPool(fgen         = config['feature_generator'],
+                                 format_list  = config['format'],
+                                 data_regex   = config['train'],
+                                 data_path    = config['data_path'],
+                                 shards       = config['spark_shards'],
+                                 sparkContext = sparkContext,
+                                 hadoop       = yarn_mode)
 
         pt.train(dataPool             = trainDataPool,
                  maxIteration         = config['iterations'],
                  learner              = config['learner'],
                  weightVectorDumpPath = config['dump_weight_to'],
                  dumpFrequency        = config['dump_frequency'],
-                 shardNum             = config['spark_shards'],
                  parallel             = spark_mode,
                  sparkContext         = sparkContext,
                  hadoop               = yarn_mode)
 
     # Run evaluation
     if config['test']:
-        testDataPool = DataPool(section_regex = config['test'],
-                                data_path     = config['data_path'],
-                                fgen          = config['feature_generator'],
-                                format_path   = config['format'],
-                                shardNum      = config['spark_shards'],
-                                sc            = sparkContext,
-                                hadoop        = yarn_mode)
+        testDataPool = DataPool(fgen         = config['feature_generator'],
+                                format_list  = config['format'],
+                                data_regex   = config['test'],
+                                data_path    = config['data_path'],
+                                shards       = config['spark_shards'],
+                                sparkContext = sparkContext,
+                                hadoop       = yarn_mode)
 
         pt.evaluate(dataPool      = testDataPool,
                     parallel      = spark_mode,
