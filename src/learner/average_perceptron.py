@@ -31,6 +31,7 @@ class Learner(PerceptronLearnerBase):
 
         w_vector = WeightVector()
         weight_sum_dict = WeightVector()
+        last_change_dict = WeightVector()
         for key in init_w_vector.keys():
             w_vector[key] = init_w_vector[key]
         sentence_count = 1
@@ -46,10 +47,26 @@ class Learner(PerceptronLearnerBase):
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
             current_global_vector = f_argmax(w_vector, data_instance)
 
-            w_vector.iadd(gold_global_vector.feature_dict)
-            w_vector.iaddc(current_global_vector.feature_dict, -1)
+            delta_global_vector = gold_global_vector - current_global_vector
 
-            weight_sum_dict.iadd(w_vector)
+            # update every iteration (more convenient for dump)
+            if data_pool.has_next_data():
+                if not current_global_vector == gold_global_vector:
+                    for s in delta_global_vector.keys():
+                        weight_sum_dict[s] += w_vector[s] * (sentence_count - last_change_dict[s])
+                        last_change_dict[s] = sentence_count
+
+                    w_vector.iadd(delta_global_vector.feature_dict)
+                    weight_sum_dict.iadd(delta_global_vector.feature_dict)
+            else:
+                for s in last_change_dict.keys():
+                    weight_sum_dict[s] += w_vector[s] * (sentence_count - last_change_dict[s])
+                    last_change_dict[s] = sentence_count
+
+                if not current_global_vector == gold_global_vector:
+                    w_vector.iadd(delta_global_vector.feature_dict)
+                    weight_sum_dict.iadd(delta_global_vector.feature_dict)
+
         data_pool.reset_index()
 
         vector_list = {}
