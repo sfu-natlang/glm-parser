@@ -59,7 +59,7 @@ class Learner(PerceptronLearnerBase):
                     w_vector.iadd(delta_global_vector.feature_dict)
                     weight_sum_dict.iadd(delta_global_vector.feature_dict)
             else:
-                for s in last_change_dict.keys():
+                for s in last_change_dict.keys() + w_vector.keys():
                     weight_sum_dict[s] += w_vector[s] * (sentence_count - last_change_dict[s])
                     last_change_dict[s] = sentence_count
 
