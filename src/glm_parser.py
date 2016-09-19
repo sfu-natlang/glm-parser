@@ -369,6 +369,10 @@ if __name__ == "__main__":
                         (not config[option].startswith("hdfs://")):
                     config[option] = 'file://' + config[option]
 
+    logger.info("Using feature generator: %s " % config['feature_generator'])
+    logger.info("Using data from: %s " % config['data_path'])
+    logger.info("Total training iterations: %d" % config['iterations'])
+
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         __logger.info("Using Tagger weight vector: " + config['tagger_w_vector'])
