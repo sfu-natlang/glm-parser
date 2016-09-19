@@ -18,6 +18,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """
     First order feature generator for english
     """
+    name = "EnglishFirstOrderFeatureGenerator"
 
     def __init__(self):
         """
@@ -61,10 +62,10 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         """
 
         if not hasattr(self, 'FORM'):
-            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
+            raise RuntimeError("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         if not hasattr(self, 'POSTAG'):
-            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
+            raise RuntimeError("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
@@ -132,10 +133,10 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         local_fv = []
 
         if not hasattr(self, 'FORM'):
-            sys.exit("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
+            raise RuntimeError("'FORM' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         if not hasattr(self, 'POSTAG'):
-            sys.exit("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
+            raise RuntimeError("'POSTAG' is needed in FirstOrderFeatureGenerator but it's not in format file")
 
         xi_word = self.FORM[head_index]
         xi_pos = self.POSTAG[head_index]
@@ -304,7 +305,10 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             dir_dist_fv.append( new_prefix + feature[2:] + new_suffix )
         return dir_dist_fv
 
-    def get_local_vector(self, head_index, dep_index, other_index_list=None,
+    def get_local_vector(self,
+                         head_index,
+                         dep_index,
+                         other_index_list=None,
                          feature_type=None):
         """
         Return first order local vector, which includes

@@ -19,6 +19,8 @@ class FeatureGenerator():
     """
     Second order feature generator: Sibling features and grandchild features
     """
+    name = "EnglishSecondOrderFeatureGenerator"
+
     def __init__(self, sent):
         # Construct a first order feature generator, and pre-cache some necessary data
         # We just wrap around first order
@@ -198,7 +200,9 @@ class FeatureGenerator():
     SECOND_ORDER_SIBLING_ONLY = 3
     SECOND_ORDER_GRANDCHILD_ONLY = 4
 
-    def get_local_vector(self, head_index, dep_index,
+    def get_local_vector(self,
+                         head_index,
+                         dep_index,
                          other_index_list=None,
                          feature_type=0):
         local_fv = []

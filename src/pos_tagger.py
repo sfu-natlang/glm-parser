@@ -1,29 +1,31 @@
 # -*- coding: utf-8 -*-
+
 #
 # Part of Speech Tagger
 # Simon Fraser University
 # NLP Lab
 #
 # Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu, Kingston Chen,
+#
 # (Please add on your name if you have authored this file)
 #
-# This is the main programme of the Part of Speech Tagger.
-# Individual modules of the tagger are located in src/pos/
-
+import debug.debug
+from data.file_io import fileRead, fileWrite
 from data.data_pool import DataPool
-from pos import pos_decode, pos_perctrain, pos_features, pos_viterbi
 from weight.weight_vector import WeightVector
-from pos.pos_common import read_tagset
 from logger.loggers import logging, init_logger
 
-import debug.debug
+from evaluate.tagger_evaluator import Evaluator
+from data.pos_tagset_reader import read_tagset
+
+import time
 import os
 import sys
-import timeit
-import time
+import importlib
+import functools
 import argparse
+import StringIO
 from ConfigParser import SafeConfigParser
-from collections import defaultdict
 
 __version__ = '1.0'
 if __name__ == '__main__':
@@ -34,156 +36,280 @@ logger = logging.getLogger('TAGGER')
 class PosTagger():
     def __init__(self,
                  weightVectorLoadPath = None,
-                 tag_file             = "file://tagset.txt",
+                 tagger               = "viterbi",
+                 tagFile              = "file://tagset.txt",
                  sparkContext         = None):
 
-        logger.info("Tag File selected: %s" % tag_file)
-        self.tagset = read_tagset(tag_file, sparkContext)
+        logger.info("Initialising Tagger")
+        self.w_vector = WeightVector(weightVectorLoadPath, sparkContext)
+        self.evaluator = Evaluator
+
+        self.tagger = importlib.import_module('tagger.' + tagger).Tagger()
+        logger.info("Using tagger: %s" % (tagger))
+
+        self.tagset = read_tagset(tagFile, sparkContext)
+        logger.info("Tag File selected: %s" % tagFile)
         self.default_tag = "NN"
-        self.sparkContext = sparkContext
-        if weightVectorLoadPath is not None:
-            self.w_vector = WeightVector()
-            self.w_vector.load(weightVectorLoadPath, self.sparkContext)
+        logger.info("Initialisation Complete")
+        return
 
-    def load_data(self, dataPool):
-        data_list = []
-        sentence_count = 0
-        while dataPool.has_next_data():
-            sentence_count += 1
-            data = dataPool.get_next_data()
-            word_list = data.column_list["FORM"]
-            pos_list = data.column_list["POSTAG"]
+    def train(self,
+              dataPool,
+              maxIteration         = 1,
+              learner              = 'average_perceptron',
+              weightVectorDumpPath = None,
+              dumpFrequency        = 1,
+              parallel             = False,
+              sparkContext         = None,
+              hadoop               = False):
 
-            del word_list[0]
-            del pos_list[0]  # delet Root
+        # Check values
+        if not isinstance(dataPool, DataPool):
+            raise ValueError("TAGGER [ERROR]: dataPool for training is not an DataPool object")
+        if maxIteration is None:
+            logger.warn("Number of Iterations not specified, using 1")
+            maxIteration = 1
+        if learner is None:
+            raise ValueError("TAGGER [ERROR]: Learner not specified")
 
-            word_list.insert(0, '_B_-1')
-            word_list.insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
-            word_list.append('_B_+1')
-            word_list.append('_B_+2')     # last two 'words' are B_+1 B_+2
-            pos_list.insert(0, 'B_-1')
-            pos_list.insert(0, 'B_-2')
+        # Load Learner
+        learner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
 
-            pos_feat = pos_features.Pos_feat_gen(word_list)
+        # Prepare the suitable argmax
+        def tagger_f_argmax(w_vector, sentence, tagger, tagset, default_tag):
+            output = tagger.tag(sentence    = sentence,
+                                w_vector    = w_vector,
+                                tagset      = tagset,
+                                default_tag = default_tag)
+            current_global_vector = sentence.convert_list_vector_to_dict(sentence.get_local_vector(poslist=output))
+            return current_global_vector
+        f_argmax = functools.partial(tagger_f_argmax,
+                                     tagger=self.tagger,
+                                     tagset=self.tagset,
+                                     default_tag=self.default_tag)
 
-            gold_out_fv = defaultdict(int)
-            pos_feat.get_sent_feature(gold_out_fv, pos_list)
+        # Start Training Process
+        logger.info("Starting Training Process")
+        start_time = time.time()
+        if not parallel:  # using sequential training
+            self.w_vector = learner.sequential_learn(
+                f_argmax   = f_argmax,
+                data_pool  = dataPool,
+                iterations = maxIteration,
+                d_filename = weightVectorDumpPath,
+                dump_freq  = dumpFrequency)
+        else:  # using parallel training
+            self.w_vector = learner.parallel_learn(
+                f_argmax     = f_argmax,
+                data_pool    = dataPool,
+                iterations   = maxIteration,
+                d_filename   = weightVectorDumpPath,
+                dump_freq    = dumpFrequency,
+                sparkContext = sparkContext,
+                hadoop       = hadoop)
 
-            data_list.append((word_list, pos_list, gold_out_fv))
+        end_time = time.time()
+        logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
+        return
 
-        logger.info("Sentence Number: %d" % sentence_count)
-        return data_list
+    def evaluate(self,
+                 dataPool,
+                 parallel=False,
+                 sparkContext=None,
+                 hadoop=None):
 
-    def perc_train(self,
-                   dataPool=None,
-                   max_iter=1,
-                   dump_data=True):
+        logger.info("Starting evaluation process")
+        if not isinstance(dataPool, DataPool):
+            raise ValueError("TAGGER [ERROR]: dataPool for evaluation is not an DataPool object")
 
-        logger.info("Loading Training Data")
-        if dataPool is None:
-            logger.error('Training DataPool not specified\n')
-            sys.exit(1)
-        train_data = self.load_data(dataPool)
+        start_time = time.time()
+        evaluator = self.evaluator(self.tagger, self.tagset)
+        if not parallel:
+            evaluator.sequentialEvaluate(
+                data_pool     = dataPool,
+                w_vector      = self.w_vector,
+                sparkContext  = sparkContext,
+                hadoop        = hadoop)
+        else:
+            evaluator.parallelEvaluate(
+                data_pool     = dataPool,
+                w_vector      = self.w_vector,
+                sparkContext  = sparkContext,
+                hadoop        = hadoop)
+        end_time = time.time()
+        logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
-        logger.info("Training with Iterations: %d" % max_iter)
-        perc = pos_perctrain.PosPerceptron(max_iter=max_iter,
-                                           default_tag="NN",
-                                           tag_file="file://tagset.txt",
-                                           sparkContext=self.sparkContext)
+    def getTags(self, sentence):
+        import feature.pos_fgen
 
-        self.w_vector = perc.avg_perc_train(train_data)
-        if dump_data:
-            logger.info("Dumping trained weight vector")
-            perc.dump_vector("fv", max_iter, self.w_vector)
-        return self.w_vector
+        inital_fgen = sentence.fgen
 
-    def evaluate(self, dataPool=None):
-        if dataPool is None:
-            logger.error('Training DataPool not specified\n')
-            sys.exit(1)
+        sentence.load_fgen(feature.pos_fgen.FeatureGenerator)
+        pos_list = self.tagger.tag(sentence, self.w_vector, self.tagset, "NN")
+        sentence.load_fgen(inital_fgen)
 
-        logger.info("Loading Testing Data")
-        test_data = self.load_data(dataPool)
-        tester = pos_decode.Decoder(test_data)
-        acc = tester.get_accuracy(self.w_vector)
-
-    def getTags(self, word_list):
-        argmax = pos_viterbi.Viterbi()
-        pos_list = argmax.perc_test(self.w_vector, word_list, self.tagset, "NN")
         return pos_list[2:]
 
 if __name__ == '__main__':
     __logger = logging.getLogger('MAIN')
-    # Process Defaults
+    # Default values
     config = {
-        'train':           None,
-        'test':            None,
-        'iterations':      1,
-        'data_path':       None,
-        'tag_file':        None,
-        'format':          'format/penn2malt.format',
-        'tagger_w_vector': None
+        'train':             None,
+        'test':              None,
+        'iterations':        1,
+        'data_path':         None,
+        'load_weight_from':  None,
+        'dump_weight_to':    None,
+        'dump_frequency':    1,
+        'spark_shards':      1,
+        'prep_path':         'data/prep',
+        'learner':           'average_perceptron',
+        'tagger':            'viterbi',
+        'feature_generator': 'english_1st_fgen',
+        'format':            'format/penn2malt.format',
+        'tag_file':          None
     }
 
-    arg_parser = argparse.ArgumentParser(description="""Part Of Speech (POS) Tagger
-        Version %s""" % __version__)
-    arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?', help="""
-        specify the config file. This will load all the setting from the config
-        file, in order to avoid massive command line inputs. Please consider
-        using config files instead of manually typing all the options.
+    # Dealing with arguments here
+    if True:  # Adding arguments
+        arg_parser = argparse.ArgumentParser(
+            description="""Part Of Speech (GLM) Tagger
+            Version %s""" % __version__)
+        arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?',
+            help="""specify the config file. This will load all the setting from the config file,
+            in order to avoid massive command line inputs. Please consider using config files
+            instead of manually typing all the options.
 
-        Additional options by command line will override the settings in the
-        config file.
+            Additional options by command line will override the settings in the config file.
 
-        Officially provided config files are located in src/config/
-        """)
-    arg_parser.add_argument('--train', metavar='TRAIN_REGEX', help="""
-        specify the data for training with regular expression
-        """)
-    arg_parser.add_argument('--test', metavar='TEST_REGEX', help="""
-        specify the data for testing with regular expression
-        """)
-    arg_parser.add_argument('--path', '-p', metavar='DATA_PATH', help="""
-        Path to data files (to the parent directory for all sections)
-        default "./penn-wsj-deps/"
-        """)
-    arg_parser.add_argument('--format', metavar='DATA_FORMAT', help="""
-        specify the format file for the training and testing files.
-        Officially supported format files are located in src/format/
-        """)
-    arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""
-        specify the file containing the tags we want to use.
-        Officially provided TAG_TARGET file is src/tagset.txt
-        """)
-    arg_parser.add_argument(
-        '--iterations', '-i',
-        metavar='ITERATIONS', type=int, help="""
-        Number of iterations
-        default 1
-        """)
-    arg_parser.add_argument('--tagger-w-vector', metavar='FILENAME',
-        help="""Path to an existing w-vector for tagger. Use this option if
-        you need to evaluate the glm_parser with a trained tagger.
-        """)
+            Officially provided config files are located in src/config/
+            """)
+        arg_parser.add_argument('--train', metavar='TRAIN_FILE_PATTERN',
+            help="""specify the data for training with regular expression""")
+        arg_parser.add_argument('--test', metavar='TEST_FILE_PATTERN',
+            help="""specify the data for testing with regular expression""")
+        arg_parser.add_argument('--feature-generator',
+            choices=['pos_fgen'],
+            help="""specify feature generation facility by a python file name.
+            The file will be searched under /feature directory. Currently we
+            only have one feature generator for the POS Tagger
+            """)
+        arg_parser.add_argument('--learner',
+            choices=['average_perceptron', 'perceptron'],
+            help="""specify a learner for weight vector training""")
+        arg_parser.add_argument('--tagger',
+            choices=['viterbi', 'viterbi_pruning'],
+            help="""specify the tagger using tagger module name (i.e. .py file
+            name without suffix).
 
-    args = arg_parser.parse_args()
-    # load configuration from file
-    #   configuration files are stored under src/format/
-    #   configuration files: *.format
+            default "viterbi"; alternative "viterbi_pruning"
+            """)
+        arg_parser.add_argument('--format', metavar='FORMAT_FILE',
+            help="""specify the format file for the training and testing files.
+            Officially supported format files are located in src/format/
+            """)
+        arg_parser.add_argument('--spark-shards', '-s', metavar='SHARDS_NUM',
+            type=int, help='train using parallelisation with spark')
+        arg_parser.add_argument('--prep-path',
+            help="""specify the directory in which you would like to store the
+            prepared data files after partitioning. For yarn mode the directory
+            will be on HDFS.
+            """)
+        arg_parser.add_argument('--data-path', '-p', metavar='DATA_PATH',
+            help="""Path to data files (to the parent directory for all sections)
+            """)
+        arg_parser.add_argument('--load-weight-from', '-l', metavar='FILENAME',
+            help="""Path to an existing weight vector dump file
+            example: "./Weight.db"
+            """)
+        arg_parser.add_argument('--dump-weight-to', '-d', metavar='PREFIX',
+            help="""Path for dumping weight vector. Please also specify a
+            prefix of file names, which will be added with iteration count and
+            ".db" suffix when dumping the file
+
+            example: "./weight_dump", and the resulting files could be:
+            "./weight_dump_Iter_1.db",
+            "./weight_dump_Iter_2.db"...
+            """)
+        arg_parser.add_argument('--dump-frequency', '-f', type=int,
+            help="""Frequency of dumping weight vector. This option is only
+            valid with option dump-weight-to. The weight vector of last
+            iteration will always be dumped.
+            example: "-i 6 -f 2"
+            weight vector will be dumped at iteration 0, 2, 4, 5.
+            """)
+        arg_parser.add_argument('--iterations', '-i', metavar='ITERATIONS',
+            type=int, help="""Number of iterations, default is 1""")
+        arg_parser.add_argument('--hadoop', '-c', action='store_true',
+            help="""Using POS Tagger in Spark Yarn Mode""")
+        arg_parser.add_argument('--tagger-w-vector', metavar='FILENAME',
+            help="""Path to an existing w-vector for tagger.""")
+        arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""
+            specify the file containing the tags we want to use.
+            This option is only valid while using option tagger-w-vector.
+            Officially provided TAG_TARGET file is src/tagset.txt
+            """)
+
+        args = arg_parser.parse_args()
+
+    # Initialise sparkcontext
+    sparkContext = None
+    yarn_mode  = True if args.hadoop       else False
+    spark_mode = True if args.spark_shards else False
+
+    if spark_mode or yarn_mode:
+        from pyspark import SparkContext, SparkConf
+        conf = SparkConf()
+        sparkContext = SparkContext(conf=conf)
+
+    # Process config
     if args.config:
-        __logger.info("Reading configurations from file: " + args.config)
-        cf = SafeConfigParser(os.environ)
-        cf.read(args.config)
+        # Check local config path
+        if (not os.path.isfile(args.config)) and (not yarn_mode):
+            __logger.error("The config file doesn't exist: %s\n" % args.config)
+            sys.exit(1)
 
-        for option in ['train', 'test', 'data_path', 'tag_file', 'format']:
-            if cf.get('data', option) != '':
-                config[option] = cf.get('data', option)
+        # Initialise the config parser
+        __logger.info("Reading configurations from file: %s" % (args.config))
+        config_parser = SafeConfigParser(os.environ)
 
-        if cf.get('option', 'iterations') != '':
-            config['iterations'] = cf.getint("option", "iterations")
+        # Read contents of config file
+        if yarn_mode:
+            listContent = fileRead(args.config, sparkContext)
+        else:
+            if not args.config.startswith("file://") and not args.config.startswith("hdfs://"):
+                listContent = fileRead('file://' + args.config, sparkContext)
+            else:
+                listContent = fileRead(args.config, sparkContext)
 
-        if cf.get('option', 'tagger_w_vector') != '':
-            config['tagger_w_vector'] = cf.get('option', 'tagger_w_vector')
+        tmpStr = ''.join(str(e) + "\n" for e in listContent)
+        stringIOContent = StringIO.StringIO(tmpStr)
+        config_parser.readfp(stringIOContent)
+
+        # Process the contents of config file
+        for option in ['train', 'test', 'prep_path', 'format', 'tag_file']:
+            if config_parser.get('data', option) != '':
+                config[option] = config_parser.get('data', option)
+
+        for option in ['load_weight_from', 'dump_weight_to']:
+            if config_parser.get('option', option) != '':
+                config[option] = config_parser.get('option', option)
+
+        for int_option in ['iterations', 'dump_frequency', 'spark_shards']:
+            if config_parser.get('option', int_option) != '':
+                config[int_option] = config_parser.getint('option', int_option)
+
+        for option in ['learner', 'feature_generator', 'tagger']:
+            if config_parser.get('core', option) != '':
+                config[option] = config_parser.get('core', option)
+
+        try:
+            config['data_path'] = config_parser.get('data', 'data_path')
+        except:
+            __logger.warn("Encountered exception while attempting to read " +
+                          "data_path from config file. It could be caused by the " +
+                          "environment variable settings, which is not supported " +
+                          "when running in yarn mode")
 
     # we do this here because we want the defaults to include our config file
     arg_parser.set_defaults(**config)
@@ -192,47 +318,62 @@ if __name__ == '__main__':
     # we want to the CLI parameters to override the config file
     config.update(vars(args))
 
-    yarn_mode = False
-
     # Check values of config[]
-    if config['data_path'] is None:
-        __logger.error('data_path not specified\n')
-        sys.exit(1)
-    if (not os.path.isdir(config['data_path'])) and (not yarn_mode):
-        __logger.error("The data_path directory doesn't exist: %s\n" % config['data_path'])
-        sys.exit(1)
-    if (not os.path.isfile(config['format'])) and (not yarn_mode):
-        __logger.error("The format file doesn't exist: %s\n" % config['format'])
-        sys.exit(1)
+    if not spark_mode:
+        config['spark_shards'] = 1
 
     if not yarn_mode:
         for option in [
                 'data_path',
+                'load_weight_from',
+                'dump_weight_to',
                 'format',
-                'tagger_w_vector',
                 'tag_file']:
             if config[option] is not None:
                 if (not config[option].startswith("file://")) and \
                         (not config[option].startswith("hdfs://")):
                     config[option] = 'file://' + config[option]
 
-    tagger = PosTagger(weightVectorLoadPath=config['tagger_w_vector'], tag_file=config['tag_file'])
+    # Initialise Tagger
+    pt = PosTagger(weightVectorLoadPath = config['load_weight_from'],
+                   tagger               = config['tagger'],
+                   tagFile              = config['tag_file'],
+                   sparkContext         = sparkContext)
 
+    # Run training
     if config['train']:
-        trainDataPool = DataPool(section_regex = config['train'],
-                                 data_path     = config['data_path'],
-                                 format_path   = config['format'])
+        trainDataPool = DataPool(fgen         = config['feature_generator'],
+                                 format_list  = config['format'],
+                                 data_regex   = config['train'],
+                                 data_path    = config['data_path'],
+                                 shards       = config['spark_shards'],
+                                 sparkContext = sparkContext,
+                                 hadoop       = yarn_mode)
 
-        __logger.info("Training Starts, Timer is on")
-        start_time = time.time()
-        tagger.perc_train(dataPool = trainDataPool,
-                          max_iter = config['iterations'])
-        end_time = time.time()
-        training_time = end_time - start_time
-        __logger.info("Total Training Time: %f" % training_time)
+        pt.train(dataPool             = trainDataPool,
+                 maxIteration         = config['iterations'],
+                 learner              = config['learner'],
+                 weightVectorDumpPath = config['dump_weight_to'],
+                 dumpFrequency        = config['dump_frequency'],
+                 parallel             = spark_mode,
+                 sparkContext         = sparkContext,
+                 hadoop               = yarn_mode)
 
+    # Run evaluation
     if config['test']:
-        testDataPool = DataPool(section_regex = config['test'],
-                                data_path     = config['data_path'],
-                                format_path   = config['format'])
-        tagger.evaluate(dataPool=testDataPool)
+        testDataPool = DataPool(fgen         = config['feature_generator'],
+                                format_list  = config['format'],
+                                data_regex   = config['test'],
+                                data_path    = config['data_path'],
+                                shards       = config['spark_shards'],
+                                sparkContext = sparkContext,
+                                hadoop       = yarn_mode)
+
+        pt.evaluate(dataPool      = testDataPool,
+                    parallel      = spark_mode,
+                    sparkContext  = sparkContext,
+                    hadoop        = yarn_mode)
+
+    # Finalising, shutting down spark
+    if spark_mode:
+        sparkContext.stop()

@@ -12,11 +12,9 @@ src/feature/english_1st_fgen.c
 src/feature/english_2nd_fgen.c
 src/feature/feature_generator_base.c
 src/feature/feature_vector.c
-src/parse/ceisner.cpp
-src/parse/ceisner3.cpp
+src/parser/ceisner.cpp
+src/parser/ceisner3.cpp
 src/*.db
-
-scripts/tests/*
 
 src/postag/*.db
 src/postag/*.log
@@ -26,6 +24,8 @@ src/*.egg-info
 src/build
 src/*.egg
 src/data/prep
+
+scripts/tests/*.log
 
 *.swp
 *.bak
