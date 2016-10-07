@@ -40,7 +40,7 @@ class Learner(PerceptronLearnerBase):
                             sentence_count,
                             data_pool.get_sent_num(),
                             len(data_instance.get_word_list()) - 1))
-                sentence_count += 1
+            sentence_count += 1
             gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
             current_global_vector = f_argmax(w_vector, data_instance)
 
