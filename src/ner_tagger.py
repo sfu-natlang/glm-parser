@@ -24,14 +24,14 @@ from collections import defaultdict
 
 class NerTagger():
 
-    def __init__(self,tag_file="ner_tagset.txt",max_iter=20):
+    def __init__(self,tag_file="ner_tagset.txt",max_iter=10,train_data="/cs/natlang-data/CoNLL/CoNLL-2003/eng.train", test_data="/cs/natlang-data/CoNLL/CoNLL-2003/eng.testa"):
         #self.brown_data_file = "./ner/brown_cluster.txt"
         #self.brown_data = self.load_data(self.brown_data_file)
         print "NER [INFO]: Loading Training Data"
-        self.train_data_file = "./ner/DATA/eng.train"
+        self.train_data_file = train_data
         self.train_data = self.loading_data(self.train_data_file)
         print "NER [INFO]: Loading Testing Data"
-        self.test_data_file = "./ner/DATA/eng.testa"
+        self.test_data_file =test_data
         self.test_data = self.loading_data(self.test_data_file)
         print "NER [INFO]: Total Iteration: %d" % max_iter
         
@@ -147,13 +147,13 @@ if __name__ == '__main__':
     import getopt, sys
 
    
-    max_iter = 20
+    max_iter = 10
     tag_file = 'ner_tagset.txt'
 
 
     print "NER [INFO]: Training Starts, Time starts"
     start_time = time.time()
-    tagger = NerTagger()
+    tagger = NerTagger()#TODO: add input data path
     tagger.perc_train()
     end_time = time.time()
     training_time = end_time - start_time
