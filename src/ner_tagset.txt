@@ -1,0 +1,8 @@
+I-PER
+I-LOC
+I-MISC
+I-ORG
+O
+B-LOC
+B-MISC
+B-ORG

@@ -1,25 +1,16 @@
 from __future__ import division
-import os,sys,inspect 
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
 import copy, operator, optparse
+import ner_features
 from collections import defaultdict
 
 class Viterbi():
-    def __init__(self, w_vector=None):
+    def __init__(self,w_vector=None):
         self.w_vector = w_vector
         
-    def contains_upper(self,s):
-        return any(char.isupper() for char in s)
-
-    def get_pos_feature(self,fv, i, pretag_1, pretag_2, sent):
-        word = sent[i]
-        fv.append(('TAG',word))
-        fv.append(('PREFIX',word[:3]))
-        fv.append(('SUFFIX',word[-3:]))
-        fv.append(('BIGRAM',pretag_1))
-        fv.append(('TRIGRAM',pretag_2,pretag_1))
-        if self.contains_upper(word):
-            fv.append(("HasUpperCase"))
-
     def get_maxvalue(self, viterbi_dict):
         maxvalue = (None, None) # maxvalue has tuple (tag, value)
         for tag in viterbi_dict.keys():
@@ -35,21 +26,13 @@ class Viterbi():
         return maxvalue
 
 
-    def perc_test(self, feat_vec, labeled_list, tagset):
-        # convert set to list
-        tagset = list(tagset)
-        default_tag = tagset[0]
+    def perc_test(self, feat_vec, labeled_list,pos_list,chunk_list, tagset, default_tag):
 
         output = []
-        labels = copy.deepcopy(labeled_list)
-        # add in the start and end buffers for the context
-        labels.insert(0, '_B_-1')
-        labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
-        labels.append('B_+1')
-        labels.append('B_+2') # last two 'words' are B_+1 B_+2
+
 
         # size of the viterbi data structure
-        N = len(labels)
+        N = len(labeled_list)
 
         # Set up the data structure for viterbi search
         viterbi = {}
@@ -61,40 +44,36 @@ class Viterbi():
         viterbi[0]['B_-2'] = (0.0, '')
         viterbi[1]['B_-1'] = (0.0, 'B_-2')
         # find the value of best_tag for each word i in the input
+        # feat_index = 0
+        ner_feat = ner_features.Ner_feat_gen(labeled_list)
         for i in range(2, N-2):
-            word = labels[i]
+            word = labeled_list[i]
             found_tag = False
             for tag in tagset:
                 prev_list = []
                 for prev_tag in viterbi[i-1]:
                     feats = []
                     (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
-                    self.get_pos_feature(feats,i,prev_tag,prev_backpointer,labels)
+                    ner_feat.get_ner_feature(feats,i,prev_tag,prev_backpointer,pos_list,chunk_list)
                     weight = 0.0
                     # sum up the weights for all features except the bigram features
-                    #for feat in feats:
-                        #print str((feat, tag))
-                     #  key = (feat,tag)
-                     #   strkey = str(key)
-                     #  if strkey in feat_vec:
-                     #       weight += feat_vec[strkey]
-                     #  prev_tag_weight = weight
                     for feat in feats:
+                    #if feat == 'B': has_bigram_feat = True
                         if (feat, tag) in feat_vec:
                             weight += feat_vec[feat, tag]
-               
+                #         print >>sys.stderr, "feat:", feat, "tag:", tag, "weight:", feat_vec[feat, tag]
                     prev_tag_weight = weight
-
                     prev_list.append( (prev_tag_weight + prev_value, prev_tag) )
                 (best_weight, backpointer) = sorted(prev_list, key=operator.itemgetter(0), reverse=True)[0]
-                
+                #print >>sys.stderr, "best_weight:", best_weight, "backpointer:", backpointer
                 if best_weight != 0.0:
                     viterbi[i][tag] = (best_weight, backpointer)
                     found_tag = True
             if found_tag is False:
                 viterbi[i][default_tag] = (0.0, default_tag)
 
-# recover the best sequence using backpointers
+
+        # recover the best sequence using backpointers
         maxvalue = self.get_maxvalue(viterbi[N-3])
         best_tag = maxvalue[0]
         for i in range(N-3, 1, -1):
@@ -102,4 +81,9 @@ class Viterbi():
             (value, backpointer) = viterbi[i][best_tag]
             best_tag = backpointer
 
+        output.insert(0,'B_-1')
+        output.insert(0,'B_-2')
+        output.append('B_+1')
+        output.append('B_+2')
         return output
+

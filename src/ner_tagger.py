@@ -1,65 +1,62 @@
-#! /usr/bin/python
-from __future__ import division
-import sys
-import time,copy,logging
-import os,sys,inspect
+
+# Named Entity Recogniser
+# Simon Fraser University
+# NLP Lab
+# NER 
+
+# This is the main programme of the Part of the Named Entitiy Recognition System.
+# Individual modules of the tagger are located in src/ner/
+
+
+from ner import ner_decode, ner_perctrain, ner_features
+from weight import weight_vector
+import debug.debug
+#import debug.interact
+import os,sys
+import timeit
+import time
+import ConfigParser
+
+import argparse
+from ConfigParser import SafeConfigParser
 from collections import defaultdict
 
-from ner import ner_features
-from ner import ner_viterbi
-from ner import ner_accuracy
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-from weight import weight_vector
+class NerTagger():
 
-# Debug output flag
-debug = False
-#fileptr = open('log_feature_generator.txt','w')
+    def __init__(self,tag_file="ner_tagset.txt",max_iter=10,train_data="/cs/natlang-data/CoNLL/CoNLL-2003/eng.train", test_data="/cs/natlang-data/CoNLL/CoNLL-2003/eng.testa"):
+        #self.brown_data_file = "./ner/brown_cluster.txt"
+        #self.brown_data = self.load_data(self.brown_data_file)
+        print "NER [INFO]: Loading Training Data"
+        self.train_data_file = train_data
+        self.train_data = self.loading_data(self.train_data_file)
+        print "NER [INFO]: Loading Testing Data"
+        self.test_data_file =test_data
+        self.test_data = self.loading_data(self.test_data_file)
+        print "NER [INFO]: Total Iteration: %d" % max_iter
+        
+        self.max_iter = max_iter
+        self.default_tag = "O"
+    
+# function to load the training and testing data  
+    def loading_data(self, data_file):
 
-
-
-class Trainer:
-    def __init__(self,w_vector=None):
-        self.tags = set()
-        #self.weight_vec = defaultdict(float)
-        self.sentences = []
-        self.ner_tags = []
-        self.pos_tags = []
-        self.chunking_tags = []
-        self.w_vector = w_vector
-        self.list_LOC = []
-        self.list_PER = []
-
-    def read_training_data(self, training_file):
-        """
-        Read the conll2003 english training file
-        :param training_file: the path of the training file
-        """
-        if debug: sys.stdout.write("Reading training data...\n")
-
-        file = open(training_file, 'r')
-        # file.seek(0) sets the file's current reading position at offset 0
-        file.seek(0)
+        f = open(data_file, 'r')
+        f.seek(0)
         sentence = []
+        sentence_count = 0
         tags = []
         pos_tag = []
         chunking_tag = []
-        for line in file:
-            #String.strip([chars]);
-            #returns a copy of the string in which all chars have been stripped from the beginning and the end of the string.
-            #e.g str = "0000000this is string example....wow!!!0000000"; 
-            #    print str.strip( '0' )
-            # answer: this is string example....wow!!!
+        data_list = []
+        for line in f:
             line = line.strip()
             if line: # Non-empty line
-                #method split() returns a list of all the words in the string, using a delimiter (splits on all whitespace if left unspecified)
                 token = line.split()
                 word = token[0]
                 tag  = token[3]
-                p_tag = token[1]
-                ch_tag = token[2]
+                p_tag = token[1] # holds the pos tag
+                ch_tag = token[2] # holds the chunking tag
                 #appends the word at the end of the list
                 sentence.append(word)
                 #appends the tag at the end of the list
@@ -69,243 +66,97 @@ class Trainer:
                 
             else: # End of sentence reached
                 #converts the sentence list to a tuple and then appends that tuple to the end of the self.x list
-                self.sentences.append(tuple(sentence))
-                self.ner_tags.append(tuple(tags))
-                self.pos_tags.append(tuple(pos_tag))
-                self.chunking_tags.append(tuple(chunking_tag))
-                #set object is an unordered collection of items and don't have duplicate items
-                #set.update(other, ...)
-                #Update the set, adding elements from all others
-                # so self.tags.update(tags) keeps only the distinct # of tags for that sentence
-                self.tags.update(tags)
+                sentence.insert(0, '_B_-1')
+                sentence.insert(0, '_B_-2')
+                sentence.append('_B_+1')
+                sentence.append('_B_+2') # last two 'words' are B_+1 B_+2
+                tags.insert(0,'B_-1')
+                tags.insert(0,'B_-2')
+                tags.append('B_+1')
+                tags.append('B_+2')
+                pos_tag.insert(0,'B_-1')
+                pos_tag.insert(0,'B_-2')
+                pos_tag.append('B_+1')
+                pos_tag.append('B_+2')
+                chunking_tag.insert(0,'B_-1')
+                chunking_tag.insert(0,'B_-2')
+                chunking_tag.append('B_+1')
+                chunking_tag.append('B_+2')
+
+                ner_feat = ner_features.Ner_feat_gen(sentence)
+                #print "tags"+str(tag)
+                gold_out_fv = defaultdict(int)
+		# getiing the gold features for the sentence
+                ner_feat.get_sent_feature(gold_out_fv,tags,pos_tag,chunking_tag)
+
+                data_list.append((sentence,pos_tag,chunking_tag,tags,gold_out_fv))
                 sentence = []
                 tags = []
                 pos_tag = []
                 chunking_tag = []
-        file.close()
-       
-    def LOC_list_formation(self):
-        fileptr = open('ned.list.LOC','r')
-        for line in fileptr:
-            x = line.split()
-            self.list_LOC.append(x)
-        print self.list_LOC
-        fileptr.close()
+                sentence_count += 1
         
-    def PER_list_formation(self):
-        fileptr = open('ned.list.PER','r')
-        for line in fileptr:
-            x = line.split()
-            self.list_PER.append(x)
-        #print self.list_PER
-        fileptr.close()
             
-    def reset_weights(self):
-        """
-        Reset all the weights to zero in the weight vector.
-        """
-        for feature in self.weight_vec:
-            self.weight_vec[feature] = 0
 
+        print "NER [INFO]: Sentence Number: %d" % sentence_count
+        f.close()
+        return data_list
 
-    def perceptron_algorithm(self, iterations):
-        """
-        Run the perceptron algorithm to estimate (or improve) the weight vector.
-        """
-        weight_vec = defaultdict(float)
-        #self.reset_weights()
-        num_updates = 0
-        avg_vec = defaultdict(float)
-        feat_count = defaultdict(int)
-        last_iter = {}
-        num_updates = 0
-        argmax = ner_viterbi.Viterbi()
-        for iteration in range(iterations):
-            num_mistakes = 0
-            for i in range(len(self.sentences)):
-                #list(self.x[i]) converts the given tuple into a list.
-                sentence = list(self.sentences[i])
-                #list(self.y[i]) converts the given sentence tuple into a list.
-                tags = list(self.ner_tags[i])
-                POS_tags = list(self.pos_tags[i])
-                chunk_tags = list(self.chunking_tags[i])
-                #chunk_tags = list(self.chunking_tags[i])
-                # Find the best tagging sequence using the Viterbi algorithm
-                predict_tags = argmax.perc_test(weight_vec, sentence, self.tags)
-		#fileptr.write("....................................\n")
-		#fileptr.write("predicted tags%s\n" %(predict_tags))
-                #fileptr.write(" actual tags%s\n" %(tags))
-                num_updates += 1
-
-                if predict_tags != tags:
-                    num_mistakes += 1
-                    labels = copy.deepcopy(sentence)
-                    out_cp = copy.deepcopy(predict_tags)
-                    tags_cp = copy.deepcopy(tags)
-
-                    labels.insert(0, '_B_-1')
-                    labels.insert(0, '_B_-2') # first two 'words' are B_-2 B_-1
-                    labels.append('_B_+1')
-                    labels.append('_B_+2') # last two 'words' are B_+1 B_+2
-
-                    out_cp.insert(0,'B_-1')
-                    out_cp.insert(0,'B_-2')
-
-                    tags_cp.insert(0,'B_-1')
-                    tags_cp.insert(0,'B_-2')
-                    
-                    POS_tags.insert(0,'B_-1')
-                    POS_tags.insert(0,'B_-1')
-                    
-                    POS_tags.append('B_+1')
-                    POS_tags.append('B_+1')
-                    
-                    chunk_tags.append('B_+1')
-                    chunk_tags.append('B_+2')
-                    
-                    chunk_tags.insert(0,'B_+1')
-                    chunk_tags.insert(0,'B_+2')
-
-                    #pos_feat = pos_features.Pos_feat_gen(labels)
-		    
-                    ner_feat = ner_features.Ner_feat_gen()
-
-                    gold_out_fv = defaultdict(int)
-                    ner_feat.sent_feat_gen(gold_out_fv,labels, tags_cp,POS_tags,chunk_tags)
-                    #fileptr.write("gold_feat_gen%s\n" %(gold_out_fv))
-                    cur_out_fv = defaultdict(int)
-                    ner_feat.sent_feat_gen(cur_out_fv,labels, out_cp,POS_tags,chunk_tags)
-                    #fileptr.write("cur_feat_gen%s\n" %(cur_out_fv))
-                    feat_vec_update = defaultdict(int)
-
-                    for feature in gold_out_fv:
-			feat_vec_update[feature]+=gold_out_fv[feature]
-                        feat_count[feature]+=gold_out_fv[feature]
-			#fileptr.write("feature is %s\n" %str(feature))
-			#fileptr.write("feat_vec_update due to gold_vec %s\n" %(feat_vec_update)
-			#fileptr.write("feat_count%s\n" %(feat_count[feature]))
-                    for feature in cur_out_fv:
-                        feat_vec_update[feature]-=cur_out_fv[feature]
-			#fileptr.write("feat_vec_update due to cur_vec %s\n" %(feat_vec_update)
-		    #num_updates = number of times the featue_vectors have been updated = num_sentences*iterations
-                    for upd_feat in feat_vec_update.keys():
-                        if feat_vec_update[upd_feat] != 0:
-                            weight_vec[upd_feat] += feat_vec_update[upd_feat]
-                            if (upd_feat) in last_iter:
-                                avg_vec[upd_feat] += (num_updates - last_iter[upd_feat]) * weight_vec[upd_feat]
-                            else:
-                                avg_vec[upd_feat] = weight_vec[upd_feat]
-                            last_iter[upd_feat] = num_updates
-		    #fileptr.write("last_iter%s\n" %(last_iter))
-            
-            print "number of mistakes:", num_mistakes, " iteration:", iteration+1
-            #dump_vector("fv",round,weight_vec,last_iter,avg_vec, num_updates)
-        #fileptr.write("%s\n" %(self.weight_vec))
-        #fileptr.close()
-        for feat in weight_vec:
-            if feat in last_iter:
-                avg_vec[feat] += (num_updates - last_iter[feat]) * weight_vec[feat]
-            else:
-                avg_vec[feat] = weight_vec[feat]
-            weight_vec[feat] = avg_vec[feat] / num_updates
-        #print self.weight_vec
-        self.dump_vector("NER", iterations, weight_vec)
-        return weight_vec
-
-    def dump_vector(self, filename, i, fv):
-        w_vector = weight_vector.WeightVector()
-        w_vector.data_dict.iadd(fv)
-        w_vector.dump(filename + "_Iter_%d.db"%i)
-
-    def tag_data(self, test_file, weight_vec):
-	self.sentences = []
-	self.pos_tags = []
-	self.chunks = []
-	self.ner_tags = []
-	self.tags = set()
-	argmax = ner_viterbi.Viterbi()
-        infile = open(test_file, 'r')
-        # file.seek(0) sets the file's current reading position at offset 0
-        infile.seek(0)
-        sentence = []
-        pos_tag = []
-        chunk = []
-        ner_tag = []
-        for line in infile:
+# function to load the brown clusters
+    
+    def load_data(self,brown_file):
+        f = open(brown_file,'r')
+        f.seek(0)
+        data_list = []
+        for line in f:
             line = line.strip()
             if line: # Non-empty line
-                #method split() returns a list of all the words in the string, using a delimiter (splits on all whitespace if left unspecified)
-                token = line.split()
-                word = token[0]
-                ptag  = token[1]
-                ctag = token[2]
-                nertag = token[3]
-                #appends the word at the end of the list
-                sentence.append(word)
-                pos_tag.append(ptag)
-                chunk.append(ctag)
+                data_list.append(line)
+        f.close()
+        return data_list
 
-                #appends the tag at the end of the list
-                ner_tag.append(nertag)
-            else: # End of sentence reached
-                #converts the sentence list to a tuple and then appends that tuple to the end of the self.x list
-                self.sentences.append(tuple(sentence))
-                self.pos_tags.append(tuple(pos_tag))
-                self.chunks.append(tuple(chunk))
-                self.ner_tags.append(tuple(ner_tag))
-                self.tags.update(ner_tag)
-                sentence = []
-                pos_tag = []
-                chunk = []
-                ner_tag = []
-        infile.close()
+# function to call the average perceptron algorith implemented in another file 
+ 
+    def perc_train(self, dump_data=True):
+        #loc_list = gazateers.LOC_list_formation()
+        #per_list = gazateers.PER_list_formation()
+        perc = ner_perctrain.NerPerceptron(max_iter=max_iter, default_tag="O", tag_file="ner_tagset.txt")
+        self.w_vector = perc.avg_perc_train(self.train_data)
+        #self.w_vector = perc.perc_train(self.train_data)
+        if dump_data:
+            perc.dump_vector("NER",max_iter,self.w_vector)
 
-        target = open('./ner/out_file.txt', 'w')
-        #log = open('log_file.text','w')
-        for i in range(len(self.sentences)):
-            sentence = list(self.sentences[i])
-            pos_tag = list(self.pos_tags[i])
-            ner_tag = list(self.ner_tags[i])
-            #log.write("this is ner_tag %s\n" %(self.ner_tags))
-            tags = argmax.perc_test(weight_vec, sentence, self.tags)
-            #log.write("this is tag from perc_test %s\n" %(tags))
-            for n in range(len(sentence)):
-                target.write("%s %s %s %s\n" % (sentence[n], pos_tag[n], ner_tag[n], tags[n]))
-            #print sentence[n] + pos_tag[n] + ner_tag[n] + tags[n]
-            #print "\n"
-            target.write("\n")
+# function to calulate the accuracy
 
-        target.close()
-        #log.close()
+    def evaluate(self, fv_path=None):
+        #loc_list = gazateers.LOC_list_formation()
+        #per_list = gazateers.PER_list_formation()
+        tester = ner_decode.Decoder(self.test_data)
+        if fv_path is not None:
+            feat_vec = weight_vector.WeightVector()
+            feat_vec.load(fv_path)
+            self.w_vector = feat_vec
+
+        acc = tester.get_accuracy(self.w_vector)
+
+MAJOR_VERSION = 0
+MINOR_VERSION = 1
+
+if __name__ == '__main__':
+
+    import getopt, sys
+
+   
+    max_iter = 10
+    tag_file = 'ner_tagset.txt'
 
 
+    print "NER [INFO]: Training Starts, Time starts"
+    start_time = time.time()
+    tagger = NerTagger()#TODO: add input data path
+    tagger.perc_train()
+    end_time = time.time()
+    training_time = end_time - start_time
+    print "NER [INFO]: Total Training Time: ", training_time
 
-def main(training_file):
-    """
-    """
-
-    trainer = Trainer()
-    #trainer.LOC_list_formation()
-    #trainer.PER_list_formation()
-    # Read the training data (x, y)
-    trainer.read_training_data(training_file)
-
-    # Compute the weight vector using the Perceptron algorithm
-    w_vec  = trainer.perceptron_algorithm(1)
-    print "evaluating"
-    trainer.tag_data('./ner/DATA/eng.testa',w_vec)
-    evaluate = ner_accuracy.Decoder('./ner/out_file.txt')
-    evaluate.get_accuracy()
-
-
-def usage():
-    sys.stderr.write("""
-    Usage: python ner_training.py [training_file]\n
-        Find the weight vector for ner tagging.\n""")
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        usage()
-        sys.exit(1)
-    main(sys.argv[1])
-    #main("eng.train")
+    tagger.evaluate()
