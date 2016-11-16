@@ -2,17 +2,17 @@
 import string
 import copy
 
-# the NER feature generator 
+# the NER feature generator
 class Ner_feat_gen():
 
 	def __init__(self, wordlist):
 		self.wl = wordlist
 		self.per_list = self.loading_list('./ner/ned_PER_list.txt')
 		self.loc_list = self.loading_list('./ner/ned_LOC_list.txt')
-	
-# function to check if the word contains a digit / dollar /exclamatory /hyphen	
-	def contains_digits(self,s): 
-		return any(char.isdigit() for char in s) 
+
+# function to check if the word contains a digit / dollar /exclamatory /hyphen
+	def contains_digits(self,s):
+		return any(char.isdigit() for char in s)
 	def contains_dollar(self,s):
 	    return any(char =="$" for char in s)
 	def contains_exclamatory(self,s):
@@ -32,37 +32,37 @@ class Ner_feat_gen():
 	    if s[0].isupper():
 	       return 1
 	    else:
-	       return 0 
-# function to check if word ends with a period              
+	       return 0
+# function to check if word ends with a period
 	def ends_with_period(self,s):
 	    if s[:-1] == '.':
 	       return 1
 	    else :
 	       return 0
-# function to check is the word is in Upper case              
+# function to check is the word is in Upper case
 	def all_upper(self,s):
 	    for k in s:
 	        if not k.isupper():
 	            return 0
 	    return 1
-# function tp check if the word has an internal period/apostrophe/amphasand	        
+# function tp check if the word has an internal period/apostrophe/amphasand
 	def contains_internal_period(self,s):
 	    return any(char=='.' for char in s)
-            
+
 	def has_internal_apostrophe(self,s):
 	    return any(char=="'" for char in s)
-         
+
 	def contains_hyphen(self,s):
 	    return any(char=="-" for char in s)
-		         
+
 	def contains_amphasand(self,s):
-		return any(char=="&" for char in s)  
-    
-# function to check if word contains both upper and lower characters    
+		return any(char=="&" for char in s)
+
+# function to check if word contains both upper and lower characters
 	def contains_upper_lower(self,s):
 	    return (any(char.isupper() for char in s) and any(char.islower() for char in s))
-        
-#function to check if the word is alphanumeric 
+
+#function to check if the word is alphanumeric
 	def contains_alphanumeric(self,s):
 	    return any(char.isalnum() for char in s)
 
@@ -72,7 +72,7 @@ class Ner_feat_gen():
 	        if not x.isdigit():
 	            return 0
 	    return 1
-        
+
 	def contains_digits(self,s):
 		return any(char.isdigit() for char in s)
 
@@ -109,7 +109,7 @@ class Ner_feat_gen():
 	            return 1
 	    return 0
 
-# function to generate ortho features	
+# function to generate ortho features
 
 	def ortho_feature_alphanumeric(self,s):
 	    for i in s:
@@ -119,7 +119,7 @@ class Ner_feat_gen():
 	            s = s.replace(i,"A")
 	    return s
 
-# function to check is all charcters are in lower case	    
+# function to check is all charcters are in lower case
 	def all_lower(self,s):
 	    for i in s:
 	        if not i.islower():
@@ -137,7 +137,7 @@ class Ner_feat_gen():
 	    first = 0
 	    last = len(alist)-1
 	    found = False
-	
+
 	    while first<=last and not found:
 	        midpoint = (first + last)//2
 	        if alist[midpoint] == item:
@@ -147,9 +147,9 @@ class Ner_feat_gen():
 	                last = midpoint-1
 	            else:
 	                first = midpoint+1
-	
+
 	    return found
-    
+
 	def loading_list(self,list_file):
 	    c = open(list_file,'r')
 	    alist = []
@@ -159,9 +159,9 @@ class Ner_feat_gen():
 	    c.close()
 	    return alist
 
-# main function used to obtain the features of a word   
-               	
-	def get_ner_feature(self,fv, i, pretag_1, pretag_2,pos_list,chunk_list):
+# main function used to obtain the features of a word
+
+	def get_ner_feature(self, fv, i, pretag_1, pretag_2,pos_list,chunk_list):
 		word = self.wl[i]
 		if self.all_upper(word):
 		    fv.append((1,'cur_upper'))
@@ -191,7 +191,7 @@ class Ner_feat_gen():
 		    fv.append((17,'after_cap'))
 		if self.starts_capital(self.wl[i+2]):
 		    fv.append((18,'after_after_cap'))
-		    
+
 		fv.append((19,word[:1]))
 		fv.append((20,word[-1:]))
 		fv.append((21,word[:2]))
@@ -205,10 +205,10 @@ class Ner_feat_gen():
 		if self.possesive_feature(word):
 		    fv.append((36,pretag_1))
 		    fv.append((37,pos_list[i-1]))
-		
+
 		fv.append((27,pos_list[i]))
 		fv.append((28,chunk_list[i]))
-		
+
 		if self.contains_all_num(word):
 		    fv.append((29,'all_digits'))
 		if self.contains_digits(word):
@@ -221,13 +221,13 @@ class Ner_feat_gen():
 		    elif self.contains_internal_period(word):
 		        fv.append((33,'digits_punc'))
 		    elif self.contains_amphasand(word):
-		        fv.append((34,'digits_punc'))      
+		        fv.append((34,'digits_punc'))
 		if self.contains_alphanumeric(word) and self.contains_hyphen(word):
-		    fv.append((35,'alphanum_hyphen')) 
+		    fv.append((35,'alphanum_hyphen'))
 		if self.binarySearch(word,self.per_list):
-		    fv.append((38,'PER_list'))		
+		    fv.append((38,'PER_list'))
 		if self.binarySearch(word,self.loc_list):
-		    fv.append((39,'LOC_list'))  
+		    fv.append((39,'LOC_list'))
 		fv.append((40,self.wl[i-1],word))
 		fv.append((41,word,self.wl[i+1]))
 		if self.all_lower(word):
@@ -235,15 +235,15 @@ class Ner_feat_gen():
 		if self.contains_hyphen(word):
 		    fv.append((43,'hyphen'))
 		#if self.starts_capital(word):
-		 #   fv.append((44,'caps'))    
+		 #   fv.append((44,'caps'))
 		#if self.containsPInitial(word):
-		 #   fv.append((36,'Initials'))    
+		 #   fv.append((36,'Initials'))
 		'''
 		fv.append((36,pos_list[i-1],pos_list[i-2]))
 		'''
 
-# function to update those weights whose features match 
-	
+# function to update those weights whose features match
+
 	def get_sent_feature(self, fv, nerlist,pos_list,chunk_list):
 		for i in range(3, len(self.wl)-2):
 			word = self.wl[i]
@@ -260,14 +260,14 @@ class Ner_feat_gen():
 			    fv[(5,'after_after_upper'),tag]+=1
 			fv[(6,'previous_2_tag',nerlist[i-1], nerlist[i-2]),tag]+=1
 			fv[(7,'previous+cur',nerlist[i-1],nerlist[i-2],word),tag]+=1
-			
+
 			fv[(8,'cur',word),tag]+=1
 			fv[(9,'prev',self.wl[i-1]),tag]+=1
 			fv[(10,'prev_prev',self.wl[i-2]),tag]+=1
 			fv[(11,'after',self.wl[i+1]),tag]+=1
 			fv[(12,'after_after',self.wl[i+2]),tag]+=1
 			fv[(13,self.wl[i-2],self.wl[i-1],word,self.wl[i+1],self.wl[i+2]),tag]+=1
-			
+
 			if self.starts_capital(word):
 			    fv[(14,'cur_cap'),tag]+=1
 			if self.starts_capital(self.wl[i-1]):
@@ -278,7 +278,7 @@ class Ner_feat_gen():
 			    fv[(17,'after_cap'),tag]+=1
 			if self.starts_capital(self.wl[i+2]):
 			    fv[(18,'after_after_cap'),tag]+=1
-			    
+
 			fv[(19,word[:1]),tag]+=1
 			fv[(20,word[-1:]),tag]+=1
 			fv[(21,word[:2]),tag]+=1
@@ -292,14 +292,14 @@ class Ner_feat_gen():
 			if self.possesive_feature(word):
 			    fv[(36,nerlist[i-1]),tag]+=1
 			    fv[(37,pos_list[i-1]),nerlist[i-1]]+=1
-			
+
 			fv[(27,pos_list[i]),tag]+=1
 			fv[(28,chunk_list[i]),tag]+=1
 			fv[(32,pos_list[i-1],pos_list[i]),tag]+=1
 			fv[(33,chunk_list[i-1],chunk_list[i]),tag]+=1
-			
+
 			if self.contains_all_num(word):
-			    fv[(29,'all_digits'),tag]+=1    
+			    fv[(29,'all_digits'),tag]+=1
 			if self.contains_digits(word):
 			    if self.contains_hyphen(word):
 			        fv[(30,'digits_punc'),tag]+=1
@@ -310,9 +310,9 @@ class Ner_feat_gen():
 			    elif self.contains_internal_period(word):
 			        fv[(33,'digits_punc'),tag]+=1
 			    elif self.contains_amphasand(word):
-			        fv[(34,'digits_punc'),tag]+=1        
+			        fv[(34,'digits_punc'),tag]+=1
 			if self.contains_alphanumeric(word) and self.contains_hyphen(word):
-			    fv[(35,'alphanum_hyphen'),tag]+=1 
+			    fv[(35,'alphanum_hyphen'),tag]+=1
 			if self.binarySearch(word,self.per_list):
 			    fv[(38,'PER_list'),tag]+=1
 			if self.binarySearch(word,self.loc_list):
@@ -324,10 +324,9 @@ class Ner_feat_gen():
 			if self.contains_hyphen(word):
 			    fv[(43,'hyphen'),tag]+=1
 			#if self.starts_capital(word):
-			 #   fv[(44,'caps'),tag]+=1    
+			 #   fv[(44,'caps'),tag]+=1
 			#if self.containsPInitial(word):
 			 #   fv[(36,'Inititals'),'I-PER']+=1
 			'''
 			fv[(36,pos_list[i-1],pos_list[i-2]),tag]+=1
 			'''
-            
