@@ -367,7 +367,7 @@ class Sentence():
                                          prev_tag=prev_tag,
                                          prev_backpointer=prev_backpointer)
 
-    def get_ner_feature(self, index, prev_tag_1, prev_tag_2):
+    def get_ner_feature(self, index, prev_tag, prev_backpointer):
         if self.fgen.name != "NERTaggerFeatureGenerator":
             raise RuntimeError("SENTENCE [ERROR]: " +
                 "get_ner_feature() requires the feature generator for NER, " +
@@ -376,7 +376,7 @@ class Sentence():
         return self.fgen.get_ner_feature(wordlist=self.column_list["FORM"],
                                          index=index,
                                          prev_tag_1=prev_tag_1,
-                                         prev_tag_2=prev_tag_2,
+                                         prev_backpointer=prev_tag_2,
                                          pos_list=self.column_list["POSTAG"],
                                          chunk_list=self.column_list["CHUNK"])
 

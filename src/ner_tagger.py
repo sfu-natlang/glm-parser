@@ -37,17 +37,39 @@ logger = logging.getLogger('NER')
 
 class NerTagger():
 
+    # def __init__(self,
+    #              tagFile        = "file://ner_tagset.txt",
+    #              sparkContext   = None):
     def __init__(self,
-                 tagFile="ner_tagset.txt"):
+                 weightVectorLoadPath = None,
+                 tagger               = "ner_viterbi",
+                 tagFile              = "file://ner_tagset.txt",
+                 sparkContext         = None):
 
         logger.info("Initialising NER Tagger")
-        self.tagFile = tagFile
+        # - self.tagFile = tagFile
+        self.w_vector = WeightVector(weightVectorLoadPath, sparkContext)
+        self.evaluator = Evaluator
+
+        self.tagger = importlib.import_module('ner.' + tagger).Tagger()
+        logger.info("Using tagger: %s" % (tagger))
+
+        self.tagFile = read_tagset(tagFile, sparkContext)
         logger.info("Tag File selected: %s" % tagFile)
         self.default_tag = "O"
         logger.info("Initialisation Complete")
         return
 
     def loading_data(self, data_file):
+    # def loading_data(self,
+    #                  dataPool,
+    #                  maxIteration           = 1,
+    #                  learner                = 'average_perceptron',
+    #                  weightVectorDumpPath   = None,
+    #                  dumpFrequency          = 1,
+    #                  parallel               = False,
+    #                  sparkContext           = None,
+    #                  hadoop                 = False):
         # function to load the training and testing data
         f = fileRead(data_file)
         sentence = []
@@ -119,58 +141,133 @@ class NerTagger():
                 data_list.append(line)
         return data_list
 
+    # def train(self,
+    #           train_data   = "/cs/natlang-data/CoNLL/CoNLL-2003/eng.train",
+    #           maxIteration = 10,
+    #           learner      = 'average_perceptron',
+    #           dump_data    = True):
     def train(self,
-              train_data   = "/cs/natlang-data/CoNLL/CoNLL-2003/eng.train",
-              maxIteration = 10,
-              learner      = 'average_perceptron',
-              dump_data    = True):
+                     dataPool,
+                     maxIteration           = 1,
+                     learner                = 'average_perceptron',
+                     weightVectorDumpPath   = None,
+                     dumpFrequency          = 1,
+                     parallel               = False,
+                     sparkContext           = None,
+                     hadoop                 = False):
 
-        logger.info("Loading training data")
-        self.train_data_file = train_data
-        self.train_data = self.loading_data(self.train_data_file)
-        logger.info("Training data loaded")
+        # logger.info("Loading training data")
+        # self.train_data_file = train_data
+        # self.train_data = self.loading_data(self.train_data_file)
+        # logger.info("Training data loaded")
+        if not isinstance(dataPool, DataPool):
+            raise ValueError("NER_TAGGER [ERROR]: dataPool for training is not an DataPool object")
+        if maxIteration is None:
+            logger.warn("Number of Iterations not specified, using 1")
+            maxIteration = 1
+        if learner is None:
+            raise ValueError("NER_TAGGER [ERROR]: Learner not specified")
 
-        # function to call the average perceptron algorith implemented in another file
-        perc = ner_perctrain.NerPerceptron(max_iter    = maxIteration,
-                                           default_tag = "O",
-                                           tag_file    = self.tagFile)
+        # Load Learner
+        learner = importlib.import_module('learner.' + learner).Learner(self.w_vector)
+
+        # Prepare suitable argmax as PosTagger 80-90
+        def tagger_f_argmax(w_vector, sentence, tagger, tagset, default_tag):
+            output = tagger.tag(sentence    = sentence,
+                                w_vector    = w_vector,
+                                tagset      = tagset,
+                                default_tag = default_tag)
+            current_global_vector = FeatureVector(sentence.get_local_vector(poslist=output))
+            return current_global_vector
+        f_argmax = functools.partial(tagger_f_max,
+                                     tagger      = self.tagger,
+                                     tagset      = self.tagset,
+                                     default_tag = self.default_tag)
+
+        # function to call the average perceptron algorithm implemented in another file
+        # perc = ner_perctrain.NerPerceptron(max_iter    = maxIteration,
+        #                                    default_tag = "O",
+        #                                    tag_file    = self.tagFile)
         # Start Training Process
         logger.info("Starting Training Process")
         start_time = time.time()
-        if learner == 'average_perceptron':
-            self.w_vector = perc.avg_perc_train(self.train_data)
+        # if learner == 'average_perceptron':
+        #     self.w_vector = perc.avg_perc_train(self.train_data)
+        # else:
+        #     self.w_vector = perc.perc_train(self.train_data)
+        if not parallel:
+            # Sequential Training
+            self.w_vector = learner.sequential_learn(
+                f_argmax    = f_argmax,
+                data_pool   = dataPool,
+                iterations  = maxIteration,
+                d_filename  = weightVectorDumpPath,
+                dump_freq   = dumpFrequency
+            )
         else:
-            self.w_vector = perc.perc_train(self.train_data)
+            # parallel
+            self.w_vector = learner.parallel_learn(
+                f_argmax     = f_argmax,
+                data_pool    = dataPool,
+                iterations   = maxIteration,
+                d_filename   = weightVectorDumpPath,
+                dump_freq    = dumpFrequency,
+                sparkContext = sparkContext,
+                hadoop       = hadoop
+            )
 
         end_time = time.time()
         logger.info("Total Training Time(seconds): %f" % (end_time - start_time,))
 
-        if dump_data:
-            perc.dump_vector("file://NER", maxIteration, self.w_vector)
+        # if dump_data:
+        #     perc.dump_vector("file://NER", maxIteration, self.w_vector)
         return
 
+    # def evaluate(self,
+    #              test_data="/cs/natlang-data/CoNLL/CoNLL-2003/eng.testa",
+    #              fv_path=None):
     def evaluate(self,
-                 test_data="/cs/natlang-data/CoNLL/CoNLL-2003/eng.testa",
-                 fv_path=None):
+                 dataPool,
+                 parallel       = False,
+                 sparkContext   = None,
+                 hadoop         = None):
 
         logger.info("Starting evaluation process")
-        logger.info("Loading evaluation data")
-        self.test_data_file = test_data
-        self.test_data = self.loading_data(self.test_data_file)
-        logger.info("Evaluation data loaded")
+        # logger.info("Loading evaluation data")
+        # self.test_data_file = test_data
+        # self.test_data = self.loading_data(self.test_data_file)
+        # logger.info("Evaluation data loaded")
+        if not isinstance(dataPool, DataPool):
+            raise ValueError("NER_TAGGER [ERROR]: dataPool for evaluation is not an DataPool object")
 
         start_time = time.time()
         # function to calulate the accuracy
-        tester = ner_decode.Decoder(self.test_data)
-        if fv_path is not None:
-            feat_vec = weight_vector.WeightVector()
-            feat_vec.load(fv_path)
-            self.w_vector = feat_vec
+        # tester = ner_decode.Decoder(self.test_data)
+        evaluator = self.evaluator(self.tagger, self.tagset)
+        # if fv_path is not None:
+        #     feat_vec = weight_vector.WeightVector()
+        #     feat_vec.load(fv_path)
+        #     self.w_vector = feat_vec
+        #
+        # acc = tester.get_accuracy(self.w_vector)
 
-        acc = tester.get_accuracy(self.w_vector)
+        if not parallel:
+            evaluator.sequentialEvaluate(
+                data_pool       = dataPool,
+                w_vector        = self.w_vector,
+                sparkContext    = sparkContext,
+                hadoop          = hadoop)
+        else:
+            evaluator.parallelEvaluate(
+                data_pool       = dataPool,
+                w_vector        = self.w_vector,
+                sparkContext    = sparkContext,
+                hadoop          = hadoop)
+
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
+# Is it necessary to add getTags function given Pos_Tagger used it?
 
 if __name__ == '__main__':
     __logger = logging.getLogger('MAIN')

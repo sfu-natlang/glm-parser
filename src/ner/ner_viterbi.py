@@ -51,8 +51,8 @@ class Viterbi():
                 for prev_tag in viterbi[i-1]:
                     (prev_value, prev_backpointer) = viterbi[i-1][prev_tag]
                     feats = sentence.get_ner_feature(index=i,
-                                                     prev_tag_1=prev_tag,
-                                                     prev_tag_2=prev_backpointer)
+                                                     prev_tag=prev_tag,
+                                                     prev_backpointer=prev_backpointer)
                     weight = 0.0
                     # sum up the weights for all features except the bigram features
                     for feat in feats:
