@@ -22,6 +22,62 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         self.care_list.append("NER")
         return
 
+    def load_to_sentence(self, sentence):
+        if sentence.fgen is not None:
+            sentence.fgen.unload_from_sentence(sentence)
+
+        sentence.column_list["FORM"].insert(0, '_B_-1')
+        sentence.column_list["FORM"].insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
+        sentence.column_list["FORM"].append('_B_+1')
+        sentence.column_list["FORM"].append('_B_+2')     # last two 'words' are B_+1 B_+2
+
+        sentence.column_list["POSTAG"].insert(0, 'B_-1')
+        sentence.column_list["POSTAG"].insert(0, 'B_-2')
+        sentence.column_list["POSTAG"].append('B_+1')
+        sentence.column_list["POSTAG"].append('B_+2')
+
+        sentence.column_list["CHUNK"].insert(0, 'B_-1')
+        sentence.column_list["CHUNK"].insert(0, 'B_-2')
+        sentence.column_list["CHUNK"].append('B_+1')
+        sentence.column_list["CHUNK"].append('B_+2')
+
+        sentence.column_list["NER"].insert(0, 'B_-1')
+        sentence.column_list["NER"].insert(0, 'B_-2')
+
+        gold_global_vector = self.get_feature_vector(sentence)
+
+        sentence.gold_global_vector = gold_global_vector
+        sentence.fgen = self
+        return
+
+    def unload_from_sentence(self, sentence):
+        if sentence.fgen is None:
+            return
+        if sentence.fgen.name != "NERTaggerFeatureGenerator":
+            sentence.fgen.unload_from_sentence(sentence)
+            return
+
+        del sentence.column_list["FORM"][0]
+        del sentence.column_list["FORM"][0]
+        del sentence.column_list["FORM"][len(sentence.column_list["FORM"]) - 1]
+        del sentence.column_list["FORM"][len(sentence.column_list["FORM"]) - 1]
+
+        del sentence.column_list["POSTAG"][0]
+        del sentence.column_list["POSTAG"][0]
+        del sentence.column_list["POSTAG"][len(sentence.column_list["FORM"]) - 1]
+        del sentence.column_list["POSTAG"][len(sentence.column_list["FORM"]) - 1]
+
+        del sentence.column_list["CHUNK"][0]
+        del sentence.column_list["CHUNK"][0]
+        del sentence.column_list["CHUNK"][len(sentence.column_list["FORM"]) - 1]
+        del sentence.column_list["CHUNK"][len(sentence.column_list["FORM"]) - 1]
+
+        del sentence.column_list["NER"][0]
+        del sentence.column_list["NER"][0]
+
+        sentence.fgen = None
+        return
+
     # function to check if the word contains a digit / dollar /exclamatory /hyphen
     def contains_digits(self, s):
         return any(char.isdigit() for char in s)
@@ -137,7 +193,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                 s = s.replace(i, "A")
         return s
 
-# function to check is all charcters are in lower case
+    # function to check is all charcters are in lower case
     def all_lower(self, s):
         for i in s:
             if not i.islower():
@@ -179,7 +235,17 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         return alist
 
     # Function to get the ner feature of a word
-    def get_ner_feature(self, wordlist, index, prev_tag_1, prev_tag_2, pos_list, chunk_list):
+    def current_tag_feature(self,
+                            sentence,
+                            index,
+                            prev_tag_1,
+                            prev_backpointer):
+
+        wordlist = sentence.column_list["FORM"]
+        ner_list = sentence.column_list["NER"]
+        pos_list = sentence.column_list["POSTAG"]
+        chunk_list = sentence.column_list["CHUNK"]
+
         fv = []
         word = wordlist[index].lower()
         if self.all_upper(word):
@@ -192,8 +258,8 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append((4, 'after_upper'))
         if self.all_upper(self.wl[i+2]):
             fv.append((5, 'after_after_upper'))
-        fv.append((6, 'previous_2_tag', pretag_1, pretag_2))
-        fv.append((7, 'previous+cur', pretag_1, pretag_2, word))
+        fv.append((6, 'previous_2_tag', pretag_1, prev_backpointer))
+        fv.append((7, 'previous+cur', pretag_1, prev_backpointer, word))
         fv.append((8, 'cur', word))
         fv.append((9, 'prev', self.wl[i-1]))
         fv.append((10, 'prev_prev', self.wl[i-2]))
@@ -253,18 +319,20 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append((42, 'islower'))
         if self.contains_hyphen(word):
             fv.append((43, 'hyphen'))
-        # if self.starts_capital(word):
-        #     fv.append((44,'caps'))
-        # if self.containsPInitial(word):
-        #     fv.append((36,'Initials'))
-        '''
-        fv.append((36,pos_list[i-1],pos_list[i-2]))
-        '''
 
         return fv
 
     # Function to get sentence feature
-    def get_feature_vector(self, wordlist, ner_list, pos_list, chunk_list):
+    def get_feature_vector(self, sentence, output=None):
+        wordlist = sentence.column_list["FORM"]
+        pos_list = sentence.column_list["POSTAG"]
+        chunk_list = sentence.column_list["CHUNK"]
+
+        if output is None:
+            ner_list = sentence.column_list["NER"]
+        else:
+            ner_list = output
+
         fv = []
         for i in range(3, len(wordlist) - 2):
             word = wordlist[i]

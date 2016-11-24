@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import copy, time
 from heapq import heappush, heappop
-from pos_tagger import PosTagger
 
 class EisnerHeap():
     def __init__(self, k, n):
@@ -10,16 +9,16 @@ class EisnerHeap():
         self.buf = []
         self.heap = []
         self.state = ()
-    
+
     def setState(self, s, t, direction, shape):
         self.state = (s, t, direction, shape)
-    
+
     def __getitem__(self, k):
         return self.buf[k]
 
     def getSize(self):
         return len(self.buf)
-    
+
     def findKBest(self, node, nodeGen, arc_weight, sentence, weight_offset = 0):
         """
         node is a tuple containing state information
@@ -29,7 +28,7 @@ class EisnerHeap():
         ---------------------------------------------------------------------
         |score | mid_index |(left_heap, heap_index)|(right_heap, heap_index)|
         ---------------------------------------------------------------------
- 
+
         """
         score = node[0]
         mid_index = node[1]
@@ -41,7 +40,7 @@ class EisnerHeap():
         if self.cube[mid_index] == None:
             self.cube[mid_index] = [[None for i in xrange(self.bestK)] for j in xrange(self.bestK)]
             self.cube[mid_index][left_index][right_index] = score
-        
+
         for i in [(-1,0), (1,0), (0,-1), (0,1)]:
             left = left_index + i[0]
             right = right_index + i[1]
@@ -62,16 +61,16 @@ class CubePruningParser():
     """
     An Eisner parsing algorithm implementation
     """
-    
+
     def __init__(self):
         return
-        
+
     def init_eisner_matrix(self,n):
         """
         Initialize a dynamic programming table, i.e. e[0..n][0..n][0..1][0..1]
         Format: e[start][end][orientation][shape]
 
-        orientation: 
+        orientation:
         <-:0
         ->:1
         shape:
@@ -122,24 +121,24 @@ class CubePruningParser():
 
             left_node = (left_heap[left_index], left_heap.state)
             right_node = (right_heap[right_index], right_heap.state)
-            
+
             if state[2] == 1 and state[3] == 1:
                 edge_list.append((state[0], state[1]))
             if state[2] == 0 and state[3] == 1:
                 edge_list.append((state[1], state[0]))
-            
+
             if left_node[1][0] is not left_node[1][1]:
                 heap.append(left_node)
             if right_node[1][0] is not right_node[1][1]:
                 heap.append(right_node)
-        return edge_list 
+        return edge_list
 
-            
+
 
     def parse(self,sentence, arc_weight, rank = 0):
         """
         Implementation of Eisner Algorithm using dynamic programming table
-        
+
         :param n: The number of input words that constitute a sentence.
         :type n: int
         :param arc_weight: A scoring function that gives scores to edges
@@ -149,10 +148,10 @@ class CubePruningParser():
         :rtype: tuple(integer,list(tuple(integer,integer)))
         """
         #tt = 0;
-        
+
         n = len(sentence.get_word_list())
         e = self.init_eisner_matrix(n)
-        
+
         def english_1st_order_gen(arc_weight, sentence, heap, left, right, weight_offset = 0):
             score = -left[0] - right[0] + weight_offset
             return -score
@@ -163,7 +162,7 @@ class CubePruningParser():
                 if t >= n:
                     break
                 #t1 = time.clock()
-                '''  
+                '''
                 def trapezoidGenLeft(arc_weight, sentence, heap, left, right, weight_offset = 0):
                     score = -left[0] - right[0] + arc_weight(sentence.get_local_vector(heap.state[1], heap.state[0]))
                           #+ arc_weight(sentence.get_local_vector(heap.state[1], heap.state[0], [right[1]], 1))\
@@ -175,7 +174,7 @@ class CubePruningParser():
                     score = english_1st_order_gen(arc_weight, sentence, e[s][t][0][1], e[s][q][1][0][0], e[q+1][t][0][0][0], offset)
                     heappush(e[s][t][0][1].heap, (score, q, (e[s][q][1][0],0), (e[q+1][t][0][0],0)))
                 e[s][t][0][1].explore(english_1st_order_gen, arc_weight, sentence, offset)
-                
+
                 #t1 = time.clock()
                 '''
                 def trapezoidGenRight(arc_weight, sentence, heap, left, right):
@@ -188,8 +187,8 @@ class CubePruningParser():
                 for q in range(s, t):
                     score = english_1st_order_gen(arc_weight, sentence, e[s][t][1][1], e[s][q][1][0][0], e[q+1][t][0][0][0], offset)
                     heappush(e[s][t][1][1].heap, (score, q, (e[s][q][1][0], 0), (e[q+1][t][0][0],0)))
-                
-                e[s][t][1][1].explore(english_1st_order_gen, arc_weight, sentence, offset)                
+
+                e[s][t][1][1].explore(english_1st_order_gen, arc_weight, sentence, offset)
 
                 '''
 
@@ -204,7 +203,7 @@ class CubePruningParser():
                     heappush(e[s][t][0][0].heap, (score, q, (e[s][q][0][0], 0), (e[q][t][0][1],0)))
 
                 e[s][t][0][0].explore(english_1st_order_gen, arc_weight, sentence)
-                
+
                 '''
                 def triangleGenRight(arc_weight, sentence, heap, left, right):
                     score = -left[0] - right[0]\
@@ -221,4 +220,3 @@ class CubePruningParser():
         #print "edge query time", tt
         edge_list = self.get_edge_list(e, n, rank)
         return edge_list
-    

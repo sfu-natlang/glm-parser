@@ -30,11 +30,11 @@ from ConfigParser import SafeConfigParser
 
 __version__ = '1.0'
 if __name__ == '__main__':
-    init_logger('pos_tagger.log')
+    init_logger('tagger.log')
 logger = logging.getLogger('TAGGER')
 
 
-class PosTagger():
+class Tagger():
     def __init__(self,
                  weightVectorLoadPath = None,
                  tagger               = "viterbi",
@@ -50,7 +50,7 @@ class PosTagger():
 
         self.tagset = read_tagset(tagFile, sparkContext)
         logger.info("Tag File selected: %s" % tagFile)
-        self.default_tag = "NN"
+        self.default_tag = self.tagset[0]
         logger.info("Initialisation Complete")
         return
 
@@ -82,7 +82,7 @@ class PosTagger():
                                 w_vector    = w_vector,
                                 tagset      = tagset,
                                 default_tag = default_tag)
-            current_global_vector = FeatureVector(sentence.get_local_vector(poslist=output))
+            current_global_vector = FeatureVector(sentence.get_local_vector(output=output))
             return current_global_vector
         f_argmax = functools.partial(tagger_f_argmax,
                                      tagger=self.tagger,
@@ -140,16 +140,19 @@ class PosTagger():
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
-    def getTags(self, sentence):
-        import feature.pos_fgen
+    def getTags(self, sentence, fgen="POS"):
+        if fgen == "POS":
+            from feature.pos_fgen import FeatureGenerator
+        elif fgen == "NER":
+            from feature.ner_fgen import FeatureGenerator
 
         inital_fgen = sentence.fgen
 
-        sentence.load_fgen(feature.pos_fgen.FeatureGenerator)
-        pos_list = self.tagger.tag(sentence, self.w_vector, self.tagset, "NN")
+        sentence.load_fgen(FeatureGenerator)
+        output = self.tagger.tag(sentence, self.w_vector, self.tagset, self.default_tag)
         sentence.load_fgen(inital_fgen)
 
-        return pos_list[2:]
+        return output[2:]
 
 if __name__ == '__main__':
     __logger = logging.getLogger('MAIN')
@@ -174,7 +177,7 @@ if __name__ == '__main__':
     # Dealing with arguments here
     if True:  # Adding arguments
         arg_parser = argparse.ArgumentParser(
-            description="""Part Of Speech (POS) Tagger
+            description="""Universal Tagger
             Version %s""" % __version__)
         arg_parser.add_argument('config', metavar='CONFIG_FILE', nargs='?',
             help="""specify the config file. This will load all the setting from the config file,
@@ -190,10 +193,9 @@ if __name__ == '__main__':
         arg_parser.add_argument('--test', metavar='TEST_FILE_PATTERN',
             help="""specify the data for testing with regular expression""")
         arg_parser.add_argument('--feature-generator',
-            choices=['pos_fgen'],
+            choices=['pos_fgen', 'ner_fgen'],
             help="""specify feature generation facility by a python file name.
-            The file will be searched under /feature directory. Currently we
-            only have one feature generator for the POS Tagger
+            The file will be searched under /feature directory.
             """)
         arg_parser.add_argument('--learner',
             choices=['average_perceptron', 'perceptron'],
@@ -336,10 +338,10 @@ if __name__ == '__main__':
                     config[option] = 'file://' + config[option]
 
     # Initialise Tagger
-    pt = PosTagger(weightVectorLoadPath = config['load_weight_from'],
-                   tagger               = config['tagger'],
-                   tagFile              = config['tag_file'],
-                   sparkContext         = sparkContext)
+    tagger = Tagger(weightVectorLoadPath = config['load_weight_from'],
+                    tagger               = config['tagger'],
+                    tagFile              = config['tag_file'],
+                    sparkContext         = sparkContext)
 
     # Run training
     if config['train']:
@@ -351,14 +353,14 @@ if __name__ == '__main__':
                                  sparkContext = sparkContext,
                                  hadoop       = yarn_mode)
 
-        pt.train(dataPool             = trainDataPool,
-                 maxIteration         = config['iterations'],
-                 learner              = config['learner'],
-                 weightVectorDumpPath = config['dump_weight_to'],
-                 dumpFrequency        = config['dump_frequency'],
-                 parallel             = spark_mode,
-                 sparkContext         = sparkContext,
-                 hadoop               = yarn_mode)
+        tagger.train(dataPool             = trainDataPool,
+                     maxIteration         = config['iterations'],
+                     learner              = config['learner'],
+                     weightVectorDumpPath = config['dump_weight_to'],
+                     dumpFrequency        = config['dump_frequency'],
+                     parallel             = spark_mode,
+                     sparkContext         = sparkContext,
+                     hadoop               = yarn_mode)
 
     # Run evaluation
     if config['test']:
@@ -370,10 +372,10 @@ if __name__ == '__main__':
                                 sparkContext = sparkContext,
                                 hadoop       = yarn_mode)
 
-        pt.evaluate(dataPool      = testDataPool,
-                    parallel      = spark_mode,
-                    sparkContext  = sparkContext,
-                    hadoop        = yarn_mode)
+        tagger.evaluate(dataPool      = testDataPool,
+                        parallel      = spark_mode,
+                        sparkContext  = sparkContext,
+                        hadoop        = yarn_mode)
 
     # Finalising, shutting down spark
     if spark_mode:

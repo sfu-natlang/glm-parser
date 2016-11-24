@@ -113,103 +113,8 @@ class Sentence():
             raise ValueError("SENTENCE [ERROR]: Feature Generator for loading not specified")
         if inspect.isclass(fgen):
             fgen = fgen()
-        if self.fgen is not None:
-            if self.fgen.name == "POSTaggerFeatureGenerator":
-                del self.column_list["FORM"][0]
-                del self.column_list["FORM"][0]
-                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
-                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
-                del self.column_list["POSTAG"][0]
-                del self.column_list["POSTAG"][0]
-            elif self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
-                    self.fgen.name == "EnglishSecondOrderFeatureGenerator":
-                del self.column_list["FORM"][0]
-                del self.column_list["POSTAG"][0]
-            elif self.fgen.name == "NERTaggerFeatureGenerator":
-                del self.column_list["FORM"][0]
-                del self.column_list["FORM"][0]
-                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
-                del self.column_list["FORM"][len(self.column_list["FORM"]) - 1]
 
-                del self.column_list["POSTAG"][0]
-                del self.column_list["POSTAG"][0]
-                del self.column_list["POSTAG"][len(self.column_list["FORM"]) - 1]
-                del self.column_list["POSTAG"][len(self.column_list["FORM"]) - 1]
-
-                del self.column_list["NER"][0]
-                del self.column_list["NER"][0]
-                del self.column_list["NER"][len(self.column_list["FORM"]) - 1]
-                del self.column_list["NER"][len(self.column_list["FORM"]) - 1]
-
-            else:
-                raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
-
-        if fgen.name == "POSTaggerFeatureGenerator":
-            self.column_list["FORM"].insert(0, '_B_-1')
-            self.column_list["FORM"].insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
-            self.column_list["FORM"].append('_B_+1')
-            self.column_list["FORM"].append('_B_+2')     # last two 'words' are B_+1 B_+2
-
-            self.column_list["POSTAG"].insert(0, 'B_-1')
-            self.column_list["POSTAG"].insert(0, 'B_-2')
-
-        elif fgen.name == "NERTaggerFeatureGenerator":
-            self.column_list["FORM"].insert(0, '_B_-1')
-            self.column_list["FORM"].insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
-            self.column_list["FORM"].append('_B_+1')
-            self.column_list["FORM"].append('_B_+2')     # last two 'words' are B_+1 B_+2
-
-            self.column_list["POSTAG"].insert(0, 'B_-1')
-            self.column_list["POSTAG"].insert(0, 'B_-2')
-            self.column_list["POSTAG"].append('B_+1')
-            self.column_list["POSTAG"].append('B_+2')
-
-            self.column_list["CHUNK"].insert(0, 'B_-1')
-            self.column_list["CHUNK"].insert(0, 'B_-2')
-            self.column_list["CHUNK"].append('B_+1')
-            self.column_list["CHUNK"].append('B_+2')
-
-        else:
-            # add ROOT to FORM and POSTAG
-            edge_list = self.construct_edge_set()
-            if "FORM" in self.column_list:
-                self.column_list["FORM"] = ["__ROOT__"] + self.column_list["FORM"]
-            else:
-                raise RuntimeError("SENTENCE [ERROR]: 'FORM' is needed in Sentence but it's not in format file")
-
-            if "POSTAG" in self.column_list:
-                self.column_list["POSTAG"] = ["ROOT"] + self.column_list["POSTAG"]
-            else:
-                raise RuntimeError("SENTENCE [ERROR]: 'POSTAG' is needed in Sentence but it's not in format file")
-
-            # This will store the dict, len(dict)
-            # into the instance
-            self.set_edge_list(edge_list)
-
-        # Each sentence instance has a exclusive fgen instance
-        # we could store some data inside fgen instance, such as cache
-        # THIS MUST BE PUT AFTER set_edge_list()
-        self.fgen = fgen
-        rsc_list = []
-        for field_name in self.fgen.care_list:
-            rsc_list.append(self.fetch_column(field_name))
-
-        self.fgen.init_resources(rsc_list)
-
-        # Pre-compute the set of gold features
-        if self.fgen.name == "POSTaggerFeatureGenerator":
-            self.gold_global_vector = self.get_global_vector()
-        elif self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
-                self.fgen.name == "EnglishSecondOrderFeatureGenerator":
-            self.gold_global_vector = self.get_global_vector(self.edge_list_index_only)
-            # During initialization is has not been known yet. We will fill this later
-            # self.current_global_vector = None
-
-            self.set_second_order_cache()
-        elif self.fgen.name == "NERTaggerFeatureGenerator":
-            self.gold_global_vector = self.get_global_vector()
-        else:
-            raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
+        fgen.load_to_sentence(self)
 
         return
 
@@ -304,15 +209,11 @@ class Sentence():
         if self.fgen.name == "EnglishFirstOrderFeatureGenerator" or\
                 self.fgen.name == "EnglishSecondOrderFeatureGenerator":
             global_vector = self.fgen.recover_feature_from_edges(edge_list)
-        elif self.fgen.name == "POSTaggerFeatureGenerator":
-            global_vector = self.fgen.get_feature_vector(self.column_list["FORM"],
-                                                         self.column_list["POSTAG"])
 
-        elif self.fgen.name == "NERTaggerFeatureGenerator":
-            global_vector = self.fgen.get_sentence_feature(self.column_list["FORM"],
-                                                           self.column_list["NER"],
-                                                           self.column_list["POSTAG"],
-                                                           self.column_list["CHUNK"])
+        elif self.fgen.name == "POSTaggerFeatureGenerator" or\
+                self.fgen.name == "NERTaggerFeatureGenerator":
+            global_vector = self.fgen.get_feature_vector(self)
+
         else:
             raise ValueError("SENTENCE [ERROR]: Loaded feature generator invalid")
 
@@ -322,9 +223,7 @@ class Sentence():
                          head_index=None,
                          dep_index=None,
                          another_index_list=[],
-                         poslist=None,
-                         nerlist=None,
-                         chunklist=None,
+                         output=None,
                          feature_type=0):
         """
         Return local vector from fgen
@@ -340,14 +239,10 @@ class Sentence():
         FeatureGenerator.get_second_order_local_vector() doc string.
 
         """
-        if self.fgen.name == "POSTaggerFeatureGenerator":
-            lv = self.fgen.get_feature_vector(wordlist=self.column_list["FORM"],
-                                              poslist=poslist)
-        elif self.fgen.name == "NERTaggerFeatureGenerator":
-            lv = self.fgen.get_feature_vector(wordlist=self.column_list["FORM"],
-                                              ner_list=nerlist,
-                                              pos_list=self.column_list["POSTAG"],
-                                              chunk_list=self.column_list["CHUNK"])
+        if self.fgen.name == "POSTaggerFeatureGenerator" or\
+           self.fgen.name == "NERTaggerFeatureGenerator":
+            lv = self.fgen.get_feature_vector(sentence=self,
+                                              output=output)
         else:
             lv = self.fgen.get_local_vector(head_index=head_index,
                                             dep_index=dep_index,
@@ -356,29 +251,18 @@ class Sentence():
 
         return lv
 
-    def get_pos_feature(self, index, prev_tag, prev_backpointer):
-        if self.fgen.name != "POSTaggerFeatureGenerator":
+    def current_tag_feature(self, index, prev_tag, prev_backpointer):
+        if self.fgen.name != "POSTaggerFeatureGenerator" and \
+           self.fgen.name != "NERTaggerFeatureGenerator":
+
             raise RuntimeError("SENTENCE [ERROR]: " +
-                "get_pos_feature() requires the feature generator for tagger," +
-                " but instead, we have " + self.fgen.name)
+                "current_tag_feature() requires the feature generator for " +
+                "tagger, but instead, we have " + self.fgen.name)
 
-        return self.fgen.get_pos_feature(wordlist=self.column_list["FORM"],
-                                         index=index,
-                                         prev_tag=prev_tag,
-                                         prev_backpointer=prev_backpointer)
-
-    def get_ner_feature(self, index, prev_tag, prev_backpointer):
-        if self.fgen.name != "NERTaggerFeatureGenerator":
-            raise RuntimeError("SENTENCE [ERROR]: " +
-                "get_ner_feature() requires the feature generator for NER, " +
-                "but instead, we have " + self.fgen.name)
-
-        return self.fgen.get_ner_feature(wordlist=self.column_list["FORM"],
-                                         index=index,
-                                         prev_tag_1=prev_tag_1,
-                                         prev_backpointer=prev_tag_2,
-                                         pos_list=self.column_list["POSTAG"],
-                                         chunk_list=self.column_list["CHUNK"])
+        return self.fgen.current_tag_feature(sentence=self,
+                                             index=index,
+                                             prev_tag=prev_tag,
+                                             prev_backpointer=prev_backpointer)
 
     '''
     def get_second_order_local_vector(self, head_index, dep_index,

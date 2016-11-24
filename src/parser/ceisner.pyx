@@ -4,7 +4,6 @@ from libcpp.queue cimport queue
 from libcpp.list cimport list
 from libcpp cimport bool
 from libc.stdlib cimport malloc, calloc, free
-from pos_tagger import PosTagger
 import logging
 
 logger = logging.getLogger('PARSER')
