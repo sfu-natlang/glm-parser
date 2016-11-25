@@ -6,6 +6,19 @@ import string
 import copy
 
 
+def loading_list(list_file):
+    c = open(list_file, 'r')
+    alist = []
+    for line in c:
+            x = line.split()
+            alist.append(x[1])
+    c.close()
+    return alist
+
+per_list = loading_list('./ner/ned_PER_list.txt')
+loc_list = loading_list('./ner/ned_LOC_list.txt')
+
+
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """
     This is the feature generator for the NER Tagger
@@ -14,8 +27,6 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
     def __init__(self):
         feature_generator_base.FeatureGeneratorBase.__init__(self)
-        self.per_list = self.loading_list('./ner/ned_PER_list.txt')
-        self.loc_list = self.loading_list('./ner/ned_LOC_list.txt')
         self.care_list.append("FORM")
         self.care_list.append("POSTAG")
         self.care_list.append("CHUNK")
@@ -179,7 +190,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     def list_PER_isPresent(self, s):
         y = '\'s'
         if s != y:
-            if s in self.per_list:
+            if s in per_list:
                 return 1
         return 0
 
@@ -248,6 +259,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         fv = []
         word = wordlist[index].lower()
+        i = index
         if self.all_upper(word):
             fv.append((1, 'cur_upper'))
         if self.all_upper(wordlist[i-1]):
@@ -309,9 +321,9 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                 fv.append((34, 'digits_punc'))
         if self.contains_alphanumeric(word) and self.contains_hyphen(word):
             fv.append((35, 'alphanum_hyphen'))
-        if self.binarySearch(word, self.per_list):
+        if self.binarySearch(word, per_list):
             fv.append((38, 'PER_list'))
-        if self.binarySearch(word, self.loc_list):
+        if self.binarySearch(word, loc_list):
             fv.append((39, 'LOC_list'))
         fv.append((40, wordlist[i-1], word))
         fv.append((41, word, wordlist[i+1]))
@@ -398,9 +410,9 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
                     fv.append(str((34, 'digits_punc', tag)))
             if self.contains_alphanumeric(word) and self.contains_hyphen(word):
                 fv.append(str((35, 'alphanum_hyphen', tag)))
-            if self.binarySearch(word, self.per_list):
+            if self.binarySearch(word, per_list):
                 fv.append(str((38, 'PER_list', tag)))
-            if self.binarySearch(word, self.loc_list):
+            if self.binarySearch(word, loc_list):
                 fv.append(str((39, 'LOC_list', tag)))
             fv.append(str((40, wordlist[i-1], word, tag)))
             fv.append(str((41, word, wordlist[i+1], tag)))
