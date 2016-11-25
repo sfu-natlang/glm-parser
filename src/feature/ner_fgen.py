@@ -250,31 +250,31 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         word = wordlist[index].lower()
         if self.all_upper(word):
             fv.append((1, 'cur_upper'))
-        if self.all_upper(self.wl[i-1]):
+        if self.all_upper(wordlist[i-1]):
             fv.append((2, 'prev_upper'))
-        if self.all_upper(self.wl[i-2]):
+        if self.all_upper(wordlist[i-2]):
             fv.append((3, 'prev_prev_upper'))
-        if self.all_upper(self.wl[i+1]):
+        if self.all_upper(wordlist[i+1]):
             fv.append((4, 'after_upper'))
-        if self.all_upper(self.wl[i+2]):
+        if self.all_upper(wordlist[i+2]):
             fv.append((5, 'after_after_upper'))
-        fv.append((6, 'previous_2_tag', pretag_1, prev_backpointer))
-        fv.append((7, 'previous+cur', pretag_1, prev_backpointer, word))
+        fv.append((6, 'previous_2_tag', prev_tag_1, prev_backpointer))
+        fv.append((7, 'previous+cur', prev_tag_1, prev_backpointer, word))
         fv.append((8, 'cur', word))
-        fv.append((9, 'prev', self.wl[i-1]))
-        fv.append((10, 'prev_prev', self.wl[i-2]))
-        fv.append((11, 'after', self.wl[i+1]))
-        fv.append((12, 'after_after', self.wl[i+2]))
-        fv.append((13, self.wl[i-2], self.wl[i-1], word, self.wl[i+1], self.wl[i+2]))
+        fv.append((9, 'prev', wordlist[i-1]))
+        fv.append((10, 'prev_prev', wordlist[i-2]))
+        fv.append((11, 'after', wordlist[i+1]))
+        fv.append((12, 'after_after', wordlist[i+2]))
+        fv.append((13, wordlist[i-2], wordlist[i-1], word, wordlist[i+1], wordlist[i+2]))
         if self.starts_capital(word):
             fv.append((14, 'cur_cap'))
-        if self.starts_capital(self.wl[i-1]):
+        if self.starts_capital(wordlist[i-1]):
             fv.append((15, 'prev_cap'))
-        if self.starts_capital(self.wl[i-2]):
+        if self.starts_capital(wordlist[i-2]):
             fv.append((16, 'prev_prev_cap'))
-        if self.starts_capital(self.wl[i+1]):
+        if self.starts_capital(wordlist[i+1]):
             fv.append((17, 'after_cap'))
-        if self.starts_capital(self.wl[i+2]):
+        if self.starts_capital(wordlist[i+2]):
             fv.append((18, 'after_after_cap'))
 
         fv.append((19, word[:1]))
@@ -288,7 +288,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append((29, len(word)))
         fv.append((30, i))
         if self.possesive_feature(word):
-            fv.append((36, pretag_1))
+            fv.append((36, prev_tag_1))
             fv.append((37, pos_list[i-1]))
 
         fv.append((27, pos_list[i]))
@@ -313,8 +313,8 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append((38, 'PER_list'))
         if self.binarySearch(word, self.loc_list):
             fv.append((39, 'LOC_list'))
-        fv.append((40, self.wl[i-1], word))
-        fv.append((41, word, self.wl[i+1]))
+        fv.append((40, wordlist[i-1], word))
+        fv.append((41, word, wordlist[i+1]))
         if self.all_lower(word):
             fv.append((42, 'islower'))
         if self.contains_hyphen(word):
@@ -338,78 +338,74 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             word = wordlist[i]
             tag = ner_list[i]
             if self.all_upper(word):
-                fv[(1, 'cur_upper'), tag] += 1
-            if self.all_upper(self.wl[i-1]):
-                fv[(2, 'prev_upper'), tag] += 1
-            if self.all_upper(self.wl[i-2]):
-                fv[(3, 'prev_prev_upper'), tag] += 1
-            if self.all_upper(self.wl[i+1]):
-                fv[(4, 'after_upper'), tag] += 1
-            if self.all_upper(self.wl[i+2]):
-                fv[(5, 'after_after_upper'), tag] += 1
-            fv[(6, 'previous_2_tag', nerlist[i-1], nerlist[i-2]), tag] += 1
-            fv[(7, 'previous+cur', nerlist[i-1], nerlist[i-2], word), tag] += 1
-
-            fv[(8, 'cur', word), tag] += 1
-            fv[(9, 'prev', self.wl[i-1]), tag] += 1
-            fv[(10, 'prev_prev', self.wl[i-2]), tag] += 1
-            fv[(11, 'after', self.wl[i+1]), tag] += 1
-            fv[(12, 'after_after', self.wl[i+2]), tag] += 1
-            fv[(13, self.wl[i-2], self.wl[i-1], word, self.wl[i+1], self.wl[i+2]), tag] += 1
-
+                fv.append(str((1, 'cur_upper', tag)))
+            if self.all_upper(wordlist[i-1]):
+                fv.append(str((2, 'prev_upper', tag)))
+            if self.all_upper(wordlist[i-2]):
+                fv.append(str((3, 'prev_prev_upper', tag)))
+            if self.all_upper(wordlist[i+1]):
+                fv.append(str((4, 'after_upper', tag)))
+            if self.all_upper(wordlist[i+2]):
+                fv.append(str((5, 'after_after_upper', tag)))
+            fv.append(str((6, 'previous_2_tag', ner_list[i-1], ner_list[i-2], tag)))
+            fv.append(str((7, 'previous+cur', ner_list[i-1], ner_list[i-2], word, tag)))
+            fv.append(str((8, 'cur', word, tag)))
+            fv.append(str((9, 'prev', wordlist[i-1], tag)))
+            fv.append(str((10, 'prev_prev', wordlist[i-2], tag)))
+            fv.append(str((11, 'after', wordlist[i+1], tag)))
+            fv.append(str((12, 'after_after', wordlist[i+2], tag)))
+            fv.append(str((13, wordlist[i-2], wordlist[i-1], word, wordlist[i+1], wordlist[i+2], tag)))
             if self.starts_capital(word):
-                fv[(14, 'cur_cap'), tag] += 1
-            if self.starts_capital(self.wl[i-1]):
-                fv[(15, 'prev_cap'), tag] += 1
-            if self.starts_capital(self.wl[i-2]):
-                fv[(16, 'prev_prev_cap'), tag] += 1
-            if self.starts_capital(self.wl[i+1]):
-                fv[(17, 'after_cap'), tag] += 1
-            if self.starts_capital(self.wl[i+2]):
-                fv[(18, 'after_after_cap'), tag] += 1
+                fv.append(str((14, 'cur_cap', tag)))
+            if self.starts_capital(wordlist[i-1]):
+                fv.append(str((15, 'prev_cap', tag)))
+            if self.starts_capital(wordlist[i-2]):
+                fv.append(str((16, 'prev_prev_cap', tag)))
+            if self.starts_capital(wordlist[i+1]):
+                fv.append(str((17, 'after_cap', tag)))
+            if self.starts_capital(wordlist[i+2]):
+                fv.append(str((18, 'after_after_cap', tag)))
 
-            fv[(19, word[:1]), tag] += 1
-            fv[(20, word[-1:]), tag] += 1
-            fv[(21, word[:2]), tag] += 1
-            fv[(22, word[-2:]), tag] += 1
-            fv[(23, word[:3]), tag] += 1
-            fv[(24, word[-3:]), tag] += 1
-            fv[(25, word[:4]), tag] += 1
-            fv[(26, word[-4:]), tag] += 1
-            fv[(29, len(word)), tag] += 1
-            fv[(30, i), tag] += 1
+            fv.append(str((19, word[:1], tag)))
+            fv.append(str((20, word[-1:], tag)))
+            fv.append(str((21, word[:2], tag)))
+            fv.append(str((22, word[-2:], tag)))
+            fv.append(str((23, word[:3], tag)))
+            fv.append(str((24, word[-3:], tag)))
+            fv.append(str((25, word[:4], tag)))
+            fv.append(str((26, word[-4:], tag)))
+            fv.append(str((29, len(word), tag)))
+            fv.append(str((30, i, tag)))
             if self.possesive_feature(word):
-                fv[(36, nerlist[i-1]), tag] += 1
-                fv[(37, pos_list[i-1]), nerlist[i-1]] += 1
+                fv.append(str((36, ner_list[i-1], tag)))
+                fv.append(str((37, pos_list[i-1], tag)))
 
-            fv[(27, pos_list[i]), tag] += 1
-            fv[(28, chunk_list[i]), tag] += 1
-            fv[(32, pos_list[i-1], pos_list[i]), tag] += 1
-            fv[(33, chunk_list[i-1], chunk_list[i]), tag] += 1
+            fv.append(str((27, pos_list[i], tag)))
+            fv.append(str((28, chunk_list[i], tag)))
 
             if self.contains_all_num(word):
-                fv[(29, 'all_digits'), tag] += 1
+                fv.append(str((29, 'all_digits', tag)))
             if self.contains_digits(word):
                 if self.contains_hyphen(word):
-                    fv[(30, 'digits_punc'), tag] += 1
+                    fv.append(str((30, 'digits_punc', tag)))
                 elif self.contains_internal_period(word):
-                    fv[(31, 'digits_punc'), tag] += 1
+                    fv.append(str((31, 'digits_punc', tag)))
                 elif self.has_internal_apostrophe(word):
-                    fv[(32, 'digits_punc'), tag] += 1
+                    fv.append(str((32, 'digits_punc', tag)))
                 elif self.contains_internal_period(word):
-                    fv[(33, 'digits_punc'), tag] += 1
+                    fv.append(str((33, 'digits_punc', tag)))
                 elif self.contains_amphasand(word):
-                    fv[(34, 'digits_punc'), tag] += 1
+                    fv.append(str((34, 'digits_punc', tag)))
             if self.contains_alphanumeric(word) and self.contains_hyphen(word):
-                fv[(35, 'alphanum_hyphen'), tag] += 1
+                fv.append(str((35, 'alphanum_hyphen', tag)))
             if self.binarySearch(word, self.per_list):
-                fv[(38, 'PER_list'), tag] += 1
+                fv.append(str((38, 'PER_list', tag)))
             if self.binarySearch(word, self.loc_list):
-                fv[(39, 'LOC_list'), tag] += 1
-            fv[(40, self.wl[i-1], word), tag] += 1
-            fv[(41, word, self.wl[i+1]), tag] += 1
+                fv.append(str((39, 'LOC_list', tag)))
+            fv.append(str((40, wordlist[i-1], word, tag)))
+            fv.append(str((41, word, wordlist[i+1], tag)))
             if self.all_lower(word):
-                fv[(42, 'islower'), tag] += 1
+                fv.append(str((42, 'islower', tag)))
             if self.contains_hyphen(word):
-                fv[(43, 'hyphen'), tag] += 1
+                fv.append(str((43, 'hyphen', tag)))
         return fv
