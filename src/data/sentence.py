@@ -362,6 +362,13 @@ class Sentence():
         """
         return self.fetch_column("POSTAG")
 
+    def get_gold_output(self):
+        if self.fgen.name == "NERTaggerFeatureGenerator":
+            return self.fetch_column("NER")
+        if self.fgen.name == "POSTaggerFeatureGenerator":
+            return self.fetch_column("POSTAG")
+        raise RuntimeError("SENTENCE [ERROR]: Method not supported for current Fgen: " + self.fgen.name)
+
     def get_edge_list(self):
         """
         Return a list of all existing edges
