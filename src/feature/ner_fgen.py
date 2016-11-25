@@ -238,7 +238,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     def current_tag_feature(self,
                             sentence,
                             index,
-                            prev_tag_1,
+                            prev_tag,
                             prev_backpointer):
 
         wordlist = sentence.column_list["FORM"]
@@ -258,8 +258,8 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
             fv.append((4, 'after_upper'))
         if self.all_upper(wordlist[i+2]):
             fv.append((5, 'after_after_upper'))
-        fv.append((6, 'previous_2_tag', prev_tag_1, prev_backpointer))
-        fv.append((7, 'previous+cur', prev_tag_1, prev_backpointer, word))
+        fv.append((6, 'previous_2_tag', prev_tag, prev_backpointer))
+        fv.append((7, 'previous+cur', prev_tag, prev_backpointer, word))
         fv.append((8, 'cur', word))
         fv.append((9, 'prev', wordlist[i-1]))
         fv.append((10, 'prev_prev', wordlist[i-2]))
@@ -288,7 +288,7 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append((29, len(word)))
         fv.append((30, i))
         if self.possesive_feature(word):
-            fv.append((36, prev_tag_1))
+            fv.append((36, prev_tag))
             fv.append((37, pos_list[i-1]))
 
         fv.append((27, pos_list[i]))
