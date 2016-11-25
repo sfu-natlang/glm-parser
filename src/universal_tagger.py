@@ -5,7 +5,7 @@
 # Simon Fraser University
 # NLP Lab
 #
-# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu, Kingston Chen,
+# Author: Yulan Huang, Ziqi Wang, Anoop Sarkar, Jetic Gu, Kingston Chen, Jerry Li
 #
 # (Please add on your name if you have authored this file)
 #
@@ -17,7 +17,7 @@ from logger.loggers import logging, init_logger
 from feature.feature_vector import FeatureVector
 
 from evaluate.tagger_evaluator import Evaluator
-from data.pos_tagset_reader import read_tagset
+from data.tagset_reader import read_tagset
 
 import time
 import os
@@ -28,9 +28,9 @@ import argparse
 import StringIO
 from ConfigParser import SafeConfigParser
 
-__version__ = '1.0'
+__version__ = '1.1'
 if __name__ == '__main__':
-    init_logger('tagger.log')
+    init_logger('universal_tagger.log')
 logger = logging.getLogger('TAGGER')
 
 
@@ -244,7 +244,7 @@ if __name__ == '__main__':
         arg_parser.add_argument('--iterations', '-i', metavar='ITERATIONS',
             type=int, help="""Number of iterations, default is 1""")
         arg_parser.add_argument('--hadoop', '-c', action='store_true',
-            help="""Using POS Tagger in Spark Yarn Mode""")
+            help="""Using the Tagger in Spark Yarn Mode""")
         arg_parser.add_argument('--tagger-w-vector', metavar='FILENAME',
             help="""Path to an existing w-vector for tagger.""")
         arg_parser.add_argument('--tag-file', metavar='TAG_TARGET', help="""

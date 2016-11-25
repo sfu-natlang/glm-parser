@@ -15,4 +15,4 @@ spark-submit --master yarn-cluster \
 			 --executor-memory 7g  \
 			 --executor-cores 3    \
 			 --py-files module.egg \
-			 pos_tagger.py -s 8 --hadoop --learner=perceptron config/pos_debug.config
+			 universal_tagger.py -s 8 --hadoop --learner=perceptron config/pos_debug.config

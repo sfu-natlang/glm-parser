@@ -5,6 +5,8 @@ import debug.debug
 import string
 import copy
 
+__version__ = '1.1'
+
 
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """

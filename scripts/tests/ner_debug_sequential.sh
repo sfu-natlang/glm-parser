@@ -5,11 +5,11 @@ cd ../
 ./setup_env.sh
 
 cd ../src/
-rm ner_tagger.log
-rm ner_tagger.log.bak
+rm universal_tagger.log
+rm universal_tagger.log.bak
 
-python ner_tagger.py config/ner_debug.config
+python universal_tagger.py config/ner_debug.config
 
-../scripts/proc_log.sh ner_tagger.log
+../scripts/proc_log.sh universal_tagger.log
 
-mv pos_tagger.log ../scripts/tests/ner_debug_sequential.log
+mv universal_tagger.log ../scripts/tests/ner_debug_sequential.log

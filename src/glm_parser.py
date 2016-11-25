@@ -16,7 +16,7 @@ from weight.weight_vector import WeightVector
 from logger.loggers import logging, init_logger
 
 from evaluate.parser_evaluator import Evaluator
-from pos_tagger import Tagger
+from universal_tagger import Tagger
 
 import time
 import os

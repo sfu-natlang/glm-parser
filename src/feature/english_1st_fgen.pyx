@@ -13,6 +13,8 @@ import feature_generator_base
 import debug.debug
 import sys
 
+__version__ = '1.1'
+
 
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """

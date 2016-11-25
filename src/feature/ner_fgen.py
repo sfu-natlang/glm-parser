@@ -5,6 +5,8 @@ import debug.debug
 import string
 import copy
 
+__version__ = '1.1'
+
 
 def loading_list(list_file):
     c = open(list_file, 'r')

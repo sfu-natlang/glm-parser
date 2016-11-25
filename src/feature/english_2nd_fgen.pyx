@@ -15,6 +15,9 @@ import debug.debug
 
 import copy
 
+__version__ = '1.1'
+
+
 class FeatureGenerator():
     """
     Second order feature generator: Sibling features and grandchild features
