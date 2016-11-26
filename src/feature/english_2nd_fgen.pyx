@@ -80,6 +80,13 @@ class FeatureGenerator():
         sentence.fgen = None
         return
 
+    def update_sentence_with_output(self, sentence, output):
+        if sentence.fgen != self:
+            raise RuntimeError("FGEN [ERROR]: update_sentence_with_output " +
+                "can only update sentence  with this fgen as feature generator")
+        sentence.set_edge_list(copy.deepcopy(output))
+        return
+
     def get_2nd_sibling_feature(self, fv, head_index, dep_index, sib_index, direction, dist):
         """
         Add second order sibling feature to feature vector

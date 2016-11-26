@@ -118,6 +118,9 @@ class Sentence():
 
         return
 
+    def update_sentence_with_output(self, output):
+        self.fgen.update_sentence_with_output(self, output)
+
     def construct_edge_set(self):
         """
         Construct the edge set for the given sentence.

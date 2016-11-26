@@ -1,5 +1,6 @@
 import logging
 import os.path
+from copy import deepcopy
 from data.data_pool import DataPool
 from weight.weight_vector import WeightVector
 
@@ -45,29 +46,36 @@ class EvaluatorBase:
             w_vector[key] = weight_vector[key]
         val = {
             'correct_num': 0,
-            'gold_set_size': 0
+            'gold_set_size': 0,
+            'data_pool': None
         }
 
         sentence_count = 1
         data_size = data_pool.get_sent_num()
+        tagged_data_pool = deepcopy(data_pool)
 
         while data_pool.has_next_data():
-            sent = data_pool.get_next_data()
+            sentence = data_pool.get_next_data()
+            tagged_sentence = tagged_data_pool.get_next_data()
 
             if not hadoop:
                 logger.info("Sentence %d of %d, Length %d" % (
                     sentence_count,
                     data_size,
-                    len(sent.get_word_list()) - 1))
+                    len(sentence.get_word_list()) - 1))
             sentence_count += 1
 
-            correct_num, gold_set_size = \
-                self.sentence_evaluator(sent, w_vector)
+            correct_num, gold_set_size, output = \
+                self.sentence_evaluator(sentence, w_vector)
+
+            tagged_sentence.update_sentence_with_output(output)
 
             val['correct_num'] += correct_num
             val['gold_set_size'] += gold_set_size
 
         data_pool.reset_index()
+        tagged_data_pool.reset_index
+        val['data_pool'] = tagged_data_pool
         return val.items()
 
     def sequentialEvaluate(self,
@@ -88,8 +96,9 @@ class EvaluatorBase:
                                         hadoop=hadoop)
         self.correct_num = val[0][1]
         self.gold_set_size = val[1][1]
+        self.data_pool = val[2][1]
         self.__print_result(w_vector, data_pool)
-        return
+        return self.data_pool
 
     def parallelEvaluate(self,
                          data_pool,
@@ -136,13 +145,16 @@ class EvaluatorBase:
                                                             weight_vector      = wv))
 
         val = dp.combineByKey(
-            lambda value: (value, 1),
-            lambda x, value: (x[0] + value, x[1] + 1),
-            lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
+            lambda value: (value, 1, None),
+            lambda x, value: (x[0] + value, x[1] + 1, x[2].merge(None)),
+            lambda x, y: (x[0] + y[0], x[1] + y[1], x[2].merge(y[2]))).collect()
 
         for (a, (b, c)) in val:
             if a == "correct_num":
                 self.correct_num = b
-            else:
+            elif a == "gold_set_size":
                 self.gold_set_size = b
+            else:
+                self.data_pool = b
         self.__print_result(w_vector, data_pool)
+        return self.data_pool

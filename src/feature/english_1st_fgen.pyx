@@ -66,6 +66,12 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         sentence.fgen = None
         return
 
+    def update_sentence_with_output(self, sentence, output):
+        if sentence.fgen != self:
+            raise RuntimeError("FGEN [ERROR]: update_sentence_with_output " +
+                "can only update sentence  with this fgen as feature generator")
+        sentence.set_edge_list(copy.deepcopy(output))
+        return
 
     def get_unigram_feature(self, head_index, dep_index, direction, dist):
         """

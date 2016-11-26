@@ -56,6 +56,13 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         sentence.fgen = None
         return
 
+    def update_sentence_with_output(self, sentence, output):
+        if sentence.fgen != self:
+            raise RuntimeError("FGEN [ERROR]: update_sentence_with_output " +
+                "can only update sentence  with this fgen as feature generator")
+        sentence.column_list["POSTAG"] = copy.deepcopy(output)
+        return
+
     def __contains_digits(self, s):
         return any(char.isdigit() for char in s)
 
