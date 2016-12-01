@@ -94,9 +94,9 @@ class EvaluatorBase:
         val = self.__datapool_evaluator(data_pool=data_pool,
                                         weight_vector=wv,
                                         hadoop=hadoop)
-        self.correct_num = val[0][1]
-        self.gold_set_size = val[1][1]
-        self.data_pool = val[2][1]
+        self.correct_num   = val[0][1]
+        self.data_pool     = val[1][1]
+        self.gold_set_size = val[2][1]
         self.__print_result(w_vector, data_pool)
         return self.data_pool
 
@@ -145,9 +145,9 @@ class EvaluatorBase:
                                                             weight_vector      = wv))
 
         val = dp.combineByKey(
-            lambda value: (value, 1, None),
-            lambda x, value: (x[0] + value, x[1] + 1, x[2].merge(None)),
-            lambda x, y: (x[0] + y[0], x[1] + y[1], x[2].merge(y[2]))).collect()
+            lambda value: (value, None, 1),
+            lambda x, value: (x[0] + value, x[1].merge(None), x[2] + 1),
+            lambda x, y: (x[0] + y[0], x[1].merge(y[1]), x[2] + y[2])).collect()
 
         for (a, (b, c)) in val:
             if a == "correct_num":
