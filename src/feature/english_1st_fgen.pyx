@@ -12,6 +12,7 @@ import feature_vector
 import feature_generator_base
 import debug.debug
 import sys
+import copy
 
 __version__ = '1.1'
 
