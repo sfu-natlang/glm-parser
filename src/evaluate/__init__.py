@@ -12,6 +12,7 @@ class EvaluatorBase:
     def __init__(self):
         self.correct_num = 0
         self.gold_set_size = 0
+        self.data_pool = None
         return
 
     def __print_result(self, w_vector, data_pool):
@@ -141,13 +142,13 @@ class EvaluatorBase:
 
         total_sent = dp.map(lambda dp: dp.get_sent_num()).sum()
         logger.info("Totel number of sentences: %d" % total_sent)
-        dp = dp.flatMap(lambda t: self.__datapool_evaluator(data_pool          = t,
-                                                            weight_vector      = wv))
+        dp = dp.flatMap(lambda t: self.__datapool_evaluator(data_pool     = t,
+                                                            weight_vector = wv))
 
         val = dp.combineByKey(
-            lambda value: (value, None, 1),
-            lambda x, value: (x[0] + value, x[1].merge(None), x[2] + 1),
-            lambda x, y: (x[0] + y[0], x[1].merge(y[1]), x[2] + y[2])).collect()
+            lambda value: (value, 1),
+            lambda x, value: (x[0] + value, x[1] + 1),
+            lambda x, y: (x[0] + y[0], x[1] + y[1])).collect()
 
         for (a, (b, c)) in val:
             if a == "correct_num":

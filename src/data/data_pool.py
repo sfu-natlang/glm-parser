@@ -182,7 +182,7 @@ class DataPool():
             raise RuntimeError("DATAPOOL [ERROR]: Data has not been loaded by DataPrep, cannot retrieve data path.")
         return
 
-    def merge(self, another_data_pool):
+    def __add__(self, another_data_pool):
         if another_data_pool is None:
             return deepcopy(self)
         newDataPool = deepcopy(self)
