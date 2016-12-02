@@ -75,8 +75,8 @@ class FeatureGenerator():
             sentence.fgen.unload_from_sentence(sentence)
             return
 
-        del self.column_list["FORM"][0]
-        del self.column_list["POSTAG"][0]
+        del sentence.column_list["FORM"][0]
+        del sentence.column_list["POSTAG"][0]
         sentence.fgen = None
         return
 
