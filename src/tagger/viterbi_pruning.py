@@ -52,9 +52,9 @@ class Tagger():
                 for (prev_tag, val) in last_viterbi[0: 10]:
                     feats = []
                     (prev_value, prev_backpointer) = viterbi[i - 1][prev_tag]
-                    feats = sentence.get_pos_feature(index=i,
-                                                     prev_tag=prev_tag,
-                                                     prev_backpointer=prev_backpointer)
+                    feats = sentence.current_tag_feature(index=i,
+                                                         prev_tag=prev_tag,
+                                                         prev_backpointer=prev_backpointer)
 
                     weight = 0.0
                     # sum up the weights for all features except the bigram

@@ -15,4 +15,4 @@ spark-submit --master yarn-cluster \
 			 --executor-memory 7g  \
 			 --executor-cores 3    \
 			 --py-files module.egg \
-			 universal_tagger.py -s 8 --hadoop config/pos_default.config
+			 universal_tagger.py -s 8 --hadoop config/ner_debug.config

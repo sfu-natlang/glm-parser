@@ -4,6 +4,7 @@ import os
 import re
 import importlib
 import logging
+from copy import deepcopy
 from sentence import Sentence
 from data_prep import DataPrep
 from file_io import fileRead, fileWrite
@@ -180,6 +181,14 @@ class DataPool():
         else:
             raise RuntimeError("DATAPOOL [ERROR]: Data has not been loaded by DataPrep, cannot retrieve data path.")
         return
+
+    def __add__(self, another_data_pool):
+        if another_data_pool is None:
+            return deepcopy(self)
+        newDataPool = deepcopy(self)
+        newDataPool.data_list = newDataPool.data_list + another_data_pool.data_list
+        newDataPool.reset_index()
+        return newDataPool
 
     def reset_all(self):
         """

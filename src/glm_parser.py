@@ -16,7 +16,7 @@ from weight.weight_vector import WeightVector
 from logger.loggers import logging, init_logger
 
 from evaluate.parser_evaluator import Evaluator
-from pos_tagger import PosTagger
+from universal_tagger import Tagger
 
 import time
 import os
@@ -369,19 +369,15 @@ if __name__ == "__main__":
                         (not config[option].startswith("hdfs://")):
                     config[option] = 'file://' + config[option]
 
-    logger.info("Using feature generator: %s " % config['feature_generator'])
-    logger.info("Using data from: %s " % config['data_path'])
-    logger.info("Total training iterations: %d" % config['iterations'])
-
     # Initialise Tagger
     if config['tagger_w_vector'] is not None:
         __logger.info("Using Tagger weight vector: " + config['tagger_w_vector'])
         if config['tag_file'] is None:
             __logger.error("The tag_file has not been specified")
             sys.exit(1)
-        tagger = PosTagger(weightVectorLoadPath = config['tagger_w_vector'],
-                           tagFile              = config['tag_file'],
-                           sparkContext         = sparkContext)
+        tagger = Tagger(weightVectorLoadPath = config['tagger_w_vector'],
+                        tagFile              = config['tag_file'],
+                        sparkContext         = sparkContext)
         __logger.info("Tagger weight vector loaded")
     else:
         tagger = None

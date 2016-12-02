@@ -31,5 +31,4 @@ class Evaluator(EvaluatorBase):
 
         intersect_set = test_edge_set.intersection(gold_edge_set)
         correct_num = len(intersect_set)
-        gold_set_size = len(gold_edge_set)
-        return correct_num, gold_set_size
+        return correct_num, len(gold_edge_set), test_edge_set

@@ -9,14 +9,14 @@ class Evaluator(EvaluatorBase):
         return
 
     def sentence_evaluator(self, sent, w_vector):
-        result_list = self.tagger.tag(sent, w_vector, self.tagset, "NN")
-        gold_list = sent.get_pos_list()
-        if len(result_list) != len(gold_list):
+        local_output = self.tagger.tag(sent, w_vector, self.tagset, self.tagset[0])
+        gold_output = sent.get_gold_output()
+        if len(local_output) != len(gold_output):
             raise ValueError("""
             TAGGER [ERRO]: Tag results do not align with gold results
             """)
         correct_num = 0
-        for i in range(len(result_list)):
-            if result_list[i] == gold_list[i]:
+        for i in range(len(local_output)):
+            if local_output[i] == gold_output[i]:
                 correct_num += 1
-        return correct_num, len(gold_list)
+        return correct_num, len(gold_output), local_output

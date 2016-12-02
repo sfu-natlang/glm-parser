@@ -11,8 +11,8 @@ rm universal_tagger.log.bak
 spark-submit --driver-memory 4g   \
 			 --executor-memory 4g \
 			 --master 'local[*]'  \
-			 universal_tagger.py -s 4 config/pos_default.config
+			 universal_tagger.py -s 4 config/ner_debug.config
 
 ../scripts/proc_log.sh universal_tagger.log
 
-mv universal_tagger.log ../scripts/tests/tagger_default_standalone.log
+mv universal_tagger.log ../scripts/tests/ner_debug_standalone.log

@@ -5,6 +5,8 @@ import debug.debug
 import string
 import copy
 
+__version__ = '1.1'
+
 
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     """
@@ -16,6 +18,49 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         feature_generator_base.FeatureGeneratorBase.__init__(self)
         self.care_list.append("FORM")
         self.care_list.append("POSTAG")
+        return
+
+    def load_to_sentence(self, sentence):
+        if sentence.fgen is not None:
+            sentence.fgen.unload_from_sentence(sentence)
+
+        sentence.column_list["FORM"].insert(0, '_B_-1')
+        sentence.column_list["FORM"].insert(0, '_B_-2')  # first two 'words' are B_-2 B_-1
+        sentence.column_list["FORM"].append('_B_+1')
+        sentence.column_list["FORM"].append('_B_+2')     # last two 'words' are B_+1 B_+2
+
+        sentence.column_list["POSTAG"].insert(0, 'B_-1')
+        sentence.column_list["POSTAG"].insert(0, 'B_-2')
+
+        gold_global_vector = self.get_feature_vector(sentence=sentence)
+
+        sentence.gold_global_vector = gold_global_vector
+        sentence.fgen = self
+        return
+
+    def unload_from_sentence(self, sentence):
+        if sentence.fgen is None:
+            return
+        if sentence.fgen.name != "POSTaggerFeatureGenerator":
+            sentence.fgen.unload_from_sentence(sentence)
+            return
+
+        del sentence.column_list["FORM"][0]
+        del sentence.column_list["FORM"][0]
+        del sentence.column_list["FORM"][len(sentence.column_list["FORM"]) - 1]
+        del sentence.column_list["FORM"][len(sentence.column_list["FORM"]) - 1]
+
+        del sentence.column_list["POSTAG"][0]
+        del sentence.column_list["POSTAG"][0]
+
+        sentence.fgen = None
+        return
+
+    def update_sentence_with_output(self, sentence, output):
+        if sentence.fgen != self:
+            raise RuntimeError("FGEN [ERROR]: update_sentence_with_output " +
+                "can only update sentence  with this fgen as feature generator")
+        sentence.column_list["POSTAG"] = copy.deepcopy(output)
         return
 
     def __contains_digits(self, s):
@@ -30,7 +75,15 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
     def __contains_punc(self, s):
         return any(char in string.punctuation for char in s)
 
-    def get_pos_feature(self, wordlist, index, prev_tag, prev_backpointer):
+    def current_tag_feature(self,
+                            sentence,
+                            index,
+                            prev_tag,
+                            prev_backpointer):
+
+        wordlist = sentence.column_list["FORM"]
+        pos_list = sentence.column_list["POSTAG"]
+
         fv = []
         word = wordlist[index].lower()
         fv.append((0, word))
@@ -59,7 +112,13 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         fv.append((20, wordlist[index + 1].lower()[-3:]))
         return fv
 
-    def get_feature_vector(self, wordlist, poslist):  # Computing Sentence Feature
+    def get_feature_vector(self, sentence, output=None):  # Computing Sentence Feature
+        wordlist = sentence.column_list["FORM"]
+        if output is None:
+            poslist = sentence.column_list["POSTAG"]
+        else:
+            poslist = output
+
         fv = []
         for i in range(3, len(wordlist) - 2):
             word = wordlist[i].lower()

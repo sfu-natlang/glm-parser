@@ -3,6 +3,7 @@ from weight.weight_vector import WeightVector
 from learner.perceptron_base import PerceptronLearnerBase
 
 from learner import logger
+from feature.feature_vector import FeatureVector
 
 __version__ = '1.0.0'
 
@@ -44,7 +45,8 @@ class Learner(PerceptronLearnerBase):
                             data_pool.get_sent_num(),
                             len(data_instance.get_word_list()) - 1))
             sentence_count += 1
-            gold_global_vector = data_instance.convert_list_vector_to_dict(data_instance.gold_global_vector)
+
+            gold_global_vector = FeatureVector(data_instance.gold_global_vector)
             current_global_vector = f_argmax(w_vector, data_instance)
 
             delta_global_vector = gold_global_vector - current_global_vector

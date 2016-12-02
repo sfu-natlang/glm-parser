@@ -12,6 +12,9 @@ import feature_vector
 import feature_generator_base
 import debug.debug
 import sys
+import copy
+
+__version__ = '1.1'
 
 
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
@@ -28,6 +31,47 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
         self.care_list.append("FORM")
         self.care_list.append("POSTAG")
 
+        return
+
+    def load_to_sentence(self, sentence):
+        if sentence.fgen is not None:
+            sentence.fgen.unload_from_sentence(sentence)
+
+        # add ROOT to FORM and POSTAG
+        edge_list = sentence.construct_edge_set()
+        sentence.column_list["FORM"].insert(0, '__ROOT__')
+        sentence.column_list["POSTAG"].insert(0, 'ROOT')
+        # This will store the dict, len(dict) into the instance
+        sentence.set_edge_list(edge_list)
+
+        rsc_list = []
+        for field_name in self.care_list:
+            rsc_list.append(sentence.fetch_column(field_name))
+        self.init_resources(rsc_list)
+
+        sentence.gold_global_vector = self.recover_feature_from_edges(sentence.edge_list_index_only)
+        sentence.set_second_order_cache()
+
+        sentence.fgen = self
+        return
+
+    def unload_from_sentence(self, sentence):
+        if sentence.fgen is None:
+            return
+        if sentence.fgen.name != "EnglishFirstOrderFeatureGenerator":
+            sentence.fgen.unload_from_sentence(sentence)
+            return
+
+        del sentence.column_list["FORM"][0]
+        del sentence.column_list["POSTAG"][0]
+        sentence.fgen = None
+        return
+
+    def update_sentence_with_output(self, sentence, output):
+        if sentence.fgen != self:
+            raise RuntimeError("FGEN [ERROR]: update_sentence_with_output " +
+                "can only update sentence  with this fgen as feature generator")
+        sentence.set_edge_list(copy.deepcopy(output))
         return
 
     def get_unigram_feature(self, head_index, dep_index, direction, dist):

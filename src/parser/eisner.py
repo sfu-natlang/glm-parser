@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import copy
 import time
-from pos_tagger import PosTagger
 
 
 class EisnerParser():
