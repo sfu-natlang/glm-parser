@@ -170,7 +170,7 @@ if __name__ == '__main__':
         'learner':           'average_perceptron',
         'tagger':            'viterbi',
         'feature_generator': 'english_1st_fgen',
-        'format':            'format/penn2malt.format',
+        'format':            'penn2malt',
         'tag_file':          None
     }
 
@@ -207,9 +207,9 @@ if __name__ == '__main__':
 
             default "viterbi"; alternative "viterbi_pruning"
             """)
-        arg_parser.add_argument('--format', metavar='FORMAT_FILE',
+        arg_parser.add_argument('--format', metavar='FORMAT',
             help="""specify the format file for the training and testing files.
-            Officially supported format files are located in src/format/
+            Officially supported format files are located in src/data_format/
             """)
         arg_parser.add_argument('--spark-shards', '-s', metavar='SHARDS_NUM',
             type=int, help='train using parallelisation with spark')
@@ -330,7 +330,6 @@ if __name__ == '__main__':
                 'data_path',
                 'load_weight_from',
                 'dump_weight_to',
-                'format',
                 'tag_file']:
             if config[option] is not None:
                 if (not config[option].startswith("file://")) and \
@@ -346,7 +345,7 @@ if __name__ == '__main__':
     # Run training
     if config['train']:
         trainDataPool = DataPool(fgen         = config['feature_generator'],
-                                 format_list  = config['format'],
+                                 data_format  = config['format'],
                                  data_regex   = config['train'],
                                  data_path    = config['data_path'],
                                  shards       = config['spark_shards'],
@@ -365,7 +364,7 @@ if __name__ == '__main__':
     # Run evaluation
     if config['test']:
         testDataPool = DataPool(fgen         = config['feature_generator'],
-                                format_list  = config['format'],
+                                data_format  = config['format'],
                                 data_regex   = config['test'],
                                 data_path    = config['data_path'],
                                 shards       = config['spark_shards'],

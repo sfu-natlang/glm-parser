@@ -155,7 +155,7 @@ if __name__ == "__main__":
         'learner':           'average_perceptron',
         'parser':            'ceisner',
         'feature_generator': 'english_1st_fgen',
-        'format':            'format/penn2malt.format',
+        'format':            'penn2malt',
         'tagger_w_vector':   None,
         'tag_file':          None
     }
@@ -200,9 +200,9 @@ if __name__ == "__main__":
 
             default "ceisner"; alternative "ceisner3"
             """)
-        arg_parser.add_argument('--format', metavar='FORMAT_FILE',
+        arg_parser.add_argument('--format', metavar='FORMAT',
             help="""specify the format file for the training and testing files.
-            Officially supported format files are located in src/format/
+            Officially supported format files are located in src/data/data_format/
             """)
         arg_parser.add_argument('--max-sentences', metavar='N', type=int,
             help="""run the first [int] sentences only. Usually combined with option -a to gather
@@ -361,7 +361,6 @@ if __name__ == "__main__":
                 'data_path',
                 'load_weight_from',
                 'dump_weight_to',
-                'format',
                 'tagger_w_vector',
                 'tag_file']:
             if config[option] is not None:
@@ -390,7 +389,7 @@ if __name__ == "__main__":
     # Run training
     if config['train']:
         trainDataPool = DataPool(fgen         = config['feature_generator'],
-                                 format_list  = config['format'],
+                                 data_format  = config['format'],
                                  data_regex   = config['train'],
                                  data_path    = config['data_path'],
                                  shards       = config['spark_shards'],
@@ -409,7 +408,7 @@ if __name__ == "__main__":
     # Run evaluation
     if config['test']:
         testDataPool = DataPool(fgen         = config['feature_generator'],
-                                format_list  = config['format'],
+                                data_format  = config['format'],
                                 data_regex   = config['test'],
                                 data_path    = config['data_path'],
                                 shards       = config['spark_shards'],
