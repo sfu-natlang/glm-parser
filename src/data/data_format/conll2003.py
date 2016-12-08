@@ -1,4 +1,5 @@
 from data.data_format import DataFormatBase
+from data.sentence import Sentence
 
 
 class DataFormat(DataFormatBase):
@@ -29,7 +30,7 @@ class DataFormat(DataFormatBase):
             else:
                 if not(self.format_list[0].isdigit()) and column_list[self.format_list[0]] != []:
                     sent = Sentence(column_list, self.format_list, self.fgen)
-                    self.data_list.append(sent)
+                    data_list.append(sent)
 
                 column_list = {}
 
