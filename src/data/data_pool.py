@@ -141,6 +141,10 @@ class DataPool():
     def __add__(self, another_data_pool):
         if another_data_pool is None:
             return deepcopy(self)
+        # if self.fgen != another_data_pool.fgen:
+        #     raise RuntimeError("DATAPOOL [ERROR]: Merging dataPools do not have the same fgen")
+        # if self.data_format != another_data_pool.data_format:
+        #     raise RuntimeError("DATAPOOL [ERROR]: Merging dataPools do not have the same format")
         newDataPool = deepcopy(self)
         newDataPool.data_list = newDataPool.data_list + another_data_pool.data_list
         newDataPool.reset_index()

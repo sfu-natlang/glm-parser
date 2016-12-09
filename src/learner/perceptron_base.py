@@ -76,11 +76,10 @@ class PerceptronLearnerBase:
                        sparkContext=None,
                        hadoop=False):
 
-        def create_dp(textString, fgen, format, comment_sign):
-            dp = DataPool(fgen         = fgen,
-                          format_list  = format,
-                          textString   = textString[1],
-                          comment_sign = comment_sign)
+        def create_dp(textString, fgen, data_format):
+            dp = DataPool(fgen        = fgen,
+                          data_format = data_format,
+                          textString  = textString[1])
             return dp
 
         def get_sent_num(dp):
@@ -108,8 +107,7 @@ class PerceptronLearnerBase:
         logger.info("Using Learner: " + self.name)
 
         dir_name     = data_pool.loadedPath()
-        format_list  = data_pool.format_list
-        comment_sign = data_pool.comment_sign
+        data_format  = data_pool.data_format
         fgen         = data_pool.fgen
 
         # By default, when the hdfs is configured for spark, even in local mode it will
@@ -120,10 +118,9 @@ class PerceptronLearnerBase:
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
             train_files = sc.wholeTextFiles("file://" + dir_name, minPartitions=10).cache()
 
-        dp = train_files.map(lambda t: create_dp(textString   = t,
-                                                 fgen         = fgen,
-                                                 format       = format_list,
-                                                 comment_sign = comment_sign)).cache()
+        dp = train_files.map(lambda t: create_dp(textString  = t,
+                                                 fgen        = fgen,
+                                                 data_format = data_format)).cache()
 
         self.w_vector = {}
         tmp = dp.map(get_sent_num).sum()

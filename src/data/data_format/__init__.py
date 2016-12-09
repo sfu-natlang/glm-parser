@@ -5,6 +5,8 @@ from data.sentence import Sentence
 class DataFormatBase():
     def __init__(self, fgen):
         self.fgen = fgen
+        self.format_list = []
+        self.comment_sign = ""
         return
 
     def load_from_content(self, content):
@@ -44,3 +46,27 @@ class DataFormatBase():
         content = fileRead("file://" + file_path)
 
         return self.load_from_content(content)
+
+    def export_to_file(self, dataPool, fileURI, sparkContext=None):
+        content = []
+        while dataPool.has_next_data():
+            sentence = dataPool.get_next_data()
+            length = len(sentence.column_list["HEAD"])
+
+            for index in range(length):
+                line = ""
+                for item in self.format_list:
+                    if item not in sentence.column_list:
+                        line = line + "O"
+                    else:
+                        line = line + sentence.column_list[item][index]
+                    line = line + " "
+                print line
+                content.append(line)
+            content.append("")
+
+        dataPool.reset_index()
+        fileWrite(fileURI=fileURI,
+                  contents=content,
+                  sparkContext=sparkContext)
+        return
