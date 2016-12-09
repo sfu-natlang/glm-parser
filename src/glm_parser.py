@@ -27,7 +27,7 @@ import argparse
 import StringIO
 from ConfigParser import SafeConfigParser
 
-__version__ = '1.0'
+__version__ = '1.1'
 if __name__ == "__main__":
     init_logger('glm_parser.log')
 logger = logging.getLogger('PARSER')
@@ -103,6 +103,7 @@ class GlmParser():
     def evaluate(self,
                  dataPool,
                  tagger=None,
+                 exportFileURI=None,
                  parallel=False,
                  sparkContext=None,
                  hadoop=None):
@@ -113,7 +114,7 @@ class GlmParser():
 
         start_time = time.time()
         evaluator = self.evaluator(self.parser, tagger)
-        if not parallel:
+        if not parallel or exportFileURI is not None:
             resultingDataPool = evaluator.sequentialEvaluate(
                 data_pool    = dataPool,
                 w_vector     = self.w_vector,
@@ -125,7 +126,8 @@ class GlmParser():
                 w_vector     = self.w_vector,
                 sparkContext = sparkContext,
                 hadoop       = hadoop)
-        resultingDataPool.data_format.export_to_file(resultingDataPool, "file://duang.txt")
+        if exportFileURI is not None:
+            resultingDataPool.export(exportFileURI, sparkContext)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
         return

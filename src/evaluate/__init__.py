@@ -4,7 +4,7 @@ from copy import deepcopy
 from data.data_pool import DataPool
 from weight.weight_vector import WeightVector
 
-__version__ = '1.0.0'
+__version__ = '1.1'
 logger = logging.getLogger('EVALUATOR')
 
 

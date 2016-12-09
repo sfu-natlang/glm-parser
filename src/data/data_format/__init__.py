@@ -1,5 +1,6 @@
 from data.file_io import fileRead, fileWrite
 from data.sentence import Sentence
+from copy import deepcopy
 
 
 class DataFormatBase():
@@ -52,6 +53,9 @@ class DataFormatBase():
         dataPool.reset_index()
         while dataPool.has_next_data():
             sentence = dataPool.get_next_data()
+            sentence = deepcopy(sentence)
+            sentence.unload_fgen()
+
             length = len(sentence.column_list["HEAD"])
 
             for index in range(length):

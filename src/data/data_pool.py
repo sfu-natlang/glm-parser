@@ -9,7 +9,7 @@ from sentence import Sentence
 from data_prep import DataPrep
 from file_io import fileRead, fileWrite
 
-__version__ = '1.0.0'
+__version__ = '1.1'
 logger = logging.getLogger('DATAPOOL')
 
 
@@ -149,6 +149,10 @@ class DataPool():
         newDataPool.data_list = newDataPool.data_list + another_data_pool.data_list
         newDataPool.reset_index()
         return newDataPool
+
+    def export(self, fileURI, sparkContext=None):
+        self.data_format.export_to_file(self, fileURI, sparkContext)
+        return
 
     def reset_all(self):
         """
