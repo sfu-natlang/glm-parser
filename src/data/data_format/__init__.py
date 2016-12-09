@@ -49,6 +49,7 @@ class DataFormatBase():
 
     def export_to_file(self, dataPool, fileURI, sparkContext=None):
         content = []
+        dataPool.reset_index()
         while dataPool.has_next_data():
             sentence = dataPool.get_next_data()
             length = len(sentence.column_list["HEAD"])
@@ -61,7 +62,7 @@ class DataFormatBase():
                     else:
                         line = line + sentence.column_list[item][index]
                     line = line + " "
-                print line
+
                 content.append(line)
             content.append("")
 

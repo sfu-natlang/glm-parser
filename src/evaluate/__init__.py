@@ -75,7 +75,7 @@ class EvaluatorBase:
             val['gold_set_size'] += gold_set_size
 
         data_pool.reset_index()
-        tagged_data_pool.reset_index
+        tagged_data_pool.reset_index()
         val['data_pool'] = tagged_data_pool
         return val.items()
 
