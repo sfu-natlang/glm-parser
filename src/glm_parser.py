@@ -161,7 +161,8 @@ if __name__ == "__main__":
         'feature_generator': 'english_1st_fgen',
         'format':            'penn2malt',
         'tagger_w_vector':   None,
-        'tag_file':          None
+        'tag_file':          None,
+        'export':            'output.txt'
     }
 
     # Dealing with arguments here
@@ -273,6 +274,9 @@ if __name__ == "__main__":
             This option is only valid while using option tagger-w-vector.
             Officially provided TAG_TARGET file is src/tagset.txt
             """)
+        arg_parser.add_argument('--export', '-e', metavar='EXPORTURI', help="""
+            Export the result after finished evaluation to designated URI.
+            """)
 
         args = arg_parser.parse_args()
 
@@ -366,6 +370,7 @@ if __name__ == "__main__":
                 'load_weight_from',
                 'dump_weight_to',
                 'tagger_w_vector',
+                'export',
                 'tag_file']:
             if config[option] is not None:
                 if (not config[option].startswith("file://")) and \
@@ -420,6 +425,7 @@ if __name__ == "__main__":
                                 hadoop       = yarn_mode)
 
         gp.evaluate(dataPool      = testDataPool,
+                    exportFileURI = config['export'],
                     tagger        = tagger,
                     parallel      = spark_mode,
                     sparkContext  = sparkContext,

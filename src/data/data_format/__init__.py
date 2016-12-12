@@ -56,7 +56,7 @@ class DataFormatBase():
             sentence = deepcopy(sentence)
             sentence.unload_fgen()
 
-            length = len(sentence.column_list["HEAD"])
+            length = len(sentence.column_list["FORM"])
 
             for index in range(length):
                 line = ""
