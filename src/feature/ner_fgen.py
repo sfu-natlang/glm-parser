@@ -1,6 +1,9 @@
 import feature_vector
 import feature_generator_base
 import debug.debug
+from data.file_io import fileRead, fileWrite
+from ner_PER_list import ner_per_list
+from ner_LOC_list import ner_loc_list
 
 import string
 import copy
@@ -8,17 +11,8 @@ import copy
 __version__ = '1.1'
 
 
-def loading_list(list_file):
-    c = open(list_file, 'r')
-    alist = []
-    for line in c:
-            x = line.split()
-            alist.append(x[1])
-    c.close()
-    return alist
-
-per_list = loading_list('./ner/ned_PER_list.txt')
-loc_list = loading_list('./ner/ned_LOC_list.txt')
+per_list = ner_per_list
+loc_list = ner_loc_list
 
 
 class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
