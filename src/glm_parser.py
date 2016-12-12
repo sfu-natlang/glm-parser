@@ -27,7 +27,7 @@ import argparse
 import StringIO
 from ConfigParser import SafeConfigParser
 
-__version__ = '1.0'
+__version__ = '1.1'
 if __name__ == "__main__":
     init_logger('glm_parser.log')
 logger = logging.getLogger('PARSER')
@@ -103,6 +103,7 @@ class GlmParser():
     def evaluate(self,
                  dataPool,
                  tagger=None,
+                 exportFileURI=None,
                  parallel=False,
                  sparkContext=None,
                  hadoop=None):
@@ -113,20 +114,23 @@ class GlmParser():
 
         start_time = time.time()
         evaluator = self.evaluator(self.parser, tagger)
-        if not parallel:
-            evaluator.sequentialEvaluate(
-                data_pool     = dataPool,
-                w_vector      = self.w_vector,
-                sparkContext  = sparkContext,
-                hadoop        = hadoop)
+        if not parallel or exportFileURI is not None:
+            resultingDataPool = evaluator.sequentialEvaluate(
+                data_pool    = dataPool,
+                w_vector     = self.w_vector,
+                sparkContext = sparkContext,
+                hadoop       = hadoop)
         else:
-            evaluator.parallelEvaluate(
-                data_pool     = dataPool,
-                w_vector      = self.w_vector,
-                sparkContext  = sparkContext,
-                hadoop        = hadoop)
+            resultingDataPool = evaluator.parallelEvaluate(
+                data_pool    = dataPool,
+                w_vector     = self.w_vector,
+                sparkContext = sparkContext,
+                hadoop       = hadoop)
+        if exportFileURI is not None:
+            resultingDataPool.export(exportFileURI, sparkContext)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
+        return
 
     def getEdgeSet(self, sentence):
         import feature.english_1st_fgen
@@ -155,9 +159,10 @@ if __name__ == "__main__":
         'learner':           'average_perceptron',
         'parser':            'ceisner',
         'feature_generator': 'english_1st_fgen',
-        'format':            'format/penn2malt.format',
+        'format':            'penn2malt',
         'tagger_w_vector':   None,
-        'tag_file':          None
+        'tag_file':          None,
+        'export':            'output.txt'
     }
 
     # Dealing with arguments here
@@ -200,9 +205,9 @@ if __name__ == "__main__":
 
             default "ceisner"; alternative "ceisner3"
             """)
-        arg_parser.add_argument('--format', metavar='FORMAT_FILE',
+        arg_parser.add_argument('--format', metavar='FORMAT',
             help="""specify the format file for the training and testing files.
-            Officially supported format files are located in src/format/
+            Officially supported format files are located in src/data/data_format/
             """)
         arg_parser.add_argument('--max-sentences', metavar='N', type=int,
             help="""run the first [int] sentences only. Usually combined with option -a to gather
@@ -268,6 +273,9 @@ if __name__ == "__main__":
             specify the file containing the tags we want to use.
             This option is only valid while using option tagger-w-vector.
             Officially provided TAG_TARGET file is src/tagset.txt
+            """)
+        arg_parser.add_argument('--export', '-e', metavar='EXPORTURI', help="""
+            Export the result after finished evaluation to designated URI.
             """)
 
         args = arg_parser.parse_args()
@@ -361,8 +369,8 @@ if __name__ == "__main__":
                 'data_path',
                 'load_weight_from',
                 'dump_weight_to',
-                'format',
                 'tagger_w_vector',
+                'export',
                 'tag_file']:
             if config[option] is not None:
                 if (not config[option].startswith("file://")) and \
@@ -390,7 +398,7 @@ if __name__ == "__main__":
     # Run training
     if config['train']:
         trainDataPool = DataPool(fgen         = config['feature_generator'],
-                                 format_list  = config['format'],
+                                 data_format  = config['format'],
                                  data_regex   = config['train'],
                                  data_path    = config['data_path'],
                                  shards       = config['spark_shards'],
@@ -409,7 +417,7 @@ if __name__ == "__main__":
     # Run evaluation
     if config['test']:
         testDataPool = DataPool(fgen         = config['feature_generator'],
-                                format_list  = config['format'],
+                                data_format  = config['format'],
                                 data_regex   = config['test'],
                                 data_path    = config['data_path'],
                                 shards       = config['spark_shards'],
@@ -417,6 +425,7 @@ if __name__ == "__main__":
                                 hadoop       = yarn_mode)
 
         gp.evaluate(dataPool      = testDataPool,
+                    exportFileURI = config['export'],
                     tagger        = tagger,
                     parallel      = spark_mode,
                     sparkContext  = sparkContext,

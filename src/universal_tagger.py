@@ -28,7 +28,7 @@ import argparse
 import StringIO
 from ConfigParser import SafeConfigParser
 
-__version__ = '1.1'
+__version__ = '1.2'
 if __name__ == '__main__':
     init_logger('universal_tagger.log')
 logger = logging.getLogger('TAGGER')
@@ -115,6 +115,7 @@ class Tagger():
 
     def evaluate(self,
                  dataPool,
+                 exportFileURI=None,
                  parallel=False,
                  sparkContext=None,
                  hadoop=None):
@@ -125,18 +126,20 @@ class Tagger():
 
         start_time = time.time()
         evaluator = self.evaluator(self.tagger, self.tagset)
-        if not parallel:
-            evaluator.sequentialEvaluate(
-                data_pool     = dataPool,
-                w_vector      = self.w_vector,
-                sparkContext  = sparkContext,
-                hadoop        = hadoop)
+        if not parallel or exportFileURI is not None:
+            resultingDataPool = evaluator.sequentialEvaluate(
+                data_pool    = dataPool,
+                w_vector     = self.w_vector,
+                sparkContext = sparkContext,
+                hadoop       = hadoop)
         else:
-            evaluator.parallelEvaluate(
-                data_pool     = dataPool,
-                w_vector      = self.w_vector,
-                sparkContext  = sparkContext,
-                hadoop        = hadoop)
+            resultingDataPool = evaluator.parallelEvaluate(
+                data_pool    = dataPool,
+                w_vector     = self.w_vector,
+                sparkContext = sparkContext,
+                hadoop       = hadoop)
+        if exportFileURI is not None:
+            resultingDataPool.export(exportFileURI, sparkContext)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
@@ -170,8 +173,9 @@ if __name__ == '__main__':
         'learner':           'average_perceptron',
         'tagger':            'viterbi',
         'feature_generator': 'english_1st_fgen',
-        'format':            'format/penn2malt.format',
-        'tag_file':          None
+        'format':            'penn2malt',
+        'tag_file':          None,
+        'export':            'output.txt'
     }
 
     # Dealing with arguments here
@@ -207,9 +211,9 @@ if __name__ == '__main__':
 
             default "viterbi"; alternative "viterbi_pruning"
             """)
-        arg_parser.add_argument('--format', metavar='FORMAT_FILE',
+        arg_parser.add_argument('--format', metavar='FORMAT',
             help="""specify the format file for the training and testing files.
-            Officially supported format files are located in src/format/
+            Officially supported format files are located in src/data_format/
             """)
         arg_parser.add_argument('--spark-shards', '-s', metavar='SHARDS_NUM',
             type=int, help='train using parallelisation with spark')
@@ -251,6 +255,9 @@ if __name__ == '__main__':
             specify the file containing the tags we want to use.
             This option is only valid while using option tagger-w-vector.
             Officially provided TAG_TARGET file is src/tagset.txt
+            """)
+        arg_parser.add_argument('--export', '-e', metavar='EXPORTURI', help="""
+            Export the result after finished evaluation to designated URI.
             """)
 
         args = arg_parser.parse_args()
@@ -330,7 +337,7 @@ if __name__ == '__main__':
                 'data_path',
                 'load_weight_from',
                 'dump_weight_to',
-                'format',
+                'export',
                 'tag_file']:
             if config[option] is not None:
                 if (not config[option].startswith("file://")) and \
@@ -346,7 +353,7 @@ if __name__ == '__main__':
     # Run training
     if config['train']:
         trainDataPool = DataPool(fgen         = config['feature_generator'],
-                                 format_list  = config['format'],
+                                 data_format  = config['format'],
                                  data_regex   = config['train'],
                                  data_path    = config['data_path'],
                                  shards       = config['spark_shards'],
@@ -365,7 +372,7 @@ if __name__ == '__main__':
     # Run evaluation
     if config['test']:
         testDataPool = DataPool(fgen         = config['feature_generator'],
-                                format_list  = config['format'],
+                                data_format  = config['format'],
                                 data_regex   = config['test'],
                                 data_path    = config['data_path'],
                                 shards       = config['spark_shards'],
@@ -373,6 +380,7 @@ if __name__ == '__main__':
                                 hadoop       = yarn_mode)
 
         tagger.evaluate(dataPool      = testDataPool,
+                        exportFileURI = config['export'],
                         parallel      = spark_mode,
                         sparkContext  = sparkContext,
                         hadoop        = yarn_mode)

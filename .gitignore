@@ -30,3 +30,5 @@ scripts/tests/*.log
 *.swp
 *.bak
 *~
+
+src/output.txt

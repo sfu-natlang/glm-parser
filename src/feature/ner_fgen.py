@@ -71,13 +71,13 @@ class FeatureGenerator(feature_generator_base.FeatureGeneratorBase):
 
         del sentence.column_list["POSTAG"][0]
         del sentence.column_list["POSTAG"][0]
-        del sentence.column_list["POSTAG"][len(sentence.column_list["FORM"]) - 1]
-        del sentence.column_list["POSTAG"][len(sentence.column_list["FORM"]) - 1]
+        del sentence.column_list["POSTAG"][len(sentence.column_list["POSTAG"]) - 1]
+        del sentence.column_list["POSTAG"][len(sentence.column_list["POSTAG"]) - 1]
 
         del sentence.column_list["CHUNK"][0]
         del sentence.column_list["CHUNK"][0]
-        del sentence.column_list["CHUNK"][len(sentence.column_list["FORM"]) - 1]
-        del sentence.column_list["CHUNK"][len(sentence.column_list["FORM"]) - 1]
+        del sentence.column_list["CHUNK"][len(sentence.column_list["CHUNK"]) - 1]
+        del sentence.column_list["CHUNK"][len(sentence.column_list["CHUNK"]) - 1]
 
         del sentence.column_list["NER"][0]
         del sentence.column_list["NER"][0]

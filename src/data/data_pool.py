@@ -9,7 +9,7 @@ from sentence import Sentence
 from data_prep import DataPrep
 from file_io import fileRead, fileWrite
 
-__version__ = '1.0.0'
+__version__ = '1.1'
 logger = logging.getLogger('DATAPOOL')
 
 
@@ -33,11 +33,10 @@ class DataPool():
     """
     def __init__(self,
                  fgen,
-                 format_list,
+                 data_format,
                  data_regex   = None,
                  data_path    = None,
                  textString   = None,
-                 comment_sign = '',
                  prep_path    = 'data/prep/',
                  shards       = 1,
                  sparkContext = None,
@@ -62,34 +61,13 @@ class DataPool():
             self.fgen = importlib.import_module('feature.' + fgen).FeatureGenerator
         else:
             self.fgen = fgen
-        self.hadoop   = hadoop
-        self.comment_sign = comment_sign
-        if isinstance(format_list, basestring):
-            self.format_list = []
-            # Load format file
-            logger.info("Loading dataFormat from: " + format_list)
-            fformat = fileRead(format_list, sparkContext=sparkContext)
 
-            remaining_field_names = 0
-            for line in fformat:
-                format_line = line.strip().split()
-
-                if remaining_field_names > 0:
-                    self.format_list.append(line.strip())
-                    remaining_field_names -= 1
-
-                if format_line[0] == "field_names:":
-                    remaining_field_names = int(format_line[1])
-
-                if format_line[0] == "comment_sign:":
-                    self.comment_sign = format_line[1]
-
-            if self.format_list == []:
-                raise RuntimeError("DATAPOOL [ERROR]: format file read failure")
+        if isinstance(data_format, basestring):
+            self.data_format = importlib.import_module('data.data_format.' + data_format).DataFormat(self.fgen)
         else:
-            if not isinstance(format_list, list):
-                raise RuntimeError("DATAPOOL [ERROR]: format_data needs to be a list or string")
-            self.format_list = format_list
+            self.data_format = data_format
+
+        self.hadoop   = hadoop
         self.reset_all()
 
         if textString is not None:
@@ -136,7 +114,7 @@ class DataPool():
             for dirName, subdirList, fileList in os.walk(self.dataPrep.localPath()):
                 for file_name in fileList:
                     file_path = "%s/%s" % (str(dirName), str(file_name))
-                    self.data_list += self.get_data_list(file_path)
+                    self.data_list += self.data_format.get_data_from_file(file_path)
         else:
             aRdd = sparkContext.textFile(self.dataPrep.hadoopPath()).cache()
             tmp  = aRdd.collect()
@@ -147,30 +125,8 @@ class DataPool():
         return
 
     def load_stringtext(self, textString):
-        lines = textString.splitlines()
-        column_list = {}
-        for field in self.format_list:
-            if not(field.isdigit()):
-                column_list[field] = []
-
-        length = len(self.format_list)
-
-        for line in lines:
-            entity = line.split()
-            if len(entity) == length and entity[0] != self.comment_sign:
-                for i in range(length):
-                    if not(self.format_list[i].isdigit()):
-                        column_list[self.format_list[i]].append(str(entity[i].encode('utf-8')))
-            else:
-                if not(self.format_list[0].isdigit()) and column_list[self.format_list[0]] != []:
-                    sent = Sentence(column_list, self.format_list, self.fgen)
-                    self.data_list.append(sent)
-
-                column_list = {}
-
-                for field in self.format_list:
-                    if not (field.isdigit()):
-                        column_list[field] = []
+        self.data_list += self.data_format.load_stringtext(textString)
+        return
 
     def loadedPath(self):
         if self.dataPrep:
@@ -185,10 +141,18 @@ class DataPool():
     def __add__(self, another_data_pool):
         if another_data_pool is None:
             return deepcopy(self)
+        # if self.fgen != another_data_pool.fgen:
+        #     raise RuntimeError("DATAPOOL [ERROR]: Merging dataPools do not have the same fgen")
+        # if self.data_format != another_data_pool.data_format:
+        #     raise RuntimeError("DATAPOOL [ERROR]: Merging dataPools do not have the same format")
         newDataPool = deepcopy(self)
         newDataPool.data_list = newDataPool.data_list + another_data_pool.data_list
         newDataPool.reset_index()
         return newDataPool
+
+    def export(self, fileURI, sparkContext=None):
+        self.data_format.export_to_file(self, fileURI, sparkContext)
+        return
 
     def reset_all(self):
         """
@@ -241,53 +205,6 @@ class DataPool():
 
             return self.data_list[self.current_index]
         raise IndexError("Run out of data while calling get_next_data()")
-
-    def get_data_list(self, file_path):
-        """
-        Form the DependencyTree list from the specified file.
-
-        :param file_path: the path to the data file
-        :type file_path: str
-
-        :return: a list of DependencyTree in the specified file
-        :rtype: list(Sentence)
-        """
-
-        f = open(file_path)
-        data_list = []
-
-        column_list = {}
-
-        for field in self.format_list:
-            if not(field.isdigit()):
-                column_list[field] = []
-
-        length = len(self.format_list)
-
-        for entity in f:
-            entity = entity[:-1].split()
-            if len(entity) == length and entity[0] != self.comment_sign:
-                for i in range(length):
-                    if not(self.format_list[i].isdigit()):
-                        column_list[self.format_list[i]].append(entity[i])
-
-            else:
-                # Prevent any non-mature (i.e. trivial) sentence structure
-                if not(self.format_list[0].isdigit()) and column_list[self.format_list[0]] != []:
-
-                    # Add "ROOT" for word and pos here
-                    sent = Sentence(column_list, self.format_list, self.fgen)
-                    data_list.append(sent)
-
-                column_list = {}
-
-                for field in self.format_list:
-                    if not (field.isdigit()):
-                        column_list[field] = []
-
-        f.close()
-
-        return data_list
 
     def get_sent_num(self):
         return len(self.data_list)

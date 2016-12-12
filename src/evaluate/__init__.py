@@ -4,7 +4,7 @@ from copy import deepcopy
 from data.data_pool import DataPool
 from weight.weight_vector import WeightVector
 
-__version__ = '1.0.0'
+__version__ = '1.1'
 logger = logging.getLogger('EVALUATOR')
 
 
@@ -75,7 +75,7 @@ class EvaluatorBase:
             val['gold_set_size'] += gold_set_size
 
         data_pool.reset_index()
-        tagged_data_pool.reset_index
+        tagged_data_pool.reset_index()
         val['data_pool'] = tagged_data_pool
         return val.items()
 
@@ -107,11 +107,10 @@ class EvaluatorBase:
                          sparkContext=None,
                          hadoop=None):
 
-        def create_dp(textString, fgen, format, comment_sign):
-            dp = data_pool.DataPool(textString   = textString[1],
-                                    fgen         = fgen,
-                                    format_list  = format,
-                                    comment_sign = comment_sign)
+        def create_dp(textString, fgen, data_format):
+            dp = data_pool.DataPool(textString  = textString[1],
+                                    fgen        = fgen,
+                                    data_format = data_format)
             return dp
 
         self.correct_num = 0
@@ -119,10 +118,9 @@ class EvaluatorBase:
 
         logger.debug("Start parallel evaluation")
 
-        dir_name     = data_pool.loadedPath()
-        format_list  = data_pool.format_list
-        comment_sign = data_pool.comment_sign
-        fgen         = data_pool.fgen
+        dir_name    = data_pool.loadedPath()
+        data_format = data_pool.data_format
+        fgen        = data_pool.fgen
 
         sc = sparkContext
 
@@ -132,10 +130,9 @@ class EvaluatorBase:
             dir_name = os.path.abspath(os.path.expanduser(dir_name))
             test_files = sc.wholeTextFiles("file://" + dir_name, minPartitions=10).cache()
 
-        dp = test_files.map(lambda t: DataPool(textString   = t[1],
-                                               fgen         = fgen,
-                                               format_list  = format_list,
-                                               comment_sign = comment_sign)).cache()
+        dp = test_files.map(lambda t: DataPool(textString  = t[1],
+                                               fgen        = fgen,
+                                               data_format = data_format)).cache()
         wv = {}
         for key in w_vector:
             wv[key] = w_vector[key]

@@ -118,6 +118,12 @@ class Sentence():
 
         return
 
+    def unload_fgen(self):
+        if self.fgen is None:
+            return
+        self.fgen.unload_from_sentence(self)
+        return
+
     def update_sentence_with_output(self, output):
         self.fgen.update_sentence_with_output(self, output)
 
