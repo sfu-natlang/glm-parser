@@ -21,10 +21,20 @@ class FeatureVector():
     """
     Emulates a feature vector using dictionary instead of list
     """
-    def __init__(self):
+    def __init__(self, vector=None):
         #self.feature_dict = {}
         # changed to hvector
         self.feature_dict = mydefaultdict(mydouble)
+        if vector is None:
+            return
+        elif isinstance(vector, dict):
+            for key in vector:
+                self[key] = dict[key]
+        elif isinstance(vector, list):
+            for key in vector:
+                self[key] += 1
+        else:
+            raise ValueError("FEATVEC [ERROR]: invalid object")
         return
 
     def __repr__(self):
@@ -86,11 +96,11 @@ class FeatureVector():
         #        self[i] = -another_fv[i]
         self.feature_dict.iaddc(another_fv.feature_dict, -1)
         return
-    
+
     def __add__(self,another_fv):
         """
         Aggregate two feature vectors into one, and return a new feature vector
-        
+
         :param another_fv: The feature vector that you want to aggregate
         :type another_fv: FeatureVector
         """
