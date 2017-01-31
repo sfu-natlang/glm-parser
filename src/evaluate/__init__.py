@@ -72,18 +72,21 @@ class EvaluatorBase:
             correct_num, gold_set_size, output = \
                 self.sentence_evaluator(sentence, w_vector)
 
-            if not parallel:
+            if parallel:
+                sentence.update_sentence_with_output(output)
+            else:
                 tagged_sentence.update_sentence_with_output(output)
 
             val['correct_num'] += correct_num
             val['gold_set_size'] += gold_set_size
 
         data_pool.reset_index()
-        if not parallel:
+        if parallel:
+            val['data_pool'] = data_pool
+        else:
             tagged_data_pool.reset_index()
             val['data_pool'] = tagged_data_pool
-            return val.items()
-        return
+        return val.items()
 
     def sequentialEvaluate(self,
                            data_pool,
