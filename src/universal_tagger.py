@@ -126,20 +126,20 @@ class Tagger():
 
         start_time = time.time()
         evaluator = self.evaluator(self.tagger, self.tagset)
-        if not parallel or exportFileURI is not None:
+        if not parallel:
             resultingDataPool = evaluator.sequentialEvaluate(
                 data_pool    = dataPool,
                 w_vector     = self.w_vector,
                 sparkContext = sparkContext,
                 hadoop       = hadoop)
+            if exportFileURI is not None:
+                resultingDataPool.export(exportFileURI, sparkContext)
         else:
             resultingDataPool = evaluator.parallelEvaluate(
                 data_pool    = dataPool,
                 w_vector     = self.w_vector,
                 sparkContext = sparkContext,
                 hadoop       = hadoop)
-        if exportFileURI is not None:
-            resultingDataPool.export(exportFileURI, sparkContext)
         end_time = time.time()
         logger.info("Total evaluation Time(seconds): %f" % (end_time - start_time,))
 
