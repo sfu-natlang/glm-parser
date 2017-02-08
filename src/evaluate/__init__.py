@@ -40,7 +40,8 @@ class EvaluatorBase:
     def __datapool_evaluator(self,
                              data_pool,
                              weight_vector,
-                             hadoop=None):
+                             hadoop=None,
+                             parallel=False):
 
         w_vector = WeightVector()
         for key in weight_vector:
@@ -53,13 +54,15 @@ class EvaluatorBase:
 
         sentence_count = 1
         data_size = data_pool.get_sent_num()
-        tagged_data_pool = deepcopy(data_pool)
+        if not parallel:
+            tagged_data_pool = deepcopy(data_pool)
 
         while data_pool.has_next_data():
             sentence = data_pool.get_next_data()
-            tagged_sentence = tagged_data_pool.get_next_data()
+            if not parallel:
+                tagged_sentence = tagged_data_pool.get_next_data()
 
-            if not hadoop:
+            if not parallel and not hadoop:
                 logger.info("Sentence %d of %d, Length %d" % (
                     sentence_count,
                     data_size,
@@ -69,14 +72,20 @@ class EvaluatorBase:
             correct_num, gold_set_size, output = \
                 self.sentence_evaluator(sentence, w_vector)
 
-            tagged_sentence.update_sentence_with_output(output)
+            if parallel:
+                sentence.update_sentence_with_output(output)
+            else:
+                tagged_sentence.update_sentence_with_output(output)
 
             val['correct_num'] += correct_num
             val['gold_set_size'] += gold_set_size
 
         data_pool.reset_index()
-        tagged_data_pool.reset_index()
-        val['data_pool'] = tagged_data_pool
+        if parallel:
+            val['data_pool'] = data_pool
+        else:
+            tagged_data_pool.reset_index()
+            val['data_pool'] = tagged_data_pool
         return val.items()
 
     def sequentialEvaluate(self,
@@ -140,7 +149,8 @@ class EvaluatorBase:
         total_sent = dp.map(lambda dp: dp.get_sent_num()).sum()
         logger.info("Totel number of sentences: %d" % total_sent)
         dp = dp.flatMap(lambda t: self.__datapool_evaluator(data_pool     = t,
-                                                            weight_vector = wv))
+                                                            weight_vector = wv,
+                                                            parallel      = True))
 
         val = dp.combineByKey(
             lambda value: (value, 1),
